@@ -331,12 +331,12 @@ require_once __DIR__ . '/../includes/header.php';
                                         
                                         <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                                             <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;">
-                                                <div style="width: 140px; color: #555;">bKash Number</div>
-                                                <input type="text" name="payment_phone" id="payment_phone" class="form-input" placeholder="017XXXXXXXX" style="flex: 1; min-width: 150px; height: 36px;">
+                                                <div style="width: 140px; color: #555;">bKash Number <span style="color: var(--color-danger);">*</span></div>
+                                                <input type="text" name="payment_phone" id="payment_phone" class="form-input" placeholder="017XXXXXXXX*" style="flex: 1; min-width: 150px; height: 36px;" required>
                                             </div>
                                             <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;">
-                                                <div style="width: 140px; color: #555;">bKash Transaction ID</div>
-                                                <input type="text" name="payment_trx_id" id="payment_trx_id" class="form-input" placeholder="8N7A6D5EE7M" style="flex: 1; min-width: 150px; height: 36px;">
+                                                <div style="width: 140px; color: #555;">bKash Transaction ID <span style="color: var(--color-danger);">*</span></div>
+                                                <input type="text" name="payment_trx_id" id="payment_trx_id" class="form-input" placeholder="8N7A6D5EE7M*" style="flex: 1; min-width: 150px; height: 36px;" required>
                                             </div>
                                         </div>
                                     </div>
