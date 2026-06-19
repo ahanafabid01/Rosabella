@@ -28,17 +28,18 @@ if (!function_exists('adminIcon')) {
 if (!function_exists('renderAdminSidebar')) {
     function renderAdminSidebar(string $activePage): void
     {
+        $base = BASE_URL;
         $items = [
-            'dashboard' => ['href' => 'index.php', 'label' => 'Dashboard'],
-            'products' => ['href' => 'products.php', 'label' => 'Products'],
-            'categories' => ['href' => 'categories.php', 'label' => 'Categories'],
-            'deals' => ['href' => 'deals.php', 'label' => 'Deals'],
-            'orders' => ['href' => 'orders.php', 'label' => 'Orders'],
-            'reviews' => ['href' => 'reviews.php', 'label' => 'Reviews'],
-            'users' => ['href' => 'users.php', 'label' => 'Users'],
-            'coupons' => ['href' => 'coupons.php', 'label' => 'Coupons'],
-            'hero' => ['href' => 'hero.php', 'label' => 'Hero Banners'],
-            'settings' => ['href' => 'settings.php', 'label' => 'Settings'],
+            'dashboard'  => ['href' => $base . '/admin/dashboard', 'label' => 'Dashboard'],
+            'products'   => ['href' => $base . '/admin/products',  'label' => 'Products'],
+            'categories' => ['href' => $base . '/admin/categories','label' => 'Categories'],
+            'deals'      => ['href' => $base . '/admin/deals',     'label' => 'Deals'],
+            'orders'     => ['href' => $base . '/admin/orders',    'label' => 'Orders'],
+            'reviews'    => ['href' => $base . '/admin/reviews',   'label' => 'Reviews'],
+            'users'      => ['href' => $base . '/admin/users',     'label' => 'Users'],
+            'coupons'    => ['href' => $base . '/admin/coupons',   'label' => 'Coupons'],
+            'hero'       => ['href' => $base . '/admin/hero',      'label' => 'Hero Banners'],
+            'settings'   => ['href' => $base . '/admin/settings',  'label' => 'Settings'],
         ];
         ?>
         <div class="admin-sidebar-backdrop" data-admin-sidebar-close></div>
@@ -56,7 +57,7 @@ if (!function_exists('renderAdminSidebar')) {
                     </a>
                 <?php endforeach; ?>
                 <div class="admin-nav-divider"></div>
-                <a href="../logout.php" class="admin-nav-muted">
+                <a href="<?= BASE_URL ?>/logout" class="admin-nav-muted">
                     <?= adminIcon('logout') ?>
                     <span>Logout</span>
                 </a>
@@ -108,7 +109,7 @@ if (!function_exists('renderAdminTopbar')) {
                     <div class="admin-topbar-avatar"><?= $initials ?></div>
                     <span class="admin-topbar-name"><?= $userName ?></span>
                 </div>
-                <a href="../logout.php" class="admin-topbar-icon admin-topbar-logout" aria-label="Log Out">
+                <a href="<?= BASE_URL ?>/logout" class="admin-topbar-icon admin-topbar-logout" aria-label="Log Out">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                         <polyline points="16 17 21 12 16 7"></polyline>

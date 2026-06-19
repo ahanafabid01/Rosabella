@@ -6,7 +6,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/includes/layout.php';
 
 if (!isLoggedIn() || !isAdmin()) {
-    header('Location: ../login.php');
+    header('Location: ' . BASE_URL . '/login');
     exit;
 }
 
@@ -137,7 +137,7 @@ $pageTitle = 'Hero Banners';
                         Add Banner
                     </a>
                 <?php else: ?>
-                    <a href="hero.php" class="btn btn-outline">
+                    <a href="/Kartly/admin/hero" class="btn btn-outline">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="19" y1="12" x2="5" y2="12"></line>
                             <polyline points="12 19 5 12 12 5"></polyline>

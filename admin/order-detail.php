@@ -10,7 +10,7 @@ require_once __DIR__ . '/includes/layout.php';
 require_once __DIR__ . '/../includes/payment_gateway.php';
 
 if (!isLoggedIn() || !isAdmin()) {
-    header('Location: ../login.php');
+    header('Location: ' . BASE_URL . '/login');
     exit;
 }
 
@@ -20,7 +20,7 @@ $error = '';
 $orderId = intval($_GET['id'] ?? 0);
 
 if ($orderId <= 0) {
-    header('Location: orders.php');
+    header('Location: ' . BASE_URL . '/admin/orders');
     exit;
 }
 
@@ -54,7 +54,7 @@ $stmt->execute([$orderId]);
 $order = $stmt->fetch();
 
 if (!$order) {
-    header('Location: orders.php');
+    header('Location: ' . BASE_URL . '/admin/orders');
     exit;
 }
 
@@ -87,7 +87,7 @@ $pageTitle = 'Order Detail';
         <?php renderAdminTopbar($pageTitle ?? 'Admin Panel'); ?>
 <div class="admin-detail-header">
             <h1 class="admin-page-title">Order <?= htmlspecialchars($order['order_number']) ?></h1>
-            <a href="orders.php" class="btn btn-secondary">Back to Orders</a>
+            <a href="/Kartly/admin/orders" class="btn btn-secondary">Back to Orders</a>
         </div>
 
         <?php if ($message): ?><div class="alert alert-success"><?= htmlspecialchars($message) ?></div><?php endif; ?>

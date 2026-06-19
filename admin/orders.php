@@ -10,7 +10,7 @@ require_once __DIR__ . '/includes/layout.php';
 require_once __DIR__ . '/../includes/payment_gateway.php';
 
 if (!isLoggedIn() || !isAdmin()) {
-    header('Location: ../login.php');
+    header('Location: ' . BASE_URL . '/login');
     exit;
 }
 
@@ -116,7 +116,7 @@ $pageTitle = 'Orders Management';
                             <td><span class="badge badge-<?= $order['payment_status'] === 'paid' ? 'success' : 'warning' ?>"><?= ucfirst($order['payment_status']) ?></span></td>
                             <td><?= htmlspecialchars(paymentDisplayName((string)$order['payment_method'])) ?></td>
                             <td><?= date('M j, Y', strtotime($order['created_at'])) ?></td>
-                            <td><a href="order-detail.php?id=<?= $order['id'] ?>" class="btn btn-sm btn-outline">View</a></td>
+                            <td><a href="/Kartly/admin/order/<?= $order['id'] ?>" class="btn btn-sm btn-outline">View</a></td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>

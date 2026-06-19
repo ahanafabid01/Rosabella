@@ -36,9 +36,12 @@ RewriteCond %{REQUEST_URI} ^/Kartly/assets/ [NC]
 RewriteRule ^ - [L]
 
 # ─────────────────────────────────────────────────────────────
-# SECTION 4: Admin panel — serve directly from /admin/
+# SECTION 4: Admin panel — let admin/.htaccess handle routing
 # ─────────────────────────────────────────────────────────────
+# Only bypass for real files inside admin (css, js, images, php files)
 RewriteCond %{REQUEST_URI} ^/Kartly/admin/ [NC]
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
 # ─────────────────────────────────────────────────────────────

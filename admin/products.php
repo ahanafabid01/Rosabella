@@ -9,7 +9,7 @@ require_once '../config/database.php';
 require_once __DIR__ . '/includes/layout.php';
 
 if (!isLoggedIn() || !isAdmin()) {
-    header('Location: ../login.php');
+    header('Location: ' . BASE_URL . '/login');
     exit;
 }
 
@@ -424,7 +424,7 @@ $pageTitle = 'Products Management';
 
                         <div class="admin-actions-row">
                             <button type="submit" class="btn btn-primary">Save Product</button>
-                            <a href="products.php" class="btn btn-secondary">Cancel</a>
+                            <a href="/Kartly/admin/products" class="btn btn-secondary">Cancel</a>
                         </div>
                     </div>
 
