@@ -375,6 +375,28 @@ try {
                                     <span class="price-original"><?= formatPrice($product['price']) ?></span>
                                 <?php endif; ?>
                             </div>
+                            <?php
+                            $colorsArr = [];
+                            if (!empty($product['colors'])) {
+                                $decoded = json_decode($product['colors'], true);
+                                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded) && !isset($decoded[0]) && !isset($decoded['color'])) {
+                                    $colorsArr = $decoded;
+                                }
+                            }
+                            ?>
+                            <?php if (!empty($colorsArr)): ?>
+                            <div style="display: flex; gap: 0.35rem; margin-top: 0.75rem; flex-wrap: wrap;">
+                                <?php foreach ($colorsArr as $cName => $cData): ?>
+                                    <?php
+                                    $cImg = '';
+                                    if (!empty($cData['main_image'])) {
+                                        $cImg = strpos($cData['main_image'], 'http') === 0 ? $cData['main_image'] : BASE_URL . '/' . ltrim($cData['main_image'], '/');
+                                    }
+                                    ?>
+                                    <div style="width: 14px; height: 14px; border-radius: 50%; background-color: <?= htmlspecialchars($cData['hex'] ?? '#000') ?>; cursor: pointer; border: 1px solid rgba(0,0,0,0.15); box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); transition: transform 0.2s;" title="<?= htmlspecialchars($cName) ?>" <?= $cImg ? 'onmouseover="this.closest(\'.product-card\').querySelector(\'.product-image img\').src=\''.htmlspecialchars($cImg).'\';"' : '' ?> onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'"></div>
+                                <?php endforeach; ?>
+                            </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -552,6 +574,28 @@ try {
                                     <span class="price-original"><?= formatPrice($product['price']) ?></span>
                                 <?php endif; ?>
                             </div>
+                            <?php
+                            $colorsArr = [];
+                            if (!empty($product['colors'])) {
+                                $decoded = json_decode($product['colors'], true);
+                                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded) && !isset($decoded[0]) && !isset($decoded['color'])) {
+                                    $colorsArr = $decoded;
+                                }
+                            }
+                            ?>
+                            <?php if (!empty($colorsArr)): ?>
+                            <div style="display: flex; gap: 0.35rem; margin-top: 0.75rem; flex-wrap: wrap;">
+                                <?php foreach ($colorsArr as $cName => $cData): ?>
+                                    <?php
+                                    $cImg = '';
+                                    if (!empty($cData['main_image'])) {
+                                        $cImg = strpos($cData['main_image'], 'http') === 0 ? $cData['main_image'] : BASE_URL . '/' . ltrim($cData['main_image'], '/');
+                                    }
+                                    ?>
+                                    <div style="width: 14px; height: 14px; border-radius: 50%; background-color: <?= htmlspecialchars($cData['hex'] ?? '#000') ?>; cursor: pointer; border: 1px solid rgba(0,0,0,0.15); box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); transition: transform 0.2s;" title="<?= htmlspecialchars($cName) ?>" <?= $cImg ? 'onmouseover="this.closest(\'.product-card\').querySelector(\'.product-image img\').src=\''.htmlspecialchars($cImg).'\';"' : '' ?> onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'"></div>
+                                <?php endforeach; ?>
+                            </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 <?php endforeach; ?>
