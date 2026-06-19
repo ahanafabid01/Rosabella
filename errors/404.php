@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * KARTLY - 404 Page Not Found
  */

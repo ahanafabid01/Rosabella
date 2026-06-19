@@ -189,4 +189,3 @@ function getSetting($key) {
     $result = $stmt->fetch();
     return $result ? $result['setting_value'] : null;
 }
-?>

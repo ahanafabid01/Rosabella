@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * KARTLY - Payment IPN Handler
  */

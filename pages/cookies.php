@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * KARTLY - Cookie Policy
  */

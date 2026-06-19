@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * KARTLY - Terms of Service
  */
