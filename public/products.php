@@ -189,11 +189,15 @@ if ($category) {
                                 if ($product['sale_price'] && $product['price'] > 0) {
                                     $discount = round((($product['price'] - $product['sale_price']) / $product['price']) * 100);
                                 }
-                                $image = $product['main_image'] ?: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80';
+                                $image = $product['main_image'] ?: null;
+                                if ($image && !str_starts_with($image, 'http')) {
+                                    $image = BASE_URL . '/' . ltrim($image, '/');
+                                }
+                                $image = $image ?: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80';
                                 ?>
                                 <div class="product-card">
                                     <div class="product-image">
-                                        <a href="<?= BASE_URL ?>/product/<?= $product['id'] ?>" class="product-image-link" aria-label="View <?= htmlspecialchars($product['name']) ?>"></a>
+                                        <a href="<?= BASE_URL ?>/product/<?= $product['slug'] ?>" class="product-image-link" aria-label="View <?= htmlspecialchars($product['name']) ?>"></a>
                                         <img src="<?= htmlspecialchars($image) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
                                         
                                         <div class="product-badges">
@@ -226,7 +230,7 @@ if ($category) {
                                     
                                     <div class="product-content">
                                         <h3 class="product-name">
-                                            <a href="<?= BASE_URL ?>/product/<?= $product['id'] ?>"><?= htmlspecialchars($product['name']) ?></a>
+                                            <a href="<?= BASE_URL ?>/product/<?= $product['slug'] ?>"><?= htmlspecialchars($product['name']) ?></a>
                                         </h3>
                                         <div class="product-price">
                                             <span class="price-current">
