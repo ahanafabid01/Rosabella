@@ -389,6 +389,14 @@ require_once __DIR__ . '/../includes/header.php';
             <div style="background: rgba(220, 53, 69, 0.1); border: 1px solid var(--color-danger); color: var(--color-danger); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;"><?= htmlspecialchars($error) ?></div>
             <?php endif; ?>
             
+            <!-- Quick Actions -->
+            <div style="margin-bottom: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                <a href="<?= BASE_URL ?>/my-orders" class="btn btn-outline">My Orders</a>
+                <a href="<?= BASE_URL ?>/wishlist" class="btn btn-outline">My Wishlist</a>
+                <a href="<?= BASE_URL ?>/track-order" class="btn btn-outline">Track Order</a>
+                <a href="<?= BASE_URL ?>/logout" class="btn btn-secondary">Logout</a>
+            </div>
+            
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
                 <!-- Profile -->
                 <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem;">
@@ -573,13 +581,6 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
             </div>
             
-            <!-- Quick Actions -->
-            <div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
-                <a href="<?= BASE_URL ?>/my-orders" class="btn btn-outline">My Orders</a>
-                <a href="<?= BASE_URL ?>/wishlist" class="btn btn-outline">My Wishlist</a>
-                <a href="<?= BASE_URL ?>/track-order" class="btn btn-outline">Track Order</a>
-                <a href="<?= BASE_URL ?>/logout" class="btn btn-secondary">Logout</a>
-            </div>
         </div>
     </section>
 

@@ -372,8 +372,16 @@ require_once __DIR__ . '/../includes/header.php';
             <?php endif; ?>
             
             <div>
+                <!-- Quick Actions -->
+                <div style="margin-bottom: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <a href="<?= BASE_URL ?>/account" class="btn btn-outline">My Account</a>
+                    <a href="<?= BASE_URL ?>/wishlist" class="btn btn-outline">My Wishlist</a>
+                    <a href="<?= BASE_URL ?>/track-order" class="btn btn-outline">Track Order</a>
+                    <a href="<?= BASE_URL ?>/logout" class="btn btn-secondary">Logout</a>
+                </div>
+
                 <!-- Orders -->
-                <div id="orders" style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem;">
+                <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem;">
                     <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem;">Order History</h2>
                     
                     <?php if (empty($orders)): ?>
@@ -421,13 +429,6 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
             </div>
             
-            <!-- Quick Actions -->
-            <div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
-                <a href="<?= BASE_URL ?>/account" class="btn btn-outline">My Account</a>
-                <a href="<?= BASE_URL ?>/wishlist" class="btn btn-outline">My Wishlist</a>
-                <a href="<?= BASE_URL ?>/track-order" class="btn btn-outline">Track Order</a>
-                <a href="<?= BASE_URL ?>/logout" class="btn btn-secondary">Logout</a>
-            </div>
         </div>
     </section>
 
