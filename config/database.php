@@ -78,10 +78,13 @@ function getDB() {
  * Sanitize input
  */
 function sanitize($data) {
-    $data = trim($data);
-    $data = stripslashes($data);
-    $data = htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
-    return $data;
+    if (is_array($data)) {
+        foreach ($data as $k => $v) {
+            $data[$k] = sanitize($v);
+        }
+        return $data;
+    }
+    return trim($data);
 }
 
 /**
