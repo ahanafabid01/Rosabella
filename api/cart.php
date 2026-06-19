@@ -21,6 +21,12 @@ try {
         case 'add':
             handleAddToCart();
             break;
+        case 'apply_coupon':
+            handleApplyCoupon();
+            break;
+        case 'remove_coupon':
+            handleRemoveCoupon();
+            break;
         case 'update':
             handleUpdateCart();
             break;
@@ -238,5 +244,74 @@ function handleGetCart() {
 
 function handleGetCartCount() {
     respond(true, 'Cart count retrieved', ['count' => getCartCount()]);
+}
+
+function handleApplyCoupon() {
+    global $db;
+    
+    $code = getInput('code', '');
+    if (empty($code)) {
+        respond(false, 'Please enter a coupon code', [], 400);
+    }
+    
+    // Check if coupon exists and is valid
+    $stmt = $db->prepare("SELECT * FROM coupons WHERE code = ? AND status = 'active'");
+    $stmt->execute([$code]);
+    $coupon = $stmt->fetch();
+    
+    if (!$coupon) {
+        respond(false, 'Invalid or inactive coupon code', [], 404);
+    }
+    
+    // Check date validity
+    $now = date('Y-m-d');
+    if (($coupon['start_date'] && $coupon['start_date'] > $now) || ($coupon['end_date'] && $coupon['end_date'] < $now)) {
+        respond(false, 'This coupon is expired or not yet active', [], 400);
+    }
+    
+    // Check usage limits
+    if ($coupon['max_uses'] && $coupon['used_count'] >= $coupon['max_uses']) {
+        respond(false, 'This coupon has reached its maximum usage limit', [], 400);
+    }
+    
+    // Get cart subtotal to check min order amount
+    $cartItems = [];
+    $sessionId = session_id();
+    $userId = $_SESSION['user_id'] ?? null;
+    if ($userId) {
+        $stmtCart = $db->prepare("SELECT c.quantity, p.price, p.sale_price FROM cart c JOIN products p ON c.product_id = p.id WHERE c.user_id = ? OR c.session_id = ?");
+        $stmtCart->execute([$userId, $sessionId]);
+    } else {
+        $stmtCart = $db->prepare("SELECT c.quantity, p.price, p.sale_price FROM cart c JOIN products p ON c.product_id = p.id WHERE c.session_id = ?");
+        $stmtCart->execute([$sessionId]);
+    }
+    $cartItems = $stmtCart->fetchAll();
+    
+    $subtotal = 0;
+    foreach ($cartItems as $item) {
+        $price = $item['sale_price'] ?: $item['price'];
+        $subtotal += $price * $item['quantity'];
+    }
+    
+    if ($subtotal < floatval($coupon['min_order_amount'])) {
+        respond(false, 'Minimum order amount for this coupon is ' . formatPrice($coupon['min_order_amount']), [], 400);
+    }
+    
+    // Store in session
+    $_SESSION['coupon'] = [
+        'id' => $coupon['id'],
+        'code' => $coupon['code'],
+        'type' => $coupon['type'],
+        'value' => floatval($coupon['value'])
+    ];
+    
+    respond(true, 'Coupon applied successfully', ['coupon' => $_SESSION['coupon']]);
+}
+
+function handleRemoveCoupon() {
+    if (isset($_SESSION['coupon'])) {
+        unset($_SESSION['coupon']);
+    }
+    respond(true, 'Coupon removed');
 }
 ?>

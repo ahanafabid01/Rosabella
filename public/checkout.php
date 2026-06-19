@@ -36,7 +36,21 @@ $tax = 0;
 
 // Default shipping cost for initial page load
 $shippingCost = 300; 
-$total = $subtotal + $shippingCost;
+
+$discount = 0;
+$couponId = null;
+if (isset($_SESSION['coupon'])) {
+    $coupon = $_SESSION['coupon'];
+    $couponId = $coupon['id'] ?? null;
+    if ($coupon['type'] === 'percentage') {
+        $discount = $subtotal * ($coupon['value'] / 100);
+    } else {
+        $discount = $coupon['value'];
+    }
+    $discount = min($discount, $subtotal);
+}
+
+$total = $subtotal + $shippingCost - $discount;
 
 $error = '';
 $success = '';
@@ -111,11 +125,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('Unable to generate order number.');
             }
 
-            $insertOrderStmt = $db->prepare("INSERT INTO orders (user_id, order_number, status, subtotal, shipping_cost, tax, total, payment_method, payment_status, shipping_first_name, shipping_last_name, shipping_email, shipping_phone, shipping_address, shipping_city, shipping_upazila, shipping_postal_code, shipping_country, order_notes, payment_phone, payment_trx_id, delivery_method) VALUES (?, ?, 'pending', ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $insertOrderStmt = $db->prepare("INSERT INTO orders (user_id, order_number, status, subtotal, discount, coupon_id, shipping_cost, tax, total, payment_method, payment_status, shipping_first_name, shipping_last_name, shipping_email, shipping_phone, shipping_address, shipping_city, shipping_upazila, shipping_postal_code, shipping_country, order_notes, payment_phone, payment_trx_id, delivery_method) VALUES (?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $insertOrderStmt->execute([
                 $_SESSION['user_id'],
                 $orderNumber,
                 $subtotal,
+                $discount,
+                $couponId,
                 $shippingCost,
                 $tax,
                 $total,
@@ -151,6 +167,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $price,
                     $price * $item['quantity'],
                 ]);
+            }
+
+            // Update coupon usage if applicable
+            if ($couponId) {
+                $updateCouponStmt = $db->prepare("UPDATE coupons SET used_count = used_count + 1 WHERE id = ?");
+                $updateCouponStmt->execute([$couponId]);
+                unset($_SESSION['coupon']);
             }
 
             // Clear cart for all successful manual orders
@@ -389,6 +412,12 @@ require_once __DIR__ . '/../includes/header.php';
                                     <span style="color: var(--color-text-light);">Subtotal</span>
                                     <span><?= formatPrice($subtotal) ?></span>
                                 </div>
+                                <?php if ($discount > 0 && isset($_SESSION['coupon'])): ?>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span style="color: var(--color-success);">Discount (<?= htmlspecialchars($_SESSION['coupon']['code']) ?>)</span>
+                                    <span style="color: var(--color-success);">-<?= formatPrice($discount) ?></span>
+                                </div>
+                                <?php endif; ?>
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
                                     <span style="color: var(--color-text-light);">Shipping</span>
                                     <span id="summary_shipping"><?= formatPrice($shippingCost) ?></span>

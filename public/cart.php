@@ -50,7 +50,20 @@ foreach ($cartItems as $item) {
 $freeShippingThreshold = floatval(getSetting('free_shipping_threshold') ?: 5000);
 $defaultShippingCost = floatval(getSetting('shipping_cost') ?: 120);
 $taxRate = floatval(getSetting('tax_rate') ?: 0);
-$total = $subtotal; // Shipping and tax are calculated at checkout
+
+$discount = 0;
+if (isset($_SESSION['coupon'])) {
+    $coupon = $_SESSION['coupon'];
+    if ($coupon['type'] === 'percentage') {
+        $discount = $subtotal * ($coupon['value'] / 100);
+    } else {
+        $discount = $coupon['value'];
+    }
+    // Discount shouldn't exceed subtotal
+    $discount = min($discount, $subtotal);
+}
+
+$total = $subtotal - $discount; // Shipping and tax are calculated at checkout
 ?>
 
     <!-- Page Header -->
@@ -206,10 +219,24 @@ $total = $subtotal; // Shipping and tax are calculated at checkout
                             <!-- Coupon -->
                             <div style="margin-bottom: 1.5rem;">
                                 <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">Coupon Code</label>
-                                <div style="display: flex; gap: 0.5rem;">
-                                    <input type="text" placeholder="Enter code" class="form-input" style="flex: 1;">
-                                    <button class="btn btn-secondary">Apply</button>
+                                <?php if (isset($_SESSION['coupon'])): ?>
+                                <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.75rem; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); border-radius: var(--radius-md);">
+                                    <div>
+                                        <div style="font-weight: 600; color: var(--color-success);"><?= htmlspecialchars($_SESSION['coupon']['code']) ?> Applied</div>
+                                        <div style="font-size: 0.75rem; color: var(--color-text-light);">
+                                            <?= $_SESSION['coupon']['type'] === 'percentage' ? $_SESSION['coupon']['value'] . '% off' : formatPrice($_SESSION['coupon']['value']) . ' off' ?>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-ghost" id="remove-coupon-btn" style="color: var(--color-danger); padding: 0.25rem;">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                    </button>
                                 </div>
+                                <?php else: ?>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <input type="text" id="coupon-code-input" placeholder="Enter code" class="form-input" style="flex: 1;">
+                                    <button id="apply-coupon-btn" class="btn btn-secondary">Apply</button>
+                                </div>
+                                <?php endif; ?>
                             </div>
                             
                             <!-- Totals -->
@@ -218,6 +245,12 @@ $total = $subtotal; // Shipping and tax are calculated at checkout
                                     <span style="color: var(--color-text-light);">Subtotal</span>
                                     <span><?= formatPrice($subtotal) ?></span>
                                 </div>
+                                <?php if ($discount > 0): ?>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
+                                    <span style="color: var(--color-success);">Discount</span>
+                                    <span style="color: var(--color-success);">-<?= formatPrice($discount) ?></span>
+                                </div>
+                                <?php endif; ?>
 
                             </div>
                             

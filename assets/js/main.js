@@ -500,6 +500,41 @@ function initCartPageControls() {
             await updateCartItemAttribute(cartId, attributeName, select.value);
         });
     });
+
+    const applyCouponBtn = document.getElementById('apply-coupon-btn');
+    if (applyCouponBtn) {
+        applyCouponBtn.addEventListener('click', async () => {
+            const codeInput = document.getElementById('coupon-code-input');
+            const code = codeInput ? codeInput.value.trim() : '';
+            if (!code) {
+                showToast('Please enter a coupon code', 'error');
+                return;
+            }
+            applyCouponBtn.disabled = true;
+            const data = await apiRequest('api/cart.php', {
+                action: 'apply_coupon',
+                code: code
+            });
+            if (data.success) {
+                showToast(data.message, 'success');
+                window.location.reload();
+            } else {
+                applyCouponBtn.disabled = false;
+                showToast(data.message || 'Invalid coupon', 'error');
+            }
+        });
+    }
+
+    const removeCouponBtn = document.getElementById('remove-coupon-btn');
+    if (removeCouponBtn) {
+        removeCouponBtn.addEventListener('click', async () => {
+            removeCouponBtn.disabled = true;
+            const data = await apiRequest('api/cart.php', {
+                action: 'remove_coupon'
+            });
+            window.location.reload();
+        });
+    }
 }
 
 async function updateCartItem(cartId, quantity) {
