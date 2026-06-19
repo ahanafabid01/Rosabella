@@ -185,17 +185,55 @@ require_once __DIR__ . '/../includes/header.php';
                     <?php endif; ?>
 
                     <!-- Colors -->
+                    <!-- Colors -->
                     <?php 
                     $colorsJson = $product['colors'] ?? '';
                     $colorsArr = [];
+                    $isNewColorFormat = false;
                     if (!empty($colorsJson)) {
                         $decoded = json_decode($colorsJson, true);
                         if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                            $colorsArr = $decoded;
+                            if (!isset($decoded[0]) && !isset($decoded['color'])) {
+                                $isNewColorFormat = true;
+                                $colorsArr = $decoded;
+                            } else {
+                                $colorsArr = $decoded;
+                            }
                         }
                     }
                     ?>
-                    <?php if (!empty($colorsArr)): ?>
+                    <?php if (!empty($colorsArr) && $isNewColorFormat): ?>
+                    <div style="margin-bottom: 1.5rem;">
+                        <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; color: #1e293b;">Color: <span id="selected-color-name" style="font-weight: 400; color: var(--color-text-light);">Select color</span></h3>
+                        <div class="color-swatches" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                            <?php foreach ($colorsArr as $cName => $cData): ?>
+                                <?php 
+                                    // Prepare valid URLs for JS
+                                    $readyImages = [];
+                                    
+                                    // Main Image
+                                    if (!empty($cData['main_image'])) {
+                                        $readyImages[] = strpos($cData['main_image'], 'http') === 0 ? $cData['main_image'] : BASE_URL . '/' . ltrim($cData['main_image'], '/');
+                                    }
+                                    
+                                    // Gallery Images
+                                    if (!empty($cData['gallery_images'])) {
+                                        foreach ($cData['gallery_images'] as $img) {
+                                            $readyImages[] = strpos($img, 'http') === 0 ? $img : BASE_URL . '/' . ltrim($img, '/');
+                                        }
+                                    }
+                                    // Fallback to legacy format
+                                    if (!empty($cData['images'])) {
+                                        foreach ($cData['images'] as $img) {
+                                            $readyImages[] = strpos($img, 'http') === 0 ? $img : BASE_URL . '/' . ltrim($img, '/');
+                                        }
+                                    }
+                                ?>
+                                <button type="button" class="color-swatch-btn" data-color-name="<?= htmlspecialchars($cName) ?>" data-color-images="<?= htmlspecialchars(json_encode($readyImages)) ?>" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid transparent; background-color: <?= htmlspecialchars($cData['hex'] ?? '#000') ?>; cursor: pointer; transition: all 0.2s; outline-offset: 2px; box-shadow: 0 0 0 1px rgba(0,0,0,0.1);" title="<?= htmlspecialchars($cName) ?>" aria-label="<?= htmlspecialchars($cName) ?>"></button>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <?php elseif (!empty($colorsArr)): ?>
                     <div style="margin-bottom: 1.5rem;">
                         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                             <?php foreach ($colorsArr as $c): ?>
@@ -243,6 +281,10 @@ require_once __DIR__ . '/../includes/header.php';
                         <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
                         <?php if (!empty($product['sizes'])): ?>
                         <input type="hidden" name="selected_size" id="selected-size-input" required>
+                        <?php endif; ?>
+                        
+                        <?php if (!empty($colorsArr) && $isNewColorFormat): ?>
+                        <input type="hidden" name="selected_color" id="selected-color-input" required>
                         <?php endif; ?>
                         
                         <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
@@ -330,13 +372,27 @@ require_once __DIR__ . '/../includes/header.php';
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Thumbnail click binding logic (needs to be callable)
+        function bindThumbClickEvents() {
+            const thumbs = document.querySelectorAll('.product-thumb-btn');
+            const mainImg = document.getElementById('product-main-image');
+            thumbs.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    thumbs.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    mainImg.src = this.dataset.imageSrc;
+                });
+            });
+        }
+        // Bind initially
+        bindThumbClickEvents();
+
         // Handle size selection
         const sizeBtns = document.querySelectorAll('.size-btn');
         const sizeInput = document.getElementById('selected-size-input');
         
         sizeBtns.forEach(btn => {
             btn.addEventListener('click', function() {
-                // Remove active styling from all buttons
                 sizeBtns.forEach(b => {
                     b.style.borderColor = 'var(--color-border)';
                     b.style.backgroundColor = '#fff';
@@ -344,15 +400,63 @@ require_once __DIR__ . '/../includes/header.php';
                     b.style.fontWeight = 'normal';
                 });
                 
-                // Add active styling to clicked button
                 this.style.borderColor = 'var(--color-primary)';
                 this.style.backgroundColor = 'var(--color-primary-light)';
                 this.style.color = 'var(--color-primary)';
                 this.style.fontWeight = '600';
                 
-                // Set hidden input value
                 if (sizeInput) {
                     sizeInput.value = this.dataset.size;
+                }
+            });
+        });
+
+        // Handle color swatch selection
+        const colorBtns = document.querySelectorAll('.color-swatch-btn');
+        const colorInput = document.getElementById('selected-color-input');
+        const colorNameLabel = document.getElementById('selected-color-name');
+        
+        colorBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active styling
+                colorBtns.forEach(b => {
+                    b.style.borderColor = 'transparent';
+                    b.style.transform = 'scale(1)';
+                });
+                
+                // Add active styling
+                this.style.borderColor = 'var(--color-primary)';
+                this.style.transform = 'scale(1.1)';
+                
+                const cName = this.dataset.colorName;
+                if (colorNameLabel) colorNameLabel.textContent = cName;
+                if (colorInput) colorInput.value = cName;
+                
+                // Update images dynamically
+                const imagesStr = this.dataset.colorImages;
+                if (imagesStr) {
+                    try {
+                        const images = JSON.parse(imagesStr);
+                        if (images.length > 0) {
+                            // Update main image
+                            const mainImg = document.getElementById('product-main-image');
+                            if (mainImg) mainImg.src = images[0];
+                            
+                            // Update thumbs
+                            const thumbsContainer = document.querySelector('.product-gallery-thumbs');
+                            if (thumbsContainer) {
+                                let html = '';
+                                images.forEach((img, idx) => {
+                                    const activeCls = idx === 0 ? 'active' : '';
+                                    html += `<button type="button" class="product-thumb-btn ${activeCls}" data-image-src="${img}"><img src="${img}"></button>`;
+                                });
+                                thumbsContainer.innerHTML = html;
+                                bindThumbClickEvents(); // Rebind!
+                            }
+                        }
+                    } catch(e) {
+                        console.error("Error parsing color images", e);
+                    }
                 }
             });
         });

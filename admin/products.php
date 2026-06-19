@@ -177,9 +177,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // New fields
     $sku = sanitize($_POST['sku'] ?? '');
+    if ($sku === '') $sku = null;
+    
     $style = sanitize($_POST['style'] ?? '');
     $sizes = sanitize($_POST['sizes'] ?? '');
-    $colors = sanitize($_POST['colors'] ?? '');
+    
+    // Parse color variants and images
+    $colorsInput = sanitize($_POST['colors_input'] ?? '');
+    $colorsData = [];
+    if ($colorsInput !== '') {
+        $colorPairs = explode(',', $colorsInput);
+        foreach ($colorPairs as $pair) {
+            if (strpos($pair, ':') !== false) {
+                [$name, $hex] = explode(':', $pair);
+                $name = trim($name);
+                $hex = trim($hex);
+                if ($name !== '' && $hex !== '') {
+                    $colorsData[$name] = ['hex' => $hex, 'main_image' => '', 'gallery_images' => []];
+                }
+            }
+        }
+    }
+    
+    // Existing colors from DB to retain existing images
+    $existingColors = [];
+    if ($action === 'edit' && isset($_GET['id'])) {
+        $existingStmt2 = $db->prepare("SELECT colors FROM products WHERE id = ?");
+        $existingStmt2->execute([intval($_GET['id'])]);
+        $existingProdColors = $existingStmt2->fetchColumn();
+        if ($existingProdColors) {
+            $existingColors = json_decode($existingProdColors, true) ?: [];
+            if (!isset($existingColors[0]) && !isset($existingColors['color'])) {
+                // it's an associative array
+                $removeGalleryImagesArr = array_values(array_unique(array_filter(array_map('trim', (array)($_POST['remove_gallery_images'] ?? [])))));
+                foreach ($colorsData as $name => &$data) {
+                    if (isset($existingColors[$name]['main_image'])) {
+                        if (!in_array($existingColors[$name]['main_image'], $removeGalleryImagesArr, true)) {
+                            $data['main_image'] = $existingColors[$name]['main_image'];
+                        }
+                    }
+                    if (isset($existingColors[$name]['images']) && is_array($existingColors[$name]['images'])) {
+                        // migrate old structure
+                        $data['gallery_images'] = array_values(array_filter($existingColors[$name]['images'], static function ($path) use ($removeGalleryImagesArr) {
+                            return !in_array($path, $removeGalleryImagesArr, true);
+                        }));
+                    }
+                    if (isset($existingColors[$name]['gallery_images']) && is_array($existingColors[$name]['gallery_images'])) {
+                        $data['gallery_images'] = array_values(array_filter($existingColors[$name]['gallery_images'], static function ($path) use ($removeGalleryImagesArr) {
+                            return !in_array($path, $removeGalleryImagesArr, true);
+                        }));
+                    }
+                }
+                unset($data);
+            }
+        }
+    }
     
     $brand = sanitize($_POST['brand'] ?? '');
     $key_features = sanitize($_POST['key_features'] ?? '');
@@ -238,6 +290,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     }
+    
+    // Process color-specific main image
+    if (!$error && isset($_FILES['color_main_image'])) {
+        foreach ($_FILES['color_main_image']['name'] as $colorName => $name) {
+            if (!isset($colorsData[$colorName])) continue;
+            if (empty($name)) continue;
+            
+            $file = [
+                'name' => $_FILES['color_main_image']['name'][$colorName],
+                'type' => $_FILES['color_main_image']['type'][$colorName],
+                'tmp_name' => $_FILES['color_main_image']['tmp_name'][$colorName],
+                'error' => $_FILES['color_main_image']['error'][$colorName],
+                'size' => $_FILES['color_main_image']['size'][$colorName]
+            ];
+            
+            $uploadedImg = uploadProductImage($file, $uploadError);
+            if ($uploadError !== null) {
+                $error = $uploadError;
+                break;
+            }
+            if ($uploadedImg !== null) {
+                $colorsData[$colorName]['main_image'] = $uploadedImg;
+                $newUploadedImages[] = $uploadedImg;
+            }
+        }
+    }
+
+    // Process color-specific gallery images
+    if (!$error && isset($_FILES['color_gallery'])) {
+        foreach ($_FILES['color_gallery']['name'] as $colorName => $names) {
+            if (!isset($colorsData[$colorName])) continue;
+            
+            $files = [
+                'name' => $_FILES['color_gallery']['name'][$colorName],
+                'type' => $_FILES['color_gallery']['type'][$colorName],
+                'tmp_name' => $_FILES['color_gallery']['tmp_name'][$colorName],
+                'error' => $_FILES['color_gallery']['error'][$colorName],
+                'size' => $_FILES['color_gallery']['size'][$colorName]
+            ];
+            
+            $colorGalleryUploads = normalizeUploadFileArray($files);
+            foreach ($colorGalleryUploads as $upload) {
+                $uploadedImg = uploadProductImage($upload, $uploadError);
+                if ($uploadError !== null) {
+                    $error = $uploadError;
+                    break 2;
+                }
+                if ($uploadedImg !== null) {
+                    $colorsData[$colorName]['gallery_images'][] = $uploadedImg;
+                    $newUploadedImages[] = $uploadedImg;
+                }
+            }
+        }
+    }
+    
+    $colors = !empty($colorsData) ? json_encode($colorsData, JSON_UNESCAPED_SLASHES) : null;
 
     $galleryImages = array_values(array_unique(array_filter($galleryImages)));
 
@@ -247,6 +355,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($mainImage === null && !empty($galleryImages)) {
         $mainImage = $galleryImages[0];
+    }
+    
+    // Fallback: If still no global main image, try to use the first color's main image or first gallery image
+    if ($mainImage === null && !empty($colorsData)) {
+        foreach ($colorsData as $cData) {
+            if (!empty($cData['main_image'])) {
+                $mainImage = $cData['main_image'];
+                break;
+            } elseif (!empty($cData['gallery_images'][0])) {
+                $mainImage = $cData['gallery_images'][0];
+                break;
+            } elseif (!empty($cData['images'][0])) {
+                $mainImage = $cData['images'][0];
+                break;
+            }
+        }
     }
 
     $galleryImagesJson = !empty($galleryImages) ? json_encode($galleryImages, JSON_UNESCAPED_SLASHES) : null;
@@ -285,7 +409,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         } catch (Throwable $e) {
-            $error = 'Unable to save product. Please check unique fields and try again.';
+            $error = 'Unable to save product: ' . $e->getMessage();
         }
 
         if (!$error) {
@@ -439,9 +563,25 @@ $pageTitle = 'Products Management';
                                 <input type="text" name="sizes" class="form-input" value="<?= htmlspecialchars($product['sizes'] ?? '') ?>" placeholder="e.g., 39, 40, 41, 42, 43, 44">
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Color Variants (JSON Format)</label>
-                                <textarea name="colors" class="form-textarea" rows="4" placeholder='[{"color":"Red","image":"path.jpg","url":"slug"}]'><?= htmlspecialchars($product['colors'] ?? '') ?></textarea>
-                                <p class="admin-upload-help" style="margin-top: 0.25rem;">Advanced: Add color swatches that link to other products.</p>
+                                <label class="form-label">Color Variants</label>
+                                <?php
+                                $colorsString = '';
+                                $parsedColors = [];
+                                if (!empty($product['colors'])) {
+                                    $parsedColors = json_decode($product['colors'], true) ?: [];
+                                    if (is_array($parsedColors) && !isset($parsedColors[0]) && !isset($parsedColors['color'])) {
+                                        $parts = [];
+                                        foreach ($parsedColors as $name => $data) {
+                                            $parts[] = $name . ':' . ($data['hex'] ?? '');
+                                        }
+                                        $colorsString = implode(', ', $parts);
+                                    } else {
+                                        $colorsString = $product['colors'];
+                                    }
+                                }
+                                ?>
+                                <input type="text" name="colors_input" id="color-variants-input" class="form-input" value="<?= htmlspecialchars($colorsString) ?>" placeholder="e.g., White:#ffffff, Crimson:#DC143C">
+                                <p class="admin-upload-help" style="margin-top: 0.25rem;">Format: Name:HexCode, separated by commas.</p>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Other Variants (Comma separated)</label>
@@ -513,7 +653,7 @@ $pageTitle = 'Products Management';
 
                         <div class="admin-card">
                             <h3 class="admin-section-heading">Media</h3>
-                            <div class="form-group">
+                            <div class="form-group" id="global-main-image-container" <?= (!empty($parsedColors)) ? 'style="display:none;"' : '' ?>>
                                 <label class="form-label">Main Product Image</label>
                                 <?php if (!empty($product['main_image'])): ?>
                                     <div class="admin-image-preview-wrap">
@@ -524,8 +664,80 @@ $pageTitle = 'Products Management';
                                 <p class="admin-upload-help">Upload JPG, PNG, WEBP, or GIF (max 5 MB).</p>
                                 <input type="hidden" name="current_image" value="<?= htmlspecialchars($product['main_image'] ?? '') ?>">
                             </div>
-                            <div class="form-group">
-                                <label class="form-label">Gallery Images</label>
+                            <?php if (!empty($parsedColors) && is_array($parsedColors)): ?>
+                                <div class="form-group" id="color-media-container">
+                                    <label class="form-label" style="border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 12px; font-weight: 600;">Color-Specific Media (Main & Gallery Images)</label>
+                                    <p class="admin-upload-help" style="margin-bottom: 15px;">Select a color from the dropdown below to upload its specific <strong>Main Product Image</strong> and <strong>Gallery Images</strong>.</p>
+                                    
+                                    <select id="color-upload-selector" class="form-select" style="margin-bottom: 1.5rem;">
+                                        <option value="">-- Select a color --</option>
+                                        <?php foreach ($parsedColors as $colorName => $colorData): ?>
+                                            <option value="<?= htmlspecialchars($colorName) ?>"><?= htmlspecialchars($colorName) ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    
+                                    <div id="dynamic-color-uploads">
+                                    <?php foreach ($parsedColors as $colorName => $colorData): ?>
+                                        <div class="color-upload-group" data-color="<?= htmlspecialchars($colorName) ?>" style="display: none; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;">
+                                            <label class="form-label" style="display:flex; align-items:center; gap:8px; margin-bottom: 1.2rem; font-size: 1.1rem;">Manage Images for 
+                                                <span style="display:inline-block; width:16px; height:16px; border-radius:50%; background-color:<?= htmlspecialchars($colorData['hex'] ?? '#000') ?>; border:1px solid rgba(0,0,0,0.1);"></span>
+                                                <strong><?= htmlspecialchars($colorName) ?></strong>
+                                            </label>
+                                            
+                                            <!-- Main Color Image -->
+                                            <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #e2e8f0;">
+                                                <label class="form-label" style="font-weight: 600; color: #334155;">Main Product Image</label>
+                                                <?php if (!empty($colorData['main_image'])): ?>
+                                                    <div class="admin-image-preview-wrap" style="margin-bottom: 10px;">
+                                                        <img src="<?= htmlspecialchars(resolveAdminImageSrc($colorData['main_image'])) ?>" alt="Main color image" class="admin-image-preview" style="max-width: 120px; border-radius: 4px;">
+                                                        <div style="margin-top: 5px;">
+                                                            <label style="font-size: 0.85rem; color: var(--color-danger); cursor: pointer;">
+                                                                <input type="checkbox" name="remove_gallery_images[]" value="<?= htmlspecialchars($colorData['main_image']) ?>"> Remove Main Image
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                <?php endif; ?>
+                                                <input type="file" name="color_main_image[<?= htmlspecialchars($colorName) ?>]" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif">
+                                                <p class="admin-upload-help" style="margin-top: 4px;">Upload the primary image shown for this color.</p>
+                                            </div>
+
+                                            <!-- Gallery Color Images -->
+                                            <div>
+                                                <label class="form-label" style="font-weight: 600; color: #334155;">Gallery Images</label>
+                                                <?php if (!empty($colorData['gallery_images'])): ?>
+                                                    <div class="admin-gallery-grid" style="margin-bottom: 15px;">
+                                                        <?php foreach ($colorData['gallery_images'] as $galleryImage): ?>
+                                                            <label class="admin-gallery-item">
+                                                                <img src="<?= htmlspecialchars(resolveAdminImageSrc($galleryImage)) ?>" alt="Gallery image" class="admin-gallery-thumb">
+                                                                <span class="admin-gallery-remove">
+                                                                    <input type="checkbox" name="remove_gallery_images[]" value="<?= htmlspecialchars($galleryImage) ?>">
+                                                                    Remove
+                                                                </span>
+                                                            </label>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                                
+                                                <input type="file" name="color_gallery[<?= htmlspecialchars($colorName) ?>][]" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
+                                                <p class="admin-upload-help" style="margin-top: 4px;">Select multiple secondary thumbnail images for this color.</p>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <div class="form-group" id="color-media-container" style="display:none;">
+                                    <label class="form-label" style="border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 12px; font-weight: 600;">Color-Specific Media (Main & Gallery Images)</label>
+                                    <p class="admin-upload-help" style="margin-bottom: 15px;">Select a color from the dropdown below to upload its specific <strong>Main Product Image</strong> and <strong>Gallery Images</strong>.</p>
+                                    <select id="color-upload-selector" class="form-select" style="margin-bottom: 1.5rem;">
+                                        <option value="">-- Select a color --</option>
+                                    </select>
+                                    <div id="dynamic-color-uploads"></div>
+                                </div>
+                            <?php endif; ?>
+
+                            <div class="form-group" id="global-gallery-image-container" <?= (!empty($parsedColors)) ? 'style="display:none;"' : '' ?>>
+                                <label class="form-label">General Gallery Images</label>
                                 <?php if (!empty($productGalleryImages)): ?>
                                     <div class="admin-gallery-grid">
                                         <?php foreach ($productGalleryImages as $galleryImage): ?>
@@ -576,6 +788,102 @@ $pageTitle = 'Products Management';
                         descriptionInput.value = (html === '<p><br></p>') ? '' : html;
                     });
                 }
+            }
+
+            var colorInput = document.getElementById('color-variants-input');
+            var colorSelector = document.getElementById('color-upload-selector');
+            if (colorInput) {
+                // Initialize existing blocks
+                Array.from(document.querySelectorAll('.color-upload-group')).forEach(function(el) {
+                    var strong = el.querySelector('strong');
+                    if (strong) {
+                        el.dataset.color = strong.textContent.trim();
+                    }
+                });
+
+                if (colorSelector) {
+                    colorSelector.addEventListener('change', function() {
+                        var selectedColor = this.value;
+                        document.querySelectorAll('.color-upload-group').forEach(function(el) {
+                            el.style.display = (el.dataset.color === selectedColor) ? 'block' : 'none';
+                        });
+                    });
+                }
+
+                colorInput.addEventListener('input', function() {
+                    var val = this.value.trim();
+                    var container = document.getElementById('color-media-container');
+                    var dynamicUploads = document.getElementById('dynamic-color-uploads');
+                    var globalMainImg = document.getElementById('global-main-image-container');
+                    var globalGalleryImg = document.getElementById('global-gallery-image-container');
+                    
+                    if (!val) {
+                        container.style.display = 'none';
+                        if (globalMainImg) globalMainImg.style.display = 'block';
+                        if (globalGalleryImg) globalGalleryImg.style.display = 'block';
+                        return;
+                    }
+                    
+                    container.style.display = 'block';
+                    if (globalMainImg) globalMainImg.style.display = 'none';
+                    if (globalGalleryImg) globalGalleryImg.style.display = 'none';
+                    
+                    var pairs = val.split(',');
+                    
+                    var existingBlocks = Array.from(dynamicUploads.querySelectorAll('.color-upload-group')).map(function(el) {
+                        return el.dataset.color;
+                    });
+                    
+                    pairs.forEach(function(p) {
+                        var parts = p.split(':');
+                        if (parts.length >= 2) {
+                            var name = parts[0].trim();
+                            var hex = parts[1].trim();
+                            if (name && hex) {
+                                if (!existingBlocks.includes(name)) {
+                                    existingBlocks.push(name);
+                                    
+                                    // Add to dropdown
+                                    if (colorSelector) {
+                                        var option = document.createElement('option');
+                                        option.value = name;
+                                        option.textContent = name;
+                                        colorSelector.appendChild(option);
+                                    }
+
+                                    // Create hidden block
+                                    var div = document.createElement('div');
+                                    div.className = 'color-upload-group';
+                                    div.dataset.color = name;
+                                    div.style = 'display: none; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;';
+                                    div.innerHTML = '<label class="form-label" style="display:flex; align-items:center; gap:8px; margin-bottom: 1.2rem; font-size: 1.1rem;">Manage Images for ' + 
+                                        '<span style="display:inline-block; width:16px; height:16px; border-radius:50%; background-color:' + hex + '; border:1px solid rgba(0,0,0,0.1);"></span>' + 
+                                        '<strong>' + name + '</strong></label>' +
+                                        '<div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #e2e8f0;">' +
+                                            '<label class="form-label" style="font-weight: 600; color: #334155;">Main Product Image</label>' +
+                                            '<input type="file" name="color_main_image[' + name + ']" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif">' +
+                                            '<p class="admin-upload-help" style="margin-top: 4px;">Upload the primary image shown for this color.</p>' +
+                                        '</div>' +
+                                        '<div>' +
+                                            '<label class="form-label" style="font-weight: 600; color: #334155;">Gallery Images</label>' +
+                                            '<input type="file" name="color_gallery[' + name + '][]" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif" multiple>' +
+                                            '<p class="admin-upload-help" style="margin-top: 4px;">Select multiple secondary thumbnail images for this color.</p>' +
+                                        '</div>';
+                                    dynamicUploads.appendChild(div);
+                                } else {
+                                    // Live update the background color as they continue typing valid hex codes
+                                    var existingBlock = dynamicUploads.querySelector('.color-upload-group[data-color="' + name.replace(/"/g, '\\"') + '"]');
+                                    if (existingBlock) {
+                                        var colorSpan = existingBlock.querySelector('span');
+                                        if (colorSpan) {
+                                            colorSpan.style.backgroundColor = hex;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                });
             }
         });
     </script>
