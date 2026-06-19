@@ -20,6 +20,40 @@ $featuredProducts = $stmt->fetchAll();
 $stmt = $db->query("SELECT * FROM categories WHERE status = 'active' ORDER BY sort_order LIMIT 6");
 $categories = $stmt->fetchAll();
 
+// Get Hero Slides
+$allHeroSlides = [];
+try {
+    $stmt = $db->query("SELECT * FROM hero_slides WHERE status = 'active' ORDER BY sort_order ASC, created_at DESC");
+    $allHeroSlides = $stmt->fetchAll();
+} catch (Throwable $e) {}
+
+$mainSlides = [];
+$sideTopSlide = null;
+$sideBottomSlide = null;
+
+foreach ($allHeroSlides as $slide) {
+    if ($slide['position'] === 'main') {
+        $mainSlides[] = $slide;
+    } elseif ($slide['position'] === 'side_top' && !$sideTopSlide) {
+        $sideTopSlide = $slide;
+    } elseif ($slide['position'] === 'side_bottom' && !$sideBottomSlide) {
+        $sideBottomSlide = $slide;
+    }
+}
+
+// Fallbacks if database is empty
+if (empty($mainSlides)) {
+    $mainSlides = [
+        ['image_path' => 'https://images.unsplash.com/photo-1542204165-65bf26472b9b?w=1200&q=80', 'link_url' => 'category/accessories', 'title' => '', 'subtitle' => ''],
+        ['image_path' => 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1200&q=80', 'link_url' => 'category/electronics', 'title' => '', 'subtitle' => '']
+    ];
+}
+if (!$sideTopSlide) {
+    $sideTopSlide = ['image_path' => 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=600&q=80', 'link_url' => 'shop', 'title' => '', 'subtitle' => ''];
+}
+if (!$sideBottomSlide) {
+    $sideBottomSlide = ['image_path' => 'https://images.unsplash.com/photo-1550009158-9ebf6d1736eb?w=600&q=80', 'link_url' => 'sale', 'title' => '', 'subtitle' => ''];
+}
 function formatCountdownDisplay(int $remainingSeconds): string
 {
     $remainingSeconds = max(0, $remainingSeconds);
@@ -143,54 +177,78 @@ foreach ($stmt->fetchAll() as $reviewRow) {
                 <!-- Main Banner (Left Side Slider) -->
                 <div class="hero-main-banner">
                     <div class="hero-slider">
-                        <!-- Slide 1 -->
-                        <div class="hero-slide active">
-                            <a href="<?= BASE_URL ?>/category/accessories" style="display: block; width: 100%; height: 100%;">
-                                <img src="https://images.unsplash.com/photo-1542204165-65bf26472b9b?w=1200&q=80" alt="Premium accessories collection">
-                            </a>
-                        </div>
-                        
-                        <!-- Slide 2 -->
-                        <div class="hero-slide">
-                            <a href="<?= BASE_URL ?>/category/electronics" style="display: block; width: 100%; height: 100%;">
-                                <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1200&q=80" alt="Smart gadgets">
-                            </a>
-                        </div>
+                        <?php foreach ($mainSlides as $index => $slide): ?>
+                            <?php $imgUrl = strpos($slide['image_path'], 'http') === 0 ? $slide['image_path'] : BASE_URL . '/' . htmlspecialchars($slide['image_path']); ?>
+                            <div class="hero-slide <?= $index === 0 ? 'active' : '' ?>">
+                                <a href="<?= BASE_URL . '/' . htmlspecialchars($slide['link_url'] ?? '') ?>" style="display: block; width: 100%; height: 100%; position: relative;">
+                                    <img src="<?= $imgUrl ?>" alt="<?= htmlspecialchars($slide['title'] ?? 'Hero Slide') ?>">
+                                    <?php if (!empty($slide['title']) || !empty($slide['subtitle'])): ?>
+                                        <div style="position: absolute; bottom: 20%; left: 10%; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+                                            <?php if (!empty($slide['title'])): ?>
+                                                <h2 style="font-size: 2.5rem; margin: 0 0 0.5rem;"><?= htmlspecialchars($slide['title']) ?></h2>
+                                            <?php endif; ?>
+                                            <?php if (!empty($slide['subtitle'])): ?>
+                                                <p style="font-size: 1.2rem; margin: 0;"><?= htmlspecialchars($slide['subtitle']) ?></p>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </a>
+                            </div>
+                        <?php endforeach; ?>
 
                         <!-- Navigation -->
-                        <div class="hero-nav hero-nav-prev">
-                            <button aria-label="Previous slide">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="15 18 9 12 15 6"/>
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="hero-nav hero-nav-next">
-                            <button aria-label="Next slide">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="9 18 15 12 9 6"/>
-                                </svg>
-                            </button>
-                        </div>
-                        
-                        <!-- Dots -->
-                        <div class="hero-dots">
-                            <button class="hero-dot active" aria-label="Go to slide 1"></button>
-                            <button class="hero-dot" aria-label="Go to slide 2"></button>
-                        </div>
+                        <?php if (count($mainSlides) > 1): ?>
+                            <div class="hero-nav hero-nav-prev">
+                                <button aria-label="Previous slide">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="15 18 9 12 15 6"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="hero-nav hero-nav-next">
+                                <button aria-label="Next slide">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="9 18 15 12 9 6"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            
+                            <!-- Dots -->
+                            <div class="hero-dots">
+                                <?php foreach ($mainSlides as $index => $slide): ?>
+                                    <button class="hero-dot <?= $index === 0 ? 'active' : '' ?>" aria-label="Go to slide <?= $index + 1 ?>"></button>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
                 <!-- Side Banners (Right Side) -->
                 <div class="hero-side-banners">
                     <!-- Top Side Banner -->
-                    <a href="<?= BASE_URL ?>/shop" class="hero-side-banner">
-                        <img src="https://images.unsplash.com/photo-1498049794561-7780e7231661?w=600&q=80" alt="Next Gen Living">
+                    <?php 
+                        $topImgUrl = strpos($sideTopSlide['image_path'], 'http') === 0 ? $sideTopSlide['image_path'] : BASE_URL . '/' . htmlspecialchars($sideTopSlide['image_path']); 
+                    ?>
+                    <a href="<?= BASE_URL . '/' . htmlspecialchars($sideTopSlide['link_url'] ?? '') ?>" class="hero-side-banner">
+                        <img src="<?= $topImgUrl ?>" alt="<?= htmlspecialchars($sideTopSlide['title'] ?? 'Top Banner') ?>">
+                        <?php if (!empty($sideTopSlide['title'])): ?>
+                            <div style="position: absolute; bottom: 15%; left: 10%; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
+                                <h3 style="font-size: 1.5rem; margin: 0;"><?= htmlspecialchars($sideTopSlide['title']) ?></h3>
+                            </div>
+                        <?php endif; ?>
                     </a>
                     
                     <!-- Bottom Side Banner -->
-                    <a href="<?= BASE_URL ?>/sale" class="hero-side-banner flash-sale">
-                        <img src="https://images.unsplash.com/photo-1550009158-9ebf6d1736eb?w=600&q=80" alt="Flash Sale">
+                    <?php 
+                        $bottomImgUrl = strpos($sideBottomSlide['image_path'], 'http') === 0 ? $sideBottomSlide['image_path'] : BASE_URL . '/' . htmlspecialchars($sideBottomSlide['image_path']); 
+                    ?>
+                    <a href="<?= BASE_URL . '/' . htmlspecialchars($sideBottomSlide['link_url'] ?? '') ?>" class="hero-side-banner flash-sale">
+                        <img src="<?= $bottomImgUrl ?>" alt="<?= htmlspecialchars($sideBottomSlide['title'] ?? 'Bottom Banner') ?>">
+                        <?php if (!empty($sideBottomSlide['title'])): ?>
+                            <div style="position: absolute; bottom: 15%; left: 10%; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
+                                <h3 style="font-size: 1.5rem; margin: 0;"><?= htmlspecialchars($sideBottomSlide['title']) ?></h3>
+                            </div>
+                        <?php endif; ?>
                     </a>
                 </div>
 
