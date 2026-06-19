@@ -30,6 +30,10 @@ if (isLoggedIn()) {
 }
 $cartItems = $stmt->fetchAll();
 
+// Fetch recommended products
+$stmtRec = $db->query("SELECT * FROM products WHERE status = 'active' ORDER BY RAND() LIMIT 4");
+$recommendedProducts = $stmtRec->fetchAll();
+
 // Calculate totals
 $subtotal = 0;
 foreach ($cartItems as $item) {
@@ -40,9 +44,7 @@ foreach ($cartItems as $item) {
 $freeShippingThreshold = floatval(getSetting('free_shipping_threshold') ?: 5000);
 $defaultShippingCost = floatval(getSetting('shipping_cost') ?: 120);
 $taxRate = floatval(getSetting('tax_rate') ?: 0);
-$shippingCost = $subtotal >= $freeShippingThreshold ? 0 : $defaultShippingCost;
-$tax = $subtotal * ($taxRate / 100);
-$total = $subtotal + $shippingCost + $tax;
+$total = $subtotal; // Shipping and tax are calculated at checkout
 ?>
 
     <!-- Page Header -->
@@ -93,7 +95,7 @@ $total = $subtotal + $shippingCost + $tax;
                             <!-- Items -->
                             <?php foreach ($cartItems as $item): ?>
                                 <?php $price = $item['sale_price'] ?: $item['price']; ?>
-                                <div class="cart-item" data-id="<?= $item['id'] ?>" style="padding: 1rem; border-bottom: 1px solid var(--color-border);">
+                                <div class="cart-item" data-id="<?= $item['id'] ?>" style="position: relative; padding: 1rem; border-bottom: 1px solid var(--color-border);">
                                     <div class="cart-item-grid">
                                         
                                         <!-- Image -->
@@ -113,7 +115,7 @@ $total = $subtotal + $shippingCost + $tax;
                                         
                                         <!-- Price -->
                                         <div class="cart-price">
-                                            <span style="font-weight: 600;"><?= formatPrice($price) ?></span>
+                                            <span><?= formatPrice($price) ?></span>
                                         </div>
                                         
                                         <!-- Quantity -->
@@ -124,7 +126,7 @@ $total = $subtotal + $shippingCost + $tax;
                                         </div>
                                         
                                         <!-- Total -->
-                                        <div class="cart-total" style="font-weight: 700;">
+                                        <div class="cart-total" style="font-weight: 700; color: var(--color-text); font-size: 1.1rem;">
                                             <?= formatPrice($price * $item['quantity']) ?>
                                         </div>
                                         
@@ -160,19 +162,12 @@ $total = $subtotal + $shippingCost + $tax;
                                     <span style="color: var(--color-text-light);">Subtotal</span>
                                     <span><?= formatPrice($subtotal) ?></span>
                                 </div>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
-                                    <span style="color: var(--color-text-light);">Shipping</span>
-                                    <span><?= $shippingCost == 0 ? 'Free' : formatPrice($shippingCost) ?></span>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
-                                    <span style="color: var(--color-text-light);">Tax (<?= number_format($taxRate, 0) ?>%)</span>
-                                    <span><?= formatPrice($tax) ?></span>
-                                </div>
+
                             </div>
                             
                             <div style="display: flex; justify-content: space-between; font-size: 1.125rem; font-weight: 700; padding-top: 1rem; border-top: 1px solid var(--color-border); margin-bottom: 1.5rem;">
                                 <span>Total</span>
-                                <span><?= formatPrice($total) ?></span>
+                                <span style="color: var(--color-danger); font-size: 1.35rem;"><?= formatPrice($total) ?></span>
                             </div>
                             
                             <a href="<?= BASE_URL ?>/shop" class="btn btn-lg" style="width: 100%; background-color: #000; color: #fff; margin-bottom: 0.75rem;">
@@ -207,9 +202,75 @@ $total = $subtotal + $shippingCost + $tax;
         </div>
     </section>
 
-    
+    <!-- Recommended Products -->
+    <?php if (!empty($recommendedProducts)): ?>
+    <section class="section" style="padding-top: 0; padding-bottom: 3rem;">
+        <div class="container">
+            <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem;">You May Be Interested In...</h2>
+            <div class="products-grid">
+                <?php foreach ($recommendedProducts as $product): ?>
+                    <?php
+                    // Calculate discount
+                    $discount = 0;
+                    if ($product['sale_price'] && $product['price'] > 0) {
+                        $discount = round((($product['price'] - $product['sale_price']) / $product['price']) * 100);
+                    }
+                    $image = $product['main_image'] ?: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80';
+                    ?>
+                    <div class="product-card">
+                        <div class="product-image">
+                            <a href="<?= BASE_URL ?>/product/<?= $product['slug'] ?>" class="product-image-link" aria-label="View <?= htmlspecialchars($product['name']) ?>"></a>
+                            <img src="<?= htmlspecialchars($image) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
+                            
+                            <!-- Badges -->
+                            <div class="product-badges">
+                                <?php if (isset($product['is_new']) && $product['is_new']): ?>
+                                    <span class="badge badge-new">New</span>
+                                <?php endif; ?>
+                                <?php if (isset($product['is_bestseller']) && $product['is_bestseller']): ?>
+                                    <span class="badge badge-bestseller">Best Seller</span>
+                                <?php endif; ?>
+                                <?php if ($discount > 0): ?>
+                                    <span class="badge badge-sale">-<?= $discount ?>%</span>
+                                <?php endif; ?>
+                            </div>
+                            
+                            <!-- Wishlist Button -->
+                            <button class="product-wishlist" data-product-id="<?= $product['id'] ?>" aria-label="Add to wishlist">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                </svg>
+                            </button>
+                            
+                            <!-- Quick Actions -->
+                            <div class="product-actions">
+                                <button class="btn btn-primary product-add-cart" data-product-id="<?= $product['id'] ?>" style="flex: 1;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                                    </svg>
+                                    Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="product-content">
+                            <h3 class="product-name">
+                                <a href="<?= BASE_URL ?>/product/<?= $product['slug'] ?>"><?= htmlspecialchars($product['name']) ?></a>
+                            </h3>
+                            <div class="product-price">
+                                <span class="price-current">
+                                    <?= formatPrice($product['sale_price'] ?: $product['price']) ?>
+                                </span>
+                                <?php if ($product['sale_price']): ?>
+                                    <span class="price-original"><?= formatPrice($product['price']) ?></span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
-
-
-

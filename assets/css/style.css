@@ -2278,6 +2278,29 @@ textarea {
     }
 }
 
+/* Mobile Remove Button */
+@media (max-width: 767px) {
+    .cart-item-grid {
+        padding-right: 1.5rem; /* Make room for the absolutely positioned button */
+    }
+    .cart-item-grid .cart-remove {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--color-bg-secondary);
+        border-radius: var(--radius-sm);
+        padding: 0;
+    }
+    .cart-item-grid .cart-remove:hover {
+        background-color: #fee2e2;
+    }
+}
+
 .sticky-summary {
     position: static;
 }
