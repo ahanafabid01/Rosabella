@@ -14,9 +14,9 @@ if (!isLoggedIn() || !isAdmin()) {
 }
 
 $db = getDB();
-$message = '';
-$error = '';
-$forceListMode = false;
+$message = $_SESSION['admin_message'] ?? '';
+$error = $_SESSION['admin_error'] ?? '';
+unset($_SESSION['admin_message'], $_SESSION['admin_error']);
 
 function ensureAdminReviewImagesTable(PDO $db): bool
 {
@@ -130,33 +130,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$action = $forceListMode ? 'list' : ($_GET['action'] ?? 'list');
-$viewReviewId = intval($_GET['id'] ?? 0);
-$viewReview = null;
-$viewReviewImages = [];
-
-if ($action === 'view' && $viewReviewId > 0) {
-    $viewStmt = $db->prepare("
-        SELECT r.*, p.name AS product_name, p.main_image AS product_image, u.first_name, u.last_name, u.email
-        FROM reviews r
-        LEFT JOIN products p ON p.id = r.product_id
-        LEFT JOIN users u ON u.id = r.user_id
-        WHERE r.id = ?
-        LIMIT 1
-    ");
-    $viewStmt->execute([$viewReviewId]);
-    $viewReview = $viewStmt->fetch();
-
-    if (!$viewReview) {
-        $error = 'Review not found.';
-        $action = 'list';
-    } elseif ($reviewImagesEnabled) {
-        $viewImagesStmt = $db->prepare("SELECT image_path FROM review_images WHERE review_id = ? ORDER BY id ASC");
-        $viewImagesStmt->execute([$viewReviewId]);
-        $viewReviewImages = $viewImagesStmt->fetchAll();
-    }
-}
-
 $statusFilter = sanitize($_GET['status'] ?? '');
 if (!in_array($statusFilter, $allowedStatuses, true)) {
     $statusFilter = '';
@@ -233,88 +206,13 @@ $pageTitle = 'Reviews Management';
         <?php if ($message): ?><div class="alert alert-success"><?= htmlspecialchars($message) ?></div><?php endif; ?>
         <?php if ($error): ?><div class="alert alert-error"><?= htmlspecialchars($error) ?></div><?php endif; ?>
 
-        <?php if ($action === 'view' && $viewReview): ?>
-        <div class="admin-card admin-card-gap-lg">
-            <div class="admin-detail-header">
-                <h2 class="admin-page-title">Review #<?= intval($viewReview['id']) ?></h2>
-                <a href="<?= BASE_URL ?>/admin/reviews" class="btn btn-secondary">Back to Reviews</a>
-            </div>
-
-            <div class="admin-detail-meta-grid">
-                <div>
-                    <div class="admin-meta-label">Product</div>
-                    <div class="admin-semi"><?= htmlspecialchars($viewReview['product_name'] ?? 'Unknown Product') ?></div>
-                </div>
-                <div>
-                    <div class="admin-meta-label">Customer</div>
-                    <div class="admin-semi"><?= htmlspecialchars(trim(($viewReview['first_name'] ?? '') . ' ' . ($viewReview['last_name'] ?? '')) ?: ($viewReview['email'] ?? 'Guest')) ?></div>
-                </div>
-                <div>
-                    <div class="admin-meta-label">Rating</div>
-                    <div class="admin-semi" style="color: #f59e0b;"><?= htmlspecialchars(renderAdminReviewStars(intval($viewReview['rating'] ?? 0))) ?></div>
-                </div>
-                <div>
-                    <div class="admin-meta-label">Submitted</div>
-                    <div class="admin-semi"><?= htmlspecialchars(date('M j, Y H:i', strtotime($viewReview['created_at'] ?? 'now'))) ?></div>
-                </div>
-            </div>
-
-            <div class="admin-card" style="margin-top: 1rem;">
-                <div class="admin-meta-label">Status</div>
-                <div style="margin-top: 0.35rem;">
-                    <span class="badge badge-<?= ($viewReview['status'] ?? '') === 'approved' ? 'success' : (($viewReview['status'] ?? '') === 'rejected' ? 'danger' : 'warning') ?>">
-                        <?= htmlspecialchars(ucfirst($viewReview['status'] ?? 'pending')) ?>
-                    </span>
-                </div>
-
-                <div class="admin-meta-label" style="margin-top: 1rem;">Title</div>
-                <div><?= htmlspecialchars((string)($viewReview['title'] ?? '-')) ?></div>
-
-                <div class="admin-meta-label" style="margin-top: 1rem;">Review</div>
-                <div class="admin-review-text"><?= nl2br(htmlspecialchars((string)($viewReview['review'] ?? ''))) ?></div>
-
-                <?php if (!empty($viewReviewImages)): ?>
-                <div class="admin-meta-label" style="margin-top: 1rem;">Photos</div>
-                <div class="admin-review-images">
-                    <?php foreach ($viewReviewImages as $viewReviewImage): ?>
-                    <a href="<?= htmlspecialchars(resolveAdminReviewImageSrc($viewReviewImage['image_path'] ?? '')) ?>" target="_blank" rel="noopener noreferrer">
-                        <img src="<?= htmlspecialchars(resolveAdminReviewImageSrc($viewReviewImage['image_path'] ?? '')) ?>" alt="Review photo" class="admin-review-thumb">
-                    </a>
-                    <?php endforeach; ?>
-                </div>
-                <?php endif; ?>
-            </div>
-
-            <div class="admin-form-row-center admin-mt-1">
-                <form method="POST" class="admin-form-row-center">
-                    <input type="hidden" name="action" value="update_status">
-                    <input type="hidden" name="review_id" value="<?= intval($viewReview['id']) ?>">
-                    <select name="status" class="form-select admin-select-220">
-                        <option value="pending" <?= ($viewReview['status'] ?? '') === 'pending' ? 'selected' : '' ?>>Pending</option>
-                        <option value="approved" <?= ($viewReview['status'] ?? '') === 'approved' ? 'selected' : '' ?>>Approved</option>
-                        <option value="rejected" <?= ($viewReview['status'] ?? '') === 'rejected' ? 'selected' : '' ?>>Rejected</option>
-                    </select>
-                    <button type="submit" class="btn btn-primary">Update Status</button>
-                </form>
-
-                <form method="POST" onsubmit="return confirm('Delete this review permanently?');">
-                    <input type="hidden" name="action" value="delete_review">
-                    <input type="hidden" name="review_id" value="<?= intval($viewReview['id']) ?>">
-                    <button type="submit" class="btn btn-secondary">Delete Review</button>
-                </form>
-            </div>
-        </div>
-        <?php endif; ?>
-
         <div class="admin-table-wrap">
             <table class="admin-table admin-table-nowrap">
                 <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Product</th>
                     <th>Customer</th>
                     <th>Rating</th>
-                    <th>Review</th>
                     <th>Status</th>
                     <th>Images</th>
                     <th>Date</th>
@@ -329,18 +227,9 @@ $pageTitle = 'Reviews Management';
                 <?php else: ?>
                     <?php foreach ($reviews as $review): ?>
                     <tr>
-                        <td>#<?= intval($review['id']) ?></td>
                         <td><?= htmlspecialchars($review['product_name'] ?? 'Unknown Product') ?></td>
                         <td><?= htmlspecialchars(trim(($review['first_name'] ?? '') . ' ' . ($review['last_name'] ?? '')) ?: ($review['email'] ?? 'Guest')) ?></td>
                         <td style="color: #f59e0b;"><?= htmlspecialchars(renderAdminReviewStars(intval($review['rating'] ?? 0))) ?></td>
-                        <td>
-                            <?php if (!empty($review['title'])): ?>
-                                <div class="admin-semi"><?= htmlspecialchars($review['title']) ?></div>
-                            <?php endif; ?>
-                            <?php $reviewPreview = trim((string)($review['review'] ?? '')); ?>
-                            <?php if (strlen($reviewPreview) > 110) { $reviewPreview = substr($reviewPreview, 0, 110) . '...'; } ?>
-                            <div class="admin-note-muted"><?= htmlspecialchars($reviewPreview) ?></div>
-                        </td>
                         <td>
                             <span class="badge badge-<?= ($review['status'] ?? '') === 'approved' ? 'success' : (($review['status'] ?? '') === 'rejected' ? 'danger' : 'warning') ?>">
                                 <?= htmlspecialchars(ucfirst($review['status'] ?? 'pending')) ?>
@@ -350,17 +239,7 @@ $pageTitle = 'Reviews Management';
                         <td><?= htmlspecialchars(date('M j, Y', strtotime($review['created_at'] ?? 'now'))) ?></td>
                         <td>
                             <div class="admin-form-row">
-                                <a href="<?= BASE_URL ?>/admin/reviews?action=view&id=<?= intval($review['id']) ?>" class="btn btn-sm btn-outline">View</a>
-                                <form method="POST" class="admin-form-row-center">
-                                    <input type="hidden" name="action" value="update_status">
-                                    <input type="hidden" name="review_id" value="<?= intval($review['id']) ?>">
-                                    <select name="status" class="form-select admin-status-select">
-                                        <option value="pending" <?= ($review['status'] ?? '') === 'pending' ? 'selected' : '' ?>>Pending</option>
-                                        <option value="approved" <?= ($review['status'] ?? '') === 'approved' ? 'selected' : '' ?>>Approved</option>
-                                        <option value="rejected" <?= ($review['status'] ?? '') === 'rejected' ? 'selected' : '' ?>>Rejected</option>
-                                    </select>
-                                    <button type="submit" class="btn btn-sm btn-secondary">Save</button>
-                                </form>
+                                <a href="<?= BASE_URL ?>/admin/view-review.php?id=<?= intval($review['id']) ?>" class="btn btn-sm btn-outline">View</a>
                                 <form method="POST" onsubmit="return confirm('Delete this review permanently?');">
                                     <input type="hidden" name="action" value="delete_review">
                                     <input type="hidden" name="review_id" value="<?= intval($review['id']) ?>">
