@@ -273,28 +273,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_review'])) {
     }
 }
 
-// Update profile
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
-    $firstName = sanitize($_POST['first_name']);
-    $lastName = sanitize($_POST['last_name']);
-    $phone = sanitize($_POST['phone']);
-    $address = sanitize($_POST['address']);
-    $city = sanitize($_POST['city']);
-    $upazila = sanitize($_POST['upazila'] ?? '');
-    $postalCode = sanitize($_POST['postal_code'] ?? '');
-    $country = 'Bangladesh';
-    
-    $stmt = $db->prepare("UPDATE users SET first_name=?, last_name=?, phone=?, address=?, city=?, upazila=?, postal_code=?, country=? WHERE id=?");
-    if ($stmt->execute([$firstName, $lastName, $phone, $address, $city, $upazila, $postalCode, $country, $userId])) {
-        $message = 'Profile updated successfully';
-        $user = getCurrentUser(); // Refresh
-    } else {
-        $error = 'Failed to update profile';
-    }
-}
+// Profile update logic removed from orders page
 
 // Get user orders
-$stmt = $db->prepare("SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT 10");
+$stmt = $db->prepare("SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC");
 $stmt->execute([$userId]);
 $orders = $stmt->fetchAll();
 
@@ -363,7 +345,7 @@ if (!empty($orders)) {
     }
 }
 
-$pageTitle = 'My Account';
+$pageTitle = 'My Orders';
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
@@ -373,9 +355,9 @@ require_once __DIR__ . '/../includes/header.php';
             <nav style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.5rem;">
                 <a href="<?= BASE_URL ?>/" style="color: var(--color-text-light); display: inline-flex; align-items: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></a>
                 <span> / </span>
-                <span style="color: var(--color-text);">My Account</span>
+                <span style="color: var(--color-text);">My Orders</span>
             </nav>
-            <h1 style="font-size: 2rem; font-weight: 700;">My Account</h1>
+            <h1 style="font-size: 2rem; font-weight: 700;">My Orders</h1>
         </div>
     </section>
 
@@ -389,64 +371,10 @@ require_once __DIR__ . '/../includes/header.php';
             <div style="background: rgba(220, 53, 69, 0.1); border: 1px solid var(--color-danger); color: var(--color-danger); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;"><?= htmlspecialchars($error) ?></div>
             <?php endif; ?>
             
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
-                <!-- Profile -->
-                <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem;">
-                    <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem;">Profile Information</h2>
-                    <form method="POST">
-                        <div class="form-grid-2">
-                            <div class="form-group">
-                                <label class="form-label">First Name</label>
-                                <input type="text" name="first_name" class="form-input" value="<?= htmlspecialchars($user['first_name'] ?? '') ?>">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Last Name</label>
-                                <input type="text" name="last_name" class="form-input" value="<?= htmlspecialchars($user['last_name'] ?? '') ?>">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Email</label>
-                            <input type="email" class="form-input" value="<?= htmlspecialchars($user['email'] ?? '') ?>" disabled style="background: var(--color-bg-secondary);">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Phone</label>
-                            <input type="tel" name="phone" class="form-input" value="<?= htmlspecialchars($user['phone'] ?? '') ?>">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Address</label>
-                            <input type="text" name="address" class="form-input" value="<?= htmlspecialchars($user['address'] ?? '') ?>">
-                        </div>
-                        <div class="form-grid-3">
-                            <div class="form-group">
-                                <label class="form-label">Upazila/Thana</label>
-                                <input type="text" name="upazila" class="form-input" value="<?= htmlspecialchars($user['upazila'] ?? '') ?>">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">District</label>
-                                <select name="city" class="form-input select2-district" style="width: 100%;">
-                                    <option value="">Select district...</option>
-                                    <?php
-                                    $districts = ["Bagerhat", "Bandarban", "Barguna", "Barisal", "Bhola", "Bogura", "Brahmanbaria", "Chandpur", "Chapai Nawabganj", "Chattogram - City", "Chattogram - Suburb", "Chuadanga", "Cox's Bazar", "Cumilla", "Dhaka - City", "Dhaka - Suburb", "Dinajpur", "Faridpur", "Feni", "Gaibandha", "Gazipur - City", "Gazipur - Suburb", "Gopalganj", "Habiganj", "Jamalpur", "Jashore", "Jhalokati", "Jhenaidah", "Joypurhat", "Khagrachari", "Khulna - City", "Khulna - Suburb", "Kishoreganj", "Kurigram", "Kushtia", "Lakshmipur", "Lalmonirhat", "Madaripur", "Magura", "Manikganj", "Meherpur", "Moulvibazar", "Munshiganj", "Mymensingh", "Naogaon", "Narail", "Narayanganj", "Narsingdi", "Natore", "Netrokona", "Nilphamari", "Noakhali", "Pabna", "Panchagarh", "Patuakhali", "Pirojpur", "Rajbari", "Rajshahi - Suburb", "Rajshahi City", "Rangamati", "Rangpur - Suburb", "Rangpur City", "Satkhira", "Shariatpur", "Sherpur", "Sirajganj", "Sunamganj", "Sylhet", "Tangail", "Thakurgaon"];
-                                    $userCity = $user['city'] ?? '';
-                                    foreach ($districts as $district) {
-                                        $selected = ($userCity == $district) ? 'selected' : '';
-                                        echo "<option value=\"" . htmlspecialchars($district) . "\" $selected>" . htmlspecialchars($district) . "</option>";
-                                    }
-                                    ?>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Postal Code</label>
-                                <input type="text" name="postal_code" class="form-input" value="<?= htmlspecialchars($user['postal_code'] ?? '') ?>">
-                            </div>
-                        </div>
-                        <button type="submit" name="update_profile" class="btn btn-primary">Save Changes</button>
-                    </form>
-                </div>
-                
+            <div>
                 <!-- Orders -->
                 <div id="orders" style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem;">
-                    <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem;">Recent Orders</h2>
+                    <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem;">Order History</h2>
                     
                     <?php if (empty($orders)): ?>
                     <p style="color: var(--color-text-light); text-align: center; padding: 2rem;">You haven't placed any orders yet.</p>
@@ -575,7 +503,7 @@ require_once __DIR__ . '/../includes/header.php';
             
             <!-- Quick Actions -->
             <div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
-                <a href="<?= BASE_URL ?>/my-orders" class="btn btn-outline">My Orders</a>
+                <a href="<?= BASE_URL ?>/account" class="btn btn-outline">My Account</a>
                 <a href="<?= BASE_URL ?>/wishlist" class="btn btn-outline">My Wishlist</a>
                 <a href="<?= BASE_URL ?>/track-order" class="btn btn-outline">Track Order</a>
                 <a href="<?= BASE_URL ?>/logout" class="btn btn-secondary">Logout</a>
@@ -583,34 +511,6 @@ require_once __DIR__ . '/../includes/header.php';
         </div>
     </section>
 
-<!-- Select2 CSS & JS for searchable district dropdown -->
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<style>
-.select2-container .select2-selection--single {
-    height: 42px;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    display: flex;
-    align-items: center;
-}
-.select2-container--default .select2-selection--single .select2-selection__arrow {
-    height: 40px;
-}
-.select2-container--default .select2-selection--single .select2-selection__rendered {
-    color: var(--color-text);
-    line-height: 40px;
-    padding-left: 0.75rem;
-}
-</style>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script>
-$(document).ready(function() {
-    $('.select2-district').select2({
-        placeholder: "Search district...",
-        width: '100%'
-    });
-});
-</script>
+
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
