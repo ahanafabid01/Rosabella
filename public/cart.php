@@ -177,9 +177,6 @@ $total = $subtotal - $discount; // Shipping and tax are calculated at checkout
                                                 </p>
                                                 <?php endif; ?>
                                             <?php endif; ?>
-                                            <p style="font-size: 0.875rem; color: var(--color-text-light);">
-                                                <?= $item['stock_quantity'] > 0 ? 'In Stock' : 'Out of Stock' ?>
-                                            </p>
                                         </div>
                                         
                                         <!-- Price -->
