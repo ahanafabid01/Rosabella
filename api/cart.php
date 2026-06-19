@@ -187,7 +187,7 @@ function handleGetCart() {
 
     if ($userId) {
         $stmt = $db->prepare("
-            SELECT c.*, p.name, p.price, p.sale_price, p.main_image, p.stock_quantity
+            SELECT c.*, p.slug, p.name, p.price, p.sale_price, p.main_image, p.stock_quantity
             FROM cart c
             JOIN products p ON c.product_id = p.id
             WHERE c.user_id = ? OR c.session_id = ?
@@ -196,7 +196,7 @@ function handleGetCart() {
         $stmt->execute([$userId, $sessionId]);
     } else {
         $stmt = $db->prepare("
-            SELECT c.*, p.name, p.price, p.sale_price, p.main_image, p.stock_quantity
+            SELECT c.*, p.slug, p.name, p.price, p.sale_price, p.main_image, p.stock_quantity
             FROM cart c
             JOIN products p ON c.product_id = p.id
             WHERE c.session_id = ?

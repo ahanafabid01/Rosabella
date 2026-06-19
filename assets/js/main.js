@@ -377,7 +377,7 @@ async function addToCart(productId, quantity = 1, size = null, color = null) {
         
         if (data.success) {
             showToast('Product added to cart!', 'success');
-            updateCartBadge(data.cart_count);
+            await refreshMiniCartFromServer();
         } else {
             showToast(data.message || 'Error adding to cart', 'error');
         }
@@ -401,6 +401,69 @@ async function refreshCartCountFromServer() {
     const data = await apiRequest('api/cart.php', { action: 'count' }, 'GET');
     if (data.success) {
         updateCartBadge(data.count);
+    }
+}
+
+async function refreshMiniCartFromServer() {
+    const data = await apiRequest('api/cart.php', { action: 'get' }, 'GET');
+    if (data.success) {
+        updateCartBadge(data.cart_count);
+        
+        const miniCartBody = document.querySelector('.mini-cart-body');
+        const miniCartSubtotal = document.querySelector('.subtotal-amount');
+        if (!miniCartBody) return;
+
+        if (data.items.length === 0) {
+            miniCartBody.innerHTML = `
+                <div class="mini-cart-empty" style="text-align: center; padding: 3rem 1rem;">
+                    <p style="color: var(--color-text-light);">Your cart is empty.</p>
+                </div>
+            `;
+            if (miniCartSubtotal) miniCartSubtotal.textContent = 'Tk 0.00';
+            return;
+        }
+
+        let html = '<div class="mini-cart-items">';
+        let total = 0;
+        
+        data.items.forEach(item => {
+            const price = parseFloat(item.sale_price || item.price);
+            total += price * item.quantity;
+            
+            let imgUrl = window.BASE_URL + '/assets/images/placeholder.png'; // Fallback
+            if (item.main_image) {
+                imgUrl = item.main_image.startsWith('http') ? item.main_image : (window.BASE_URL + '/' + item.main_image.replace(/^\/+/, ''));
+            }
+            html += `
+                <div class="mini-cart-item">
+                    <img src="${imgUrl}" alt="${item.name.replace(/"/g, '&quot;')}">
+                    <div class="mini-cart-item-info">
+                        <a href="${window.BASE_URL}/product/${item.slug}" class="mini-cart-item-title">${item.name}</a>
+                        <div class="mini-cart-item-price">
+                            Tk ${price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} <span>&times; ${item.quantity}</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-ghost cart-remove" data-cart-id="${item.id}" aria-label="Remove item" style="padding: 0.25rem; color: var(--color-danger);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        miniCartBody.innerHTML = html;
+        if (miniCartSubtotal) {
+            miniCartSubtotal.textContent = 'Tk ' + total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+        
+        // Re-bind remove buttons inside mini cart
+        const removeButtons = miniCartBody.querySelectorAll('.cart-remove');
+        removeButtons.forEach((button) => {
+            button.addEventListener('click', async () => {
+                const cartId = button.dataset.cartId;
+                await removeCartItem(cartId);
+            });
+        });
     }
 }
 
