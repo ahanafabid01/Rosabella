@@ -463,6 +463,11 @@ require_once __DIR__ . '/../includes/header.php';
                 }
             });
         });
+
+        // Auto-select first color
+        if (colorBtns.length > 0) {
+            colorBtns[0].click();
+        }
     });
     </script>
 
