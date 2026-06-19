@@ -294,7 +294,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
 }
 
 // Get user orders
-$stmt = $db->prepare("SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT 10");
+$stmt = $db->prepare("SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT 1");
 $stmt->execute([$userId]);
 $orders = $stmt->fetchAll();
 
@@ -446,7 +446,7 @@ require_once __DIR__ . '/../includes/header.php';
                 
                 <!-- Orders -->
                 <div id="orders" style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem;">
-                    <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem;">Recent Orders</h2>
+                    <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem;">Most Recent Order</h2>
                     
                     <?php if (empty($orders)): ?>
                     <p style="color: var(--color-text-light); text-align: center; padding: 2rem;">You haven't placed any orders yet.</p>
