@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * KARTLY - Products Page
  */
@@ -88,7 +88,7 @@ if ($category) {
         <div class="container">
             <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                 <nav style="font-size: 0.875rem; color: var(--color-text-light);">
-                    <a href="/Kartly/" style="color: var(--color-text-light);">Home</a>
+                    <a href="<?= BASE_URL ?>/" style="color: var(--color-text-light);">Home</a>
                     <span> / </span>
                     <span style="color: var(--color-text);">Products</span>
                     <?php if ($currentCategory): ?>
@@ -125,13 +125,13 @@ if ($category) {
                         <h3 style="font-weight: 600; margin-bottom: 1rem;">Categories</h3>
                         <ul style="display: flex; flex-direction: column; gap: 0.5rem;">
                             <li>
-                                <a href="/Kartly/shop" style="display: flex; justify-content: space-between; padding: 0.5rem 0; color: <?= !$category ? 'var(--color-primary)' : 'var(--color-text-light)' ?>;">
+                                <a href="<?= BASE_URL ?>/shop" style="display: flex; justify-content: space-between; padding: 0.5rem 0; color: <?= !$category ? 'var(--color-primary)' : 'var(--color-text-light)' ?>;">
                                     <span>All Products</span>
                                 </a>
                             </li>
                             <?php foreach ($categories as $cat): ?>
                             <li>
-                                <a href="/Kartly/category/<?= urlencode($cat['slug']) ?>" style="display: flex; justify-content: space-between; padding: 0.5rem 0; color: <?= $category === $cat['slug'] ? 'var(--color-primary)' : 'var(--color-text-light)' ?>;">
+                                <a href="<?= BASE_URL ?>/category/<?= urlencode($cat['slug']) ?>" style="display: flex; justify-content: space-between; padding: 0.5rem 0; color: <?= $category === $cat['slug'] ? 'var(--color-primary)' : 'var(--color-text-light)' ?>;">
                                     <span><?= htmlspecialchars($cat['name']) ?></span>
                                 </a>
                             </li>
@@ -155,7 +155,7 @@ if ($category) {
                     <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--color-border);">
                         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                             <?php
-                            $baseUrl = $category ? "/Kartly/category/$category" : '/Kartly/shop';
+                            $baseUrl = $category ? BASE_URL . "/category/$category" : BASE_URL . '/shop';
                             ?>
                             <a href="<?= $baseUrl ?>" class="btn <?= !$filter ? 'btn-primary' : 'btn-secondary' ?> btn-sm">All</a>
                             <a href="<?= $baseUrl ?>?filter=new" class="btn <?= $filter === 'new' ? 'btn-primary' : 'btn-secondary' ?> btn-sm">New</a>
@@ -182,7 +182,7 @@ if ($category) {
                             </svg>
                             <h3 style="font-weight: 600; margin-bottom: 0.5rem;">No products found</h3>
                             <p style="color: var(--color-text-light);">Try adjusting your search or filter criteria</p>
-                            <a href="/Kartly/shop" class="btn btn-primary" style="margin-top: 1rem;">View All Products</a>
+                            <a href="<?= BASE_URL ?>/shop" class="btn btn-primary" style="margin-top: 1rem;">View All Products</a>
                         </div>
                     <?php else: ?>
                         <div class="products-grid">
@@ -196,7 +196,7 @@ if ($category) {
                                 ?>
                                 <div class="product-card">
                                     <div class="product-image">
-                                        <a href="/Kartly/product/<?= $product['id'] ?>" class="product-image-link" aria-label="View <?= htmlspecialchars($product['name']) ?>"></a>
+                                        <a href="<?= BASE_URL ?>/product/<?= $product['id'] ?>" class="product-image-link" aria-label="View <?= htmlspecialchars($product['name']) ?>"></a>
                                         <img src="<?= htmlspecialchars($image) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
                                         
                                         <div class="product-badges">
@@ -230,7 +230,7 @@ if ($category) {
                                     <div class="product-content">
                                         <span class="product-category"><?= htmlspecialchars($product['category_name'] ?? 'General') ?></span>
                                         <h3 class="product-name">
-                                            <a href="/Kartly/product/<?= $product['id'] ?>"><?= htmlspecialchars($product['name']) ?></a>
+                                            <a href="<?= BASE_URL ?>/product/<?= $product['id'] ?>"><?= htmlspecialchars($product['name']) ?></a>
                                         </h3>
                                         
                                         <div class="product-price">
@@ -277,5 +277,6 @@ if ($category) {
     </section>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
+
 
 

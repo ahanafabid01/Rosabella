@@ -94,7 +94,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <div style="text-align: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border);">
                     <p style="color: var(--color-text-light); font-size: 0.875rem;">
                         Don't have an account? 
-                        <a href="/Kartly/register" style="color: var(--color-primary); font-weight: 500;">Create one</a>
+                        <a href="<?= BASE_URL ?>/register" style="color: var(--color-primary); font-weight: 500;">Create one</a>
                     </p>
                 </div>
             </div>
@@ -102,5 +102,6 @@ require_once __DIR__ . '/../includes/header.php';
     </section>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
+
 
 

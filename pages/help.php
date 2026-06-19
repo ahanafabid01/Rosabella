@@ -10,7 +10,7 @@ require_once __DIR__ . '/../includes/header.php';
     <section class="section section-bg">
         <div class="container">
             <nav style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.5rem;">
-                <a href="/Kartly/" style="color: var(--color-text-light);">Home</a>
+                <a href="<?= BASE_URL ?>/" style="color: var(--color-text-light);">Home</a>
                 <span> / </span>
                 <span style="color: var(--color-text);">Help Center</span>
             </nav>
@@ -30,22 +30,22 @@ require_once __DIR__ . '/../includes/header.php';
     <section class="section">
         <div class="container">
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 3rem;">
-                <a href="/Kartly/track-order" style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem; text-align: center; transition: all var(--transition-base);" onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='var(--color-border)'">
+                <a href="<?= BASE_URL ?>/track-order" style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem; text-align: center; transition: all var(--transition-base);" onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='var(--color-border)'">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" style="margin: 0 auto 0.75rem;"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
                     <h4 style="font-weight: 600; margin-bottom: 0.25rem;">Track Order</h4>
                     <p style="font-size: 0.75rem; color: var(--color-text-light);">Check your order status</p>
                 </a>
-                <a href="/Kartly/returns" style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem; text-align: center; transition: all var(--transition-base);" onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='var(--color-border)'">
+                <a href="<?= BASE_URL ?>/returns" style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem; text-align: center; transition: all var(--transition-base);" onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='var(--color-border)'">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" style="margin: 0 auto 0.75rem;"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
                     <h4 style="font-weight: 600; margin-bottom: 0.25rem;">Returns</h4>
                     <p style="font-size: 0.75rem; color: var(--color-text-light);">Start a return request</p>
                 </a>
-                <a href="/Kartly/shipping" style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem; text-align: center; transition: all var(--transition-base);" onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='var(--color-border)'">
+                <a href="<?= BASE_URL ?>/shipping" style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem; text-align: center; transition: all var(--transition-base);" onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='var(--color-border)'">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" style="margin: 0 auto 0.75rem;"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
                     <h4 style="font-weight: 600; margin-bottom: 0.25rem;">Shipping Info</h4>
                     <p style="font-size: 0.75rem; color: var(--color-text-light);">Delivery options & times</p>
                 </a>
-                <a href="/Kartly/contact" style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem; text-align: center; transition: all var(--transition-base);" onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='var(--color-border)'">
+                <a href="<?= BASE_URL ?>/contact" style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem; text-align: center; transition: all var(--transition-base);" onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='var(--color-border)'">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" style="margin: 0 auto 0.75rem;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                     <h4 style="font-weight: 600; margin-bottom: 0.25rem;">Contact Us</h4>
                     <p style="font-size: 0.75rem; color: var(--color-text-light);">Get in touch with support</p>
@@ -65,7 +65,7 @@ require_once __DIR__ . '/../includes/header.php';
                     <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                         <details style="background: var(--color-bg-secondary); border-radius: var(--radius-md); padding: 1rem; cursor: pointer;">
                             <summary style="font-weight: 500; outline: none;">How do I track my order?</summary>
-                            <p style="margin-top: 0.75rem; color: var(--color-text-light); font-size: 0.875rem;">You can track your order by visiting our <a href="/Kartly/track-order" style="color: var(--color-primary);">Track Order</a> page and entering your order number and email address. You'll receive real-time updates on your package location.</p>
+                            <p style="margin-top: 0.75rem; color: var(--color-text-light); font-size: 0.875rem;">You can track your order by visiting our <a href="<?= BASE_URL ?>/track-order" style="color: var(--color-primary);">Track Order</a> page and entering your order number and email address. You'll receive real-time updates on your package location.</p>
                         </details>
                         <details style="background: var(--color-bg-secondary); border-radius: var(--radius-md); padding: 1rem; cursor: pointer;">
                             <summary style="font-weight: 500; outline: none;">What are the shipping options?</summary>
@@ -164,5 +164,6 @@ require_once __DIR__ . '/../includes/header.php';
     </section>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
+
 
 

@@ -10,7 +10,7 @@ require_once __DIR__ . '/../includes/header.php';
     <section class="section section-bg">
         <div class="container">
             <nav style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.5rem;">
-                <a href="/Kartly/" style="color: var(--color-text-light);">Home</a>
+                <a href="<?= BASE_URL ?>/" style="color: var(--color-text-light);">Home</a>
                 <span> / </span>
                 <span style="color: var(--color-text);">Privacy Policy</span>
             </nav>
@@ -68,7 +68,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">6. Cookies</h2>
                 <p style="color: var(--color-text-light); margin-bottom: 1.5rem;">
                     We use cookies to enhance your browsing experience. For more information, see our 
-                    <a href="/Kartly/cookies" style="color: var(--color-primary);">Cookie Policy</a>.
+                    <a href="<?= BASE_URL ?>/cookies" style="color: var(--color-primary);">Cookie Policy</a>.
                 </p>
 
                 <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">7. Third-Party Sharing</h2>
@@ -91,5 +91,6 @@ require_once __DIR__ . '/../includes/header.php';
     </section>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
+
 
 

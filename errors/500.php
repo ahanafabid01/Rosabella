@@ -17,10 +17,11 @@ http_response_code(500);
             <p style="color: var(--color-text-light); margin-bottom: 1.25rem;">
                 The server hit an unexpected error. Please try again in a few minutes.
             </p>
-            <a href="/Kartly/" class="btn btn-primary">Back to Homepage</a>
+            <a href="<?= BASE_URL ?>/" class="btn btn-primary">Back to Homepage</a>
         </div>
     </main>
 </body>
 </html>
+
 
 

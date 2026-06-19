@@ -49,7 +49,7 @@ $total = $subtotal + $shippingCost + $tax;
     <section class="section section-bg">
         <div class="container">
             <nav style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.5rem;">
-                <a href="/Kartly/" style="color: var(--color-text-light);">Home</a>
+                <a href="<?= BASE_URL ?>/" style="color: var(--color-text-light);">Home</a>
                 <span> / </span>
                 <span style="color: var(--color-text);">Shopping Cart</span>
             </nav>
@@ -68,7 +68,7 @@ $total = $subtotal + $shippingCost + $tax;
                     </svg>
                     <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem;">Your cart is empty</h2>
                     <p style="color: var(--color-text-light); margin-bottom: 1.5rem;">Looks like you haven't added any items to your cart yet.</p>
-                    <a href="/Kartly/shop" class="btn btn-primary btn-lg">
+                    <a href="<?= BASE_URL ?>/shop" class="btn btn-primary btn-lg">
                         Start Shopping
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
@@ -144,7 +144,7 @@ $total = $subtotal + $shippingCost + $tax;
                         
                         <!-- Continue Shopping -->
                         <div style="margin-top: 1.5rem;">
-                            <a href="/Kartly/shop" class="btn btn-ghost">
+                            <a href="<?= BASE_URL ?>/shop" class="btn btn-ghost">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <polyline points="15 18 9 12 15 6"/>
                                 </svg>
@@ -188,7 +188,7 @@ $total = $subtotal + $shippingCost + $tax;
                                 <span><?= formatPrice($total) ?></span>
                             </div>
                             
-                            <a href="/Kartly/checkout" class="btn btn-primary btn-lg" style="width: 100%;">
+                            <a href="<?= BASE_URL ?>/checkout" class="btn btn-primary btn-lg" style="width: 100%;">
                                 Proceed to Checkout
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
@@ -220,5 +220,6 @@ $total = $subtotal + $shippingCost + $tax;
     
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
+
 
 

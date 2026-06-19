@@ -370,7 +370,7 @@ require_once __DIR__ . '/../includes/header.php';
     <section class="section section-bg">
         <div class="container">
             <nav style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.5rem;">
-                <a href="/Kartly/" style="color: var(--color-text-light);">Home</a>
+                <a href="<?= BASE_URL ?>/" style="color: var(--color-text-light);">Home</a>
                 <span> / </span>
                 <span style="color: var(--color-text);">My Account</span>
             </nav>
@@ -441,7 +441,7 @@ require_once __DIR__ . '/../includes/header.php';
                     <?php if (empty($orders)): ?>
                     <p style="color: var(--color-text-light); text-align: center; padding: 2rem;">You haven't placed any orders yet.</p>
                     <div style="text-align: center;">
-                        <a href="/Kartly/shop" class="btn btn-primary">Start Shopping</a>
+                        <a href="<?= BASE_URL ?>/shop" class="btn btn-primary">Start Shopping</a>
                     </div>
                     <?php else: ?>
                     <div style="display: flex; flex-direction: column; gap: 1rem;">
@@ -565,13 +565,14 @@ require_once __DIR__ . '/../includes/header.php';
             
             <!-- Quick Actions -->
             <div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
-                <a href="/Kartly/wishlist" class="btn btn-outline">My Wishlist</a>
-                <a href="/Kartly/track-order" class="btn btn-outline">Track Order</a>
-                <a href="/Kartly/logout" class="btn btn-secondary">Logout</a>
+                <a href="<?= BASE_URL ?>/wishlist" class="btn btn-outline">My Wishlist</a>
+                <a href="<?= BASE_URL ?>/track-order" class="btn btn-outline">Track Order</a>
+                <a href="<?= BASE_URL ?>/logout" class="btn btn-secondary">Logout</a>
             </div>
         </div>
     </section>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
+
 
 

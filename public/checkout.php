@@ -223,9 +223,9 @@ require_once __DIR__ . '/../includes/header.php';
     <section class="section section-bg">
         <div class="container">
             <nav style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.5rem;">
-                <a href="/Kartly/" style="color: var(--color-text-light);">Home</a>
+                <a href="<?= BASE_URL ?>/" style="color: var(--color-text-light);">Home</a>
                 <span> / </span>
-                <a href="/Kartly/cart" style="color: var(--color-text-light);">Cart</a>
+                <a href="<?= BASE_URL ?>/cart" style="color: var(--color-text-light);">Cart</a>
                 <span> / </span>
                 <span style="color: var(--color-text);">Checkout</span>
             </nav>
@@ -245,7 +245,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin: 0 auto 1rem;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                 <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem;">Order Placed Successfully!</h2>
                 <p style="color: var(--color-text-light); margin-bottom: 1rem;"><?= htmlspecialchars($success) ?></p>
-                <a href="/Kartly/account" class="btn btn-primary">View My Orders</a>
+                <a href="<?= BASE_URL ?>/account" class="btn btn-primary">View My Orders</a>
             </div>
             <?php else: ?>
             
@@ -383,7 +383,7 @@ require_once __DIR__ . '/../includes/header.php';
                             </button>
                             
                             <p style="font-size: 0.75rem; color: var(--color-text-light); text-align: center; margin-top: 1rem;">
-                                By placing your order, you agree to our <a href="/Kartly/terms" style="color: var(--color-primary);">Terms of Service</a> and <a href="/Kartly/privacy" style="color: var(--color-primary);">Privacy Policy</a>
+                                By placing your order, you agree to our <a href="<?= BASE_URL ?>/terms" style="color: var(--color-primary);">Terms of Service</a> and <a href="<?= BASE_URL ?>/privacy" style="color: var(--color-primary);">Privacy Policy</a>
                             </p>
                         </div>
                     </div>
@@ -394,5 +394,6 @@ require_once __DIR__ . '/../includes/header.php';
     </section>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
+
 
 

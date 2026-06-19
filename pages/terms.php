@@ -10,7 +10,7 @@ require_once __DIR__ . '/../includes/header.php';
     <section class="section section-bg">
         <div class="container">
             <nav style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.5rem;">
-                <a href="/Kartly/" style="color: var(--color-text-light);">Home</a>
+                <a href="<?= BASE_URL ?>/" style="color: var(--color-text-light);">Home</a>
                 <span> / </span>
                 <span style="color: var(--color-text);">Terms of Service</span>
             </nav>
@@ -61,13 +61,13 @@ require_once __DIR__ . '/../includes/header.php';
                 <p style="color: var(--color-text-light); margin-bottom: 1.5rem;">
                     We ship to the address provided during checkout. Delivery times are estimates and not guaranteed. 
                     Risk of loss passes to you upon delivery to the carrier. For more information, see our 
-                    <a href="/Kartly/shipping" style="color: var(--color-primary);">Shipping Policy</a>.
+                    <a href="<?= BASE_URL ?>/shipping" style="color: var(--color-primary);">Shipping Policy</a>.
                 </p>
 
                 <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">6. Returns and Refunds</h2>
                 <p style="color: var(--color-text-light); margin-bottom: 1.5rem;">
                     We accept returns within 30 days of delivery. Items must be unused and in original packaging. 
-                    For complete details, see our <a href="/Kartly/returns" style="color: var(--color-primary);">Returns Policy</a>.
+                    For complete details, see our <a href="<?= BASE_URL ?>/returns" style="color: var(--color-primary);">Returns Policy</a>.
                 </p>
 
                 <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">7. Prohibited Activities</h2>
@@ -101,5 +101,6 @@ require_once __DIR__ . '/../includes/header.php';
     </section>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
+
 
 

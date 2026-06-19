@@ -113,7 +113,7 @@ require_once __DIR__ . '/../includes/header.php';
                         <label style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.875rem; cursor: pointer;">
                             <input type="checkbox" name="terms" required style="width: 16px; height: 16px; margin-top: 2px;">
                             <span style="color: var(--color-text-light);">
-                                I agree to the <a href="/Kartly/terms" style="color: var(--color-primary);">Terms of Service</a> and <a href="/Kartly/privacy" style="color: var(--color-primary);">Privacy Policy</a>
+                                I agree to the <a href="<?= BASE_URL ?>/terms" style="color: var(--color-primary);">Terms of Service</a> and <a href="<?= BASE_URL ?>/privacy" style="color: var(--color-primary);">Privacy Policy</a>
                             </span>
                         </label>
                     </div>
@@ -126,7 +126,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <div style="text-align: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border);">
                     <p style="color: var(--color-text-light); font-size: 0.875rem;">
                         Already have an account? 
-                        <a href="/Kartly/login" style="color: var(--color-primary); font-weight: 500;">Sign in</a>
+                        <a href="<?= BASE_URL ?>/login" style="color: var(--color-primary); font-weight: 500;">Sign in</a>
                     </p>
                 </div>
             </div>
@@ -134,5 +134,6 @@ require_once __DIR__ . '/../includes/header.php';
     </section>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
+
 
 

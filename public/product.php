@@ -63,9 +63,9 @@ require_once __DIR__ . '/../includes/header.php';
     <section class="section section-bg" style="padding: 1rem 0 1.1rem;">
         <div class="container">
             <nav style="font-size: 0.875rem; color: var(--color-text-light);">
-                <a href="/Kartly/" style="color: var(--color-text-light);">Home</a>
+                <a href="<?= BASE_URL ?>/" style="color: var(--color-text-light);">Home</a>
                 <span> / </span>
-                <a href="/Kartly/shop" style="color: var(--color-text-light);">Products</a>
+                <a href="<?= BASE_URL ?>/shop" style="color: var(--color-text-light);">Products</a>
                 <span> / </span>
                 <a href="products.php?category=<?= urlencode($product['category_slug']) ?>" style="color: var(--color-text-light);"><?= htmlspecialchars($product['category_name']) ?></a>
                 <span> / </span>
@@ -211,5 +211,6 @@ require_once __DIR__ . '/../includes/header.php';
     </section>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
+
 
 

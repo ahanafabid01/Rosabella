@@ -23,7 +23,7 @@ $wishlistItems = $stmt->fetchAll();
     <section class="section section-bg">
         <div class="container">
             <nav style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.5rem;">
-                <a href="/Kartly/" style="color: var(--color-text-light);">Home</a>
+                <a href="<?= BASE_URL ?>/" style="color: var(--color-text-light);">Home</a>
                 <span> / </span>
                 <span style="color: var(--color-text);">Wishlist</span>
             </nav>
@@ -42,7 +42,7 @@ $wishlistItems = $stmt->fetchAll();
                 </svg>
                 <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem;">Your wishlist is empty</h2>
                 <p style="color: var(--color-text-light); margin-bottom: 1.5rem;">Start adding items you love to your wishlist!</p>
-                <a href="/Kartly/shop" class="btn btn-primary btn-lg">Browse Products</a>
+                <a href="<?= BASE_URL ?>/shop" class="btn btn-primary btn-lg">Browse Products</a>
             </div>
             <?php else: ?>
             <div class="products-grid">
@@ -90,5 +90,6 @@ $wishlistItems = $stmt->fetchAll();
     </section>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
+
 
 

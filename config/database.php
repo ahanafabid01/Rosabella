@@ -16,6 +16,11 @@ define('SITE_NAME', 'KARTLY');
 define('SITE_URL', 'http://localhost/kartly');  // Change to your domain
 define('SITE_EMAIL', 'support@kartly.com');
 
+// BASE_URL is used for all internal links.
+// For local XAMPP: set to '/Kartly'
+// For live domain root: set to '' (empty string)
+define('BASE_URL', '/Kartly');
+
 // Security
 define('SECRET_KEY', 'your-secret-key-change-this-in-production');
 

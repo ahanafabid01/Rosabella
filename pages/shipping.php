@@ -10,9 +10,9 @@ require_once __DIR__ . '/../includes/header.php';
     <section class="section section-bg">
         <div class="container">
             <nav style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.5rem;">
-                <a href="/Kartly/" style="color: var(--color-text-light);">Home</a>
+                <a href="<?= BASE_URL ?>/" style="color: var(--color-text-light);">Home</a>
                 <span> / </span>
-                <a href="/Kartly/help" style="color: var(--color-text-light);">Help</a>
+                <a href="<?= BASE_URL ?>/help" style="color: var(--color-text-light);">Help</a>
                 <span> / </span>
                 <span style="color: var(--color-text);">Shipping Info</span>
             </nav>
@@ -111,7 +111,7 @@ require_once __DIR__ . '/../includes/header.php';
             <div style="display: flex; flex-direction: column; gap: 1rem;">
                 <details style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1rem 1.5rem; cursor: pointer;">
                     <summary style="font-weight: 600; outline: none;">How do I track my shipment?</summary>
-                    <p style="margin-top: 0.75rem; color: var(--color-text-light);">Once your order ships, you'll receive an email with tracking information. You can also track your order on our <a href="/Kartly/track-order" style="color: var(--color-primary);">Track Order</a> page.</p>
+                    <p style="margin-top: 0.75rem; color: var(--color-text-light);">Once your order ships, you'll receive an email with tracking information. You can also track your order on our <a href="<?= BASE_URL ?>/track-order" style="color: var(--color-primary);">Track Order</a> page.</p>
                 </details>
                 <details style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1rem 1.5rem; cursor: pointer;">
                     <summary style="font-weight: 600; outline: none;">Do you ship to PO boxes?</summary>
@@ -131,5 +131,6 @@ require_once __DIR__ . '/../includes/header.php';
     </section>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
+
 
 

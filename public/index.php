@@ -161,13 +161,13 @@ foreach ($stmt->fetchAll() as $reviewRow) {
                             <li>Verified quality</li>
                         </ul>
                         <div class="hero-buttons">
-                            <a href="/Kartly/new-arrivals" class="btn btn-primary btn-lg">
+                            <a href="<?= BASE_URL ?>/new-arrivals" class="btn btn-primary btn-lg">
                                 Shop Now
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
                                 </svg>
                             </a>
-                            <a href="/Kartly/best-sellers" class="btn hero-btn-outline btn-lg">Best Sellers</a>
+                            <a href="<?= BASE_URL ?>/best-sellers" class="btn hero-btn-outline btn-lg">Best Sellers</a>
                         </div>
                     </div>
                 </div>
@@ -196,13 +196,13 @@ foreach ($stmt->fetchAll() as $reviewRow) {
                             <li>Fast delivery updates</li>
                         </ul>
                         <div class="hero-buttons">
-                            <a href="/Kartly/category/electronics" class="btn btn-primary btn-lg">
+                            <a href="<?= BASE_URL ?>/category/electronics" class="btn btn-primary btn-lg">
                                 Explore Tech
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
                                 </svg>
                             </a>
-                            <a href="/Kartly/sale" class="btn hero-btn-outline btn-lg">Today's Deals</a>
+                            <a href="<?= BASE_URL ?>/sale" class="btn hero-btn-outline btn-lg">Today's Deals</a>
                         </div>
                     </div>
                 </div>
@@ -231,13 +231,13 @@ foreach ($stmt->fetchAll() as $reviewRow) {
                             <li>Support when needed</li>
                         </ul>
                         <div class="hero-buttons">
-                            <a href="/Kartly/category/home-living" class="btn btn-primary btn-lg">
+                            <a href="<?= BASE_URL ?>/category/home-living" class="btn btn-primary btn-lg">
                                 Shop Home
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
                                 </svg>
                             </a>
-                            <a href="/Kartly/shop" class="btn hero-btn-outline btn-lg">Browse Catalog</a>
+                            <a href="<?= BASE_URL ?>/shop" class="btn hero-btn-outline btn-lg">Browse Catalog</a>
                         </div>
                     </div>
                 </div>
@@ -276,7 +276,7 @@ foreach ($stmt->fetchAll() as $reviewRow) {
                     <h2 class="section-title">Shop by Category</h2>
                     <p class="section-subtitle">Browse our curated collections</p>
                 </div>
-                <a href="/Kartly/shop" class="btn btn-outline">
+                <a href="<?= BASE_URL ?>/shop" class="btn btn-outline">
                     View All
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
@@ -509,7 +509,7 @@ foreach ($stmt->fetchAll() as $reviewRow) {
             </div>
             
             <div style="text-align: center; margin-top: 2.5rem;">
-                <a href="/Kartly/shop" class="btn btn-outline btn-lg">
+                <a href="<?= BASE_URL ?>/shop" class="btn btn-outline btn-lg">
                     View All Products
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
@@ -593,5 +593,6 @@ foreach ($stmt->fetchAll() as $reviewRow) {
     </section>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
+
 
 

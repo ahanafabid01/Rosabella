@@ -111,11 +111,11 @@ $siteEmail = getSetting('site_email') ?: SITE_EMAIL;
                 <div>
                     <h4 class="footer-heading">Shop</h4>
                     <ul class="footer-links">
-                        <li><a href="/Kartly/shop" class="footer-link">All Products</a></li>
-                        <li><a href="/Kartly/new-arrivals" class="footer-link">New Arrivals</a></li>
-                        <li><a href="/Kartly/best-sellers" class="footer-link">Best Sellers</a></li>
-                        <li><a href="/Kartly/sale" class="footer-link">Sale</a></li>
-                        <li><a href="/Kartly/gift-cards" class="footer-link">Gift Cards</a></li>
+                        <li><a href="<?= BASE_URL ?>/shop" class="footer-link">All Products</a></li>
+                        <li><a href="<?= BASE_URL ?>/new-arrivals" class="footer-link">New Arrivals</a></li>
+                        <li><a href="<?= BASE_URL ?>/best-sellers" class="footer-link">Best Sellers</a></li>
+                        <li><a href="<?= BASE_URL ?>/sale" class="footer-link">Sale</a></li>
+                        <li><a href="<?= BASE_URL ?>/gift-cards" class="footer-link">Gift Cards</a></li>
                     </ul>
                 </div>
                 
@@ -123,11 +123,11 @@ $siteEmail = getSetting('site_email') ?: SITE_EMAIL;
                 <div>
                     <h4 class="footer-heading">Support</h4>
                     <ul class="footer-links">
-                        <li><a href="/Kartly/help" class="footer-link">Help Center</a></li>
-                        <li><a href="/Kartly/track-order" class="footer-link">Track Order</a></li>
-                        <li><a href="/Kartly/shipping" class="footer-link">Shipping Info</a></li>
-                        <li><a href="/Kartly/returns" class="footer-link">Returns & Exchanges</a></li>
-                        <li><a href="/Kartly/size-guide" class="footer-link">Size Guide</a></li>
+                        <li><a href="<?= BASE_URL ?>/help" class="footer-link">Help Center</a></li>
+                        <li><a href="<?= BASE_URL ?>/track-order" class="footer-link">Track Order</a></li>
+                        <li><a href="<?= BASE_URL ?>/shipping" class="footer-link">Shipping Info</a></li>
+                        <li><a href="<?= BASE_URL ?>/returns" class="footer-link">Returns & Exchanges</a></li>
+                        <li><a href="<?= BASE_URL ?>/size-guide" class="footer-link">Size Guide</a></li>
                     </ul>
                 </div>
                 
@@ -135,11 +135,11 @@ $siteEmail = getSetting('site_email') ?: SITE_EMAIL;
                 <div>
                     <h4 class="footer-heading">Company</h4>
                     <ul class="footer-links">
-                        <li><a href="/Kartly/about" class="footer-link">About Us</a></li>
-                        <li><a href="/Kartly/careers" class="footer-link">Careers</a></li>
-                        <li><a href="/Kartly/press" class="footer-link">Press</a></li>
-                        <li><a href="/Kartly/sustainability" class="footer-link">Sustainability</a></li>
-                        <li><a href="/Kartly/affiliate" class="footer-link">Affiliate Program</a></li>
+                        <li><a href="<?= BASE_URL ?>/about" class="footer-link">About Us</a></li>
+                        <li><a href="<?= BASE_URL ?>/careers" class="footer-link">Careers</a></li>
+                        <li><a href="<?= BASE_URL ?>/press" class="footer-link">Press</a></li>
+                        <li><a href="<?= BASE_URL ?>/sustainability" class="footer-link">Sustainability</a></li>
+                        <li><a href="<?= BASE_URL ?>/affiliate" class="footer-link">Affiliate Program</a></li>
                     </ul>
                 </div>
                 
@@ -147,10 +147,10 @@ $siteEmail = getSetting('site_email') ?: SITE_EMAIL;
                 <div>
                     <h4 class="footer-heading">Legal</h4>
                     <ul class="footer-links">
-                        <li><a href="/Kartly/privacy" class="footer-link">Privacy Policy</a></li>
-                        <li><a href="/Kartly/terms" class="footer-link">Terms of Service</a></li>
-                        <li><a href="/Kartly/cookies" class="footer-link">Cookie Policy</a></li>
-                        <li><a href="/Kartly/accessibility" class="footer-link">Accessibility</a></li>
+                        <li><a href="<?= BASE_URL ?>/privacy" class="footer-link">Privacy Policy</a></li>
+                        <li><a href="<?= BASE_URL ?>/terms" class="footer-link">Terms of Service</a></li>
+                        <li><a href="<?= BASE_URL ?>/cookies" class="footer-link">Cookie Policy</a></li>
+                        <li><a href="<?= BASE_URL ?>/accessibility" class="footer-link">Accessibility</a></li>
                     </ul>
                 </div>
             </div>
@@ -196,7 +196,7 @@ $siteEmail = getSetting('site_email') ?: SITE_EMAIL;
     </footer>
     
     <!-- Scripts -->
-    <script src="/Kartly/assets/js/main.js"></script>
+    <script src="<?= BASE_URL ?>/assets/js/main.js"></script>
     
     <!-- Additional page-specific scripts -->
     <?php if (isset($additionalScripts)): ?>
@@ -204,4 +204,5 @@ $siteEmail = getSetting('site_email') ?: SITE_EMAIL;
     <?php endif; ?>
 </body>
 </html>
+
 

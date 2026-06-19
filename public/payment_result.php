@@ -54,7 +54,7 @@ require_once __DIR__ . '/../includes/header.php';
 <section class="section section-bg">
     <div class="container">
         <nav style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.5rem;">
-            <a href="/Kartly/" style="color: var(--color-text-light);">Home</a>
+            <a href="<?= BASE_URL ?>/" style="color: var(--color-text-light);">Home</a>
             <span> / </span>
             <span style="color: var(--color-text);">Payment Status</span>
         </nav>
@@ -100,15 +100,16 @@ require_once __DIR__ . '/../includes/header.php';
 
             <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; flex-wrap: wrap;">
                 <?php if (isLoggedIn()): ?>
-                <a href="/Kartly/account" class="btn btn-primary">My Orders</a>
+                <a href="<?= BASE_URL ?>/account" class="btn btn-primary">My Orders</a>
                 <?php endif; ?>
-                <a href="/Kartly/checkout" class="btn btn-outline">Back to Checkout</a>
-                <a href="/Kartly/" class="btn btn-secondary">Continue Shopping</a>
+                <a href="<?= BASE_URL ?>/checkout" class="btn btn-outline">Back to Checkout</a>
+                <a href="<?= BASE_URL ?>/" class="btn btn-secondary">Continue Shopping</a>
             </div>
         </div>
     </div>
 </section>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
+
 
 
