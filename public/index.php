@@ -135,183 +135,184 @@ foreach ($stmt->fetchAll() as $reviewRow) {
 }
 ?>
 
-    <!-- Hero Slider -->
-    <section class="hero">
-        <div class="hero-slider">
-            <!-- Slide 1 -->
-            <div class="hero-slide active">
-                <img src="https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=1920&q=80" alt="Modern fashion and lifestyle collection">
-                <div class="hero-overlay"></div>
-                <div class="hero-content container">
-                    <div class="hero-text hero-panel">
-                        <div class="hero-badge">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                            </svg>
-                            New Season
-                        </div>
-                        <h2 class="hero-subtitle">Designed for everyday confidence</h2>
-                        <h1 class="hero-title">Fresh Arrivals Curated for Bangladesh</h1>
-                        <p class="hero-description">
-                            Shop premium essentials, local favorites, and trend-forward picks with fast nationwide delivery and secure checkout.
-                        </p>
-                        <ul class="hero-meta">
-                            <li>Nationwide delivery</li>
-                            <li>Easy returns</li>
-                            <li>Verified quality</li>
-                        </ul>
-                        <div class="hero-buttons">
-                            <a href="<?= BASE_URL ?>/new-arrivals" class="btn btn-primary btn-lg">
-                                Shop Now
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-                                </svg>
+    <!-- Hero Section -->
+    <section class="section" style="padding-top: 1.5rem; padding-bottom: 2rem;">
+        <div class="container">
+            <div class="hero-bento-grid">
+                
+                <!-- Main Banner (Left Side Slider) -->
+                <div class="hero-main-banner">
+                    <div class="hero-slider">
+                        <!-- Slide 1 -->
+                        <div class="hero-slide active">
+                            <a href="<?= BASE_URL ?>/category/accessories" style="display: block; width: 100%; height: 100%;">
+                                <img src="https://images.unsplash.com/photo-1542204165-65bf26472b9b?w=1200&q=80" alt="Premium accessories collection">
                             </a>
-                            <a href="<?= BASE_URL ?>/best-sellers" class="btn hero-btn-outline btn-lg">Best Sellers</a>
+                        </div>
+                        
+                        <!-- Slide 2 -->
+                        <div class="hero-slide">
+                            <a href="<?= BASE_URL ?>/category/electronics" style="display: block; width: 100%; height: 100%;">
+                                <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1200&q=80" alt="Smart gadgets">
+                            </a>
+                        </div>
+
+                        <!-- Navigation -->
+                        <div class="hero-nav hero-nav-prev">
+                            <button aria-label="Previous slide">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="15 18 9 12 15 6"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="hero-nav hero-nav-next">
+                            <button aria-label="Next slide">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"/>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <!-- Dots -->
+                        <div class="hero-dots">
+                            <button class="hero-dot active" aria-label="Go to slide 1"></button>
+                            <button class="hero-dot" aria-label="Go to slide 2"></button>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Slide 2 -->
-            <div class="hero-slide">
-                <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1920&q=80" alt="Latest tech essentials">
-                <div class="hero-overlay"></div>
-                <div class="hero-content container">
-                    <div class="hero-text hero-panel">
-                        <div class="hero-badge">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                            </svg>
-                            Tech Picks
-                        </div>
-                        <h2 class="hero-subtitle">Performance meets reliability</h2>
-                        <h1 class="hero-title">Smart Gadgets for Work and Life</h1>
-                        <p class="hero-description">
-                            Discover handpicked electronics with transparent pricing, local support, and delivery updates at every step.
-                        </p>
-                        <ul class="hero-meta">
-                            <li>Authentic products</li>
-                            <li>Secure payment</li>
-                            <li>Fast delivery updates</li>
-                        </ul>
-                        <div class="hero-buttons">
-                            <a href="<?= BASE_URL ?>/category/electronics" class="btn btn-primary btn-lg">
-                                Explore Tech
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-                                </svg>
-                            </a>
-                            <a href="<?= BASE_URL ?>/sale" class="btn hero-btn-outline btn-lg">Today's Deals</a>
-                        </div>
-                    </div>
+
+                <!-- Side Banners (Right Side) -->
+                <div class="hero-side-banners">
+                    <!-- Top Side Banner -->
+                    <a href="<?= BASE_URL ?>/shop" class="hero-side-banner">
+                        <img src="https://images.unsplash.com/photo-1498049794561-7780e7231661?w=600&q=80" alt="Next Gen Living">
+                    </a>
+                    
+                    <!-- Bottom Side Banner -->
+                    <a href="<?= BASE_URL ?>/sale" class="hero-side-banner flash-sale">
+                        <img src="https://images.unsplash.com/photo-1550009158-9ebf6d1736eb?w=600&q=80" alt="Flash Sale">
+                    </a>
                 </div>
+
             </div>
-            
-            <!-- Slide 3 -->
-            <div class="hero-slide">
-                <img src="https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=1920&q=80" alt="Home and lifestyle collection">
-                <div class="hero-overlay"></div>
-                <div class="hero-content container">
-                    <div class="hero-text hero-panel">
-                        <div class="hero-badge">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                            </svg>
-                            Home Edit
-                        </div>
-                        <h2 class="hero-subtitle">Comfort-first modern essentials</h2>
-                        <h1 class="hero-title">Upgrade Every Room with Purpose</h1>
-                        <p class="hero-description">
-                            From decor to daily must-haves, find practical pieces that make your home feel polished and personal.
-                        </p>
-                        <ul class="hero-meta">
-                            <li>Trusted quality</li>
-                            <li>Value pricing</li>
-                            <li>Support when needed</li>
-                        </ul>
-                        <div class="hero-buttons">
-                            <a href="<?= BASE_URL ?>/category/home-living" class="btn btn-primary btn-lg">
-                                Shop Home
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-                                </svg>
-                            </a>
-                            <a href="<?= BASE_URL ?>/shop" class="btn hero-btn-outline btn-lg">Browse Catalog</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Navigation -->
-        <div class="hero-nav hero-nav-prev">
-            <button aria-label="Previous slide">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="15 18 9 12 15 6"/>
-                </svg>
-            </button>
-        </div>
-        <div class="hero-nav hero-nav-next">
-            <button aria-label="Next slide">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="9 18 15 12 9 6"/>
-                </svg>
-            </button>
-        </div>
-        
-        <!-- Dots -->
-        <div class="hero-dots">
-            <button class="hero-dot active" aria-label="Go to slide 1"></button>
-            <button class="hero-dot" aria-label="Go to slide 2"></button>
-            <button class="hero-dot" aria-label="Go to slide 3"></button>
         </div>
     </section>
 
     <!-- Categories Section -->
-    <section class="section">
+    <section class="section" style="padding-top: 1rem; padding-bottom: 2rem;">
         <div class="container">
-            <div class="section-header">
-                <div>
-                    <h2 class="section-title">Shop by Category</h2>
-                    <p class="section-subtitle">Browse our curated collections</p>
-                </div>
-                <a href="<?= BASE_URL ?>/shop" class="btn btn-outline">
-                    View All
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-                    </svg>
-                </a>
+            <div class="section-header" style="margin-bottom: 1.5rem;">
+                <h2 class="section-title" style="font-size: 1.5rem; color: #1f2937;">Categories</h2>
             </div>
             
-            <div class="categories-grid">
-                <?php foreach ($categories as $index => $category): ?>
-                    <?php 
-                    $images = [
-                        'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=600&q=80',
-                        'https://images.unsplash.com/photo-1445205170230-053b83016050?w=600&q=80',
-                        'https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=600&q=80',
-                        'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80',
-                        'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&q=80',
-                        'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&q=80'
-                    ];
-                    ?>
-                    <a href="products.php?category=<?= urlencode($category['slug']) ?>" class="category-card">
-                        <img src="<?= $images[$index % count($images)] ?>" alt="<?= htmlspecialchars($category['name']) ?>">
-                        <div class="category-overlay"></div>
-                        <div class="category-content">
-                            <h3 class="category-name"><?= htmlspecialchars($category['name']) ?></h3>
-                            <p class="category-count">
-                                <?php 
-                                $stmt = $db->prepare("SELECT COUNT(*) FROM products WHERE category_id = ? AND status = 'active'");
-                                $stmt->execute([$category['id']]);
-                                echo $stmt->fetchColumn() . ' items';
-                                ?>
-                            </p>
-                        </div>
-                    </a>
-                <?php endforeach; ?>
+            <div class="categories-carousel-container" style="position: relative;">
+                <button class="carousel-nav prev" aria-label="Previous categories">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                </button>
+                
+                <div class="categories-grid" id="categoriesGrid">
+                    <?php foreach ($categories as $index => $category): ?>
+                        <?php 
+                        // Transparent product images that look good on white backgrounds
+                        $images = [
+                            'https://raw.githubusercontent.com/mdn/learning-area/master/html/multimedia-and-embedding/images-in-html/dinosaur_small.jpg', // we will use better placeholders via CSS or just Unsplash transparent PNGs if available. Actually, let's use some nice transparent product placeholders.
+                            'https://freepngimg.com/thumb/laptop/2-2-laptop-png-picture.png',
+                            'https://freepngimg.com/thumb/watch/22616-2-mens-watch-transparent.png',
+                            'https://freepngimg.com/thumb/shoes/28530-3-nike-shoes-transparent.png',
+                            'https://freepngimg.com/thumb/backpack/2-2-backpack-png-image.png',
+                            'https://freepngimg.com/thumb/headphones/4-2-headphones-png-image.png',
+                            'https://freepngimg.com/thumb/sunglasses/23812-7-sunglasses-transparent-background.png'
+                        ];
+                        $catImage = $images[$index % count($images)];
+                        ?>
+                        <a href="<?= BASE_URL ?>/category/<?= urlencode($category['slug']) ?>" class="category-card-clean">
+                            <div class="category-card-img-wrap">
+                                <img src="<?= $catImage ?>" alt="<?= htmlspecialchars($category['name']) ?>" loading="lazy">
+                            </div>
+                            <div class="category-card-title"><?= htmlspecialchars($category['name']) ?></div>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+
+                <button class="carousel-nav next" aria-label="Next categories">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                </button>
             </div>
+            
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const grid = document.getElementById('categoriesGrid');
+                    const container = document.querySelector('.categories-carousel-container');
+                    const prevBtn = document.querySelector('.categories-carousel-container .prev');
+                    const nextBtn = document.querySelector('.categories-carousel-container .next');
+                    
+                    if(grid && prevBtn && nextBtn) {
+                        prevBtn.addEventListener('click', () => {
+                            grid.scrollBy({ left: -200, behavior: 'smooth' });
+                        });
+                        nextBtn.addEventListener('click', () => {
+                            grid.scrollBy({ left: 200, behavior: 'smooth' });
+                        });
+                        
+                        // Show/hide buttons based on scroll position
+                        const checkScroll = () => {
+                            if (grid.scrollWidth <= grid.clientWidth) {
+                                prevBtn.style.display = 'none';
+                                nextBtn.style.display = 'none';
+                                return;
+                            }
+                            
+                            // On desktop where it's a grid, don't show arrows
+                            if (window.innerWidth >= 1024) {
+                                prevBtn.style.display = 'none';
+                                nextBtn.style.display = 'none';
+                                return;
+                            }
+
+                            prevBtn.style.display = grid.scrollLeft > 0 ? 'flex' : 'none';
+                            nextBtn.style.display = grid.scrollLeft < (grid.scrollWidth - grid.clientWidth - 5) ? 'flex' : 'none';
+                        };
+                        
+                        grid.addEventListener('scroll', checkScroll);
+                        window.addEventListener('resize', checkScroll);
+                        // Initial check after a short delay to allow layout
+                        setTimeout(checkScroll, 100);
+
+                        // Auto-slide functionality
+                        let autoSlideInterval;
+                        const startAutoSlide = () => {
+                            if (window.innerWidth >= 1024) return; // Don't auto-slide on desktop grid
+                            autoSlideInterval = setInterval(() => {
+                                if (grid.scrollLeft < (grid.scrollWidth - grid.clientWidth - 5)) {
+                                    grid.scrollBy({ left: 200, behavior: 'smooth' });
+                                } else {
+                                    // Reset to start
+                                    grid.scrollTo({ left: 0, behavior: 'smooth' });
+                                }
+                            }, 1000); // 1 seconds
+                        };
+
+                        const stopAutoSlide = () => {
+                            clearInterval(autoSlideInterval);
+                        };
+
+                        // Start initially
+                        startAutoSlide();
+
+                        // Pause on hover or touch
+                        if (container) {
+                            container.addEventListener('mouseenter', stopAutoSlide);
+                            container.addEventListener('mouseleave', startAutoSlide);
+                            container.addEventListener('touchstart', stopAutoSlide, {passive: true});
+                            container.addEventListener('touchend', startAutoSlide);
+                        }
+                    }
+                });
+            </script>
         </div>
     </section>
 
