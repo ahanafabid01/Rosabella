@@ -332,7 +332,8 @@ $pageTitle = 'Products Management';
 
         <!-- Main Content -->
         <main class="admin-content">
-            <div class="admin-header">
+        <?php renderAdminTopbar($pageTitle ?? 'Admin Panel'); ?>
+<div class="admin-header">
                 <h1 class="admin-title"><?= $action === 'add' ? 'Add New Product' : ($action === 'edit' ? 'Edit Product' : 'Products') ?></h1>
                 <?php if ($action === 'list'): ?>
                 <a href="?action=add" class="btn btn-primary">+ Add Product</a>
@@ -506,3 +507,4 @@ $pageTitle = 'Products Management';
     <script src="js/admin.js"></script>
 </body>
 </html>
+

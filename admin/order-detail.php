@@ -84,7 +84,8 @@ $pageTitle = 'Order Detail';
     <?php renderAdminSidebar('orders'); ?>
 
     <main class="admin-content">
-        <div class="admin-detail-header">
+        <?php renderAdminTopbar($pageTitle ?? 'Admin Panel'); ?>
+<div class="admin-detail-header">
             <h1 class="admin-page-title">Order <?= htmlspecialchars($order['order_number']) ?></h1>
             <a href="orders.php" class="btn btn-secondary">Back to Orders</a>
         </div>
@@ -200,3 +201,4 @@ $pageTitle = 'Order Detail';
     <script src="js/admin.js"></script>
 </body>
 </html>
+

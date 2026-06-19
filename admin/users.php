@@ -93,7 +93,8 @@ $pageTitle = 'Users Management';
     <?php renderAdminSidebar('users'); ?>
 
     <main class="admin-content">
-        <div class="admin-header">
+        <?php renderAdminTopbar($pageTitle ?? 'Admin Panel'); ?>
+<div class="admin-header">
             <h1 class="admin-page-title">Users</h1>
         </div>
 
@@ -174,3 +175,4 @@ $pageTitle = 'Users Management';
     <script src="js/admin.js"></script>
 </body>
 </html>
+

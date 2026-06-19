@@ -45,7 +45,8 @@ $lowStockProducts = $db->query("SELECT * FROM products WHERE stock_quantity < 10
 
         <!-- Main Content -->
         <main class="admin-content">
-            <div class="admin-header">
+        <?php renderAdminTopbar($pageTitle ?? 'Admin Panel'); ?>
+<div class="admin-header">
                 <h1 class="admin-title">Dashboard</h1>
                 <div class="admin-inline-flex-center-gap">
                     <span class="admin-text-muted">Welcome, <?= htmlspecialchars($_SESSION['user_name'] ?? 'Admin') ?></span>
@@ -128,3 +129,4 @@ $lowStockProducts = $db->query("SELECT * FROM products WHERE stock_quantity < 10
     <script src="js/admin.js"></script>
 </body>
 </html>
+

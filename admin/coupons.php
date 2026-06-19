@@ -117,7 +117,8 @@ $pageTitle = 'Coupons Management';
     <?php renderAdminSidebar('coupons'); ?>
 
     <main class="admin-content">
-        <div class="admin-header">
+        <?php renderAdminTopbar($pageTitle ?? 'Admin Panel'); ?>
+<div class="admin-header">
             <h1 class="admin-page-title">
                 <?= $action === 'edit' ? 'Edit Coupon' : ($action === 'add' ? 'Add Coupon' : 'Coupons') ?>
             </h1>
@@ -235,3 +236,4 @@ $pageTitle = 'Coupons Management';
     <script src="js/admin.js"></script>
 </body>
 </html>
+

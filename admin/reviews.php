@@ -209,7 +209,8 @@ $pageTitle = 'Reviews Management';
     <?php renderAdminSidebar('reviews'); ?>
 
     <main class="admin-content">
-        <div class="admin-header">
+        <?php renderAdminTopbar($pageTitle ?? 'Admin Panel'); ?>
+<div class="admin-header">
             <h1 class="admin-title">Reviews</h1>
             <form method="GET" class="admin-actions-row">
                 <input
@@ -378,3 +379,4 @@ $pageTitle = 'Reviews Management';
 <script src="js/admin.js"></script>
 </body>
 </html>
+

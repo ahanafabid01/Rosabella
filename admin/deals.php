@@ -524,7 +524,8 @@ $pageTitle = 'Deals Management';
     <?php renderAdminSidebar('deals'); ?>
 
     <main class="admin-content">
-        <div class="admin-header">
+        <?php renderAdminTopbar($pageTitle ?? 'Admin Panel'); ?>
+<div class="admin-header">
             <h1 class="admin-page-title">
                 <?= $action === 'edit' ? 'Edit Deal' : ($action === 'add' ? 'Add Deal' : 'Deals') ?>
             </h1>
@@ -743,3 +744,4 @@ $pageTitle = 'Deals Management';
 <script src="js/admin.js"></script>
 </body>
 </html>
+

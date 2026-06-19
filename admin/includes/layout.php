@@ -40,13 +40,6 @@ if (!function_exists('renderAdminSidebar')) {
         ];
         ?>
         <div class="admin-sidebar-backdrop" data-admin-sidebar-close></div>
-        <button class="admin-menu-btn" type="button" data-admin-sidebar-toggle aria-label="Open admin menu">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-        </button>
         <aside class="admin-sidebar">
             <div class="admin-logo-centered">
                 <span class="logo-icon">K</span>
@@ -67,6 +60,62 @@ if (!function_exists('renderAdminSidebar')) {
                 </a>
             </nav>
         </aside>
+        <?php
+    }
+}
+
+if (!function_exists('renderAdminTopbar')) {
+    function renderAdminTopbar(string $pageTitle): void
+    {
+        $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Admin');
+        $initials = strtoupper(substr($userName, 0, 2));
+        ?>
+        <div class="admin-topbar">
+            <div class="admin-topbar-left">
+                <!-- Hamburger menu button visible only on mobile -->
+                <button class="admin-menu-btn-mobile" type="button" data-admin-sidebar-toggle aria-label="Open admin menu">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <div class="admin-topbar-breadcrumb">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    <span class="admin-topbar-separator">></span>
+                    <span class="admin-topbar-title"><?= htmlspecialchars($pageTitle) ?></span>
+                </div>
+            </div>
+            <div class="admin-topbar-right">
+                <button class="admin-topbar-icon" aria-label="Notifications">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    </svg>
+                </button>
+                <button class="admin-topbar-icon" aria-label="Messages">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                </button>
+                <div class="admin-topbar-profile-pill">
+                    <div class="admin-topbar-avatar"><?= $initials ?></div>
+                    <span class="admin-topbar-name"><?= $userName ?></span>
+                </div>
+                <a href="../logout.php" class="admin-topbar-icon admin-topbar-logout" aria-label="Log Out">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    <span class="logout-text">Log Out</span>
+                </a>
+            </div>
+        </div>
         <?php
     }
 }

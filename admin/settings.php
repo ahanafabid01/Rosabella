@@ -86,7 +86,8 @@ $pageTitle = 'Settings Management';
     <?php renderAdminSidebar('settings'); ?>
 
     <main class="admin-content">
-        <h1 class="admin-page-title admin-title-spaced">Settings</h1>
+        <?php renderAdminTopbar($pageTitle ?? 'Admin Panel'); ?>
+<h1 class="admin-page-title admin-title-spaced">Settings</h1>
 
         <?php if ($message): ?><div class="alert alert-success"><?= htmlspecialchars($message) ?></div><?php endif; ?>
         <?php if ($error): ?><div class="alert alert-error"><?= htmlspecialchars($error) ?></div><?php endif; ?>
@@ -153,3 +154,4 @@ $pageTitle = 'Settings Management';
     <script src="js/admin.js"></script>
 </body>
 </html>
+
