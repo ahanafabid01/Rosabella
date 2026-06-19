@@ -86,7 +86,7 @@ $total = $subtotal + $shippingCost + $tax;
                                 <span>Product</span>
                                 <span>Price</span>
                                 <span>Quantity</span>
-                                <span>Total</span>
+                                <span>Sub-Total</span>
                                 <span></span>
                             </div>
                             
@@ -113,9 +113,6 @@ $total = $subtotal + $shippingCost + $tax;
                                         
                                         <!-- Price -->
                                         <div class="cart-price">
-                                            <?php if ($item['sale_price']): ?>
-                                                <span style="text-decoration: line-through; color: var(--color-text-light); font-size: 0.875rem;"><?= formatPrice($item['price']) ?></span>
-                                            <?php endif; ?>
                                             <span style="font-weight: 600;"><?= formatPrice($price) ?></span>
                                         </div>
                                         
@@ -140,16 +137,6 @@ $total = $subtotal + $shippingCost + $tax;
                                     </div>
                                 </div>
                             <?php endforeach; ?>
-                        </div>
-                        
-                        <!-- Continue Shopping -->
-                        <div style="margin-top: 1.5rem;">
-                            <a href="<?= BASE_URL ?>/shop" class="btn btn-ghost">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="15 18 9 12 15 6"/>
-                                </svg>
-                                Continue Shopping
-                            </a>
                         </div>
                     </div>
                     
@@ -188,6 +175,9 @@ $total = $subtotal + $shippingCost + $tax;
                                 <span><?= formatPrice($total) ?></span>
                             </div>
                             
+                            <a href="<?= BASE_URL ?>/shop" class="btn btn-lg" style="width: 100%; background-color: #000; color: #fff; margin-bottom: 0.75rem;">
+                                Continue Shopping
+                            </a>
                             <a href="<?= BASE_URL ?>/checkout" class="btn btn-primary btn-lg" style="width: 100%;">
                                 Proceed to Checkout
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
