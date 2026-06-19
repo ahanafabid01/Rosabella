@@ -26,7 +26,7 @@ $stmt = $db->query("SELECT p.*, c.name as category_name
                     LEFT JOIN categories c ON p.category_id = c.id 
                     WHERE p.status = 'active' 
                     ORDER BY p.created_at DESC 
-                    LIMIT 4");
+                    LIMIT 3");
 $newArrivalProducts = $stmt->fetchAll();
 
 function formatCountdownDisplay(int $remainingSeconds): string
@@ -501,10 +501,10 @@ try {
     <!-- Featured Products Section -->
     <section class="section">
         <div class="container">
-            <div class="section-header" style="margin-bottom: 2.5rem;">
-                <div>
+            <div class="section-header" style="margin-bottom: 2.5rem; text-align: center; display: flex; flex-direction: column; align-items: center;">
+                <div style="width: 100%;">
                     <h2 class="section-title">Featured Products</h2>
-                    <p class="section-subtitle" style="max-width: 500px; margin-top: 0.5rem;">
+                    <p class="section-subtitle" style="max-width: 500px; margin: 0.5rem auto 0;">
                         Discover our most popular items, carefully selected for quality and style
                     </p>
                 </div>

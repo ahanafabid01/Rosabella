@@ -45,7 +45,7 @@ require_once __DIR__ . '/../includes/header.php';
 ?>
 
     <!-- Breadcrumb -->
-    <div style="background: #fff; border-bottom: 1px solid #eee; padding: 1rem 0; margin-bottom: 2rem;">
+    <div class="section-bg" style="border-bottom: 1px solid var(--color-border); padding: 1rem 0; margin-bottom: 2rem;">
         <div class="container">
             <nav style="font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; color: var(--color-text-light);">
                 <a href="<?= BASE_URL ?>/" style="color: var(--color-text-light); display: flex; align-items: center;">
