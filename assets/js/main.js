@@ -405,6 +405,14 @@ async function refreshCartCountFromServer() {
 }
 
 function initCartPageControls() {
+    const removeButtons = document.querySelectorAll('.cart-remove');
+    removeButtons.forEach((button) => {
+        button.addEventListener('click', async () => {
+            const cartId = button.dataset.cartId;
+            await removeCartItem(cartId);
+        });
+    });
+
     const cartItems = document.querySelectorAll('.cart-item');
     if (!cartItems.length) return;
 
@@ -417,14 +425,6 @@ function initCartPageControls() {
             const value = Math.max(min, Math.min(max, parseInt(input.value || String(min), 10)));
             input.value = String(value);
             await updateCartItem(cartId, value);
-        });
-    });
-
-    const removeButtons = document.querySelectorAll('.cart-remove');
-    removeButtons.forEach((button) => {
-        button.addEventListener('click', async () => {
-            const cartId = button.dataset.cartId;
-            await removeCartItem(cartId);
         });
     });
 }
