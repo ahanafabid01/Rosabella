@@ -2007,7 +2007,7 @@ textarea {
 
 @media (min-width: 768px) {
     .product-detail-grid {
-        grid-template-columns: 40% 60%;
+        grid-template-columns: 4fr 6fr;
         gap: 3.5rem;
     }
 }
