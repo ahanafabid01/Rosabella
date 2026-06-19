@@ -340,7 +340,6 @@ if ($dealsTableReady && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['s
     $subtitle = trim((string)($_POST['subtitle'] ?? ''));
     $badgeText = trim((string)($_POST['badge_text'] ?? ''));
     $badgeStyle = sanitize($_POST['badge_style'] ?? 'primary');
-    $timerText = trim((string)($_POST['timer_text'] ?? ''));
     $countdownEndAtRaw = trim((string)($_POST['countdown_end_at'] ?? ''));
     $linkUrl = trim((string)($_POST['link_url'] ?? ''));
     $imagePathInput = trim((string)($_POST['image_path'] ?? ''));
@@ -419,7 +418,7 @@ if ($dealsTableReady && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['s
                 $subtitle !== '' ? $subtitle : null,
                 $badgeText !== '' ? $badgeText : null,
                 $badgeStyle,
-                $timerText !== '' ? $timerText : null,
+                null,
                 $countdownEndAt,
                 $imagePath !== '' ? $imagePath : null,
                 $linkUrl,
@@ -446,7 +445,7 @@ if ($dealsTableReady && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['s
                 $subtitle !== '' ? $subtitle : null,
                 $badgeText !== '' ? $badgeText : null,
                 $badgeStyle,
-                $timerText !== '' ? $timerText : null,
+                null,
                 $countdownEndAt,
                 $imagePath !== '' ? $imagePath : null,
                 $linkUrl,
@@ -484,13 +483,22 @@ $sectionSettings = [
 ];
 
 $editingDeal = null;
-if ($dealsTableReady && $action === 'edit' && $dealId > 0) {
-    $stmt = $db->prepare("SELECT * FROM deals WHERE id = ?");
-    $stmt->execute([$dealId]);
-    $editingDeal = $stmt->fetch();
-    if (!$editingDeal) {
-        $error = 'Deal not found.';
-        $action = 'list';
+$nextSortOrder = 0;
+if ($dealsTableReady) {
+    if ($action === 'edit' && $dealId > 0) {
+        $stmt = $db->prepare("SELECT * FROM deals WHERE id = ?");
+        $stmt->execute([$dealId]);
+        $editingDeal = $stmt->fetch();
+        if (!$editingDeal) {
+            $error = 'Deal not found.';
+            $action = 'list';
+        }
+    } elseif ($action === 'add') {
+        $stmt = $db->query("SELECT MAX(sort_order) as max_sort FROM deals");
+        $row = $stmt->fetch();
+        if ($row && $row['max_sort'] !== null) {
+            $nextSortOrder = intval($row['max_sort']) + 1;
+        }
     }
 }
 
@@ -507,6 +515,14 @@ if ($dealsTableReady) {
     $stmt->execute($params);
     $deals = $stmt->fetchAll();
 }
+
+$allCategories = [];
+try {
+    $catStmt = $db->query("SELECT id, name, slug FROM categories ORDER BY name ASC");
+    if ($catStmt) {
+        $allCategories = $catStmt->fetchAll();
+    }
+} catch (Exception $e) {}
 
 $pageTitle = 'Deals Management';
 ?>
@@ -581,7 +597,6 @@ $pageTitle = 'Deals Management';
                             <th>ID</th>
                             <th>Deal</th>
                             <th>Badge</th>
-                            <th>Timer</th>
                             <th>Ends At</th>
                             <th>Link</th>
                             <th>Sort</th>
@@ -592,7 +607,7 @@ $pageTitle = 'Deals Management';
                         <tbody>
                         <?php if (empty($deals)): ?>
                             <tr>
-                                <td colspan="9" class="admin-text-muted">No deals found.</td>
+                                <td colspan="8" class="admin-text-muted">No deals found.</td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($deals as $deal): ?>
@@ -616,9 +631,25 @@ $pageTitle = 'Deals Management';
                                         <span class="admin-text-muted">-</span>
                                     <?php endif; ?>
                                 </td>
-                                <td><?= htmlspecialchars((string)($deal['timer_text'] ?? '-')) ?></td>
                                 <td><?= !empty($deal['countdown_end_at']) ? htmlspecialchars(date('M j, Y H:i', strtotime($deal['countdown_end_at']))) : '-' ?></td>
-                                <td><span class="admin-cell-mono"><?= htmlspecialchars($deal['link_url']) ?></span></td>
+                                <td>
+                                    <?php
+                                        $displayLink = $deal['link_url'];
+                                        if ($deal['link_url'] === 'sale') {
+                                            $displayLink = '★ Sale & Discount';
+                                        } elseif ($deal['link_url'] === 'products.php') {
+                                            $displayLink = 'All Products';
+                                        } else {
+                                            foreach ($allCategories as $cat) {
+                                                if ($deal['link_url'] === 'products.php?category=' . $cat['slug']) {
+                                                    $displayLink = 'Category: ' . $cat['name'];
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    ?>
+                                    <span class="admin-cell-mono"><?= htmlspecialchars($displayLink) ?></span>
+                                </td>
                                 <td><?= intval($deal['sort_order']) ?></td>
                                 <td><span class="badge badge-<?= $deal['status'] === 'active' ? 'success' : 'warning' ?>"><?= htmlspecialchars(ucfirst($deal['status'])) ?></span></td>
                                 <td>
@@ -642,44 +673,34 @@ $pageTitle = 'Deals Management';
                         <label class="form-label">Deal Title *</label>
                         <input type="text" name="title" class="form-input" required value="<?= htmlspecialchars($editingDeal['title'] ?? $_POST['title'] ?? '') ?>">
                     </div>
+
                     <div class="form-group">
                         <label class="form-label">Subtitle</label>
                         <input type="text" name="subtitle" class="form-input" value="<?= htmlspecialchars($editingDeal['subtitle'] ?? $_POST['subtitle'] ?? '') ?>">
                     </div>
 
-                    <div class="admin-two-col-grid">
-                        <div class="form-group">
-                            <label class="form-label">Badge Text</label>
-                            <input type="text" name="badge_text" class="form-input" value="<?= htmlspecialchars($editingDeal['badge_text'] ?? $_POST['badge_text'] ?? '') ?>">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Badge Style</label>
-                            <?php $selectedBadgeStyle = $editingDeal['badge_style'] ?? $_POST['badge_style'] ?? 'primary'; ?>
-                            <select name="badge_style" class="form-select">
-                                <?php foreach ($allowedBadgeStyles as $badgeStyle): ?>
-                                    <option value="<?= $badgeStyle ?>" <?= $selectedBadgeStyle === $badgeStyle ? 'selected' : '' ?>>
-                                        <?= ucfirst($badgeStyle) ?>
+                    <div class="form-group">
+                        <label class="form-label">Select Category</label>
+                        <?php $currentLink = $editingDeal['link_url'] ?? $_POST['link_url'] ?? 'sale'; ?>
+                        <select name="link_url" class="form-select">
+                            <option value="sale" <?= ($currentLink === 'sale') ? 'selected' : '' ?>>★ All Sale & Discount Products</option>
+                            <option value="products.php" <?= ($currentLink === 'products.php') ? 'selected' : '' ?>>All Products (Storefront)</option>
+                            <optgroup label="Categories">
+                                <?php foreach ($allCategories as $cat): ?>
+                                    <?php $catVal = 'products.php?category=' . $cat['slug']; ?>
+                                    <option value="<?= htmlspecialchars($catVal) ?>" <?= ($currentLink === $catVal) ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($cat['name']) ?>
                                     </option>
                                 <?php endforeach; ?>
-                            </select>
-                        </div>
+                            </optgroup>
+                        </select>
                     </div>
 
                     <div class="admin-two-col-grid">
-                        <div class="form-group">
-                            <label class="form-label">Timer Text</label>
-                            <input type="text" name="timer_text" class="form-input" value="<?= htmlspecialchars($editingDeal['timer_text'] ?? $_POST['timer_text'] ?? '') ?>" placeholder="e.g. 23:59:59">
-                        </div>
                         <div class="form-group">
                             <label class="form-label">Countdown Ends At</label>
                             <input type="datetime-local" name="countdown_end_at" class="form-input" value="<?= htmlspecialchars(isset($_POST['countdown_end_at']) ? (string)$_POST['countdown_end_at'] : toDateTimeLocalValue($editingDeal['countdown_end_at'] ?? null)) ?>">
-                        </div>
-                    </div>
-
-                    <div class="admin-two-col-grid">
-                        <div class="form-group">
-                            <label class="form-label">Link URL</label>
-                            <input type="text" name="link_url" class="form-input" value="<?= htmlspecialchars($editingDeal['link_url'] ?? $_POST['link_url'] ?? 'sale') ?>" placeholder="e.g. sale, shop, category/electronics">
+                            <p class="admin-text-muted" style="margin-top: 0.25rem; font-size: 0.85rem;">Countdown is automatic.</p>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Status</label>
@@ -691,15 +712,17 @@ $pageTitle = 'Deals Management';
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">External Image URL <span class="admin-text-muted" style="font-weight:400;">(Optional)</span></label>
-                        <input type="url" name="image_path" class="form-input" value="<?= htmlspecialchars($editingDeal['image_path'] ?? $_POST['image_path'] ?? '') ?>" placeholder="https://example.com/image.jpg">
+                    <div class="admin-two-col-grid">
+                        <div class="form-group">
+                            <label class="form-label">Sort Order</label>
+                            <input type="number" name="sort_order" class="form-input" value="<?= htmlspecialchars((string)($editingDeal['sort_order'] ?? $_POST['sort_order'] ?? $nextSortOrder)) ?>">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Upload Image <span class="admin-text-muted" style="font-weight:400;">(Optional)</span></label>
+                            <input type="file" name="image_file" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Upload Image <span class="admin-text-muted" style="font-weight:400;">(Optional)</span></label>
-                        <input type="file" name="image_file" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif">
-                        <p class="admin-upload-help">Upload overrides the URL above. Use one or the other.</p>
-                    </div>
+
                     <?php if (!empty($editingDeal['image_path'])): ?>
                         <div class="admin-image-preview-wrap">
                             <img src="<?= htmlspecialchars(resolveAdminDealImageSrc($editingDeal['image_path'])) ?>" alt="Current deal image" class="admin-image-preview">
@@ -710,27 +733,53 @@ $pageTitle = 'Deals Management';
                         </label>
                     <?php endif; ?>
 
-                    <div class="admin-two-col-grid">
-                        <div class="form-group">
-                            <label class="form-label">Overlay Start Color</label>
-                            <input type="text" name="overlay_start" class="form-input" value="<?= htmlspecialchars($editingDeal['overlay_start'] ?? $_POST['overlay_start'] ?? 'rgba(15, 118, 110, 0.84)') ?>" placeholder="rgba(15, 118, 110, 0.84)">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Overlay End Color</label>
-                            <input type="text" name="overlay_end" class="form-input" value="<?= htmlspecialchars($editingDeal['overlay_end'] ?? $_POST['overlay_end'] ?? 'rgba(11, 91, 85, 0.62)') ?>" placeholder="rgba(11, 91, 85, 0.62)">
-                        </div>
-                    </div>
+                    <details style="margin-top: 1.5rem; margin-bottom: 1.5rem; padding: 1rem; border: 1px solid var(--color-border); border-radius: 6px; background: rgba(0,0,0,0.02);">
+                        <summary style="cursor: pointer; font-weight: 600; font-size: 0.95rem; user-select: none;">Advanced Settings (Links, Badges, Colors)</summary>
+                        <div style="margin-top: 1rem;">
+                            
+                            <div class="admin-two-col-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Badge Text</label>
+                                    <input type="text" name="badge_text" class="form-input" value="<?= htmlspecialchars($editingDeal['badge_text'] ?? $_POST['badge_text'] ?? '') ?>">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Badge Style</label>
+                                    <?php $selectedBadgeStyle = $editingDeal['badge_style'] ?? $_POST['badge_style'] ?? 'primary'; ?>
+                                    <select name="badge_style" class="form-select">
+                                        <?php foreach ($allowedBadgeStyles as $badgeStyle): ?>
+                                            <option value="<?= $badgeStyle ?>" <?= $selectedBadgeStyle === $badgeStyle ? 'selected' : '' ?>>
+                                                <?= ucfirst($badgeStyle) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                            </div>
 
-                    <div class="admin-two-col-grid">
-                        <div class="form-group">
-                            <label class="form-label">Image Position</label>
-                            <input type="text" name="image_position" class="form-input" value="<?= htmlspecialchars($editingDeal['image_position'] ?? $_POST['image_position'] ?? 'center center') ?>" placeholder="center top">
+
+
+                            <div class="form-group">
+                                <label class="form-label">External Image URL <span class="admin-text-muted" style="font-weight:400;">(Optional - overrides upload)</span></label>
+                                <input type="url" name="image_path" class="form-input" value="<?= htmlspecialchars($editingDeal['image_path'] ?? $_POST['image_path'] ?? '') ?>" placeholder="https://example.com/image.jpg">
+                            </div>
+
+                            <div class="admin-two-col-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Overlay Start Color</label>
+                                    <input type="text" name="overlay_start" class="form-input" value="<?= htmlspecialchars($editingDeal['overlay_start'] ?? $_POST['overlay_start'] ?? 'rgba(15, 118, 110, 0.84)') ?>" placeholder="rgba(15, 118, 110, 0.84)">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Overlay End Color</label>
+                                    <input type="text" name="overlay_end" class="form-input" value="<?= htmlspecialchars($editingDeal['overlay_end'] ?? $_POST['overlay_end'] ?? 'rgba(11, 91, 85, 0.62)') ?>" placeholder="rgba(11, 91, 85, 0.62)">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Image Position</label>
+                                <input type="text" name="image_position" class="form-input" value="<?= htmlspecialchars($editingDeal['image_position'] ?? $_POST['image_position'] ?? 'center center') ?>" placeholder="center top">
+                            </div>
+
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Sort Order</label>
-                            <input type="number" name="sort_order" class="form-input" value="<?= htmlspecialchars((string)($editingDeal['sort_order'] ?? $_POST['sort_order'] ?? 0)) ?>">
-                        </div>
-                    </div>
+                    </details>
 
                     <div class="admin-actions-row">
                         <button class="btn btn-primary" type="submit">Save Deal</button>

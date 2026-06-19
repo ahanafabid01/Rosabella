@@ -73,7 +73,7 @@ function formatCountdownDisplay(int $remainingSeconds): string
 $hotDealsSectionTitle = getSetting('home_deals_title') ?: 'Hot Deals';
 $hotDealsSectionSubtitle = getSetting('home_deals_subtitle') ?: "Don't miss out on these amazing offers";
 $hotDealsCtaLabel = getSetting('home_deals_cta_label') ?: 'View All Deals';
-$hotDealsCtaUrl = getSetting('home_deals_cta_url') ?: 'products.php?filter=sale';
+$hotDealsCtaUrl = getSetting('home_deals_cta_url') ?: 'sale';
 
 $hotDeals = [];
 $hotDealsTableReady = true;
