@@ -312,13 +312,8 @@ try {
     <?php if (!empty($newArrivalProducts)): ?>
     <section class="section">
         <div class="container">
-            <div class="section-header" style="text-align: center; flex-direction: column; margin-bottom: 2.5rem;">
-                <div style="display: inline-flex; align-items: center; gap: 0.5rem; background-color: #ecfdf5; color: #059669; padding: 0.375rem 1rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500; margin-bottom: 1rem;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-                    </svg>
-                    Just Dropped
-                </div>
+            <div class="section-header" style="text-align: center; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 2.5rem;">
+
                 <h2 class="section-title">New Arrivals</h2>
                 <p class="section-subtitle" style="max-width: 500px; margin: 0.5rem auto 0;">
                     Be the first to check out our newest additions
@@ -484,13 +479,8 @@ try {
     <!-- Featured Products Section -->
     <section class="section">
         <div class="container">
-            <div class="section-header" style="text-align: center; flex-direction: column; margin-bottom: 2.5rem;">
-                <div style="display: inline-flex; align-items: center; gap: 0.5rem; background-color: var(--color-primary-light); color: var(--color-primary); padding: 0.375rem 1rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500; margin-bottom: 1rem;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                    </svg>
-                    Handpicked for You
-                </div>
+            <div class="section-header" style="margin-bottom: 2.5rem;">
+
                 <h2 class="section-title">Featured Products</h2>
                 <p class="section-subtitle" style="max-width: 500px; margin: 0.5rem auto 0;">
                     Discover our most popular items, carefully selected for quality and style
