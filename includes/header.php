@@ -204,21 +204,39 @@ $freeShippingThreshold = floatval(getSetting('free_shipping_threshold') ?: 5000)
             </button>
         </div>
         <ul class="mobile-nav-list">
-            <li>
-                <a href="<?= BASE_URL ?>/shop" class="mobile-nav-link">
+            <li class="mobile-nav-item">
+                <a href="<?= BASE_URL ?>/shop" class="mobile-nav-link main-cat">
                     All Products
                 </a>
             </li>
             <?php foreach ($categories as $category): ?>
-                <li>
-                    <a href="<?= BASE_URL ?>/category/<?= urlencode($category['slug']) ?>" class="mobile-nav-link">
-                        <?= htmlspecialchars($category['name']) ?>
-                        <?php if ($category['child_count'] > 0): ?>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="9 18 15 12 9 6"/>
-                        </svg>
+                <?php $hasChildren = !empty($categoryChildren[$category['id']]); ?>
+                <li class="mobile-nav-item">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <a href="<?= BASE_URL ?>/category/<?= urlencode($category['slug']) ?>" class="mobile-nav-link main-cat" style="flex: 1;">
+                            <?= htmlspecialchars($category['name']) ?>
+                        </a>
+                        <?php if ($hasChildren): ?>
+                        <button class="mobile-toggle-btn" aria-label="Toggle Submenu" onclick="const container = this.parentElement.nextElementSibling; this.classList.toggle('open'); container.classList.toggle('open');">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </button>
                         <?php endif; ?>
-                    </a>
+                    </div>
+                    <?php if ($hasChildren): ?>
+                    <div class="mobile-subnav-container">
+                        <div class="mobile-subnav">
+                            <div class="mobile-subnav-inner">
+                                <?php foreach ($categoryChildren[$category['id']] as $child): ?>
+                                    <a href="<?= BASE_URL ?>/category/<?= urlencode($child['slug']) ?>" class="mobile-nav-link sub-cat">
+                                        <?= htmlspecialchars($child['name']) ?>
+                                    </a>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                 </li>
             <?php endforeach; ?>
         </ul>

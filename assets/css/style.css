@@ -949,6 +949,94 @@ textarea {
     display: block;
 }
 
+/* ---- Modern Mobile Nav Enhancements ---- */
+.mobile-nav-list {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+.mobile-nav-item {
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+.mobile-nav-item:last-child {
+    border-bottom: none;
+}
+.mobile-nav-link {
+    display: block;
+    padding: 1.15rem 1.5rem;
+    border-radius: 0;
+    text-decoration: none;
+    transition: background-color 0.2s, color 0.2s;
+}
+.mobile-nav-link.main-cat {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #1e293b;
+    letter-spacing: -0.01em;
+}
+.mobile-nav-link.main-cat:hover {
+    background-color: rgba(0,0,0,0.02);
+}
+.mobile-nav-link.sub-cat {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #64748b;
+    padding: 0.85rem 1.5rem 0.85rem 2.5rem;
+    border-bottom: 1px solid rgba(0,0,0,0.03);
+}
+.mobile-nav-link.sub-cat:last-child {
+    border-bottom: none;
+}
+.mobile-nav-link.sub-cat:hover {
+    color: var(--color-primary);
+    background-color: transparent;
+}
+
+.mobile-subnav-container {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.3s ease-in-out;
+}
+.mobile-subnav-container.open {
+    grid-template-rows: 1fr;
+}
+.mobile-subnav {
+    overflow: hidden;
+    background: #f8fafc;
+    border-top: 1px solid rgba(0,0,0,0.03);
+    box-shadow: inset 0 3px 6px rgba(0,0,0,0.01);
+}
+.mobile-subnav-inner {
+    padding: 0.5rem 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.mobile-toggle-btn {
+    padding: 1.15rem 1.5rem;
+    background: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    cursor: pointer;
+    color: #64748b;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.2s, background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.mobile-toggle-btn:hover, .mobile-toggle-btn:active {
+    color: var(--color-primary);
+    background-color: rgba(0,0,0,0.02);
+}
+.mobile-toggle-btn svg {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mobile-toggle-btn.open svg {
+    transform: rotate(180deg);
+}
+
 /* ---- Responsive: show desktop elements ---- */
 @media (min-width: 640px) {
     .header-cart-label {
