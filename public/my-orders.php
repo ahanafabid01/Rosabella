@@ -382,120 +382,40 @@ require_once __DIR__ . '/../includes/header.php';
                         <a href="<?= BASE_URL ?>/shop" class="btn btn-primary">Start Shopping</a>
                     </div>
                     <?php else: ?>
-                    <div style="display: flex; flex-direction: column; gap: 1rem;">
-                        <?php foreach ($orders as $order): ?>
-                        <?php $orderId = intval($order['id']); ?>
-                        <?php $orderItems = $orderItemsByOrder[$orderId] ?? []; ?>
-                        <div style="padding: 1rem; background: var(--color-bg-secondary); border-radius: var(--radius-md);">
-                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-                                <div>
-                                    <p style="font-weight: 600;"><?= htmlspecialchars($order['order_number']) ?></p>
-                                    <p style="font-size: 0.75rem; color: var(--color-text-light);"><?= date('F j, Y', strtotime($order['created_at'])) ?></p>
-                                </div>
-                                <div style="text-align: right;">
-                                    <span class="badge badge-<?= $order['status'] === 'delivered' ? 'success' : 'warning' ?>"><?= ucfirst($order['status']) ?></span>
-                                    <p style="font-weight: 600; margin-top: 0.25rem;"><?= formatPrice($order['total']) ?></p>
-                                    <p style="font-size: 0.75rem; color: var(--color-text-light); margin-top: 0.2rem;">
-                                        <?= htmlspecialchars(paymentDisplayName((string)$order['payment_method'])) ?> · <?= htmlspecialchars(ucfirst((string)$order['payment_status'])) ?>
-                                    </p>
-                                </div>
-                            </div>
-
-                            <?php if (!empty($orderItems)): ?>
-                            <div style="margin-top: 0.9rem; border-top: 1px solid var(--color-border); padding-top: 0.9rem; display: flex; flex-direction: column; gap: 0.75rem;">
-                                <?php foreach ($orderItems as $item): ?>
-                                <?php
-                                $itemProductId = intval($item['product_id']);
-                                $existingReview = $reviewsByProduct[$itemProductId] ?? null;
-                                $existingReviewId = intval($existingReview['id'] ?? 0);
-                                $existingReviewImages = $existingReviewId > 0 ? ($reviewImagesByReview[$existingReviewId] ?? []) : [];
-                                ?>
-                                <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 0.75rem;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-                                        <div style="display: flex; align-items: center; gap: 0.75rem; min-width: 0;">
-                                            <img src="<?= htmlspecialchars($item['main_image'] ?: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&q=80') ?>" alt="" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover; border: 1px solid var(--color-border);">
-                                            <div style="min-width: 0;">
-                                                <p style="font-weight: 600; line-height: 1.3;"><?= htmlspecialchars($item['product_name']) ?></p>
-                                                <p style="font-size: 0.75rem; color: var(--color-text-light);">Qty: <?= intval($item['quantity']) ?></p>
-                                            </div>
-                                        </div>
-
-                                        <?php if ($order['status'] === 'delivered'): ?>
-                                        <span style="font-size: 0.75rem; color: var(--color-text-light);">You can review this item</span>
-                                        <?php else: ?>
-                                        <span style="font-size: 0.75rem; color: var(--color-text-light);">Review available after delivery</span>
-                                        <?php endif; ?>
-                                    </div>
-
-                                    <?php if ($order['status'] === 'delivered'): ?>
-                                    <?php if ($existingReview): ?>
-                                    <div style="margin-top: 0.6rem; font-size: 0.78rem; color: var(--color-text-light);">
-                                        Current review status:
-                                        <span class="badge badge-<?= $existingReview['status'] === 'approved' ? 'success' : ($existingReview['status'] === 'rejected' ? 'danger' : 'warning') ?>">
-                                            <?= htmlspecialchars(ucfirst($existingReview['status'])) ?>
-                                        </span>
-                                    </div>
-                                    <?php endif; ?>
-
-                                    <details style="margin-top: 0.65rem;">
-                                        <summary style="cursor: pointer; font-weight: 600; color: var(--color-primary);">
-                                            <?= $existingReview ? 'Update your review' : 'Write a review' ?>
-                                        </summary>
-                                        <form method="POST" enctype="multipart/form-data" style="margin-top: 0.85rem; display: flex; flex-direction: column; gap: 0.75rem;">
-                                            <input type="hidden" name="submit_review" value="1">
-                                            <input type="hidden" name="order_id" value="<?= $orderId ?>">
-                                            <input type="hidden" name="product_id" value="<?= $itemProductId ?>">
-
-                                            <div class="form-group" style="margin-bottom: 0;">
-                                                <label class="form-label">Rating</label>
-                                                <select name="rating" class="form-select" required>
-                                                    <option value="">Select rating</option>
-                                                    <?php for ($star = 5; $star >= 1; $star--): ?>
-                                                    <option value="<?= $star ?>" <?= intval($existingReview['rating'] ?? 0) === $star ? 'selected' : '' ?>>
-                                                        <?= $star ?> Star<?= $star > 1 ? 's' : '' ?>
-                                                    </option>
-                                                    <?php endfor; ?>
-                                                </select>
-                                            </div>
-
-                                            <div class="form-group" style="margin-bottom: 0;">
-                                                <label class="form-label">Title (optional)</label>
-                                                <input type="text" name="review_title" class="form-input" maxlength="255" value="<?= htmlspecialchars((string)($existingReview['title'] ?? '')) ?>" placeholder="Short summary">
-                                            </div>
-
-                                            <div class="form-group" style="margin-bottom: 0;">
-                                                <label class="form-label">Review</label>
-                                                <textarea name="review_text" class="form-textarea" rows="4" maxlength="3000" placeholder="Share your experience..." required><?= htmlspecialchars((string)($existingReview['review'] ?? '')) ?></textarea>
-                                            </div>
-
-                                            <div class="form-group" style="margin-bottom: 0;">
-                                                <label class="form-label">Photos (optional, up to 4)</label>
-                                                <input type="file" name="review_images[]" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
-                                                <p style="font-size: 0.75rem; color: var(--color-text-light); margin-top: 0.4rem;">Adding new photos replaces existing photos for this review.</p>
-                                            </div>
-
-                                            <?php if (!empty($existingReviewImages)): ?>
-                                            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                                                <?php foreach ($existingReviewImages as $existingReviewImage): ?>
-                                                <img src="<?= htmlspecialchars($existingReviewImage) ?>" alt="Review photo" style="width: 58px; height: 58px; object-fit: cover; border: 1px solid var(--color-border); border-radius: 6px;">
-                                                <?php endforeach; ?>
-                                            </div>
-                                            <?php endif; ?>
-
-                                            <div>
-                                                <button type="submit" class="btn btn-primary">
-                                                    <?= $existingReview ? 'Update Review' : 'Submit Review' ?>
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </details>
-                                    <?php endif; ?>
-                                </div>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; min-width: 600px; text-align: left;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid var(--color-border);">
+                                    <th style="padding: 1rem; font-weight: 600;">Order ID</th>
+                                    <th style="padding: 1rem; font-weight: 600;">Date</th>
+                                    <th style="padding: 1rem; font-weight: 600;">Time</th>
+                                    <th style="padding: 1rem; font-weight: 600;">Status</th>
+                                    <th style="padding: 1rem; text-align: right; font-weight: 600;">Amount</th>
+                                    <th style="padding: 1rem; text-align: center; font-weight: 600;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($orders as $order): ?>
+                                <tr style="border-bottom: 1px solid var(--color-border); transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='var(--color-bg-secondary)'" onmouseout="this.style.backgroundColor='transparent'">
+                                    <td style="padding: 1rem;">
+                                        <strong><?= htmlspecialchars($order['order_number']) ?></strong>
+                                    </td>
+                                    <td style="padding: 1rem;"><?= date('M j, Y', strtotime($order['created_at'])) ?></td>
+                                    <td style="padding: 1rem; color: var(--color-text-light);"><?= date('g:i A', strtotime($order['created_at'])) ?></td>
+                                    <td style="padding: 1rem;">
+                                        <span class="badge badge-<?= $order['status'] === 'delivered' ? 'success' : ($order['status'] === 'cancelled' ? 'danger' : 'warning') ?>"><?= ucfirst($order['status']) ?></span>
+                                    </td>
+                                    <td style="padding: 1rem; text-align: right; font-weight: 600;">
+                                        <?= formatPrice($order['total']) ?><br>
+                                        <span style="font-size: 0.75rem; color: var(--color-text-light); font-weight: normal;"><?= htmlspecialchars(paymentDisplayName((string)$order['payment_method'])) ?></span>
+                                    </td>
+                                    <td style="padding: 1rem; text-align: center;">
+                                        <a href="<?= BASE_URL ?>/track/<?= htmlspecialchars($order['order_number']) ?>" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.875rem;">View</a>
+                                    </td>
+                                </tr>
                                 <?php endforeach; ?>
-                            </div>
-                            <?php endif; ?>
-                        </div>
-                        <?php endforeach; ?>
+                            </tbody>
+                        </table>
                     </div>
                     <?php endif; ?>
                 </div>
