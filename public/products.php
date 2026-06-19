@@ -16,11 +16,23 @@ $page = max(1, intval($_GET['page'] ?? 1));
 $perPage = 12;
 $offset = ($page - 1) * $perPage;
 
+// Get current category info first so we can include child categories
+$currentCategory = null;
+if ($category) {
+    $stmt = $db->prepare("SELECT * FROM categories WHERE slug = ?");
+    $stmt->execute([$category]);
+    $currentCategory = $stmt->fetch();
+}
+
 // Build query
 $where = ["p.status = 'active'"];
 $params = [];
 
-if ($category) {
+if ($currentCategory) {
+    $where[] = "(p.category_id = ? OR c.parent_id = ?)";
+    $params[] = $currentCategory['id'];
+    $params[] = $currentCategory['id'];
+} elseif ($category) {
     $where[] = "c.slug = ?";
     $params[] = $category;
 }
@@ -73,14 +85,6 @@ $totalPages = ceil($totalProducts / $perPage);
 // Get categories for sidebar
 $stmt = $db->query("SELECT * FROM categories WHERE status = 'active' ORDER BY name");
 $categories = $stmt->fetchAll();
-
-// Get current category name
-$currentCategory = null;
-if ($category) {
-    $stmt = $db->prepare("SELECT * FROM categories WHERE slug = ?");
-    $stmt->execute([$category]);
-    $currentCategory = $stmt->fetch();
-}
 ?>
 
     <!-- Page Header -->

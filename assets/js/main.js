@@ -490,6 +490,16 @@ function initCartPageControls() {
             await updateCartItem(cartId, value);
         });
     });
+
+    const attributeSelects = document.querySelectorAll('.cart-attribute-select');
+    attributeSelects.forEach((select) => {
+        select.addEventListener('change', async () => {
+            if (!select.value) return;
+            const cartId = select.dataset.cartId;
+            const attributeName = select.dataset.attribute;
+            await updateCartItemAttribute(cartId, attributeName, select.value);
+        });
+    });
 }
 
 async function updateCartItem(cartId, quantity) {
@@ -505,6 +515,23 @@ async function updateCartItem(cartId, quantity) {
     }
 
     updateCartBadge(data.cart_count);
+    window.location.reload();
+}
+
+async function updateCartItemAttribute(cartId, attributeName, value) {
+    const payload = {
+        action: 'update',
+        cart_id: cartId
+    };
+    payload[attributeName] = value;
+
+    const data = await apiRequest('api/cart.php', payload);
+
+    if (!data.success) {
+        showToast(data.message || 'Unable to update cart', 'error');
+        return;
+    }
+
     window.location.reload();
 }
 

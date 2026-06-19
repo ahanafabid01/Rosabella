@@ -11,7 +11,7 @@ $sessionId = session_id();
 // Get cart items
 if (isLoggedIn()) {
     $stmt = $db->prepare("
-        SELECT c.*, p.name, p.slug, p.price, p.sale_price, p.main_image, p.stock_quantity 
+        SELECT c.*, p.name, p.slug, p.price, p.sale_price, p.main_image, p.stock_quantity, p.sizes, p.colors, p.variants
         FROM cart c 
         JOIN products p ON c.product_id = p.id 
         WHERE c.user_id = ? OR c.session_id = ?
@@ -20,7 +20,7 @@ if (isLoggedIn()) {
     $stmt->execute([$_SESSION['user_id'], $sessionId]);
 } else {
     $stmt = $db->prepare("
-        SELECT c.*, p.name, p.slug, p.price, p.sale_price, p.main_image, p.stock_quantity 
+        SELECT c.*, p.name, p.slug, p.price, p.sale_price, p.main_image, p.stock_quantity, p.sizes, p.colors, p.variants
         FROM cart c 
         JOIN products p ON c.product_id = p.id 
         WHERE c.session_id = ?
@@ -34,11 +34,17 @@ $cartItems = $stmt->fetchAll();
 $stmtRec = $db->query("SELECT * FROM products WHERE status = 'active' ORDER BY RAND() LIMIT 4");
 $recommendedProducts = $stmtRec->fetchAll();
 
-// Calculate totals
+// Calculate totals and validate checkout readiness
 $subtotal = 0;
+$canProceedToCheckout = true;
 foreach ($cartItems as $item) {
     $price = $item['sale_price'] ?: $item['price'];
     $subtotal += $price * $item['quantity'];
+    
+    // Check if any required attributes are missing
+    if (!empty($item['sizes']) && empty($item['size'])) $canProceedToCheckout = false;
+    if (!empty($item['colors']) && empty($item['color'])) $canProceedToCheckout = false;
+    if (!empty($item['variants']) && empty($item['variant'])) $canProceedToCheckout = false;
 }
 
 $freeShippingThreshold = floatval(getSetting('free_shipping_threshold') ?: 5000);
@@ -108,20 +114,55 @@ $total = $subtotal; // Shipping and tax are calculated at checkout
                                             <h3 style="font-weight: 600; margin-bottom: 0.25rem;">
                                                 <a href="<?= BASE_URL ?>/product/<?= $item['slug'] ?>"><?= htmlspecialchars($item['name']) ?></a>
                                             </h3>
-                                            <?php if (!empty($item['size'])): ?>
-                                            <p style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.25rem;">
-                                                Size: <strong style="color: var(--color-text);"><?= htmlspecialchars($item['size']) ?></strong>
-                                            </p>
+                                            <?php if (!empty($item['sizes'])): ?>
+                                                <?php if (empty($item['size'])): ?>
+                                                <div style="margin-bottom: 0.5rem;">
+                                                    <select class="cart-attribute-select" data-cart-id="<?= $item['id'] ?>" data-attribute="selected_size" style="padding: 0.25rem; border: 1px solid var(--color-danger); border-radius: 4px; font-size: 0.875rem;">
+                                                        <option value="">Select Size (Required)</option>
+                                                        <?php foreach (explode(',', $item['sizes']) as $s): $s = trim($s); if ($s): ?>
+                                                            <option value="<?= htmlspecialchars($s) ?>"><?= htmlspecialchars($s) ?></option>
+                                                        <?php endif; endforeach; ?>
+                                                    </select>
+                                                </div>
+                                                <?php else: ?>
+                                                <p style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.25rem;">
+                                                    Size: <strong style="color: var(--color-text);"><?= htmlspecialchars($item['size']) ?></strong>
+                                                </p>
+                                                <?php endif; ?>
                                             <?php endif; ?>
-                                            <?php if (!empty($item['color'])): ?>
-                                            <p style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.25rem;">
-                                                Color: <strong style="color: var(--color-text);"><?= htmlspecialchars($item['color']) ?></strong>
-                                            </p>
+                                            
+                                            <?php if (!empty($item['colors'])): ?>
+                                                <?php if (empty($item['color'])): ?>
+                                                <div style="margin-bottom: 0.5rem;">
+                                                    <select class="cart-attribute-select" data-cart-id="<?= $item['id'] ?>" data-attribute="selected_color" style="padding: 0.25rem; border: 1px solid var(--color-danger); border-radius: 4px; font-size: 0.875rem;">
+                                                        <option value="">Select Color (Required)</option>
+                                                        <?php foreach (explode(',', $item['colors']) as $c): $c = trim($c); if ($c): ?>
+                                                            <option value="<?= htmlspecialchars($c) ?>"><?= htmlspecialchars($c) ?></option>
+                                                        <?php endif; endforeach; ?>
+                                                    </select>
+                                                </div>
+                                                <?php else: ?>
+                                                <p style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.25rem;">
+                                                    Color: <strong style="color: var(--color-text);"><?= htmlspecialchars($item['color']) ?></strong>
+                                                </p>
+                                                <?php endif; ?>
                                             <?php endif; ?>
-                                            <?php if (!empty($item['variant'])): ?>
-                                            <p style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.25rem;">
-                                                Variant: <strong style="color: var(--color-text);"><?= htmlspecialchars($item['variant']) ?></strong>
-                                            </p>
+                                            
+                                            <?php if (!empty($item['variants'])): ?>
+                                                <?php if (empty($item['variant'])): ?>
+                                                <div style="margin-bottom: 0.5rem;">
+                                                    <select class="cart-attribute-select" data-cart-id="<?= $item['id'] ?>" data-attribute="selected_variant" style="padding: 0.25rem; border: 1px solid var(--color-danger); border-radius: 4px; font-size: 0.875rem;">
+                                                        <option value="">Select Variant (Required)</option>
+                                                        <?php foreach (explode(',', $item['variants']) as $v): $v = trim($v); if ($v): ?>
+                                                            <option value="<?= htmlspecialchars($v) ?>"><?= htmlspecialchars($v) ?></option>
+                                                        <?php endif; endforeach; ?>
+                                                    </select>
+                                                </div>
+                                                <?php else: ?>
+                                                <p style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.25rem;">
+                                                    Variant: <strong style="color: var(--color-text);"><?= htmlspecialchars($item['variant']) ?></strong>
+                                                </p>
+                                                <?php endif; ?>
                                             <?php endif; ?>
                                             <p style="font-size: 0.875rem; color: var(--color-text-light);">
                                                 <?= $item['stock_quantity'] > 0 ? 'In Stock' : 'Out of Stock' ?>
@@ -188,12 +229,21 @@ $total = $subtotal; // Shipping and tax are calculated at checkout
                             <a href="<?= BASE_URL ?>/shop" class="btn btn-lg" style="width: 100%; background-color: #000; color: #fff; margin-bottom: 0.75rem;">
                                 Continue Shopping
                             </a>
+                            <?php if ($canProceedToCheckout): ?>
                             <a href="<?= BASE_URL ?>/checkout" class="btn btn-primary btn-lg" style="width: 100%;">
                                 Proceed to Checkout
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
                                 </svg>
                             </a>
+                            <?php else: ?>
+                            <button class="btn btn-primary btn-lg" style="width: 100%; opacity: 0.6; cursor: not-allowed;" onclick="showToast('Please select all required sizes, colors, and variants for your items before checking out.', 'error');">
+                                Proceed to Checkout
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                                </svg>
+                            </button>
+                            <?php endif; ?>
                             
                             <!-- Trust Badges -->
                             <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--color-border);">

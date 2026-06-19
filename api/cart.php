@@ -133,9 +133,12 @@ function handleUpdateCart() {
     global $db, $sessionId, $userId;
 
     $cartId = getIntInput('cart_id');
-    $quantity = getIntInput('quantity', 1);
+    $quantity = getIntInput('quantity', 0);
+    $size = getInput('selected_size');
+    $color = getInput('selected_color');
+    $variant = getInput('selected_variant');
 
-    if ($cartId <= 0 || $quantity <= 0) {
+    if ($cartId <= 0) {
         respond(false, 'Invalid parameters', [], 422);
     }
 
@@ -152,12 +155,36 @@ function handleUpdateCart() {
         respond(false, 'Cart item not found', [], 404);
     }
 
-    if ($quantity > intval($item['stock_quantity'])) {
-        respond(false, 'Insufficient stock', [], 422);
+    $updates = [];
+    $params = [];
+
+    if ($quantity > 0) {
+        if ($quantity > intval($item['stock_quantity'])) {
+            respond(false, 'Insufficient stock', [], 422);
+        }
+        $updates[] = "quantity = ?";
+        $params[] = $quantity;
     }
 
-    $stmt = $db->prepare("UPDATE cart SET quantity = ? WHERE id = ?");
-    $stmt->execute([$quantity, $cartId]);
+    if ($size !== null && $size !== '') {
+        $updates[] = "size = ?";
+        $params[] = $size;
+    }
+    if ($color !== null && $color !== '') {
+        $updates[] = "color = ?";
+        $params[] = $color;
+    }
+    if ($variant !== null && $variant !== '') {
+        $updates[] = "variant = ?";
+        $params[] = $variant;
+    }
+
+    if (!empty($updates)) {
+        $sql = "UPDATE cart SET " . implode(', ', $updates) . " WHERE id = ?";
+        $params[] = $cartId;
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
+    }
 
     respond(true, 'Cart updated', ['cart_count' => getCartCount()]);
 }
