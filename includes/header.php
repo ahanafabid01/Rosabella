@@ -13,7 +13,13 @@ $wishlistCount = getWishlistCount();
 
 // Get categories for navigation
 $db = getDB();
-$stmt = $db->query("SELECT * FROM categories WHERE status = 'active' ORDER BY sort_order, name");
+$stmt = $db->query("
+    SELECT c.*, 
+           (SELECT COUNT(*) FROM categories child WHERE child.parent_id = c.id AND child.status = 'active') as child_count
+    FROM categories c 
+    WHERE c.status = 'active' AND (c.parent_id = 0 OR c.parent_id IS NULL)
+    ORDER BY c.sort_order, c.name
+");
 $categories = $stmt->fetchAll();
 $currencySymbol = getSetting('currency_symbol') ?: 'Tk';
 $freeShippingThreshold = floatval(getSetting('free_shipping_threshold') ?: 5000);
@@ -145,9 +151,11 @@ $freeShippingThreshold = floatval(getSetting('free_shipping_threshold') ?: 5000)
                         <li>
                             <a href="<?= BASE_URL ?>/category/<?= urlencode($category['slug']) ?>" class="header-nav-link">
                                 <?= htmlspecialchars($category['name']) ?>
+                                <?php if ($category['child_count'] > 0): ?>
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                     <polyline points="6 9 12 15 18 9"/>
                                 </svg>
+                                <?php endif; ?>
                             </a>
                         </li>
                     <?php endforeach; ?>
@@ -181,9 +189,11 @@ $freeShippingThreshold = floatval(getSetting('free_shipping_threshold') ?: 5000)
                 <li>
                     <a href="<?= BASE_URL ?>/category/<?= urlencode($category['slug']) ?>" class="mobile-nav-link">
                         <?= htmlspecialchars($category['name']) ?>
+                        <?php if ($category['child_count'] > 0): ?>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="9 18 15 12 9 6"/>
                         </svg>
+                        <?php endif; ?>
                     </a>
                 </li>
             <?php endforeach; ?>

@@ -114,6 +114,13 @@ if ($action === 'edit' && $categoryId > 0) {
     }
 }
 
+$nextSortOrder = 0;
+if ($action === 'add') {
+    $stmt = $db->query("SELECT MAX(sort_order) FROM categories");
+    $maxSort = $stmt->fetchColumn();
+    $nextSortOrder = ($maxSort !== false) ? intval($maxSort) + 1 : 0;
+}
+
 $parentOptionsStmt = $db->prepare("SELECT id, name FROM categories WHERE (? = 0 OR id != ?) ORDER BY name");
 $parentOptionsStmt->execute([$categoryId, $categoryId]);
 $parentOptions = $parentOptionsStmt->fetchAll();
@@ -255,7 +262,7 @@ $pageTitle = 'Categories Management';
                         </div>
                         <div class="form-group">
                             <label class="form-label">Sort Order</label>
-                            <input type="number" name="sort_order" class="form-input" value="<?= htmlspecialchars((string)($editingCategory['sort_order'] ?? $_POST['sort_order'] ?? 0)) ?>">
+                            <input type="number" name="sort_order" class="form-input" value="<?= htmlspecialchars((string)($editingCategory['sort_order'] ?? $_POST['sort_order'] ?? $nextSortOrder)) ?>">
                         </div>
                     </div>
                     <div class="admin-actions-row">
