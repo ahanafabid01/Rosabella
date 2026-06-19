@@ -189,11 +189,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $colorPairs = explode(',', $colorsInput);
         foreach ($colorPairs as $pair) {
             if (strpos($pair, ':') !== false) {
-                [$name, $hex] = explode(':', $pair);
-                $name = trim($name);
-                $hex = trim($hex);
-                if ($name !== '' && $hex !== '') {
-                    $colorsData[$name] = ['hex' => $hex, 'main_image' => '', 'gallery_images' => []];
+                [$cName, $cHex] = explode(':', $pair);
+                $cName = trim($cName);
+                $cHex = trim($cHex);
+                if ($cName !== '' && $cHex !== '') {
+                    $colorsData[$cName] = ['hex' => $cHex, 'main_image' => '', 'gallery_images' => []];
                 }
             }
         }
@@ -210,20 +210,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!isset($existingColors[0]) && !isset($existingColors['color'])) {
                 // it's an associative array
                 $removeGalleryImagesArr = array_values(array_unique(array_filter(array_map('trim', (array)($_POST['remove_gallery_images'] ?? [])))));
-                foreach ($colorsData as $name => &$data) {
-                    if (isset($existingColors[$name]['main_image'])) {
-                        if (!in_array($existingColors[$name]['main_image'], $removeGalleryImagesArr, true)) {
-                            $data['main_image'] = $existingColors[$name]['main_image'];
+                foreach ($colorsData as $cName => &$data) {
+                    if (isset($existingColors[$cName]['main_image'])) {
+                        if (!in_array($existingColors[$cName]['main_image'], $removeGalleryImagesArr, true)) {
+                            $data['main_image'] = $existingColors[$cName]['main_image'];
                         }
                     }
-                    if (isset($existingColors[$name]['images']) && is_array($existingColors[$name]['images'])) {
+                    if (isset($existingColors[$cName]['images']) && is_array($existingColors[$cName]['images'])) {
                         // migrate old structure
-                        $data['gallery_images'] = array_values(array_filter($existingColors[$name]['images'], static function ($path) use ($removeGalleryImagesArr) {
+                        $data['gallery_images'] = array_values(array_filter($existingColors[$cName]['images'], static function ($path) use ($removeGalleryImagesArr) {
                             return !in_array($path, $removeGalleryImagesArr, true);
                         }));
                     }
-                    if (isset($existingColors[$name]['gallery_images']) && is_array($existingColors[$name]['gallery_images'])) {
-                        $data['gallery_images'] = array_values(array_filter($existingColors[$name]['gallery_images'], static function ($path) use ($removeGalleryImagesArr) {
+                    if (isset($existingColors[$cName]['gallery_images']) && is_array($existingColors[$cName]['gallery_images'])) {
+                        $data['gallery_images'] = array_values(array_filter($existingColors[$cName]['gallery_images'], static function ($path) use ($removeGalleryImagesArr) {
                             return !in_array($path, $removeGalleryImagesArr, true);
                         }));
                     }
@@ -293,9 +293,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Process color-specific main image
     if (!$error && isset($_FILES['color_main_image'])) {
-        foreach ($_FILES['color_main_image']['name'] as $colorName => $name) {
+        foreach ($_FILES['color_main_image']['name'] as $colorName => $cImgName) {
             if (!isset($colorsData[$colorName])) continue;
-            if (empty($name)) continue;
+            if (empty($cImgName)) continue;
             
             $file = [
                 'name' => $_FILES['color_main_image']['name'][$colorName],

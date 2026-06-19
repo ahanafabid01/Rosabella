@@ -106,15 +106,13 @@ require_once __DIR__ . '/../includes/header.php';
                     <div class="product-gallery-main">
                         <img id="product-main-image" src="<?= htmlspecialchars($primaryProductImage) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
                     </div>
-                    <?php if (count($productImages) > 1): ?>
-                        <div class="product-gallery-thumbs">
-                            <?php foreach ($productImages as $index => $imagePath): ?>
-                                <button type="button" class="product-thumb-btn <?= $index === 0 ? 'active' : '' ?>" data-image-src="<?= htmlspecialchars($imagePath) ?>" data-image-alt="<?= htmlspecialchars($product['name']) ?>">
-                                    <img src="<?= htmlspecialchars($imagePath) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
-                                </button>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
+                    <div class="product-gallery-thumbs" style="<?= count($productImages) <= 1 ? 'display: none;' : '' ?>">
+                        <?php foreach ($productImages as $index => $imagePath): ?>
+                            <button type="button" class="product-thumb-btn <?= $index === 0 ? 'active' : '' ?>" data-image-src="<?= htmlspecialchars($imagePath) ?>" data-image-alt="<?= htmlspecialchars($product['name']) ?>">
+                                <img src="<?= htmlspecialchars($imagePath) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
+                            </button>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
                 
                 <!-- Product Info -->
@@ -445,13 +443,18 @@ require_once __DIR__ . '/../includes/header.php';
                             // Update thumbs
                             const thumbsContainer = document.querySelector('.product-gallery-thumbs');
                             if (thumbsContainer) {
-                                let html = '';
-                                images.forEach((img, idx) => {
-                                    const activeCls = idx === 0 ? 'active' : '';
-                                    html += `<button type="button" class="product-thumb-btn ${activeCls}" data-image-src="${img}"><img src="${img}"></button>`;
-                                });
-                                thumbsContainer.innerHTML = html;
-                                bindThumbClickEvents(); // Rebind!
+                                if (images.length > 1) {
+                                    thumbsContainer.style.display = ''; // Re-show container
+                                    let html = '';
+                                    images.forEach((img, idx) => {
+                                        const activeCls = idx === 0 ? 'active' : '';
+                                        html += `<button type="button" class="product-thumb-btn ${activeCls}" data-image-src="${img}"><img src="${img}"></button>`;
+                                    });
+                                    thumbsContainer.innerHTML = html;
+                                    bindThumbClickEvents(); // Rebind!
+                                } else {
+                                    thumbsContainer.style.display = 'none'; // Hide if no thumbs
+                                }
                             }
                         }
                     } catch(e) {
