@@ -15,8 +15,9 @@ $db = getDB();
 $user = getCurrentUser();
 
 // Get cart items
-$stmt = $db->prepare("SELECT c.*, p.name, p.price, p.sale_price, p.main_image, p.stock_quantity FROM cart c JOIN products p ON c.product_id = p.id WHERE c.user_id = ? ORDER BY c.created_at DESC");
-$stmt->execute([$_SESSION['user_id']]);
+$sessionId = session_id();
+$stmt = $db->prepare("SELECT c.*, p.name, p.price, p.sale_price, p.main_image, p.stock_quantity FROM cart c JOIN products p ON c.product_id = p.id WHERE c.user_id = ? OR c.session_id = ? ORDER BY c.created_at DESC");
+$stmt->execute([$_SESSION['user_id'], $sessionId]);
 $cartItems = $stmt->fetchAll();
 
 if (empty($cartItems)) {
@@ -30,12 +31,12 @@ foreach ($cartItems as $item) {
     $price = $item['sale_price'] ?: $item['price'];
     $subtotal += $price * $item['quantity'];
 }
-$taxRate = floatval(getSetting('tax_rate') ?: 0);
-$tax = $subtotal * ($taxRate / 100);
+$taxRate = 0;
+$tax = 0;
 
 // Default shipping cost for initial page load
 $shippingCost = 300; 
-$total = $subtotal + $shippingCost + $tax;
+$total = $subtotal + $shippingCost;
 
 $error = '';
 $success = '';
@@ -84,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $shippingCost = 300;
     }
-    $total = $subtotal + $shippingCost + $tax;
+    $total = $subtotal + $shippingCost;
 
     if (empty($availablePaymentMethods)) {
         $error = 'No payment methods are configured right now. Please contact support.';
@@ -294,7 +295,7 @@ require_once __DIR__ . '/../includes/header.php';
                                     
                                     <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
                                         <input type="radio" name="payment_method" value="bkash_manual" id="bkash_radio" style="width: 18px; height: 18px;" onchange="toggleBkash()">
-                                        <span style="display: flex; align-items: center; gap: 0.5rem;">bKash <img src="https://scripts.sandbox.bka.sh/resources/img/bkash_logo.png" alt="bKash" style="height: 18px;"></span>
+                                        <span>bKash</span>
                                     </label>
                                     
                                     <!-- bKash Instructions Box (Hidden by default) -->
@@ -319,7 +320,6 @@ require_once __DIR__ . '/../includes/header.php';
                                     <p style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">We Accept :</p>
                                     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                                         <span style="font-size: 0.75rem; font-weight: bold; background: #eee; padding: 0.2rem 0.4rem; border-radius: 3px;">CASH ON DELIVERY</span>
-                                        <span style="font-size: 0.75rem; font-weight: bold; background: #eee; padding: 0.2rem 0.4rem; border-radius: 3px;">VISA</span>
                                         <span style="font-size: 0.75rem; font-weight: bold; background: #eee; padding: 0.2rem 0.4rem; border-radius: 3px; color: #e1136c;">bKash</span>
                                     </div>
                                 </div>
@@ -386,10 +386,6 @@ require_once __DIR__ . '/../includes/header.php';
                                 <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
                                     <span style="color: var(--color-text-light);">Shipping</span>
                                     <span id="summary_shipping"><?= formatPrice($shippingCost) ?></span>
-                                </div>
-                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                                    <span style="color: var(--color-text-light);">Tax (<?= number_format($taxRate, 0) ?>%)</span>
-                                    <span><?= formatPrice($tax) ?></span>
                                 </div>
                             </div>
                             
@@ -460,8 +456,7 @@ function toggleBkash() {
 function updateShipping(radio) {
     let cost = parseFloat($(radio).data('cost'));
     let subtotal = <?= $subtotal ?>;
-    let tax = <?= $tax ?>;
-    let total = subtotal + cost + tax;
+    let total = subtotal + cost;
     
     // Format appropriately assuming standard Tk symbol formatting used in formatPrice
     $('#summary_shipping').text('৳' + cost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));

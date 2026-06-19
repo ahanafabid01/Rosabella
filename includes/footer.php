@@ -22,7 +22,7 @@ $siteEmail = getSetting('site_email') ?: SITE_EMAIL;
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
                     </svg>
-                    <span>Free Shipping</span>
+                    <span>Fast Shipping</span>
                 </div>
                 <div class="footer-trust-item">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

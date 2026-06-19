@@ -307,7 +307,7 @@ require_once __DIR__ . '/../includes/header.php';
                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
                         <div style="display: flex; align-items: center; gap: 0.75rem;">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-                            <span style="font-size: 0.875rem;">Free Shipping</span>
+                            <span style="font-size: 0.875rem;">Fast Shipping</span>
                         </div>
                         <div style="display: flex; align-items: center; gap: 0.75rem;">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>

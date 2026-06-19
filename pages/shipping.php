@@ -24,10 +24,10 @@ require_once __DIR__ . '/../includes/header.php';
     <section class="section">
         <div class="container" style="max-width: 900px;">
             
-            <!-- Free Shipping Banner -->
-            <div style="background: linear-gradient(135deg, var(--color-primary), #dc5603); border-radius: var(--radius-xl); padding: 2rem; text-align: center; color: white; margin-bottom: 3rem;">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin: 0 auto 1rem;"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-                <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;">Free Shipping on Orders Over Tk 5,000</h2>
+            <!-- Fast Shipping Banner -->
+            <div style="background: var(--color-bg-secondary); padding: 2.5rem; border-radius: var(--radius-lg); text-align: center; margin-bottom: 3rem;">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="1.5" style="margin: 0 auto 1rem;"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;">Fast Shipping on Orders Over Tk 5,000</h2>
                 <p style="opacity: 0.9;">No code needed - automatic at checkout</p>
             </div>
 

@@ -69,7 +69,7 @@ require_once __DIR__ . '/../includes/header.php';
                         </details>
                         <details style="background: var(--color-bg-secondary); border-radius: var(--radius-md); padding: 1rem; cursor: pointer;">
                             <summary style="font-weight: 500; outline: none;">What are the shipping options?</summary>
-                            <p style="margin-top: 0.75rem; color: var(--color-text-light); font-size: 0.875rem;">We offer Standard Shipping (5-7 business days), Express Shipping (2-3 business days), and Next Day Delivery. Free shipping is available on orders over $50.</p>
+                            <p style="margin-top: 0.75rem; color: var(--color-text-light); font-size: 0.875rem;">We offer Standard Shipping (5-7 business days), Express Shipping (2-3 business days), and Next Day Delivery. Fast shipping is available on orders over $50.</p>
                         </details>
                         <details style="background: var(--color-bg-secondary); border-radius: var(--radius-md); padding: 1rem; cursor: pointer;">
                             <summary style="font-weight: 500; outline: none;">Can I change my shipping address?</summary>
