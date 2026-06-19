@@ -294,7 +294,7 @@ function initCart() {
     }
 
     function openMiniCart(e) {
-        if (window.innerWidth >= 1024 && miniCartSidebar) {
+        if (miniCartSidebar) {
             e.preventDefault();
             
             // Prevent page jump by replacing scrollbar with padding
