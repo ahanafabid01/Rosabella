@@ -1,0 +1,595 @@
+<?php
+/**
+ * KARTLY - Homepage
+ */
+$pageTitle = 'Home';
+require_once 'includes/header.php';
+
+$db = getDB();
+
+// Get featured products
+$stmt = $db->query("SELECT p.*, c.name as category_name 
+                    FROM products p 
+                    LEFT JOIN categories c ON p.category_id = c.id 
+                    WHERE p.status = 'active' AND p.is_featured = 1 
+                    ORDER BY p.created_at DESC 
+                    LIMIT 8");
+$featuredProducts = $stmt->fetchAll();
+
+// Get categories
+$stmt = $db->query("SELECT * FROM categories WHERE status = 'active' ORDER BY sort_order LIMIT 6");
+$categories = $stmt->fetchAll();
+
+function formatCountdownDisplay(int $remainingSeconds): string
+{
+    $remainingSeconds = max(0, $remainingSeconds);
+    $days = intdiv($remainingSeconds, 86400);
+    $hours = intdiv($remainingSeconds % 86400, 3600);
+    $minutes = intdiv($remainingSeconds % 3600, 60);
+    $seconds = $remainingSeconds % 60;
+
+    if ($days > 0) {
+        return $days . 'd ' . sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+    }
+
+    return sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+}
+
+// Homepage deals settings
+$hotDealsSectionTitle = getSetting('home_deals_title') ?: 'Hot Deals';
+$hotDealsSectionSubtitle = getSetting('home_deals_subtitle') ?: "Don't miss out on these amazing offers";
+$hotDealsCtaLabel = getSetting('home_deals_cta_label') ?: 'View All Deals';
+$hotDealsCtaUrl = getSetting('home_deals_cta_url') ?: 'products.php?filter=sale';
+
+$hotDeals = [];
+$hotDealsTableReady = true;
+try {
+    $stmt = $db->query("SELECT * FROM deals WHERE status = 'active' ORDER BY sort_order ASC, created_at DESC LIMIT 3");
+    $hotDeals = $stmt->fetchAll();
+} catch (Throwable $e) {
+    $hotDealsTableReady = false;
+    $hotDeals = [];
+}
+
+if (!$hotDealsTableReady) {
+    $hotDeals = [
+        [
+            'title' => 'Up to 70% Off',
+            'subtitle' => 'Electronics & Gadgets',
+            'badge_text' => 'Limited Time',
+            'badge_style' => 'danger',
+            'timer_text' => '12:45:30',
+            'image_path' => 'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=800&q=80',
+            'link_url' => 'products.php?category=electronics',
+            'overlay_start' => 'rgba(15, 118, 110, 0.84)',
+            'overlay_end' => 'rgba(11, 91, 85, 0.62)',
+            'image_position' => 'center center',
+        ],
+        [
+            'title' => 'Fashion Forward',
+            'subtitle' => 'Summer Collection 2024',
+            'badge_text' => 'New Arrivals',
+            'badge_style' => 'primary',
+            'timer_text' => '23:59:59',
+            'image_path' => 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=80',
+            'link_url' => 'products.php?category=fashion',
+            'overlay_start' => 'rgba(30, 64, 175, 0.82)',
+            'overlay_end' => 'rgba(30, 58, 138, 0.62)',
+            'image_position' => 'center top',
+        ],
+        [
+            'title' => 'Buy 2 Get 1 Free',
+            'subtitle' => 'Home & Living Essentials',
+            'badge_text' => 'This Weekend',
+            'badge_style' => 'success',
+            'timer_text' => '48:00:00',
+            'image_path' => 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80',
+            'link_url' => 'products.php?category=home-living',
+            'overlay_start' => 'rgba(15, 118, 110, 0.84)',
+            'overlay_end' => 'rgba(13, 89, 97, 0.62)',
+            'image_position' => 'center center',
+        ],
+    ];
+}
+
+// Get latest approved testimonials (recent 3)
+$stmt = $db->prepare("
+    SELECT
+        r.rating,
+        r.title,
+        r.review AS content,
+        r.created_at,
+        p.name AS product_name,
+        u.first_name,
+        u.last_name
+    FROM reviews r
+    LEFT JOIN products p ON p.id = r.product_id
+    LEFT JOIN users u ON u.id = r.user_id
+    WHERE r.status = 'approved'
+    ORDER BY r.created_at DESC
+    LIMIT 3
+");
+$stmt->execute();
+$testimonials = [];
+foreach ($stmt->fetchAll() as $reviewRow) {
+    $customerName = trim((string)($reviewRow['first_name'] ?? '') . ' ' . (string)($reviewRow['last_name'] ?? ''));
+    if ($customerName === '') {
+        $customerName = 'Verified Customer';
+    }
+
+    $reviewContent = trim((string)($reviewRow['content'] ?? ''));
+    $reviewTitle = trim((string)($reviewRow['title'] ?? ''));
+    $displayContent = $reviewContent !== ''
+        ? $reviewContent
+        : ($reviewTitle !== '' ? $reviewTitle : 'Rated this product after purchase.');
+
+    $testimonials[] = [
+        'name' => $customerName,
+        'role' => 'Verified Buyer',
+        'avatar' => 'https://ui-avatars.com/api/?background=0f766e&color=fff&name=' . rawurlencode($customerName),
+        'rating' => max(1, min(5, intval($reviewRow['rating'] ?? 5))),
+        'title' => $reviewTitle,
+        'content' => $displayContent,
+        'product_name' => trim((string)($reviewRow['product_name'] ?? '')),
+    ];
+}
+?>
+
+    <!-- Hero Slider -->
+    <section class="hero">
+        <div class="hero-slider">
+            <!-- Slide 1 -->
+            <div class="hero-slide active">
+                <img src="https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=1920&q=80" alt="Modern fashion and lifestyle collection">
+                <div class="hero-overlay"></div>
+                <div class="hero-content container">
+                    <div class="hero-text hero-panel">
+                        <div class="hero-badge">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                            </svg>
+                            New Season
+                        </div>
+                        <h2 class="hero-subtitle">Designed for everyday confidence</h2>
+                        <h1 class="hero-title">Fresh Arrivals Curated for Bangladesh</h1>
+                        <p class="hero-description">
+                            Shop premium essentials, local favorites, and trend-forward picks with fast nationwide delivery and secure checkout.
+                        </p>
+                        <ul class="hero-meta">
+                            <li>Nationwide delivery</li>
+                            <li>Easy returns</li>
+                            <li>Verified quality</li>
+                        </ul>
+                        <div class="hero-buttons">
+                            <a href="products.php?filter=new" class="btn btn-primary btn-lg">
+                                Shop Now
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                                </svg>
+                            </a>
+                            <a href="products.php?filter=bestseller" class="btn hero-btn-outline btn-lg">Best Sellers</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 2 -->
+            <div class="hero-slide">
+                <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1920&q=80" alt="Latest tech essentials">
+                <div class="hero-overlay"></div>
+                <div class="hero-content container">
+                    <div class="hero-text hero-panel">
+                        <div class="hero-badge">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                            </svg>
+                            Tech Picks
+                        </div>
+                        <h2 class="hero-subtitle">Performance meets reliability</h2>
+                        <h1 class="hero-title">Smart Gadgets for Work and Life</h1>
+                        <p class="hero-description">
+                            Discover handpicked electronics with transparent pricing, local support, and delivery updates at every step.
+                        </p>
+                        <ul class="hero-meta">
+                            <li>Authentic products</li>
+                            <li>Secure payment</li>
+                            <li>Fast delivery updates</li>
+                        </ul>
+                        <div class="hero-buttons">
+                            <a href="products.php?category=electronics" class="btn btn-primary btn-lg">
+                                Explore Tech
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                                </svg>
+                            </a>
+                            <a href="products.php?filter=sale" class="btn hero-btn-outline btn-lg">Today's Deals</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 3 -->
+            <div class="hero-slide">
+                <img src="https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=1920&q=80" alt="Home and lifestyle collection">
+                <div class="hero-overlay"></div>
+                <div class="hero-content container">
+                    <div class="hero-text hero-panel">
+                        <div class="hero-badge">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                            </svg>
+                            Home Edit
+                        </div>
+                        <h2 class="hero-subtitle">Comfort-first modern essentials</h2>
+                        <h1 class="hero-title">Upgrade Every Room with Purpose</h1>
+                        <p class="hero-description">
+                            From decor to daily must-haves, find practical pieces that make your home feel polished and personal.
+                        </p>
+                        <ul class="hero-meta">
+                            <li>Trusted quality</li>
+                            <li>Value pricing</li>
+                            <li>Support when needed</li>
+                        </ul>
+                        <div class="hero-buttons">
+                            <a href="products.php?category=home-living" class="btn btn-primary btn-lg">
+                                Shop Home
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                                </svg>
+                            </a>
+                            <a href="products.php" class="btn hero-btn-outline btn-lg">Browse Catalog</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <div class="hero-nav hero-nav-prev">
+            <button aria-label="Previous slide">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"/>
+                </svg>
+            </button>
+        </div>
+        <div class="hero-nav hero-nav-next">
+            <button aria-label="Next slide">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"/>
+                </svg>
+            </button>
+        </div>
+        
+        <!-- Dots -->
+        <div class="hero-dots">
+            <button class="hero-dot active" aria-label="Go to slide 1"></button>
+            <button class="hero-dot" aria-label="Go to slide 2"></button>
+            <button class="hero-dot" aria-label="Go to slide 3"></button>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Shop by Category</h2>
+                    <p class="section-subtitle">Browse our curated collections</p>
+                </div>
+                <a href="products.php" class="btn btn-outline">
+                    View All
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                </a>
+            </div>
+            
+            <div class="categories-grid">
+                <?php foreach ($categories as $index => $category): ?>
+                    <?php 
+                    $images = [
+                        'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=600&q=80',
+                        'https://images.unsplash.com/photo-1445205170230-053b83016050?w=600&q=80',
+                        'https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=600&q=80',
+                        'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&q=80',
+                        'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&q=80',
+                        'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&q=80'
+                    ];
+                    ?>
+                    <a href="products.php?category=<?= urlencode($category['slug']) ?>" class="category-card">
+                        <img src="<?= $images[$index % count($images)] ?>" alt="<?= htmlspecialchars($category['name']) ?>">
+                        <div class="category-overlay"></div>
+                        <div class="category-content">
+                            <h3 class="category-name"><?= htmlspecialchars($category['name']) ?></h3>
+                            <p class="category-count">
+                                <?php 
+                                $stmt = $db->prepare("SELECT COUNT(*) FROM products WHERE category_id = ? AND status = 'active'");
+                                $stmt->execute([$category['id']]);
+                                echo $stmt->fetchColumn() . ' items';
+                                ?>
+                            </p>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+
+    <!-- Hot Deals Section -->
+    <?php if (!empty($hotDeals)): ?>
+    <section class="section section-bg">
+        <div class="container">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title"><?= htmlspecialchars($hotDealsSectionTitle) ?></h2>
+                    <p class="section-subtitle"><?= htmlspecialchars($hotDealsSectionSubtitle) ?></p>
+                </div>
+                <a href="<?= htmlspecialchars($hotDealsCtaUrl) ?>" class="btn btn-outline">
+                    <?= htmlspecialchars($hotDealsCtaLabel) ?>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                </a>
+            </div>
+            
+            <div class="deals-grid">
+                <?php foreach ($hotDeals as $deal): ?>
+                    <?php
+                    $dealTitle = trim((string)($deal['title'] ?? 'Special Deal'));
+                    $dealSubtitle = trim((string)($deal['subtitle'] ?? 'Limited Offer'));
+                    $dealBadgeText = trim((string)($deal['badge_text'] ?? ''));
+                    $dealBadgeStyle = trim((string)($deal['badge_style'] ?? 'primary'));
+                    if (!in_array($dealBadgeStyle, ['primary', 'success', 'danger', 'warning'], true)) {
+                        $dealBadgeStyle = 'primary';
+                    }
+                    $dealTimerText = trim((string)($deal['timer_text'] ?? ''));
+                    $dealCountdownEndAt = trim((string)($deal['countdown_end_at'] ?? ''));
+                    $dealCountdownTs = null;
+                    if ($dealCountdownEndAt !== '') {
+                        $parsedCountdownTs = strtotime($dealCountdownEndAt);
+                        if ($parsedCountdownTs !== false) {
+                            $dealCountdownTs = $parsedCountdownTs;
+                        }
+                    }
+                    if ($dealCountdownTs === null && preg_match('/^(\d{1,2}):([0-5]\d):([0-5]\d)$/', $dealTimerText, $durationMatch)) {
+                        $dealCountdownTs = time() + (intval($durationMatch[1]) * 3600) + (intval($durationMatch[2]) * 60) + intval($durationMatch[3]);
+                    }
+                    if ($dealTimerText === '' && $dealCountdownTs !== null) {
+                        $dealTimerText = formatCountdownDisplay($dealCountdownTs - time());
+                    }
+                    $dealImage = trim((string)($deal['image_path'] ?? ''));
+                    if ($dealImage === '') {
+                        $dealImage = 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80';
+                    }
+                    $dealLink = trim((string)($deal['link_url'] ?? 'products.php?filter=sale'));
+                    if ($dealLink === '') {
+                        $dealLink = 'products.php?filter=sale';
+                    }
+                    $overlayStart = trim((string)($deal['overlay_start'] ?? 'rgba(15, 118, 110, 0.84)'));
+                    $overlayEnd = trim((string)($deal['overlay_end'] ?? 'rgba(11, 91, 85, 0.62)'));
+                    $imagePosition = trim((string)($deal['image_position'] ?? 'center center'));
+                    if ($imagePosition === '') {
+                        $imagePosition = 'center center';
+                    }
+                    ?>
+                    <a href="<?= htmlspecialchars($dealLink) ?>" class="deal-card">
+                        <img src="<?= htmlspecialchars($dealImage) ?>" alt="<?= htmlspecialchars($dealTitle) ?>" style="object-position: <?= htmlspecialchars($imagePosition) ?>;">
+                        <div class="deal-overlay" style="background: linear-gradient(135deg, <?= htmlspecialchars($overlayStart) ?>, <?= htmlspecialchars($overlayEnd) ?>);"></div>
+                        <?php if ($dealBadgeText !== ''): ?>
+                        <div class="deal-badge">
+                            <span class="badge badge-<?= htmlspecialchars($dealBadgeStyle) ?>"><?= htmlspecialchars($dealBadgeText) ?></span>
+                        </div>
+                        <?php endif; ?>
+                        <?php if ($dealTimerText !== '' || $dealCountdownTs !== null): ?>
+                        <div class="deal-timer"<?= $dealCountdownTs !== null ? ' data-deal-end-ts="' . intval($dealCountdownTs) . '"' : '' ?>>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                            <span class="deal-timer-value"><?= htmlspecialchars($dealTimerText !== '' ? $dealTimerText : '00:00:00') ?></span>
+                        </div>
+                        <?php endif; ?>
+                        <div class="deal-content">
+                            <p class="deal-subtitle"><?= htmlspecialchars($dealSubtitle) ?></p>
+                            <h3 class="deal-title"><?= htmlspecialchars($dealTitle) ?></h3>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
+    <!-- Featured Products Section -->
+    <section class="section">
+        <div class="container">
+            <div class="section-header" style="text-align: center; flex-direction: column; margin-bottom: 2.5rem;">
+                <div style="display: inline-flex; align-items: center; gap: 0.5rem; background-color: var(--color-primary-light); color: var(--color-primary); padding: 0.375rem 1rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500; margin-bottom: 1rem;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                    Handpicked for You
+                </div>
+                <h2 class="section-title">Featured Products</h2>
+                <p class="section-subtitle" style="max-width: 500px; margin: 0.5rem auto 0;">
+                    Discover our most popular items, carefully selected for quality and style
+                </p>
+            </div>
+            
+            <div class="products-grid">
+                <?php foreach ($featuredProducts as $product): ?>
+                    <?php
+                    // Calculate discount
+                    $discount = 0;
+                    if ($product['sale_price'] && $product['price'] > 0) {
+                        $discount = round((($product['price'] - $product['sale_price']) / $product['price']) * 100);
+                    }
+                    
+                    // Get average rating (mock for demo)
+                    $rating = 4.5 + (rand(0, 5) / 10);
+                    $reviewCount = rand(50, 300);
+                    
+                    // Default image
+                    $image = $product['main_image'] ?: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80';
+                    ?>
+                    <div class="product-card">
+                        <div class="product-image">
+                            <a href="product.php?id=<?= $product['id'] ?>" class="product-image-link" aria-label="View <?= htmlspecialchars($product['name']) ?>"></a>
+                            <img src="<?= htmlspecialchars($image) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
+                            
+                            <!-- Badges -->
+                            <div class="product-badges">
+                                <?php if ($product['is_new']): ?>
+                                    <span class="badge badge-new">New</span>
+                                <?php endif; ?>
+                                <?php if ($product['is_bestseller']): ?>
+                                    <span class="badge badge-bestseller">Best Seller</span>
+                                <?php endif; ?>
+                                <?php if ($discount > 0): ?>
+                                    <span class="badge badge-sale">-<?= $discount ?>%</span>
+                                <?php endif; ?>
+                            </div>
+                            
+                            <!-- Wishlist Button -->
+                            <button class="product-wishlist" data-product-id="<?= $product['id'] ?>" aria-label="Add to wishlist">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                </svg>
+                            </button>
+                            
+                            <!-- Quick Actions -->
+                            <div class="product-actions">
+                                <button class="btn btn-primary product-add-cart" data-product-id="<?= $product['id'] ?>" style="flex: 1;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                                    </svg>
+                                    Add to Cart
+                                </button>
+                                <button class="btn btn-secondary btn-icon product-quick-view" data-product-id="<?= $product['id'] ?>">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="product-content">
+                            <span class="product-category"><?= htmlspecialchars($product['category_name'] ?? 'General') ?></span>
+                            <h3 class="product-name">
+                                <a href="product.php?id=<?= $product['id'] ?>"><?= htmlspecialchars($product['name']) ?></a>
+                            </h3>
+                            
+                            <div class="product-rating">
+                                <div class="stars">
+                                    <?php for ($i = 1; $i <= 5; $i++): ?>
+                                        <?php if ($i <= floor($rating)): ?>
+                                            <svg class="star" viewBox="0 0 24 24" fill="currentColor">
+                                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                            </svg>
+                                        <?php else: ?>
+                                            <svg class="star empty" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                            </svg>
+                                        <?php endif; ?>
+                                    <?php endfor; ?>
+                                </div>
+                                <span class="rating-count">(<?= $reviewCount ?>)</span>
+                            </div>
+                            
+                            <div class="product-price">
+                                <span class="price-current">
+                                    <?= formatPrice($product['sale_price'] ?: $product['price']) ?>
+                                </span>
+                                <?php if ($product['sale_price']): ?>
+                                    <span class="price-original"><?= formatPrice($product['price']) ?></span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            
+            <div style="text-align: center; margin-top: 2.5rem;">
+                <a href="products.php" class="btn btn-outline btn-lg">
+                    View All Products
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="section section-bg">
+        <div class="container">
+            <div class="section-header" style="text-align: center; margin-bottom: 2.5rem;">
+                <h2 class="section-title">What Our Customers Think</h2>
+                <p class="section-subtitle">Join thousands of satisfied shoppers</p>
+            </div>
+            
+            <?php if (!empty($testimonials)): ?>
+            <div class="testimonials-grid">
+                <?php foreach ($testimonials as $testimonial): ?>
+                    <div class="testimonial-card">
+                        <svg class="testimonial-quote" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V21c0 1 0 1 1 1z"/>
+                            <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
+                        </svg>
+                        
+                        <div class="testimonial-rating">
+                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                                <?php if ($i <= $testimonial['rating']): ?>
+                                    <svg class="star" viewBox="0 0 24 24" fill="#ffc107">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                    </svg>
+                                <?php endif; ?>
+                            <?php endfor; ?>
+                        </div>
+                        
+                        <p class="testimonial-text">"<?= htmlspecialchars($testimonial['content']) ?>"</p>
+                        
+                        <?php if ($testimonial['product_name'] !== ''): ?>
+                        <div class="testimonial-product">
+                            Purchased: <span><?= htmlspecialchars($testimonial['product_name']) ?></span>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <div class="testimonial-author">
+                            <img src="<?= htmlspecialchars($testimonial['avatar']) ?>" alt="<?= htmlspecialchars($testimonial['name']) ?>" class="testimonial-avatar">
+                            <div class="testimonial-info">
+                                <h4><?= htmlspecialchars($testimonial['name']) ?></h4>
+                                <p><?= htmlspecialchars($testimonial['role']) ?></p>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            <?php else: ?>
+            <div style="text-align: center; padding: 1rem 0 0; color: var(--color-text-light);">
+                No approved customer reviews yet.
+            </div>
+            <?php endif; ?>
+            
+            <!-- Trust Stats -->
+            <div class="trust-stats">
+                <div class="trust-stat">
+                    <div class="trust-stat-value">50K+</div>
+                    <div class="trust-stat-label">Happy Customers</div>
+                </div>
+                <div class="trust-stat">
+                    <div class="trust-stat-value">4.9</div>
+                    <div class="trust-stat-label">Average Rating</div>
+                </div>
+                <div class="trust-stat">
+                    <div class="trust-stat-value">100K+</div>
+                    <div class="trust-stat-label">Products Sold</div>
+                </div>
+                <div class="trust-stat">
+                    <div class="trust-stat-value">24/7</div>
+                    <div class="trust-stat-label">Customer Support</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<?php require_once 'includes/footer.php'; ?>
