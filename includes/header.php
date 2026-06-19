@@ -136,6 +136,11 @@ $freeShippingThreshold = floatval(getSetting('free_shipping_threshold') ?: 5000)
         <nav class="header-nav-bar">
             <div class="container">
                 <ul class="header-nav-list">
+                    <li>
+                        <a href="<?= BASE_URL ?>/shop" class="header-nav-link">
+                            All Products
+                        </a>
+                    </li>
                     <?php foreach ($categories as $category): ?>
                         <li>
                             <a href="<?= BASE_URL ?>/category/<?= urlencode($category['slug']) ?>" class="header-nav-link">
@@ -167,6 +172,11 @@ $freeShippingThreshold = floatval(getSetting('free_shipping_threshold') ?: 5000)
             </button>
         </div>
         <ul class="mobile-nav-list">
+            <li>
+                <a href="<?= BASE_URL ?>/shop" class="mobile-nav-link">
+                    All Products
+                </a>
+            </li>
             <?php foreach ($categories as $category): ?>
                 <li>
                     <a href="<?= BASE_URL ?>/category/<?= urlencode($category['slug']) ?>" class="mobile-nav-link">

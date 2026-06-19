@@ -84,7 +84,7 @@ if ($category) {
 ?>
 
     <!-- Page Header -->
-    <section class="section section-bg">
+    <section class="section section-bg" style="padding: 1.5rem 0 2rem;">
         <div class="container">
             <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                 <nav style="font-size: 0.875rem; color: var(--color-text-light);">
