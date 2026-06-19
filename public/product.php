@@ -59,6 +59,15 @@ $productImages = array_values(array_unique(array_filter($productImages)));
 if (empty($productImages)) {
     $productImages[] = $fallbackImage;
 }
+
+// Ensure all local paths are absolute URLs (fixes broken images on slug-based URLs)
+$productImages = array_map(function($path) {
+    if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+        return $path;
+    }
+    return BASE_URL . '/' . ltrim($path, '/');
+}, $productImages);
+
 $primaryProductImage = $productImages[0];
 
 $pageTitle = $product['name'];
@@ -246,7 +255,14 @@ require_once __DIR__ . '/../includes/header.php';
                     <?php foreach ($relatedProducts as $rp): ?>
                     <div class="product-card">
                         <div class="product-image">
-                            <img src="<?= htmlspecialchars($rp['main_image'] ?: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80') ?>" alt="<?= htmlspecialchars($rp['name']) ?>">
+                            <?php
+                            $rpImg = $rp['main_image'] ?: null;
+                            if ($rpImg && !str_starts_with($rpImg, 'http')) {
+                                $rpImg = BASE_URL . '/' . ltrim($rpImg, '/');
+                            }
+                            $rpImg = $rpImg ?: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80';
+                            ?>
+                            <img src="<?= htmlspecialchars($rpImg) ?>" alt="<?= htmlspecialchars($rp['name']) ?>">
                             <div class="product-actions">
                                 <a href="<?= BASE_URL ?>/product/<?= $rp['slug'] ?>" class="btn btn-primary" style="flex: 1;">View Details</a>
                             </div>
