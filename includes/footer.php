@@ -45,19 +45,7 @@ $siteEmail = getSetting('site_email') ?: SITE_EMAIL;
             </div>
         </div>
 
-        <?php if (isset($footerProductDescription) && trim((string)$footerProductDescription) !== ''): ?>
-        <?php
-            $normalizedFooterDescription = preg_replace('/\R{2,}/', "\n", trim((string)$footerProductDescription));
-        ?>
-        <div class="footer-product-description container">
-            <section class="footer-product-description-card" aria-label="Product Description">
-                <h3 class="footer-product-description-title">Product Description</h3>
-                <div class="footer-product-description-content">
-                    <?= htmlspecialchars($normalizedFooterDescription) ?>
-                </div>
-            </section>
-        </div>
-        <?php endif; ?>
+
         
         <!-- Newsletter -->
         <div class="newsletter">
