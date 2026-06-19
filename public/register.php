@@ -61,12 +61,11 @@ require_once __DIR__ . '/../includes/header.php';
 ?>
 
     <!-- Register Section -->
-    <section class="section" style="min-height: 60vh; display: flex; align-items: center;">
-        <div class="container" style="max-width: 450px;">
-            <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem;">
-                <div style="text-align: center; margin-bottom: 2rem;">
-                    <h1 style="font-size: 1.5rem; font-weight: 700;">Create Account</h1>
-                    <p style="color: var(--color-text-light); margin-top: 0.5rem;">Join KARTLY for the best shopping experience</p>
+    <section class="section" style="padding-top: 3rem; padding-bottom: 5rem;">
+        <div class="container" style="max-width: 540px; width: 100%;">
+            <div style="padding: 3rem 2.5rem;">
+                <div style="text-align: left; margin-bottom: 2rem;">
+                    <h1 style="font-size: 1.5rem; font-weight: 500; color: var(--color-text); margin-bottom: 0.5rem;">Register Account</h1>
                 </div>
                 
                 <?php if ($error): ?>
@@ -82,52 +81,55 @@ require_once __DIR__ . '/../includes/header.php';
                 <?php endif; ?>
                 
                 <form method="POST" action="">
-                    <div class="form-grid-2">
+                    <div class="form-grid-2" style="gap: 1.5rem;">
                         <div class="form-group">
-                            <label class="form-label" for="first_name">First Name</label>
-                            <input type="text" id="first_name" name="first_name" class="form-input" placeholder="John" required>
+                            <label class="form-label" for="first_name" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem; display: block;">First Name <span style="color: red;">*</span></label>
+                            <input type="text" id="first_name" name="first_name" class="form-input" placeholder="First Name" required style="border-radius: 4px;">
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label" for="last_name">Last Name</label>
-                            <input type="text" id="last_name" name="last_name" class="form-input" placeholder="Doe" required>
+                            <label class="form-label" for="last_name" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem; display: block;">Last Name <span style="color: red;">*</span></label>
+                            <input type="text" id="last_name" name="last_name" class="form-input" placeholder="Last Name" required style="border-radius: 4px;">
                         </div>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="email">Email Address</label>
-                        <input type="email" id="email" name="email" class="form-input" placeholder="john@example.com" required>
+                        <label class="form-label" for="email" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem; display: block;">E-Mail <span style="color: red;">*</span></label>
+                        <input type="email" id="email" name="email" class="form-input" placeholder="E-Mail" required style="border-radius: 4px;">
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="password">Password</label>
-                        <input type="password" id="password" name="password" class="form-input" placeholder="Minimum 6 characters" required>
+                        <label class="form-label" for="password" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem; display: block;">Password <span style="color: red;">*</span></label>
+                        <input type="password" id="password" name="password" class="form-input" placeholder="Password" required style="border-radius: 4px;">
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="confirm_password">Confirm Password</label>
-                        <input type="password" id="confirm_password" name="confirm_password" class="form-input" placeholder="Confirm your password" required>
+                        <label class="form-label" for="confirm_password" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem; display: block;">Confirm Password <span style="color: red;">*</span></label>
+                        <input type="password" id="confirm_password" name="confirm_password" class="form-input" placeholder="Confirm Password" required style="border-radius: 4px;">
                     </div>
                     
-                    <div class="form-group">
-                        <label style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.875rem; cursor: pointer;">
-                            <input type="checkbox" name="terms" required style="width: 16px; height: 16px; margin-top: 2px;">
-                            <span style="color: var(--color-text-light);">
-                                I agree to the <a href="<?= BASE_URL ?>/terms" style="color: var(--color-primary);">Terms of Service</a> and <a href="<?= BASE_URL ?>/privacy" style="color: var(--color-primary);">Privacy Policy</a>
+                    <div class="form-group" style="margin-top: 1.5rem; margin-bottom: 1rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; cursor: pointer; font-weight: 500;">
+                            <input type="checkbox" name="terms" required style="width: 16px; height: 16px;">
+                            <span style="color: var(--color-text);">
+                                I have read and agree to the <a href="<?= BASE_URL ?>/privacy" style="color: var(--color-primary); text-decoration: none;">Privacy Policy</a>
                             </span>
                         </label>
                     </div>
                     
-                    <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
-                        Create Account
+                    <button type="submit" class="btn" style="width: 100%; background-color: var(--color-primary); color: #fff; border-radius: 4px; padding: 0.875rem; font-weight: 600; font-size: 0.95rem; border: none; cursor: pointer;">
+                        Continue
                     </button>
                 </form>
                 
-                <div style="text-align: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border);">
-                    <p style="color: var(--color-text-light); font-size: 0.875rem;">
-                        Already have an account? 
-                        <a href="<?= BASE_URL ?>/login" style="color: var(--color-primary); font-weight: 500;">Sign in</a>
-                    </p>
+                <div style="text-align: center; margin-top: 2rem;">
+                    <div style="position: relative; text-align: center; margin-bottom: 1.5rem;">
+                        <span style="background: #fff; padding: 0 10px; color: var(--color-text-light); font-size: 0.9rem; position: relative; z-index: 1;">Already have an account?</span>
+                        <div style="position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #eee; z-index: 0;"></div>
+                    </div>
+                    <a href="<?= BASE_URL ?>/login" class="btn" style="display: block; width: 100%; border: 1px solid var(--color-primary); color: var(--color-primary); border-radius: 4px; padding: 0.875rem; font-weight: 600; font-size: 0.95rem; background: #fff; text-decoration: none;">
+                        Login to Account
+                    </a>
                 </div>
             </div>
         </div>
