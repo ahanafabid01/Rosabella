@@ -215,17 +215,8 @@ foreach ($stmt->fetchAll() as $reviewRow) {
                 <div class="categories-grid" id="categoriesGrid">
                     <?php foreach ($categories as $index => $category): ?>
                         <?php 
-                        // Transparent product images that look good on white backgrounds
-                        $images = [
-                            'https://raw.githubusercontent.com/mdn/learning-area/master/html/multimedia-and-embedding/images-in-html/dinosaur_small.jpg', // we will use better placeholders via CSS or just Unsplash transparent PNGs if available. Actually, let's use some nice transparent product placeholders.
-                            'https://freepngimg.com/thumb/laptop/2-2-laptop-png-picture.png',
-                            'https://freepngimg.com/thumb/watch/22616-2-mens-watch-transparent.png',
-                            'https://freepngimg.com/thumb/shoes/28530-3-nike-shoes-transparent.png',
-                            'https://freepngimg.com/thumb/backpack/2-2-backpack-png-image.png',
-                            'https://freepngimg.com/thumb/headphones/4-2-headphones-png-image.png',
-                            'https://freepngimg.com/thumb/sunglasses/23812-7-sunglasses-transparent-background.png'
-                        ];
-                        $catImage = $images[$index % count($images)];
+                        // Load image from database, fallback to a default placeholder if empty
+                        $catImage = !empty($category['image']) ? BASE_URL . '/' . htmlspecialchars($category['image']) : 'https://raw.githubusercontent.com/mdn/learning-area/master/html/multimedia-and-embedding/images-in-html/dinosaur_small.jpg';
                         ?>
                         <a href="<?= BASE_URL ?>/category/<?= urlencode($category['slug']) ?>" class="category-card-clean">
                             <div class="category-card-img-wrap">

@@ -48,7 +48,11 @@ if (!function_exists('renderAdminSidebar')) {
             </svg>
         </button>
         <aside class="admin-sidebar">
-            <div class="admin-logo"><span>K</span>KARTLY Admin</div>
+            <div class="admin-logo-centered">
+                <span class="logo-icon">K</span>
+                <div class="logo-text">Admin Panel</div>
+            </div>
+            <div class="admin-nav-divider" style="margin-bottom: 1.5rem;"></div>
             <nav class="admin-nav">
                 <?php foreach ($items as $key => $item): ?>
                     <a href="<?= htmlspecialchars($item['href']) ?>" class="<?= $activePage === $key ? 'active' : '' ?>">
@@ -57,10 +61,6 @@ if (!function_exists('renderAdminSidebar')) {
                     </a>
                 <?php endforeach; ?>
                 <div class="admin-nav-divider"></div>
-                <a href="../index.php" class="admin-nav-muted">
-                    <?= adminIcon('back') ?>
-                    <span>Back to Store</span>
-                </a>
                 <a href="../logout.php" class="admin-nav-muted">
                     <?= adminIcon('logout') ?>
                     <span>Logout</span>

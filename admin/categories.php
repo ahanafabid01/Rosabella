@@ -35,7 +35,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = sanitize($_POST['name'] ?? '');
     $slug = sanitize($_POST['slug'] ?? '');
     $description = sanitize($_POST['description'] ?? '');
-    $image = sanitize($_POST['image'] ?? '');
+    $image = sanitize($_POST['current_image'] ?? '');
+    
+    // Handle file upload
+    if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
+        $uploadDir = '../assets/images/categories/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+        $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9.\-_]/', '', basename($_FILES['image_file']['name']));
+        $targetPath = $uploadDir . $fileName;
+        
+        if (move_uploaded_file($_FILES['image_file']['tmp_name'], $targetPath)) {
+            $image = 'assets/images/categories/' . $fileName;
+        }
+    }
     $parentId = intval($_POST['parent_id'] ?? 0);
     $status = sanitize($_POST['status'] ?? 'active');
     $sortOrder = intval($_POST['sort_order'] ?? 0);
@@ -189,8 +203,8 @@ $pageTitle = 'Categories Management';
                 </table>
             </div>
         <?php else: ?>
-            <div class="admin-card">
-                <form method="POST">
+            <div class="admin-card" style="max-width: 800px; margin: 0 auto;">
+                <form method="POST" enctype="multipart/form-data">
                     <div class="form-group">
                         <label class="form-label">Name *</label>
                         <input type="text" name="name" class="form-input" required value="<?= htmlspecialchars($editingCategory['name'] ?? $_POST['name'] ?? '') ?>">
@@ -211,8 +225,20 @@ $pageTitle = 'Categories Management';
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Image Path</label>
-                        <input type="text" name="image" class="form-input" value="<?= htmlspecialchars($editingCategory['image'] ?? $_POST['image'] ?? '') ?>">
+                        <label class="form-label">Category Image</label>
+                        <?php if (!empty($editingCategory['image'])): ?>
+                            <?php 
+                                $imgSrc = str_starts_with($editingCategory['image'], 'http') 
+                                    ? $editingCategory['image'] 
+                                    : '../' . $editingCategory['image']; 
+                            ?>
+                            <div class="admin-image-preview-wrap">
+                                <img src="<?= htmlspecialchars($imgSrc) ?>" alt="Current Category Image" class="admin-image-preview">
+                            </div>
+                        <?php endif; ?>
+                        <input type="hidden" name="current_image" value="<?= htmlspecialchars($editingCategory['image'] ?? $_POST['current_image'] ?? '') ?>">
+                        <input type="file" name="image_file" class="form-input" accept="image/*">
+                        <div class="admin-upload-help">Upload a transparent PNG or JPG. Leave blank to keep current image.</div>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Description</label>

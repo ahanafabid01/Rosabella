@@ -9,7 +9,7 @@
     top: 0;
     left: 0;
     z-index: 1100;
-    width: 260px;
+    width: 230px;
     height: 100vh;
     overflow-y: auto;
     padding: 1.5rem;
@@ -21,9 +21,10 @@
 .admin-content {
     flex: 1;
     min-width: 0;
-    margin-left: 260px;
+    margin-left: 230px;
     padding: clamp(1rem, 2.2vw, 2rem);
     background: var(--color-bg-secondary);
+    font-size: 14px;
 }
 
 .admin-logo {
@@ -34,6 +35,35 @@
     font-size: 1.25rem;
     font-weight: 700;
     color: #fff;
+}
+
+.admin-logo-centered {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    color: #fff;
+}
+
+.admin-logo-centered .logo-icon {
+    display: flex;
+    width: 48px;
+    height: 48px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: var(--color-primary);
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+}
+
+.admin-logo-centered .logo-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .admin-logo span {
@@ -207,11 +237,12 @@
     border-radius: var(--radius-lg);
     background: var(--color-bg);
     overflow: hidden;
+    font-size: 13px;
 }
 
 .admin-table th,
 .admin-table td {
-    padding: 0.875rem;
+    padding: 0.85rem 1.5rem;
     text-align: left;
     border-bottom: 1px solid var(--color-border);
 }
@@ -543,4 +574,69 @@
     .admin-dashboard-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* =============================================
+   Hard Overrides for Smaller Fonts & Wide Columns
+   ============================================= */
+.admin-layout, 
+.admin-sidebar,
+.admin-sidebar a,
+.admin-sidebar a span,
+.admin-table th, 
+.admin-table td,
+.admin-card,
+.stat-label,
+.admin-text-muted,
+.admin-label-medium {
+    font-size: 13px !important;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 1rem 2rem !important;
+}
+
+.admin-title, .admin-page-title {
+    font-size: 1.4rem !important;
+}
+
+.admin-subtitle, .admin-section-heading {
+    font-size: 1.1rem !important;
+}
+
+.stat-value {
+    font-size: 1.7rem !important;
+}
+
+/* =============================================
+   Two-Column Professional Form Layout
+   ============================================= */
+.admin-product-form-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+@media (min-width: 1024px) {
+    .admin-product-form-layout {
+        grid-template-columns: 2fr 1fr;
+    }
+}
+
+.admin-form-main, .admin-form-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.admin-section-heading {
+    margin-top: 0;
+    margin-bottom: 1.25rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 0.75rem;
 }

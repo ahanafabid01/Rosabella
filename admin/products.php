@@ -386,97 +386,120 @@ $pageTitle = 'Products Management';
                     </table>
                 </div>
             <?php else: ?>
-                <!-- Product Form -->
-                <div class="admin-card">
-                    <form method="POST" enctype="multipart/form-data" class="admin-form">
-                        <div class="form-group">
-                            <label class="form-label">Product Name *</label>
-                            <input type="text" name="name" class="form-input" required value="<?= htmlspecialchars($product['name'] ?? '') ?>">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Category</label>
-                            <select name="category_id" class="form-select">
-                                <option value="">Select category</option>
-                                <?php foreach ($categories as $cat): ?>
-                                <option value="<?= $cat['id'] ?>" <?= ($product['category_id'] ?? '') == $cat['id'] ? 'selected' : '' ?>><?= htmlspecialchars($cat['name']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="admin-two-col-grid">
+                <!-- Professional Two-Column Product Form -->
+                <form method="POST" enctype="multipart/form-data" class="admin-product-form-layout">
+                    
+                    <!-- Left Column: Main Details -->
+                    <div class="admin-form-main">
+                        <div class="admin-card">
+                            <h3 class="admin-section-heading">Basic Information</h3>
                             <div class="form-group">
-                                <label class="form-label">Price *</label>
-                                <input type="number" step="0.01" name="price" class="form-input" required value="<?= $product['price'] ?? '' ?>">
+                                <label class="form-label">Product Name *</label>
+                                <input type="text" name="name" class="form-input" required value="<?= htmlspecialchars($product['name'] ?? '') ?>">
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Sale Price</label>
-                                <input type="number" step="0.01" name="sale_price" class="form-input" value="<?= $product['sale_price'] ?? '' ?>">
+                                <label class="form-label">Description</label>
+                                <textarea name="description" class="form-textarea" rows="6"><?= htmlspecialchars($product['description'] ?? '') ?></textarea>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Stock Quantity *</label>
-                            <input type="number" name="stock_quantity" class="form-input" required value="<?= $product['stock_quantity'] ?? '0' ?>">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Description</label>
-                            <textarea name="description" class="form-textarea" rows="4"><?= htmlspecialchars($product['description'] ?? '') ?></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Product Image</label>
-                            <?php if (!empty($product['main_image'])): ?>
-                                <div class="admin-image-preview-wrap">
-                                    <img src="<?= htmlspecialchars(resolveAdminImageSrc($product['main_image'])) ?>" alt="Current product image" class="admin-image-preview">
+
+                        <div class="admin-card">
+                            <h3 class="admin-section-heading">Pricing & Inventory</h3>
+                            <div class="admin-two-col-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Price *</label>
+                                    <input type="number" step="0.01" name="price" class="form-input" required value="<?= $product['price'] ?? '' ?>">
                                 </div>
-                            <?php endif; ?>
-                            <input type="file" name="main_image_file" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif">
-                            <p class="admin-upload-help">Upload JPG, PNG, WEBP, or GIF (max 5 MB).</p>
-                            <input type="hidden" name="current_image" value="<?= htmlspecialchars($product['main_image'] ?? '') ?>">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Gallery Images</label>
-                            <?php if (!empty($productGalleryImages)): ?>
-                                <div class="admin-gallery-grid">
-                                    <?php foreach ($productGalleryImages as $galleryImage): ?>
-                                        <label class="admin-gallery-item">
-                                            <img src="<?= htmlspecialchars(resolveAdminImageSrc($galleryImage)) ?>" alt="Gallery image" class="admin-gallery-thumb">
-                                            <span class="admin-gallery-remove">
-                                                <input type="checkbox" name="remove_gallery_images[]" value="<?= htmlspecialchars($galleryImage) ?>">
-                                                Remove
-                                            </span>
-                                        </label>
-                                    <?php endforeach; ?>
+                                <div class="form-group">
+                                    <label class="form-label">Sale Price</label>
+                                    <input type="number" step="0.01" name="sale_price" class="form-input" value="<?= $product['sale_price'] ?? '' ?>">
                                 </div>
-                            <?php endif; ?>
-                            <input type="file" name="gallery_image_files[]" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
-                            <p class="admin-upload-help">You can select multiple images at once.</p>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Stock Quantity *</label>
+                                <input type="number" name="stock_quantity" class="form-input" required value="<?= $product['stock_quantity'] ?? '0' ?>">
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Status</label>
-                            <select name="status" class="form-select">
-                                <option value="active" <?= ($product['status'] ?? '') === 'active' ? 'selected' : '' ?>>Active</option>
-                                <option value="inactive" <?= ($product['status'] ?? '') === 'inactive' ? 'selected' : '' ?>>Inactive</option>
-                                <option value="out_of_stock" <?= ($product['status'] ?? '') === 'out_of_stock' ? 'selected' : '' ?>>Out of Stock</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="admin-checkbox-row">
-                                <input type="checkbox" name="is_featured" <?= ($product['is_featured'] ?? 0) ? 'checked' : '' ?>>
-                                Featured Product
-                            </label>
-                            <label class="admin-checkbox-row">
-                                <input type="checkbox" name="is_new" <?= ($product['is_new'] ?? 0) ? 'checked' : '' ?>>
-                                New Arrival
-                            </label>
-                            <label class="admin-checkbox-row">
-                                <input type="checkbox" name="is_bestseller" <?= ($product['is_bestseller'] ?? 0) ? 'checked' : '' ?>>
-                                Best Seller
-                            </label>
-                        </div>
+
                         <div class="admin-actions-row">
                             <button type="submit" class="btn btn-primary">Save Product</button>
                             <a href="products.php" class="btn btn-secondary">Cancel</a>
                         </div>
-                    </form>
-                </div>
+                    </div>
+
+                    <!-- Right Column: Sidebar Details -->
+                    <div class="admin-form-sidebar">
+                        
+                        <div class="admin-card">
+                            <h3 class="admin-section-heading">Status & Organization</h3>
+                            <div class="form-group">
+                                <label class="form-label">Category</label>
+                                <select name="category_id" class="form-select">
+                                    <option value="">Select category</option>
+                                    <?php foreach ($categories as $cat): ?>
+                                    <option value="<?= $cat['id'] ?>" <?= ($product['category_id'] ?? '') == $cat['id'] ? 'selected' : '' ?>><?= htmlspecialchars($cat['name']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Status</label>
+                                <select name="status" class="form-select">
+                                    <option value="active" <?= ($product['status'] ?? '') === 'active' ? 'selected' : '' ?>>Active</option>
+                                    <option value="inactive" <?= ($product['status'] ?? '') === 'inactive' ? 'selected' : '' ?>>Inactive</option>
+                                    <option value="out_of_stock" <?= ($product['status'] ?? '') === 'out_of_stock' ? 'selected' : '' ?>>Out of Stock</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="admin-checkbox-row">
+                                    <input type="checkbox" name="is_featured" <?= ($product['is_featured'] ?? 0) ? 'checked' : '' ?>>
+                                    Featured Product
+                                </label>
+                                <label class="admin-checkbox-row">
+                                    <input type="checkbox" name="is_new" <?= ($product['is_new'] ?? 0) ? 'checked' : '' ?>>
+                                    New Arrival
+                                </label>
+                                <label class="admin-checkbox-row">
+                                    <input type="checkbox" name="is_bestseller" <?= ($product['is_bestseller'] ?? 0) ? 'checked' : '' ?>>
+                                    Best Seller
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="admin-card">
+                            <h3 class="admin-section-heading">Media</h3>
+                            <div class="form-group">
+                                <label class="form-label">Main Product Image</label>
+                                <?php if (!empty($product['main_image'])): ?>
+                                    <div class="admin-image-preview-wrap">
+                                        <img src="<?= htmlspecialchars(resolveAdminImageSrc($product['main_image'])) ?>" alt="Current product image" class="admin-image-preview">
+                                    </div>
+                                <?php endif; ?>
+                                <input type="file" name="main_image_file" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif">
+                                <p class="admin-upload-help">Upload JPG, PNG, WEBP, or GIF (max 5 MB).</p>
+                                <input type="hidden" name="current_image" value="<?= htmlspecialchars($product['main_image'] ?? '') ?>">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Gallery Images</label>
+                                <?php if (!empty($productGalleryImages)): ?>
+                                    <div class="admin-gallery-grid">
+                                        <?php foreach ($productGalleryImages as $galleryImage): ?>
+                                            <label class="admin-gallery-item">
+                                                <img src="<?= htmlspecialchars(resolveAdminImageSrc($galleryImage)) ?>" alt="Gallery image" class="admin-gallery-thumb">
+                                                <span class="admin-gallery-remove">
+                                                    <input type="checkbox" name="remove_gallery_images[]" value="<?= htmlspecialchars($galleryImage) ?>">
+                                                    Remove
+                                                </span>
+                                            </label>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
+                                <input type="file" name="gallery_image_files[]" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
+                                <p class="admin-upload-help">Select multiple images at once.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
             <?php endif; ?>
         </main>
     </div>
