@@ -105,9 +105,6 @@ if ($category) {
                         All Products
                     <?php endif; ?>
                 </h1>
-                <p style="color: var(--color-text-light);">
-                    <?= $totalProducts ?> product<?= $totalProducts != 1 ? 's' : '' ?> found
-                </p>
             </div>
         </div>
     </section>
@@ -228,11 +225,9 @@ if ($category) {
                                     </div>
                                     
                                     <div class="product-content">
-                                        <span class="product-category"><?= htmlspecialchars($product['category_name'] ?? 'General') ?></span>
                                         <h3 class="product-name">
                                             <a href="<?= BASE_URL ?>/product/<?= $product['id'] ?>"><?= htmlspecialchars($product['name']) ?></a>
                                         </h3>
-                                        
                                         <div class="product-price">
                                             <span class="price-current">
                                                 <?= formatPrice($product['sale_price'] ?: $product['price']) ?>

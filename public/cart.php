@@ -11,7 +11,7 @@ $sessionId = session_id();
 // Get cart items
 if (isLoggedIn()) {
     $stmt = $db->prepare("
-        SELECT c.*, p.name, p.price, p.sale_price, p.main_image, p.stock_quantity 
+        SELECT c.*, p.name, p.slug, p.price, p.sale_price, p.main_image, p.stock_quantity 
         FROM cart c 
         JOIN products p ON c.product_id = p.id 
         WHERE c.user_id = ? OR c.session_id = ?
@@ -20,7 +20,7 @@ if (isLoggedIn()) {
     $stmt->execute([$_SESSION['user_id'], $sessionId]);
 } else {
     $stmt = $db->prepare("
-        SELECT c.*, p.name, p.price, p.sale_price, p.main_image, p.stock_quantity 
+        SELECT c.*, p.name, p.slug, p.price, p.sale_price, p.main_image, p.stock_quantity 
         FROM cart c 
         JOIN products p ON c.product_id = p.id 
         WHERE c.session_id = ?
@@ -104,7 +104,7 @@ $total = $subtotal + $shippingCost + $tax;
                                         <!-- Product Info -->
                                         <div>
                                             <h3 style="font-weight: 600; margin-bottom: 0.25rem;">
-                                                <a href="product.php?id=<?= $item['product_id'] ?>"><?= htmlspecialchars($item['name']) ?></a>
+                                                <a href="<?= BASE_URL ?>/product/<?= $item['slug'] ?>"><?= htmlspecialchars($item['name']) ?></a>
                                             </h3>
                                             <p style="font-size: 0.875rem; color: var(--color-text-light);">
                                                 <?= $item['stock_quantity'] > 0 ? 'In Stock' : 'Out of Stock' ?>

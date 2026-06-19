@@ -167,7 +167,7 @@ if ($action === 'delete' && $productId) {
 // Save product (create/update)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = sanitize($_POST['name']);
-    $slug = strtolower(preg_replace('/[^a-z0-9]+/', '-', $name));
+    $slug = trim(preg_replace('/[^a-z0-9]+/', '-', strtolower($name)), '-');
     $category_id = intval($_POST['category_id']);
     $price = floatval($_POST['price']);
     $sale_price = !empty($_POST['sale_price']) ? floatval($_POST['sale_price']) : null;

@@ -417,7 +417,7 @@ try {
                     ?>
                     <div class="product-card">
                         <div class="product-image">
-                            <a href="product.php?id=<?= $product['id'] ?>" class="product-image-link" aria-label="View <?= htmlspecialchars($product['name']) ?>"></a>
+                            <a href="<?= BASE_URL ?>/product/<?= $product['slug'] ?>" class="product-image-link" aria-label="View <?= htmlspecialchars($product['name']) ?>"></a>
                             <img src="<?= htmlspecialchars($image) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
                             
                             <!-- Badges -->
@@ -457,28 +457,9 @@ try {
                         </div>
                         
                         <div class="product-content">
-                            <span class="product-category"><?= htmlspecialchars($product['category_name'] ?? 'General') ?></span>
                             <h3 class="product-name">
-                                <a href="product.php?id=<?= $product['id'] ?>"><?= htmlspecialchars($product['name']) ?></a>
+                                <a href="<?= BASE_URL ?>/product/<?= $product['slug'] ?>"><?= htmlspecialchars($product['name']) ?></a>
                             </h3>
-                            
-                            <div class="product-rating">
-                                <div class="stars">
-                                    <?php for ($i = 1; $i <= 5; $i++): ?>
-                                        <?php if ($i <= floor($rating)): ?>
-                                            <svg class="star" viewBox="0 0 24 24" fill="currentColor">
-                                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                                            </svg>
-                                        <?php else: ?>
-                                            <svg class="star empty" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                                            </svg>
-                                        <?php endif; ?>
-                                    <?php endfor; ?>
-                                </div>
-                                <span class="rating-count">(<?= $reviewCount ?>)</span>
-                            </div>
-                            
                             <div class="product-price">
                                 <span class="price-current">
                                     <?= formatPrice($product['sale_price'] ?: $product['price']) ?>

@@ -5,19 +5,32 @@
 require_once __DIR__ . '/../config/database.php';
 
 $db = getDB();
+
+// Support both slug-based URLs (pretty) and id-based URLs (legacy)
+$slug = trim($_GET['slug'] ?? '');
 $productId = intval($_GET['id'] ?? 0);
 
-if ($productId <= 0) {
-    header('Location: products.php');
+if ($slug !== '') {
+    $stmt = $db->prepare("SELECT p.*, c.name as category_name, c.slug as category_slug FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.slug = ? LIMIT 1");
+    $stmt->execute([$slug]);
+} elseif ($productId > 0) {
+    $stmt = $db->prepare("SELECT p.*, c.name as category_name, c.slug as category_slug FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.id = ? LIMIT 1");
+    $stmt->execute([$productId]);
+} else {
+    header('Location: ' . BASE_URL . '/shop');
     exit;
 }
 
-$stmt = $db->prepare("SELECT p.*, c.name as category_name, c.slug as category_slug FROM products p LEFT JOIN categories c ON p.category_id = c.id WHERE p.id = ?");
-$stmt->execute([$productId]);
 $product = $stmt->fetch();
 
 if (!$product) {
-    header('Location: products.php');
+    header('Location: ' . BASE_URL . '/shop');
+    exit;
+}
+
+// Redirect legacy ?id= URLs to the clean slug URL
+if ($productId > 0 && !empty($product['slug'])) {
+    header('Location: ' . BASE_URL . '/product/' . $product['slug'], true, 301);
     exit;
 }
 
@@ -97,73 +110,66 @@ require_once __DIR__ . '/../includes/header.php';
                 
                 <!-- Product Info -->
                 <div>
-                    <span style="font-size: 0.875rem; color: var(--color-text-light); text-transform: uppercase;"><?= htmlspecialchars($product['category_name']) ?></span>
-                    
-                    <h1 style="font-size: 2rem; font-weight: 700; margin: 0.5rem 0 1rem;"><?= htmlspecialchars($product['name']) ?></h1>
-                    
-                    <!-- Rating -->
-                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                        <div style="display: flex; gap: 2px;">
-                            <?php for ($i = 1; $i <= 5; $i++): ?>
-                            <svg class="star" viewBox="0 0 24 24" fill="#ffc107" style="width: 18px; height: 18px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                            <?php endfor; ?>
-                        </div>
-                        <span style="color: var(--color-text-light);">(125 reviews)</span>
-                    </div>
+                    <h1 style="font-size: 1.75rem; font-weight: 500; margin: 0 0 1.1rem; color: #1e293b; letter-spacing: -0.01em; line-height: 1.3;"><?= htmlspecialchars($product['name']) ?></h1>
 
-                    <!-- Meta Data -->
-                    <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; font-size: 0.875rem;">
+                    <!-- Meta Data: separator-line style -->
+                    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0; margin-bottom: 1.5rem; font-size: 0.875rem; color: var(--color-text-light); border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); padding: 0.65rem 0;">
                         <?php if (!empty($product['brand'])): ?>
-                        <div style="background: var(--color-bg-alt); padding: 0.35rem 0.75rem; border-radius: var(--radius-md);">
-                            <span style="color: var(--color-text-light);">Brand:</span> <strong style="color: var(--color-text);"><?= htmlspecialchars($product['brand']) ?></strong>
+                        <div style="padding: 0 1rem 0 0; display: flex; align-items: center; gap: 0.3rem;">
+                            <span>Brand:</span>
+                            <strong style="color: var(--color-text); font-weight: 600;"><?= htmlspecialchars($product['brand']) ?></strong>
                         </div>
+                        <span style="width: 1px; height: 1rem; background: var(--color-border); display: inline-block; margin-right: 1rem;"></span>
                         <?php endif; ?>
-                        
+
                         <?php if (!empty($product['sku'])): ?>
-                        <div style="background: var(--color-bg-alt); padding: 0.35rem 0.75rem; border-radius: var(--radius-md);">
-                            <span style="color: var(--color-text-light);">Product Code:</span> <strong style="color: var(--color-text);"><?= htmlspecialchars($product['sku']) ?></strong>
+                        <div style="padding: 0 1rem 0 0; display: flex; align-items: center; gap: 0.3rem;">
+                            <span>SKU:</span>
+                            <strong style="color: var(--color-text); font-weight: 600;"><?= htmlspecialchars($product['sku']) ?></strong>
                         </div>
+                        <span style="width: 1px; height: 1rem; background: var(--color-border); display: inline-block; margin-right: 1rem;"></span>
                         <?php endif; ?>
+
+                        <div style="display: flex; align-items: center; gap: 0.4rem;">
+                            <span>Availability:</span>
+                            <?php if ($product['stock_quantity'] > 0): ?>
+                            <strong style="color: #16a34a; font-weight: 600;">&#10003; In Stock</strong>
+                            <?php else: ?>
+                            <strong style="color: var(--color-danger); font-weight: 600;">&#10007; Out of Stock</strong>
+                            <?php endif; ?>
+                        </div>
                     </div>
                     
                     <!-- Price -->
-                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
-                        <span style="font-size: 2rem; font-weight: 700;"><?= formatPrice($product['sale_price'] ?: $product['price']) ?></span>
+                    <div style="display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 1.75rem;">
+                        <span style="font-size: 1.85rem; font-weight: 400; color: var(--color-primary);"><?= formatPrice($product['sale_price'] ?: $product['price']) ?></span>
                         <?php if ($product['sale_price']): ?>
-                        <span style="font-size: 1.25rem; color: var(--color-text-light); text-decoration: line-through;"><?= formatPrice($product['price']) ?></span>
+                        <span style="font-size: 1.1rem; color: var(--color-text-light); text-decoration: line-through; font-weight: 400;"><?= formatPrice($product['price']) ?></span>
                         <?php $discount = round((($product['price'] - $product['sale_price']) / $product['price']) * 100); ?>
-                        <span class="badge badge-danger">Save <?= $discount ?>%</span>
+                        <span style="background: #fef2f2; color: #dc2626; font-size: 0.8rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 999px; letter-spacing: 0.02em;"><?= $discount ?>% OFF</span>
                         <?php endif; ?>
                     </div>
 
                     <!-- Key Features -->
                     <?php if (!empty($product['key_features'])): ?>
-                    <div style="margin-bottom: 1.5rem;">
-                        <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;">Key Features</h3>
-                        <ul style="list-style-type: disc; padding-left: 1.25rem; color: var(--color-text-light); display: flex; flex-direction: column; gap: 0.25rem;">
+                    <div style="margin-bottom: 1.75rem;">
+                        <h3 style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-light); margin-bottom: 0.6rem;">Key Features</h3>
+                        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.4rem;">
                             <?php foreach (explode("\n", $product['key_features']) as $feature): ?>
                                 <?php if (trim($feature) !== ''): ?>
-                                <li><?= htmlspecialchars(trim($feature)) ?></li>
+                                <li style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.9rem; color: var(--color-text);">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" style="flex-shrink:0; margin-top: 3px;"><polyline points="20 6 9 17 4 12"/></svg>
+                                    <?= htmlspecialchars(trim($feature)) ?>
+                                </li>
                                 <?php endif; ?>
                             <?php endforeach; ?>
                         </ul>
                     </div>
                     <?php endif; ?>
 
-                    <!-- Description -->
-                    <div style="color: var(--color-text-light); margin-bottom: 1.5rem; line-height: 1.6;" class="product-description-content">
-                        <?= !empty($product['description']) ? $product['description'] : htmlspecialchars($product['short_description'] ?? '') ?>
-                    </div>
+
                     
-                    <!-- Stock Status -->
-                    <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
-                        <span style="color: var(--color-text-light);">Status:</span>
-                        <?php if ($product['stock_quantity'] > 0): ?>
-                        <span style="color: var(--color-text); font-weight: 600;">In Stock</span>
-                        <?php else: ?>
-                        <span style="color: var(--color-danger); font-weight: 600;">Out of Stock</span>
-                        <?php endif; ?>
-                    </div>
+
 
                     <!-- Variants -->
                     <?php if (!empty($product['variants'])): ?>
@@ -224,6 +230,14 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
             </div>
             
+            <!-- Product Description Section -->
+            <div style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--color-border);">
+                <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem;">Product Description</h2>
+                <div class="product-description-content" style="color: var(--color-text); line-height: 1.8; max-width: 900px;">
+                    <?= !empty($product['description']) ? $product['description'] : htmlspecialchars($product['short_description'] ?? '') ?>
+                </div>
+            </div>
+            
             <!-- Related Products -->
             <?php if (count($relatedProducts) > 0): ?>
             <div style="margin-top: 4rem;">
@@ -234,12 +248,11 @@ require_once __DIR__ . '/../includes/header.php';
                         <div class="product-image">
                             <img src="<?= htmlspecialchars($rp['main_image'] ?: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80') ?>" alt="<?= htmlspecialchars($rp['name']) ?>">
                             <div class="product-actions">
-                                <a href="product.php?id=<?= $rp['id'] ?>" class="btn btn-primary" style="flex: 1;">View Details</a>
+                                <a href="<?= BASE_URL ?>/product/<?= $rp['slug'] ?>" class="btn btn-primary" style="flex: 1;">View Details</a>
                             </div>
                         </div>
                         <div class="product-content">
-                            <span class="product-category"><?= htmlspecialchars($product['category_name']) ?></span>
-                            <h3 class="product-name"><a href="product.php?id=<?= $rp['id'] ?>"><?= htmlspecialchars($rp['name']) ?></a></h3>
+                            <h3 class="product-name"><a href="<?= BASE_URL ?>/product/<?= $rp['slug'] ?>"><?= htmlspecialchars($rp['name']) ?></a></h3>
                             <div class="product-price">
                                 <span class="price-current"><?= formatPrice($rp['sale_price'] ?: $rp['price']) ?></span>
                                 <?php if ($rp['sale_price']): ?>

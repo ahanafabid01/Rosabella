@@ -10,10 +10,10 @@ $sessionId = session_id();
 
 // Get wishlist items
 if (isLoggedIn()) {
-    $stmt = $db->prepare("SELECT w.*, p.name, p.price, p.sale_price, p.main_image, p.stock_quantity, p.status FROM wishlist w JOIN products p ON w.product_id = p.id WHERE w.user_id = ? OR w.session_id = ? ORDER BY w.created_at DESC");
+    $stmt = $db->prepare("SELECT w.*, p.name, p.slug, p.price, p.sale_price, p.main_image, p.stock_quantity, p.status FROM wishlist w JOIN products p ON w.product_id = p.id WHERE w.user_id = ? OR w.session_id = ? ORDER BY w.created_at DESC");
     $stmt->execute([$_SESSION['user_id'], $sessionId]);
 } else {
-    $stmt = $db->prepare("SELECT w.*, p.name, p.price, p.sale_price, p.main_image, p.stock_quantity, p.status FROM wishlist w JOIN products p ON w.product_id = p.id WHERE w.session_id = ? ORDER BY w.created_at DESC");
+    $stmt = $db->prepare("SELECT w.*, p.name, p.slug, p.price, p.sale_price, p.main_image, p.stock_quantity, p.status FROM wishlist w JOIN products p ON w.product_id = p.id WHERE w.session_id = ? ORDER BY w.created_at DESC");
     $stmt->execute([$sessionId]);
 }
 $wishlistItems = $stmt->fetchAll();
@@ -64,12 +64,12 @@ $wishlistItems = $stmt->fetchAll();
                         </button>
                         
                         <div class="product-actions">
-                            <a href="product.php?id=<?= $item['product_id'] ?>" class="btn btn-primary" style="flex: 1;">View Details</a>
+                            <a href="<?= BASE_URL ?>/product/<?= $item['slug'] ?>" class="btn btn-primary" style="flex: 1;">View Details</a>
                         </div>
                     </div>
                     
                     <div class="product-content">
-                        <h3 class="product-name"><a href="product.php?id=<?= $item['product_id'] ?>"><?= htmlspecialchars($item['name']) ?></a></h3>
+                        <h3 class="product-name"><a href="<?= BASE_URL ?>/product/<?= $item['slug'] ?>"><?= htmlspecialchars($item['name']) ?></a></h3>
                         
                         <?php if ($item['status'] !== 'active' || $item['stock_quantity'] <= 0): ?>
                         <span class="badge badge-danger" style="margin-bottom: 0.5rem;">Out of Stock</span>
