@@ -91,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'No payment methods are configured right now. Please contact support.';
     } elseif (!array_key_exists($payment_method, $availablePaymentMethods)) {
         $error = 'Invalid payment method selected.';
-    } elseif ($payment_method === 'bkash_manual' && (empty($payment_phone) || empty($payment_trx_id))) {
+    } elseif (empty($payment_phone) || empty($payment_trx_id)) {
         $error = 'Please provide your bKash Number and Transaction ID.';
     } else {
         try {
@@ -136,7 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
             $orderId = (int)$db->lastInsertId();
 
-            $insertItemStmt = $db->prepare("INSERT INTO order_items (order_id, product_id, product_name, product_sku, quantity, price, total) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $insertItemStmt = $db->prepare("INSERT INTO order_items (order_id, product_id, product_name, product_sku, size, color, variant, quantity, price, total) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             foreach ($cartItems as $item) {
                 $price = $item['sale_price'] ?: $item['price'];
                 $insertItemStmt->execute([
@@ -144,6 +144,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $item['product_id'],
                     $item['name'],
                     '',
+                    $item['size'] ?? null,
+                    $item['color'] ?? null,
+                    $item['variant'] ?? null,
                     $item['quantity'],
                     $price,
                     $price * $item['quantity'],
@@ -298,10 +301,10 @@ require_once __DIR__ . '/../includes/header.php';
                                         <span>bKash</span>
                                     </label>
                                     
-                                    <!-- bKash Instructions Box (Hidden by default) -->
-                                    <div id="bkash_instructions" style="display: none; background: #fafafa; border: 1px solid rgba(0,0,0,0.05); border-radius: var(--radius-md); padding: 1rem; margin-top: 0.5rem; font-size: 0.85rem;">
-                                        <p style="margin-bottom: 0.5rem; color: #555;">We usually take payment 200 taka in advance to avoid fake orders.<br>Please complete your bKash payment at first, then fill up the form below.<br>Pay the remaining amount in cash when you receive the product.</p>
-                                        <p style="margin-bottom: 1rem; font-weight: 600;">bKash Personal Number : 01521728340</p>
+                                    <!-- bKash Instructions Box (Visible for both) -->
+                                    <div id="bkash_instructions" style="background: #fafafa; border: 1px solid rgba(0,0,0,0.05); border-radius: var(--radius-md); padding: 1rem; margin-top: 0.5rem; font-size: 0.85rem;">
+                                        <p style="margin-bottom: 0.5rem; color: #555;"><span id="cod_extra_msg1">We usually take payment 200 taka in advance to avoid fake orders.<br></span>Please complete your bKash payment at first, then fill up the form below.<span id="cod_extra_msg2"><br>Pay the remaining amount in cash when you receive the product.</span></p>
+                                        <p style="margin-bottom: 1rem; font-weight: 600;">bKash Personal Number : 01706941756</p>
                                         
                                         <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                                             <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;">
@@ -370,6 +373,9 @@ require_once __DIR__ . '/../includes/header.php';
                                     </div>
                                     <div style="flex: 1;">
                                         <p style="font-size: 0.875rem; font-weight: 500;"><?= htmlspecialchars($item['name']) ?></p>
+                                        <?php if (!empty($item['variant'])): ?>
+                                        <p style="font-size: 0.75rem; color: var(--color-text-light);">Variant: <?= htmlspecialchars($item['variant']) ?></p>
+                                        <?php endif; ?>
                                         <p style="font-size: 0.75rem; color: var(--color-text-light);">Qty: <?= $item['quantity'] ?></p>
                                     </div>
                                     <div style="font-weight: 600;"><?= formatPrice($price * $item['quantity']) ?></div>
@@ -442,14 +448,15 @@ $(document).ready(function() {
 });
 
 function toggleBkash() {
+    $('#payment_phone').prop('required', true);
+    $('#payment_trx_id').prop('required', true);
+    
     if ($('#bkash_radio').is(':checked')) {
-        $('#bkash_instructions').slideDown();
-        $('#payment_phone').prop('required', true);
-        $('#payment_trx_id').prop('required', true);
+        $('#cod_extra_msg1').hide();
+        $('#cod_extra_msg2').hide();
     } else {
-        $('#bkash_instructions').slideUp();
-        $('#payment_phone').prop('required', false);
-        $('#payment_trx_id').prop('required', false);
+        $('#cod_extra_msg1').show();
+        $('#cod_extra_msg2').show();
     }
 }
 

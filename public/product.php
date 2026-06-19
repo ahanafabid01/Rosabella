@@ -266,7 +266,7 @@ require_once __DIR__ . '/../includes/header.php';
                         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                             <?php foreach (explode(",", $product['variants']) as $variant): ?>
                                 <?php if (trim($variant) !== ''): ?>
-                                <button type="button" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.875rem; border-color: var(--color-border); color: var(--color-text);"><?= htmlspecialchars(trim($variant)) ?></button>
+                                <button type="button" class="btn btn-outline variant-btn" data-variant="<?= htmlspecialchars(trim($variant)) ?>" style="padding: 0.5rem 1rem; font-size: 0.875rem; border-color: var(--color-border); color: var(--color-text); transition: all 0.2s;"><?= htmlspecialchars(trim($variant)) ?></button>
                                 <?php endif; ?>
                             <?php endforeach; ?>
                         </div>
@@ -279,6 +279,9 @@ require_once __DIR__ . '/../includes/header.php';
                         <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
                         <?php if (!empty($product['sizes'])): ?>
                         <input type="hidden" name="selected_size" id="selected-size-input" required>
+                        <?php endif; ?>
+                        <?php if (!empty($product['variants'])): ?>
+                        <input type="hidden" name="selected_variant" id="selected-variant-input" required>
                         <?php endif; ?>
                         
                         <?php if (!empty($colorsArr) && $isNewColorFormat): ?>
@@ -405,6 +408,30 @@ require_once __DIR__ . '/../includes/header.php';
                 
                 if (sizeInput) {
                     sizeInput.value = this.dataset.size;
+                }
+            });
+        });
+
+        // Handle variant selection
+        const variantBtns = document.querySelectorAll('.variant-btn');
+        const variantInput = document.getElementById('selected-variant-input');
+        
+        variantBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                variantBtns.forEach(b => {
+                    b.style.borderColor = 'var(--color-border)';
+                    b.style.backgroundColor = 'transparent';
+                    b.style.color = 'var(--color-text)';
+                    b.style.fontWeight = 'normal';
+                });
+                
+                this.style.borderColor = 'var(--color-primary)';
+                this.style.backgroundColor = 'var(--color-primary-light)';
+                this.style.color = 'var(--color-primary)';
+                this.style.fontWeight = '600';
+                
+                if (variantInput) {
+                    variantInput.value = this.dataset.variant;
                 }
             });
         });

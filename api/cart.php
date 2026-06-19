@@ -89,6 +89,8 @@ function handleAddToCart() {
     if ($size === '') $size = null;
     $color = getInput('selected_color', null);
     if ($color === '') $color = null;
+    $variant = getInput('selected_variant', null);
+    if ($variant === '') $variant = null;
 
     if ($productId <= 0 || $quantity <= 0) {
         respond(false, 'Invalid product or quantity', [], 422);
@@ -107,11 +109,11 @@ function handleAddToCart() {
     }
 
     if ($userId) {
-        $stmt = $db->prepare("SELECT id, quantity FROM cart WHERE product_id = ? AND IFNULL(size, '') = IFNULL(?, '') AND IFNULL(color, '') = IFNULL(?, '') AND (user_id = ? OR session_id = ?) LIMIT 1");
-        $stmt->execute([$productId, $size, $color, $userId, $sessionId]);
+        $stmt = $db->prepare("SELECT id, quantity FROM cart WHERE product_id = ? AND IFNULL(size, '') = IFNULL(?, '') AND IFNULL(color, '') = IFNULL(?, '') AND IFNULL(variant, '') = IFNULL(?, '') AND (user_id = ? OR session_id = ?) LIMIT 1");
+        $stmt->execute([$productId, $size, $color, $variant, $userId, $sessionId]);
     } else {
-        $stmt = $db->prepare("SELECT id, quantity FROM cart WHERE product_id = ? AND IFNULL(size, '') = IFNULL(?, '') AND IFNULL(color, '') = IFNULL(?, '') AND session_id = ? LIMIT 1");
-        $stmt->execute([$productId, $size, $color, $sessionId]);
+        $stmt = $db->prepare("SELECT id, quantity FROM cart WHERE product_id = ? AND IFNULL(size, '') = IFNULL(?, '') AND IFNULL(color, '') = IFNULL(?, '') AND IFNULL(variant, '') = IFNULL(?, '') AND session_id = ? LIMIT 1");
+        $stmt->execute([$productId, $size, $color, $variant, $sessionId]);
     }
     $existingItem = $stmt->fetch();
 
@@ -120,8 +122,8 @@ function handleAddToCart() {
         $stmt = $db->prepare("UPDATE cart SET quantity = ? WHERE id = ?");
         $stmt->execute([$newQuantity, $existingItem['id']]);
     } else {
-        $stmt = $db->prepare("INSERT INTO cart (session_id, user_id, product_id, size, color, quantity) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$sessionId, $userId, $productId, $size, $color, $quantity]);
+        $stmt = $db->prepare("INSERT INTO cart (session_id, user_id, product_id, size, color, variant, quantity) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$sessionId, $userId, $productId, $size, $color, $variant, $quantity]);
     }
 
     respond(true, 'Product added to cart', ['cart_count' => getCartCount()]);

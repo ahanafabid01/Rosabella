@@ -118,6 +118,11 @@ $total = $subtotal; // Shipping and tax are calculated at checkout
                                                 Color: <strong style="color: var(--color-text);"><?= htmlspecialchars($item['color']) ?></strong>
                                             </p>
                                             <?php endif; ?>
+                                            <?php if (!empty($item['variant'])): ?>
+                                            <p style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.25rem;">
+                                                Variant: <strong style="color: var(--color-text);"><?= htmlspecialchars($item['variant']) ?></strong>
+                                            </p>
+                                            <?php endif; ?>
                                             <p style="font-size: 0.875rem; color: var(--color-text-light);">
                                                 <?= $item['stock_quantity'] > 0 ? 'In Stock' : 'Out of Stock' ?>
                                             </p>
