@@ -35,7 +35,7 @@ function ensureDealsTable(PDO $db): bool
                 timer_text VARCHAR(32),
                 countdown_end_at DATETIME NULL,
                 image_path VARCHAR(255),
-                link_url VARCHAR(255) NOT NULL DEFAULT 'products.php?filter=sale',
+                link_url VARCHAR(255) NOT NULL DEFAULT 'sale',
                 overlay_start VARCHAR(40) DEFAULT 'rgba(15, 118, 110, 0.84)',
                 overlay_end VARCHAR(40) DEFAULT 'rgba(11, 91, 85, 0.62)',
                 image_position VARCHAR(100) DEFAULT 'center center',
@@ -77,7 +77,7 @@ function ensureDealsSettings(PDO $db): void
         'home_deals_title' => 'Hot Deals',
         'home_deals_subtitle' => "Don't miss out on these amazing offers",
         'home_deals_cta_label' => 'View All Deals',
-        'home_deals_cta_url' => 'products.php?filter=sale',
+        'home_deals_cta_url' => 'sale',
     ];
 
     foreach ($defaults as $key => $defaultValue) {
@@ -136,7 +136,7 @@ function seedDefaultDeals(PDO $db): void
             'timer_text' => '12:45:30',
             'countdown_end_at' => date('Y-m-d H:i:s', time() + (12 * 3600)),
             'image_path' => 'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=800&q=80',
-            'link_url' => 'products.php?category=electronics',
+            'link_url' => 'category/electronics',
             'overlay_start' => 'rgba(15, 118, 110, 0.84)',
             'overlay_end' => 'rgba(11, 91, 85, 0.62)',
             'image_position' => 'center center',
@@ -150,7 +150,7 @@ function seedDefaultDeals(PDO $db): void
             'timer_text' => '23:59:59',
             'countdown_end_at' => date('Y-m-d H:i:s', time() + (24 * 3600)),
             'image_path' => 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=80',
-            'link_url' => 'products.php?category=fashion',
+            'link_url' => 'shop',
             'overlay_start' => 'rgba(30, 64, 175, 0.82)',
             'overlay_end' => 'rgba(30, 58, 138, 0.62)',
             'image_position' => 'center top',
@@ -164,7 +164,7 @@ function seedDefaultDeals(PDO $db): void
             'timer_text' => '48:00:00',
             'countdown_end_at' => date('Y-m-d H:i:s', time() + (48 * 3600)),
             'image_path' => 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80',
-            'link_url' => 'products.php?category=home-living',
+            'link_url' => 'shop',
             'overlay_start' => 'rgba(15, 118, 110, 0.84)',
             'overlay_end' => 'rgba(13, 89, 97, 0.62)',
             'image_position' => 'center center',
@@ -330,7 +330,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_section_settings
         upsertSettingValue($db, 'home_deals_title', $sectionTitle);
         upsertSettingValue($db, 'home_deals_subtitle', $sectionSubtitle);
         upsertSettingValue($db, 'home_deals_cta_label', $sectionCtaLabel);
-        upsertSettingValue($db, 'home_deals_cta_url', $sectionCtaUrl !== '' ? $sectionCtaUrl : 'products.php?filter=sale');
+        upsertSettingValue($db, 'home_deals_cta_url', $sectionCtaUrl !== '' ? $sectionCtaUrl : 'sale');
         $message = 'Deals section settings updated successfully.';
     }
 }
@@ -390,7 +390,7 @@ if ($dealsTableReady && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['s
     }
 
     if ($linkUrl === '') {
-        $linkUrl = 'products.php?filter=sale';
+        $linkUrl = 'sale';
     }
     if ($imagePosition === '') {
         $imagePosition = 'center center';
@@ -480,7 +480,7 @@ $sectionSettings = [
     'home_deals_title' => getSetting('home_deals_title') ?: 'Hot Deals',
     'home_deals_subtitle' => getSetting('home_deals_subtitle') ?: "Don't miss out on these amazing offers",
     'home_deals_cta_label' => getSetting('home_deals_cta_label') ?: 'View All Deals',
-    'home_deals_cta_url' => getSetting('home_deals_cta_url') ?: 'products.php?filter=sale',
+    'home_deals_cta_url' => getSetting('home_deals_cta_url') ?: 'sale',
 ];
 
 $editingDeal = null;
@@ -679,7 +679,7 @@ $pageTitle = 'Deals Management';
                     <div class="admin-two-col-grid">
                         <div class="form-group">
                             <label class="form-label">Link URL</label>
-                            <input type="text" name="link_url" class="form-input" value="<?= htmlspecialchars($editingDeal['link_url'] ?? $_POST['link_url'] ?? 'products.php?filter=sale') ?>">
+                            <input type="text" name="link_url" class="form-input" value="<?= htmlspecialchars($editingDeal['link_url'] ?? $_POST['link_url'] ?? 'sale') ?>" placeholder="e.g. sale, shop, category/electronics">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Status</label>
@@ -692,13 +692,13 @@ $pageTitle = 'Deals Management';
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Image URL / Path</label>
-                        <input type="text" name="image_path" class="form-input" value="<?= htmlspecialchars($editingDeal['image_path'] ?? $_POST['image_path'] ?? '') ?>" placeholder="assets/uploads/deals/... or https://...">
+                        <label class="form-label">External Image URL <span class="admin-text-muted" style="font-weight:400;">(Optional)</span></label>
+                        <input type="url" name="image_path" class="form-input" value="<?= htmlspecialchars($editingDeal['image_path'] ?? $_POST['image_path'] ?? '') ?>" placeholder="https://example.com/image.jpg">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Upload Image</label>
+                        <label class="form-label">Upload Image <span class="admin-text-muted" style="font-weight:400;">(Optional)</span></label>
                         <input type="file" name="image_file" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif">
-                        <p class="admin-upload-help">If uploaded, this image overrides the URL/path field.</p>
+                        <p class="admin-upload-help">Upload overrides the URL above. Use one or the other.</p>
                     </div>
                     <?php if (!empty($editingDeal['image_path'])): ?>
                         <div class="admin-image-preview-wrap">
@@ -734,7 +734,7 @@ $pageTitle = 'Deals Management';
 
                     <div class="admin-actions-row">
                         <button class="btn btn-primary" type="submit">Save Deal</button>
-                        <a class="btn btn-secondary" href="/Kartly/admin/deals">Cancel</a>
+                        <a class="btn btn-secondary" href="<?= BASE_URL ?>/admin/deals">Cancel</a>
                     </div>
                 </form>
             </div>

@@ -87,7 +87,7 @@ $pageTitle = 'Order Detail';
         <?php renderAdminTopbar($pageTitle ?? 'Admin Panel'); ?>
 <div class="admin-detail-header">
             <h1 class="admin-page-title">Order <?= htmlspecialchars($order['order_number']) ?></h1>
-            <a href="/Kartly/admin/orders" class="btn btn-secondary">Back to Orders</a>
+            <a href="<?= BASE_URL ?>/admin/orders" class="btn btn-secondary">Back to Orders</a>
         </div>
 
         <?php if ($message): ?><div class="alert alert-success"><?= htmlspecialchars($message) ?></div><?php endif; ?>

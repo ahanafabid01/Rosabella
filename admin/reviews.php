@@ -237,7 +237,7 @@ $pageTitle = 'Reviews Management';
         <div class="admin-card admin-card-gap-lg">
             <div class="admin-detail-header">
                 <h2 class="admin-page-title">Review #<?= intval($viewReview['id']) ?></h2>
-                <a href="/Kartly/admin/reviews" class="btn btn-secondary">Back to Reviews</a>
+                <a href="<?= BASE_URL ?>/admin/reviews" class="btn btn-secondary">Back to Reviews</a>
             </div>
 
             <div class="admin-detail-meta-grid">
@@ -350,7 +350,7 @@ $pageTitle = 'Reviews Management';
                         <td><?= htmlspecialchars(date('M j, Y', strtotime($review['created_at'] ?? 'now'))) ?></td>
                         <td>
                             <div class="admin-form-row">
-                                <a href="/Kartly/admin/reviews?action=view&id=<?= intval($review['id']) ?>" class="btn btn-sm btn-outline">View</a>
+                                <a href="<?= BASE_URL ?>/admin/reviews?action=view&id=<?= intval($review['id']) ?>" class="btn btn-sm btn-outline">View</a>
                                 <form method="POST" class="admin-form-row-center">
                                     <input type="hidden" name="action" value="update_status">
                                     <input type="hidden" name="review_id" value="<?= intval($review['id']) ?>">

@@ -116,7 +116,7 @@ $lowStockProducts = $db->query("SELECT * FROM products WHERE stock_quantity < 10
                                 <tr>
                                     <td><?= htmlspecialchars($product['name']) ?></td>
                                     <td><span class="badge badge-danger"><?= $product['stock_quantity'] ?></span></td>
-                                    <td><a href="/Kartly/admin/products?action=edit&id=<?= $product['id'] ?>" class="btn btn-sm btn-outline">Edit</a></td>
+                                    <td><a href="<?= BASE_URL ?>/admin/products?action=edit&id=<?= $product['id'] ?>" class="btn btn-sm btn-outline">Edit</a></td>
                                 </tr>
                                 <?php endforeach; ?>
                             </tbody>

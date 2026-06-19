@@ -424,7 +424,7 @@ $pageTitle = 'Products Management';
 
                         <div class="admin-actions-row">
                             <button type="submit" class="btn btn-primary">Save Product</button>
-                            <a href="/Kartly/admin/products" class="btn btn-secondary">Cancel</a>
+                            <a href="<?= BASE_URL ?>/admin/products" class="btn btn-secondary">Cancel</a>
                         </div>
                     </div>
 

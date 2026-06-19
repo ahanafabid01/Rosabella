@@ -260,7 +260,7 @@ $pageTitle = 'Categories Management';
                     </div>
                     <div class="admin-actions-row">
                         <button class="btn btn-primary" type="submit">Save Category</button>
-                        <a class="btn btn-secondary" href="/Kartly/admin/categories">Cancel</a>
+                        <a class="btn btn-secondary" href="<?= BASE_URL ?>/admin/categories">Cancel</a>
                     </div>
                 </form>
             </div>
