@@ -1393,6 +1393,13 @@ textarea {
     cursor: pointer;
     transition: all var(--transition-fast);
     z-index: 4;
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.product-card:hover .product-wishlist {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .product-wishlist:hover {
