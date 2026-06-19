@@ -1,70 +1,158 @@
 # KARTLY - Apache Configuration
+# Organized structure: /public/ (shop), /pages/ (info), /admin/, /api/, /errors/
 
 # Enable rewrite engine
 RewriteEngine On
 
 # Set base directory
-RewriteBase /
+RewriteBase /Kartly/
 
-# Force HTTPS (uncomment in production)
+# ─────────────────────────────────────────────────────────────
+# SECTION 1: Force HTTPS (uncomment in production)
+# ─────────────────────────────────────────────────────────────
 # RewriteCond %{HTTPS} off
 # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-# Remove www (optional)
-# RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
-# RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
-
-# Prevent directory listing
+# ─────────────────────────────────────────────────────────────
+# SECTION 2: Security — prevent directory listing & protect files
+# ─────────────────────────────────────────────────────────────
 Options -Indexes
 
-# Protect sensitive files
-<FilesMatch "\.(sql|log|ini|conf)$">
+# Block direct access to sensitive directories
+RedirectMatch 403 ^/Kartly/config/
+RedirectMatch 403 ^/Kartly/database/
+RedirectMatch 403 ^/Kartly/errors/(?!$)
+
+# Protect sensitive file types
+<FilesMatch "\.(sql|log|ini|conf|env)$">
     Order allow,deny
     Deny from all
 </FilesMatch>
 
-# Protect config directory
-<FilesMatch "^(config|includes|api)">
-    Order allow,deny
-    Deny from all
-</FilesMatch>
+# ─────────────────────────────────────────────────────────────
+# SECTION 3: Static assets — serve directly (no rewriting)
+# ─────────────────────────────────────────────────────────────
+RewriteCond %{REQUEST_URI} ^/Kartly/assets/ [NC]
+RewriteRule ^ - [L]
 
-# Enable GZIP compression
+# ─────────────────────────────────────────────────────────────
+# SECTION 4: Admin panel — serve directly from /admin/
+# ─────────────────────────────────────────────────────────────
+RewriteCond %{REQUEST_URI} ^/Kartly/admin/ [NC]
+RewriteRule ^ - [L]
+
+# ─────────────────────────────────────────────────────────────
+# SECTION 5: API endpoints — serve directly from /api/
+# ─────────────────────────────────────────────────────────────
+RewriteCond %{REQUEST_URI} ^/Kartly/api/ [NC]
+RewriteRule ^ - [L]
+
+# ─────────────────────────────────────────────────────────────
+# SECTION 6: Static / Info pages → /pages/
+# ─────────────────────────────────────────────────────────────
+RewriteRule ^about(\.php)?$            pages/about.php         [L]
+RewriteRule ^help(\.php)?$             pages/help.php          [L]
+RewriteRule ^shipping(\.php)?$         pages/shipping.php      [L]
+RewriteRule ^returns(\.php)?$          pages/returns.php       [L]
+RewriteRule ^terms(\.php)?$            pages/terms.php         [L]
+RewriteRule ^privacy(\.php)?$          pages/privacy.php       [L]
+RewriteRule ^cookies(\.php)?$          pages/cookies.php       [L]
+RewriteRule ^careers(\.php)?$          pages/careers.php       [L]
+RewriteRule ^press(\.php)?$            pages/press.php         [L]
+RewriteRule ^affiliate(\.php)?$        pages/affiliate.php     [L]
+RewriteRule ^accessibility(\.php)?$    pages/accessibility.php [L]
+RewriteRule ^sustainability(\.php)?$   pages/sustainability.php [L]
+RewriteRule ^size-guide(\.php)?$       pages/size-guide.php    [L]
+
+# ─────────────────────────────────────────────────────────────
+# SECTION 7: Clean pretty URLs (no .php, no ugly query strings)
+# ─────────────────────────────────────────────────────────────
+
+# /category/books  →  products.php?category=books
+RewriteRule ^category/([a-zA-Z0-9_-]+)/?$   public/products.php?category=$1 [L,QSA]
+
+# /shop  →  all products
+RewriteRule ^shop/?$                         public/products.php             [L,QSA]
+
+# /product/my-product-name  →  product.php?slug=$1
+RewriteRule ^product/([a-zA-Z0-9_-]+)/?$    public/product.php?slug=$1      [L,QSA]
+
+# /search?q=term  →  products.php?search=term
+RewriteRule ^search/?$                       public/products.php             [L,QSA]
+
+# Shortcut filter URLs
+RewriteRule ^sale/?$                         public/products.php?filter=sale         [L,QSA]
+RewriteRule ^new-arrivals/?$                 public/products.php?filter=new          [L,QSA]
+RewriteRule ^best-sellers/?$                 public/products.php?filter=bestseller   [L,QSA]
+
+# /track/ORDER123  →  track-order.php?order=ORDER123
+RewriteRule ^track/([a-zA-Z0-9_-]+)/?$      public/track-order.php?order=$1 [L,QSA]
+
+# ─────────────────────────────────────────────────────────────
+# SECTION 8: Core pages (clean, no .php extension)
+# ─────────────────────────────────────────────────────────────
+RewriteRule ^$                         public/index.php            [L]
+RewriteRule ^index(\.php)?$            public/index.php            [L]
+RewriteRule ^products(\.php)?$         public/products.php         [L,QSA]
+RewriteRule ^product(\.php)?$          public/product.php          [L,QSA]
+RewriteRule ^cart(\.php)?$             public/cart.php             [L]
+RewriteRule ^checkout(\.php)?$         public/checkout.php         [L]
+RewriteRule ^wishlist(\.php)?$         public/wishlist.php         [L]
+RewriteRule ^account(\.php)?$          public/account.php          [L]
+RewriteRule ^login(\.php)?$            public/login.php            [L]
+RewriteRule ^register(\.php)?$         public/register.php         [L]
+RewriteRule ^logout(\.php)?$           public/logout.php           [L]
+RewriteRule ^contact(\.php)?$          public/contact.php          [L]
+RewriteRule ^track-order(\.php)?$      public/track-order.php      [L]
+RewriteRule ^gift-cards(\.php)?$       public/gift-cards.php       [L]
+RewriteRule ^payment_callback(\.php)?$ public/payment_callback.php [L]
+RewriteRule ^payment_ipn(\.php)?$      public/payment_ipn.php      [L]
+RewriteRule ^payment_result(\.php)?$   public/payment_result.php   [L]
+
+# ─────────────────────────────────────────────────────────────
+# SECTION 9: Error pages
+# ─────────────────────────────────────────────────────────────
+ErrorDocument 404 /Kartly/errors/404.php
+ErrorDocument 500 /Kartly/errors/500.php
+
+# ─────────────────────────────────────────────────────────────
+# SECTION 9: Performance — GZIP compression
+# ─────────────────────────────────────────────────────────────
 <IfModule mod_deflate.c>
-    AddOutputFilterByType DEFLATE text/plain
-    AddOutputFilterByType DEFLATE text/html
-    AddOutputFilterByType DEFLATE text/xml
-    AddOutputFilterByType DEFLATE text/css
-    AddOutputFilterByType DEFLATE application/xml
-    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE text/plain text/html text/xml text/css
+    AddOutputFilterByType DEFLATE application/xml application/xhtml+xml
     AddOutputFilterByType DEFLATE application/rss+xml
-    AddOutputFilterByType DEFLATE application/javascript
-    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/javascript application/x-javascript
 </IfModule>
 
-# Browser caching
+# ─────────────────────────────────────────────────────────────
+# SECTION 10: Performance — Browser caching
+# ─────────────────────────────────────────────────────────────
 <IfModule mod_expires.c>
     ExpiresActive On
-    ExpiresByType image/jpg "access plus 1 year"
-    ExpiresByType image/jpeg "access plus 1 year"
-    ExpiresByType image/gif "access plus 1 year"
-    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/jpg    "access plus 1 year"
+    ExpiresByType image/jpeg   "access plus 1 year"
+    ExpiresByType image/gif    "access plus 1 year"
+    ExpiresByType image/png    "access plus 1 year"
+    ExpiresByType image/webp   "access plus 1 year"
     ExpiresByType image/svg+xml "access plus 1 year"
-    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType text/css     "access plus 1 month"
     ExpiresByType application/javascript "access plus 1 month"
-    ExpiresByType application/x-javascript "access plus 1 month"
 </IfModule>
 
-# Set default charset
+# ─────────────────────────────────────────────────────────────
+# SECTION 11: PHP settings
+# ─────────────────────────────────────────────────────────────
 AddDefaultCharset UTF-8
 
-# PHP settings (if allowed)
 <IfModule mod_php7.c>
     php_value upload_max_filesize 10M
     php_value post_max_size 10M
     php_value max_execution_time 300
 </IfModule>
 
-# Error pages
-ErrorDocument 404 /404.php
-ErrorDocument 500 /500.php
+<IfModule mod_php8.c>
+    php_value upload_max_filesize 10M
+    php_value post_max_size 10M
+    php_value max_execution_time 300
+</IfModule>
