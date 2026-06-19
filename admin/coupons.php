@@ -146,7 +146,8 @@ $pageTitle = 'Coupons Management';
                         <th>Code</th>
                         <th>Type</th>
                         <th>Value</th>
-                        <th>Usage</th>
+                        <th>Total Uses</th>
+                        <th>Per-User Limit</th>
                         <th>Period</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -159,7 +160,8 @@ $pageTitle = 'Coupons Management';
                             <td><?= htmlspecialchars($coupon['code']) ?></td>
                             <td><?= htmlspecialchars($coupon['type']) ?></td>
                             <td><?= $coupon['type'] === 'percentage' ? intval($coupon['value']) . '%' : formatPrice($coupon['value']) ?></td>
-                            <td><?= intval($coupon['used_count']) ?><?= $coupon['max_uses'] !== null ? ' / ' . intval($coupon['max_uses']) : '' ?></td>
+                            <td><?= intval($coupon['used_count']) ?></td>
+                            <td><?= $coupon['max_uses'] !== null ? intval($coupon['max_uses']) : 'Unlimited' ?></td>
                             <td>
                                 <?= $coupon['start_date'] ? htmlspecialchars($coupon['start_date']) : '-' ?>
                                 to
@@ -203,7 +205,7 @@ $pageTitle = 'Coupons Management';
                             <input type="number" step="0.01" min="0" name="min_order_amount" class="form-input" value="<?= htmlspecialchars((string)($editingCoupon['min_order_amount'] ?? $_POST['min_order_amount'] ?? 0)) ?>">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Max Uses</label>
+                            <label class="form-label">Max Uses (Per User)</label>
                             <input type="number" min="0" name="max_uses" class="form-input" value="<?= htmlspecialchars((string)($editingCoupon['max_uses'] ?? $_POST['max_uses'] ?? '')) ?>">
                         </div>
                     </div>

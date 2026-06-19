@@ -78,7 +78,7 @@ $lowStockProducts = $db->query("SELECT * FROM products WHERE stock_quantity < 10
                 <div class="stat-card">
                     <h3 class="admin-section-heading">Recent Orders</h3>
                     <div class="admin-table-wrap">
-                        <table class="admin-table">
+                        <table class="admin-table admin-table-sm">
                             <thead>
                                 <tr>
                                     <th>Order</th>
@@ -103,7 +103,7 @@ $lowStockProducts = $db->query("SELECT * FROM products WHERE stock_quantity < 10
                 <div class="stat-card">
                     <h3 class="admin-section-heading">Low Stock Alert</h3>
                     <div class="admin-table-wrap">
-                        <table class="admin-table">
+                        <table class="admin-table admin-table-sm">
                             <thead>
                                 <tr>
                                     <th>Product</th>

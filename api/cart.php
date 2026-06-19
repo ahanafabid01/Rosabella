@@ -269,15 +269,22 @@ function handleApplyCoupon() {
         respond(false, 'This coupon is expired or not yet active', [], 400);
     }
     
-    // Check usage limits
-    if ($coupon['max_uses'] && $coupon['used_count'] >= $coupon['max_uses']) {
-        respond(false, 'This coupon has reached its maximum usage limit', [], 400);
+    $userId = $_SESSION['user_id'] ?? null;
+    
+    // Check usage limits per user
+    if ($coupon['max_uses'] && $userId) {
+        $stmtUsage = $db->prepare("SELECT COUNT(*) FROM orders WHERE user_id = ? AND coupon_id = ? AND status != 'cancelled'");
+        $stmtUsage->execute([$userId, $coupon['id']]);
+        $userUsageCount = $stmtUsage->fetchColumn();
+        
+        if ($userUsageCount >= $coupon['max_uses']) {
+            respond(false, 'You have already reached the maximum usage limit for this coupon.', [], 400);
+        }
     }
     
     // Get cart subtotal to check min order amount
     $cartItems = [];
     $sessionId = session_id();
-    $userId = $_SESSION['user_id'] ?? null;
     if ($userId) {
         $stmtCart = $db->prepare("SELECT c.quantity, p.price, p.sale_price FROM cart c JOIN products p ON c.product_id = p.id WHERE c.user_id = ? OR c.session_id = ?");
         $stmtCart->execute([$userId, $sessionId]);
