@@ -17,7 +17,7 @@ $stmt = $db->query("SELECT p.*, c.name as category_name
 $featuredProducts = $stmt->fetchAll();
 
 // Get categories
-$stmt = $db->query("SELECT * FROM categories WHERE status = 'active' ORDER BY sort_order LIMIT 6");
+$stmt = $db->query("SELECT * FROM categories WHERE status = 'active' AND show_on_home = 1 ORDER BY sort_order LIMIT 12");
 $categories = $stmt->fetchAll();
 
 function formatCountdownDisplay(int $remainingSeconds): string

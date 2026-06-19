@@ -53,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $parentId = intval($_POST['parent_id'] ?? 0);
     $status = sanitize($_POST['status'] ?? 'active');
     $sortOrder = intval($_POST['sort_order'] ?? 0);
+    $showOnHome = isset($_POST['show_on_home']) ? 1 : 0;
 
     if (!$name) {
         $error = 'Category name is required.';
@@ -65,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($action === 'edit' && $categoryId > 0) {
                 $stmt = $db->prepare("
                     UPDATE categories
-                    SET name = ?, slug = ?, description = ?, image = ?, parent_id = ?, status = ?, sort_order = ?
+                    SET name = ?, slug = ?, description = ?, image = ?, parent_id = ?, status = ?, sort_order = ?, show_on_home = ?
                     WHERE id = ?
                 ");
                 $stmt->execute([
@@ -76,13 +77,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $parentId > 0 ? $parentId : null,
                     in_array($status, ['active', 'inactive'], true) ? $status : 'active',
                     $sortOrder,
+                    $showOnHome,
                     $categoryId
                 ]);
                 $message = 'Category updated successfully.';
             } else {
                 $stmt = $db->prepare("
-                    INSERT INTO categories (name, slug, description, image, parent_id, status, sort_order)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO categories (name, slug, description, image, parent_id, status, sort_order, show_on_home)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 ");
                 $stmt->execute([
                     $name,
@@ -91,7 +93,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $image ?: null,
                     $parentId > 0 ? $parentId : null,
                     in_array($status, ['active', 'inactive'], true) ? $status : 'active',
-                    $sortOrder
+                    $sortOrder,
+                    $showOnHome
                 ]);
                 $message = 'Category created successfully.';
             }
@@ -264,6 +267,14 @@ $pageTitle = 'Categories Management';
                             <label class="form-label">Sort Order</label>
                             <input type="number" name="sort_order" class="form-input" value="<?= htmlspecialchars((string)($editingCategory['sort_order'] ?? $_POST['sort_order'] ?? $nextSortOrder)) ?>">
                         </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom: 2rem;">
+                        <label class="form-label" style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                            <input type="checkbox" name="show_on_home" value="1" <?= (!isset($editingCategory) || $editingCategory['show_on_home']) ? 'checked' : '' ?> style="width: 18px; height: 18px;">
+                            <span style="font-weight: 500;">Show this category on the Home Page</span>
+                        </label>
+                        <div class="admin-upload-help" style="margin-top: 0.25rem;">If unchecked, this category will not appear in the "Categories" section on the index page.</div>
                     </div>
                     <div class="admin-actions-row">
                         <button class="btn btn-primary" type="submit">Save Category</button>
