@@ -266,13 +266,20 @@ function initCart() {
             showToast('Please select a color first.', 'error');
             return;
         }
+
+        const variantInput = document.getElementById('selected-variant-input');
+        if (variantInput && !variantInput.value) {
+            showToast('Please select a variant first.', 'error');
+            return;
+        }
         
         const productId = addToCartForm.dataset.productId;
         const quantity = parseInt(addToCartForm.querySelector('input[name="quantity"]')?.value || 1);
         const size = sizeInput ? sizeInput.value : null;
         const color = colorInput ? colorInput.value : null;
+        const variant = variantInput ? variantInput.value : null;
         
-        await addToCart(productId, quantity, size, color);
+        await addToCart(productId, quantity, size, color, variant);
     });
 
     const buyNowBtn = addToCartForm?.querySelector('.buy-now-btn');
@@ -294,16 +301,23 @@ function initCart() {
             return;
         }
 
+        const variantInput = document.getElementById('selected-variant-input');
+        if (variantInput && !variantInput.value) {
+            showToast('Please select a variant first.', 'error');
+            return;
+        }
+
         const productId = addToCartForm.dataset.productId;
         const quantity = parseInt(addToCartForm.querySelector('input[name="quantity"]')?.value || 1);
         const size = sizeInput ? sizeInput.value : null;
         const color = colorInput ? colorInput.value : null;
+        const variant = variantInput ? variantInput.value : null;
 
         buyNowBtn.disabled = true;
         const originalLabel = buyNowBtn.textContent;
         buyNowBtn.textContent = 'Processing...';
 
-        const result = await addToCart(productId, quantity, size, color);
+        const result = await addToCart(productId, quantity, size, color, variant);
 
         buyNowBtn.textContent = originalLabel;
         buyNowBtn.disabled = false;
@@ -363,7 +377,7 @@ function initCart() {
     initCartPageControls();
 }
 
-async function addToCart(productId, quantity = 1, size = null, color = null) {
+async function addToCart(productId, quantity = 1, size = null, color = null, variant = null) {
     try {
         const payload = {
             action: 'add',
@@ -372,6 +386,7 @@ async function addToCart(productId, quantity = 1, size = null, color = null) {
         };
         if (size) payload.selected_size = size;
         if (color) payload.selected_color = color;
+        if (variant) payload.selected_variant = variant;
 
         const data = await apiRequest('api/cart.php', payload);
         
@@ -384,11 +399,11 @@ async function addToCart(productId, quantity = 1, size = null, color = null) {
         return data;
     } catch (error) {
         // Fallback to local storage
-        const existingItem = cart.find(item => item.product_id === productId && item.size === size && item.color === color);
+        const existingItem = cart.find(item => item.product_id === productId && item.size === size && item.color === color && item.variant === variant);
         if (existingItem) {
             existingItem.quantity += quantity;
         } else {
-            cart.push({ product_id: productId, quantity: quantity, size: size, color: color });
+            cart.push({ product_id: productId, quantity: quantity, size: size, color: color, variant: variant });
         }
         localStorage.setItem('kartly_cart', JSON.stringify(cart));
         updateCartBadge();
