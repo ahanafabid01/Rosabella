@@ -153,13 +153,25 @@ if ($order) {
                                 <span>Total</span>
                                 <span><?= formatPrice($order['total']) ?></span>
                             </div>
+                            <?php
+                            $paidAmount = 0;
+                            $dueAmount = $order['total'];
+                            
+                            if ($order['payment_method'] === 'cod') {
+                                $paidAmount = 200;
+                                $dueAmount = max(0, $order['total'] - 200);
+                            } elseif ($order['payment_status'] === 'paid') {
+                                $paidAmount = $order['total'];
+                                $dueAmount = 0;
+                            }
+                            ?>
                             <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: var(--color-success); font-weight: 600; font-size: 0.9rem;">
                                 <span>Paid</span>
-                                <span><?= $order['payment_status'] === 'paid' ? formatPrice($order['total']) : formatPrice(0) ?></span>
+                                <span><?= formatPrice($paidAmount) ?></span>
                             </div>
                             <div style="display: flex; justify-content: space-between; color: var(--color-danger); font-weight: 600; font-size: 0.9rem;">
                                 <span>Due</span>
-                                <span><?= $order['payment_status'] === 'paid' ? formatPrice(0) : formatPrice($order['total']) ?></span>
+                                <span><?= formatPrice($dueAmount) ?></span>
                             </div>
                         </div>
                     </div>
