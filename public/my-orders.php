@@ -149,15 +149,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_review'])) {
     $orderId = intval($_POST['order_id'] ?? 0);
     $productId = intval($_POST['product_id'] ?? 0);
     $rating = intval($_POST['rating'] ?? 0);
-    $reviewTitle = trim((string)($_POST['review_title'] ?? ''));
+    $rating = intval($_POST['rating'] ?? 0);
     $reviewText = trim((string)($_POST['review_text'] ?? ''));
 
     if ($orderId <= 0 || $productId <= 0) {
         $error = 'Invalid review request.';
     } elseif ($rating < 1 || $rating > 5) {
         $error = 'Please select a valid rating between 1 and 5.';
-    } elseif (strlen($reviewTitle) > 255) {
-        $error = 'Review title must be 255 characters or less.';
     } elseif (strlen($reviewText) > 3000) {
         $error = 'Review must be 3000 characters or less.';
     }
@@ -223,12 +221,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_review'])) {
             $existingReviewId = $existingReview ? intval($existingReview['id']) : null;
 
             if ($existingReviewId) {
-                $updateStmt = $db->prepare("UPDATE reviews SET rating = ?, title = ?, review = ?, status = 'pending' WHERE id = ?");
-                $updateStmt->execute([$rating, $reviewTitle !== '' ? $reviewTitle : null, $reviewText !== '' ? $reviewText : null, $existingReviewId]);
+                $updateStmt = $db->prepare("UPDATE reviews SET rating = ?, review = ?, status = 'pending' WHERE id = ?");
+                $updateStmt->execute([$rating, $reviewText !== '' ? $reviewText : null, $existingReviewId]);
                 $newReviewId = $existingReviewId;
             } else {
-                $insertStmt = $db->prepare("INSERT INTO reviews (product_id, user_id, rating, title, review, status) VALUES (?, ?, ?, ?, ?, 'pending')");
-                $insertStmt->execute([$productId, $userId, $rating, $reviewTitle !== '' ? $reviewTitle : null, $reviewText !== '' ? $reviewText : null]);
+                $insertStmt = $db->prepare("INSERT INTO reviews (product_id, user_id, rating, review, status) VALUES (?, ?, ?, ?, 'pending')");
+                $insertStmt->execute([$productId, $userId, $rating, $reviewText !== '' ? $reviewText : null]);
                 $newReviewId = intval($db->lastInsertId());
             }
 

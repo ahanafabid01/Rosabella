@@ -174,7 +174,6 @@ $pageTitle = 'Review Details #' . intval($viewReview['id']);
             <!-- Left Column: Review Content -->
             <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden;">
                 <div style="padding: 1.5rem; border-bottom: 1px solid var(--color-border); background: var(--color-bg-secondary);">
-                    <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;"><?= htmlspecialchars((string)($viewReview['title'] ?? 'No Title Provided')) ?></h3>
                     <div style="color: #f59e0b; font-size: 1.25rem; letter-spacing: 2px;">
                         <?= htmlspecialchars(renderAdminReviewStars(intval($viewReview['rating'] ?? 0))) ?>
                     </div>
