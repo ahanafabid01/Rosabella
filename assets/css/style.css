@@ -2012,6 +2012,19 @@ textarea {
     }
 }
 
+.product-bottom-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+}
+
+@media (min-width: 1024px) {
+    .product-bottom-layout {
+        grid-template-columns: 1fr 400px;
+        gap: 4rem;
+    }
+}
+
 @media (max-width: 767px) {
     .header-top {
         padding: 0.28rem 0;

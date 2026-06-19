@@ -239,48 +239,45 @@ require_once __DIR__ . '/../includes/header.php';
                 </div>
             </div>
             
-            <!-- Product Description Section -->
-            <div style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--color-border);">
-                <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem;">Product Description</h2>
-                <div class="product-description-content" style="color: var(--color-text); line-height: 1.8; max-width: 900px;">
-                    <?= !empty($product['description']) ? $product['description'] : htmlspecialchars($product['short_description'] ?? '') ?>
-                </div>
-            </div>
-            
-            <!-- Related Products -->
-            <?php if (count($relatedProducts) > 0): ?>
-            <div style="margin-top: 4rem;">
-                <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem;">Related Products</h2>
-                <div class="products-grid">
-                    <?php foreach ($relatedProducts as $rp): ?>
-                    <div class="product-card">
-                        <div class="product-image">
-                            <?php
-                            $rpImg = $rp['main_image'] ?: null;
-                            if ($rpImg && !str_starts_with($rpImg, 'http')) {
-                                $rpImg = BASE_URL . '/' . ltrim($rpImg, '/');
-                            }
-                            $rpImg = $rpImg ?: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80';
-                            ?>
-                            <img src="<?= htmlspecialchars($rpImg) ?>" alt="<?= htmlspecialchars($rp['name']) ?>">
-                            <div class="product-actions">
-                                <a href="<?= BASE_URL ?>/product/<?= $rp['slug'] ?>" class="btn btn-primary" style="flex: 1;">View Details</a>
-                            </div>
-                        </div>
-                        <div class="product-content">
-                            <h3 class="product-name"><a href="<?= BASE_URL ?>/product/<?= $rp['slug'] ?>"><?= htmlspecialchars($rp['name']) ?></a></h3>
-                            <div class="product-price">
-                                <span class="price-current"><?= formatPrice($rp['sale_price'] ?: $rp['price']) ?></span>
-                                <?php if ($rp['sale_price']): ?>
-                                <span class="price-original"><?= formatPrice($rp['price']) ?></span>
-                                <?php endif; ?>
-                            </div>
-                        </div>
+            <!-- Product Bottom Layout (Description & Related) -->
+            <div class="product-bottom-layout" style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--color-border);">
+                <!-- Product Description Section -->
+                <div>
+                    <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem;">Product Description</h2>
+                    <div class="product-description-content" style="color: var(--color-text); line-height: 1.8;">
+                        <?= !empty($product['description']) ? $product['description'] : htmlspecialchars($product['short_description'] ?? '') ?>
                     </div>
-                    <?php endforeach; ?>
                 </div>
+                
+                <!-- Related Products -->
+                <?php if (count($relatedProducts) > 0): ?>
+                <div>
+                    <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem;">Related Products</h2>
+                    <div class="related-products-sidebar" style="display: grid; gap: 1.5rem;">
+                        <?php foreach ($relatedProducts as $rp): ?>
+                        <div class="product-card" style="display: flex; gap: 1rem; padding: 1rem; align-items: center;">
+                            <div class="product-image" style="width: 100px; height: 100px; flex-shrink: 0; padding: 0;">
+                                <?php
+                                $rpImg = $rp['main_image'] ?: null;
+                                if ($rpImg && !str_starts_with($rpImg, 'http')) {
+                                    $rpImg = BASE_URL . '/' . ltrim($rpImg, '/');
+                                }
+                                $rpImg = $rpImg ?: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80';
+                                ?>
+                                <img src="<?= htmlspecialchars($rpImg) ?>" alt="<?= htmlspecialchars($rp['name']) ?>" style="width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+                            <div class="product-content" style="padding: 0;">
+                                <h3 class="product-name" style="font-size: 0.95rem; margin-bottom: 0.4rem; font-weight: 500;"><a href="<?= BASE_URL ?>/product/<?= $rp['slug'] ?>"><?= htmlspecialchars($rp['name']) ?></a></h3>
+                                <div class="product-price">
+                                    <span class="price-current" style="font-size: 1rem;"><?= formatPrice($rp['sale_price'] ?: $rp['price']) ?></span>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
-            <?php endif; ?>
 
         </div>
     </section>
