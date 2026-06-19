@@ -279,9 +279,56 @@ function initCart() {
         buyNowBtn.disabled = false;
 
         if (result && result.success) {
-            window.location.href = 'checkout.php';
+            window.location.href = 'cart.php';
         }
     });
+
+    // Mini Cart Sidebar Logic
+    const headerCartBtn = document.querySelector('.header-cart-btn');
+    const miniCartSidebar = document.querySelector('.mini-cart-sidebar');
+    const miniCartOverlay = document.querySelector('.mini-cart-overlay');
+    const miniCartClose = document.querySelector('.mini-cart-close');
+
+    function getScrollbarWidth() {
+        return window.innerWidth - document.documentElement.clientWidth;
+    }
+
+    function openMiniCart(e) {
+        if (window.innerWidth >= 1024 && miniCartSidebar) {
+            e.preventDefault();
+            
+            // Prevent page jump by replacing scrollbar with padding
+            const scrollbarWidth = getScrollbarWidth();
+            document.body.style.paddingRight = `${scrollbarWidth}px`;
+            document.body.style.overflow = 'hidden';
+            
+            miniCartSidebar.classList.add('active');
+            if (miniCartOverlay) miniCartOverlay.classList.add('active');
+        }
+    }
+
+    function closeMiniCart() {
+        if (miniCartSidebar) {
+            miniCartSidebar.classList.remove('active');
+            if (miniCartOverlay) miniCartOverlay.classList.remove('active');
+            
+            // Wait for sidebar sliding animation to finish before restoring scroll
+            setTimeout(() => {
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            }, 300);
+        }
+    }
+
+    if (headerCartBtn) {
+        headerCartBtn.addEventListener('click', openMiniCart);
+    }
+    if (miniCartClose) {
+        miniCartClose.addEventListener('click', closeMiniCart);
+    }
+    if (miniCartOverlay) {
+        miniCartOverlay.addEventListener('click', closeMiniCart);
+    }
 
     initCartPageControls();
 }

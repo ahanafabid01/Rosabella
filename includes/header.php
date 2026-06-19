@@ -227,4 +227,78 @@ $freeShippingThreshold = floatval(getSetting('free_shipping_threshold') ?: 5000)
     <!-- Toast Container -->
     <div class="toast-container"></div>
 
-
+    <!-- Mini Cart Sidebar -->
+    <?php
+    $miniCartSessionId = session_id();
+    if (isLoggedIn()) {
+        $mcStmt = $db->prepare("
+            SELECT c.*, p.name, p.slug, p.price, p.sale_price, p.main_image 
+            FROM cart c 
+            JOIN products p ON c.product_id = p.id 
+            WHERE c.user_id = ? OR c.session_id = ?
+            ORDER BY c.created_at DESC
+        ");
+        $mcStmt->execute([$_SESSION['user_id'], $miniCartSessionId]);
+    } else {
+        $mcStmt = $db->prepare("
+            SELECT c.*, p.name, p.slug, p.price, p.sale_price, p.main_image 
+            FROM cart c 
+            JOIN products p ON c.product_id = p.id 
+            WHERE c.session_id = ?
+            ORDER BY c.created_at DESC
+        ");
+        $mcStmt->execute([$miniCartSessionId]);
+    }
+    $miniCartItems = $mcStmt->fetchAll();
+    $miniCartSubtotal = 0;
+    ?>
+    <div class="mini-cart-overlay"></div>
+    <div class="mini-cart-sidebar">
+        <div class="mini-cart-header">
+            <h3>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 0.5rem; vertical-align: middle;">
+                    <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                </svg>
+                Cart (<?= $cartCount ?>)
+            </h3>
+            <button class="mini-cart-close" aria-label="Close cart">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="mini-cart-body">
+            <?php if (empty($miniCartItems)): ?>
+                <div class="mini-cart-empty" style="text-align: center; padding: 3rem 1rem;">
+                    <p style="color: var(--color-text-light);">Your cart is empty.</p>
+                </div>
+            <?php else: ?>
+                <div class="mini-cart-items">
+                    <?php foreach ($miniCartItems as $item): 
+                        $price = $item['sale_price'] ?: $item['price'];
+                        $miniCartSubtotal += $price * $item['quantity'];
+                    ?>
+                        <div class="mini-cart-item">
+                            <img src="<?= htmlspecialchars(BASE_URL . '/' . ltrim($item['main_image'], '/')) ?>" alt="<?= htmlspecialchars($item['name']) ?>">
+                            <div class="mini-cart-item-info">
+                                <a href="<?= BASE_URL ?>/product/<?= $item['slug'] ?>" class="mini-cart-item-title"><?= htmlspecialchars($item['name']) ?></a>
+                                <div class="mini-cart-item-price">
+                                    <?= $currencySymbol ?> <?= number_format($price, 2) ?> <span>&times; <?= $item['quantity'] ?></span>
+                                </div>
+                            </div>
+                            <button class="btn btn-ghost cart-remove" data-cart-id="<?= $item['id'] ?>" aria-label="Remove item" style="padding: 0.25rem; color: var(--color-danger);">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            </button>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+        <div class="mini-cart-footer">
+            <div class="mini-cart-subtotal">
+                <span>Sub Total:</span>
+                <span class="subtotal-amount"><?= $currencySymbol ?> <?= number_format($miniCartSubtotal, 2) ?></span>
+            </div>
+            <a href="<?= BASE_URL ?>/cart" class="btn btn-primary mini-cart-btn" style="width: 100%;">View Cart</a>
+        </div>
+    </div>
