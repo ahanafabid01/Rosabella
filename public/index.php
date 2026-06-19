@@ -20,40 +20,6 @@ $featuredProducts = $stmt->fetchAll();
 $stmt = $db->query("SELECT * FROM categories WHERE status = 'active' ORDER BY sort_order LIMIT 6");
 $categories = $stmt->fetchAll();
 
-// Get Hero Slides
-$allHeroSlides = [];
-try {
-    $stmt = $db->query("SELECT * FROM hero_slides WHERE status = 'active' ORDER BY sort_order ASC, created_at DESC");
-    $allHeroSlides = $stmt->fetchAll();
-} catch (Throwable $e) {}
-
-$mainSlides = [];
-$sideTopSlide = null;
-$sideBottomSlide = null;
-
-foreach ($allHeroSlides as $slide) {
-    if ($slide['position'] === 'main') {
-        $mainSlides[] = $slide;
-    } elseif ($slide['position'] === 'side_top' && !$sideTopSlide) {
-        $sideTopSlide = $slide;
-    } elseif ($slide['position'] === 'side_bottom' && !$sideBottomSlide) {
-        $sideBottomSlide = $slide;
-    }
-}
-
-// Fallbacks if database is empty
-if (empty($mainSlides)) {
-    $mainSlides = [
-        ['image_path' => 'https://images.unsplash.com/photo-1542204165-65bf26472b9b?w=1200&q=80', 'link_url' => 'category/accessories', 'title' => '', 'subtitle' => ''],
-        ['image_path' => 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1200&q=80', 'link_url' => 'category/electronics', 'title' => '', 'subtitle' => '']
-    ];
-}
-if (!$sideTopSlide) {
-    $sideTopSlide = ['image_path' => 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=600&q=80', 'link_url' => 'shop', 'title' => '', 'subtitle' => ''];
-}
-if (!$sideBottomSlide) {
-    $sideBottomSlide = ['image_path' => 'https://images.unsplash.com/photo-1550009158-9ebf6d1736eb?w=600&q=80', 'link_url' => 'sale', 'title' => '', 'subtitle' => ''];
-}
 function formatCountdownDisplay(int $remainingSeconds): string
 {
     $remainingSeconds = max(0, $remainingSeconds);
@@ -73,7 +39,7 @@ function formatCountdownDisplay(int $remainingSeconds): string
 $hotDealsSectionTitle = getSetting('home_deals_title') ?: 'Hot Deals';
 $hotDealsSectionSubtitle = getSetting('home_deals_subtitle') ?: "Don't miss out on these amazing offers";
 $hotDealsCtaLabel = getSetting('home_deals_cta_label') ?: 'View All Deals';
-$hotDealsCtaUrl = getSetting('home_deals_cta_url') ?: 'sale';
+$hotDealsCtaUrl = getSetting('home_deals_cta_url') ?: 'products.php?filter=sale';
 
 $hotDeals = [];
 $hotDealsTableReady = true;
@@ -126,135 +92,95 @@ if (!$hotDealsTableReady) {
     ];
 }
 
-// Get latest approved testimonials (recent 3)
-$stmt = $db->prepare("
-    SELECT
-        r.rating,
-        r.title,
-        r.review AS content,
-        r.created_at,
-        p.name AS product_name,
-        u.first_name,
-        u.last_name
-    FROM reviews r
-    LEFT JOIN products p ON p.id = r.product_id
-    LEFT JOIN users u ON u.id = r.user_id
-    WHERE r.status = 'approved'
-    ORDER BY r.created_at DESC
-    LIMIT 3
-");
-$stmt->execute();
-$testimonials = [];
-foreach ($stmt->fetchAll() as $reviewRow) {
-    $customerName = trim((string)($reviewRow['first_name'] ?? '') . ' ' . (string)($reviewRow['last_name'] ?? ''));
-    if ($customerName === '') {
-        $customerName = 'Verified Customer';
-    }
+// Fetch hero slides from DB
+$heroMain = [];
+$heroSideTop = null;
+$heroSideBottom = null;
+try {
+    $stmt = $db->query("SELECT * FROM hero_slides WHERE status = 'active' AND position = 'main' ORDER BY sort_order ASC, created_at DESC");
+    $heroMain = $stmt->fetchAll();
 
-    $reviewContent = trim((string)($reviewRow['content'] ?? ''));
-    $reviewTitle = trim((string)($reviewRow['title'] ?? ''));
-    $displayContent = $reviewContent !== ''
-        ? $reviewContent
-        : ($reviewTitle !== '' ? $reviewTitle : 'Rated this product after purchase.');
+    $stmt = $db->query("SELECT * FROM hero_slides WHERE status = 'active' AND position = 'side_top' ORDER BY sort_order ASC LIMIT 1");
+    $heroSideTop = $stmt->fetch() ?: null;
 
-    $testimonials[] = [
-        'name' => $customerName,
-        'role' => 'Verified Buyer',
-        'avatar' => 'https://ui-avatars.com/api/?background=0f766e&color=fff&name=' . rawurlencode($customerName),
-        'rating' => max(1, min(5, intval($reviewRow['rating'] ?? 5))),
-        'title' => $reviewTitle,
-        'content' => $displayContent,
-        'product_name' => trim((string)($reviewRow['product_name'] ?? '')),
-    ];
+    $stmt = $db->query("SELECT * FROM hero_slides WHERE status = 'active' AND position = 'side_bottom' ORDER BY sort_order ASC LIMIT 1");
+    $heroSideBottom = $stmt->fetch() ?: null;
+} catch (Throwable $e) {
+    $heroMain = [];
+    $heroSideTop = null;
+    $heroSideBottom = null;
 }
 ?>
 
     <!-- Hero Section -->
+    <?php if (!empty($heroMain) || $heroSideTop || $heroSideBottom): ?>
     <section class="section" style="padding-top: 1.5rem; padding-bottom: 2rem;">
         <div class="container">
             <div class="hero-bento-grid">
-                
+
                 <!-- Main Banner (Left Side Slider) -->
+                <?php if (!empty($heroMain)): ?>
                 <div class="hero-main-banner">
                     <div class="hero-slider">
-                        <?php foreach ($mainSlides as $index => $slide): ?>
-                            <?php $imgUrl = strpos($slide['image_path'], 'http') === 0 ? $slide['image_path'] : BASE_URL . '/' . htmlspecialchars($slide['image_path']); ?>
-                            <div class="hero-slide <?= $index === 0 ? 'active' : '' ?>">
-                                <a href="<?= BASE_URL . '/' . htmlspecialchars($slide['link_url'] ?? '') ?>" style="display: block; width: 100%; height: 100%; position: relative;">
-                                    <img src="<?= $imgUrl ?>" alt="<?= htmlspecialchars($slide['title'] ?? 'Hero Slide') ?>">
-                                    <?php if (!empty($slide['title']) || !empty($slide['subtitle'])): ?>
-                                        <div style="position: absolute; bottom: 20%; left: 10%; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
-                                            <?php if (!empty($slide['title'])): ?>
-                                                <h2 style="font-size: 2.5rem; margin: 0 0 0.5rem;"><?= htmlspecialchars($slide['title']) ?></h2>
-                                            <?php endif; ?>
-                                            <?php if (!empty($slide['subtitle'])): ?>
-                                                <p style="font-size: 1.2rem; margin: 0;"><?= htmlspecialchars($slide['subtitle']) ?></p>
-                                            <?php endif; ?>
-                                        </div>
-                                    <?php endif; ?>
+                        <?php foreach ($heroMain as $slideIdx => $slide): ?>
+                        <div class="hero-slide <?= $slideIdx === 0 ? 'active' : '' ?>">
+                            <?php $slideLink = !empty($slide['link_url']) ? BASE_URL . '/' . ltrim($slide['link_url'], '/') : null; ?>
+                            <?php if ($slideLink): ?>
+                                <a href="<?= htmlspecialchars($slideLink) ?>" style="display:block;width:100%;height:100%;">
+                                    <img src="<?= BASE_URL . '/' . htmlspecialchars($slide['image_path']) ?>" alt="<?= htmlspecialchars($slide['title'] ?? 'Banner') ?>">
                                 </a>
-                            </div>
+                            <?php else: ?>
+                                <img src="<?= BASE_URL . '/' . htmlspecialchars($slide['image_path']) ?>" alt="<?= htmlspecialchars($slide['title'] ?? 'Banner') ?>">
+                            <?php endif; ?>
+                        </div>
                         <?php endforeach; ?>
 
+                        <?php if (count($heroMain) > 1): ?>
                         <!-- Navigation -->
-                        <?php if (count($mainSlides) > 1): ?>
-                            <div class="hero-nav hero-nav-prev">
-                                <button aria-label="Previous slide">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="15 18 9 12 15 6"/>
-                                    </svg>
-                                </button>
-                            </div>
-                            <div class="hero-nav hero-nav-next">
-                                <button aria-label="Next slide">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="9 18 15 12 9 6"/>
-                                    </svg>
-                                </button>
-                            </div>
-                            
-                            <!-- Dots -->
-                            <div class="hero-dots">
-                                <?php foreach ($mainSlides as $index => $slide): ?>
-                                    <button class="hero-dot <?= $index === 0 ? 'active' : '' ?>" aria-label="Go to slide <?= $index + 1 ?>"></button>
-                                <?php endforeach; ?>
-                            </div>
+                        <div class="hero-nav hero-nav-prev">
+                            <button aria-label="Previous slide">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                            </button>
+                        </div>
+                        <div class="hero-nav hero-nav-next">
+                            <button aria-label="Next slide">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                            </button>
+                        </div>
+                        <!-- Dots -->
+                        <div class="hero-dots">
+                            <?php foreach ($heroMain as $dotIdx => $dot): ?>
+                                <button class="hero-dot <?= $dotIdx === 0 ? 'active' : '' ?>" aria-label="Go to slide <?= $dotIdx + 1 ?>"></button>
+                            <?php endforeach; ?>
+                        </div>
                         <?php endif; ?>
                     </div>
                 </div>
+                <?php endif; ?>
 
                 <!-- Side Banners (Right Side) -->
+                <?php if ($heroSideTop || $heroSideBottom): ?>
                 <div class="hero-side-banners">
-                    <!-- Top Side Banner -->
-                    <?php 
-                        $topImgUrl = strpos($sideTopSlide['image_path'], 'http') === 0 ? $sideTopSlide['image_path'] : BASE_URL . '/' . htmlspecialchars($sideTopSlide['image_path']); 
-                    ?>
-                    <a href="<?= BASE_URL . '/' . htmlspecialchars($sideTopSlide['link_url'] ?? '') ?>" class="hero-side-banner">
-                        <img src="<?= $topImgUrl ?>" alt="<?= htmlspecialchars($sideTopSlide['title'] ?? 'Top Banner') ?>">
-                        <?php if (!empty($sideTopSlide['title'])): ?>
-                            <div style="position: absolute; bottom: 15%; left: 10%; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
-                                <h3 style="font-size: 1.5rem; margin: 0;"><?= htmlspecialchars($sideTopSlide['title']) ?></h3>
-                            </div>
-                        <?php endif; ?>
+                    <?php if ($heroSideTop): ?>
+                    <?php $sideTopLink = !empty($heroSideTop['link_url']) ? BASE_URL . '/' . ltrim($heroSideTop['link_url'], '/') : BASE_URL . '/shop'; ?>
+                    <a href="<?= htmlspecialchars($sideTopLink) ?>" class="hero-side-banner">
+                        <img src="<?= BASE_URL . '/' . htmlspecialchars($heroSideTop['image_path']) ?>" alt="<?= htmlspecialchars($heroSideTop['title'] ?? 'Banner') ?>">
                     </a>
-                    
-                    <!-- Bottom Side Banner -->
-                    <?php 
-                        $bottomImgUrl = strpos($sideBottomSlide['image_path'], 'http') === 0 ? $sideBottomSlide['image_path'] : BASE_URL . '/' . htmlspecialchars($sideBottomSlide['image_path']); 
-                    ?>
-                    <a href="<?= BASE_URL . '/' . htmlspecialchars($sideBottomSlide['link_url'] ?? '') ?>" class="hero-side-banner flash-sale">
-                        <img src="<?= $bottomImgUrl ?>" alt="<?= htmlspecialchars($sideBottomSlide['title'] ?? 'Bottom Banner') ?>">
-                        <?php if (!empty($sideBottomSlide['title'])): ?>
-                            <div style="position: absolute; bottom: 15%; left: 10%; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.5);">
-                                <h3 style="font-size: 1.5rem; margin: 0;"><?= htmlspecialchars($sideBottomSlide['title']) ?></h3>
-                            </div>
-                        <?php endif; ?>
+                    <?php endif; ?>
+
+                    <?php if ($heroSideBottom): ?>
+                    <?php $sideBotLink = !empty($heroSideBottom['link_url']) ? BASE_URL . '/' . ltrim($heroSideBottom['link_url'], '/') : BASE_URL . '/sale'; ?>
+                    <a href="<?= htmlspecialchars($sideBotLink) ?>" class="hero-side-banner">
+                        <img src="<?= BASE_URL . '/' . htmlspecialchars($heroSideBottom['image_path']) ?>" alt="<?= htmlspecialchars($heroSideBottom['title'] ?? 'Banner') ?>">
                     </a>
+                    <?php endif; ?>
                 </div>
+                <?php endif; ?>
 
             </div>
         </div>
     </section>
+    <?php endif; ?>
 
     <!-- Categories Section -->
     <section class="section" style="padding-top: 1rem; padding-bottom: 2rem;">
@@ -273,12 +199,20 @@ foreach ($stmt->fetchAll() as $reviewRow) {
                 <div class="categories-grid" id="categoriesGrid">
                     <?php foreach ($categories as $index => $category): ?>
                         <?php 
-                        // Load image from database, fallback to a default placeholder if empty
-                        $catImage = !empty($category['image']) ? BASE_URL . '/' . htmlspecialchars($category['image']) : 'https://raw.githubusercontent.com/mdn/learning-area/master/html/multimedia-and-embedding/images-in-html/dinosaur_small.jpg';
+                        // Use category image from DB if available, else a generated placeholder
+                        if (!empty($category['image'])) {
+                            // If the image is a full URL, use it directly, else prepend BASE_URL
+                            $catImage = str_starts_with($category['image'], 'http') 
+                                ? $category['image'] 
+                                : BASE_URL . '/' . ltrim($category['image'], '/');
+                        } else {
+                            // Fallback generated placeholder
+                            $catImage = 'https://placehold.co/200x200/0f766e/ffffff?text=' . urlencode(substr($category['name'], 0, 1));
+                        }
                         ?>
                         <a href="<?= BASE_URL ?>/category/<?= urlencode($category['slug']) ?>" class="category-card-clean">
                             <div class="category-card-img-wrap">
-                                <img src="<?= $catImage ?>" alt="<?= htmlspecialchars($category['name']) ?>" loading="lazy">
+                                <img src="<?= htmlspecialchars($catImage) ?>" alt="<?= htmlspecialchars($category['name']) ?>" loading="lazy">
                             </div>
                             <div class="category-card-title"><?= htmlspecialchars($category['name']) ?></div>
                         </a>
@@ -569,78 +503,6 @@ foreach ($stmt->fetchAll() as $reviewRow) {
         </div>
     </section>
 
-    <!-- Testimonials Section -->
-    <section class="section section-bg">
-        <div class="container">
-            <div class="section-header" style="text-align: center; margin-bottom: 2.5rem;">
-                <h2 class="section-title">What Our Customers Think</h2>
-                <p class="section-subtitle">Join thousands of satisfied shoppers</p>
-            </div>
-            
-            <?php if (!empty($testimonials)): ?>
-            <div class="testimonials-grid">
-                <?php foreach ($testimonials as $testimonial): ?>
-                    <div class="testimonial-card">
-                        <svg class="testimonial-quote" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V21c0 1 0 1 1 1z"/>
-                            <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
-                        </svg>
-                        
-                        <div class="testimonial-rating">
-                            <?php for ($i = 1; $i <= 5; $i++): ?>
-                                <?php if ($i <= $testimonial['rating']): ?>
-                                    <svg class="star" viewBox="0 0 24 24" fill="#ffc107">
-                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                                    </svg>
-                                <?php endif; ?>
-                            <?php endfor; ?>
-                        </div>
-                        
-                        <p class="testimonial-text">"<?= htmlspecialchars($testimonial['content']) ?>"</p>
-                        
-                        <?php if ($testimonial['product_name'] !== ''): ?>
-                        <div class="testimonial-product">
-                            Purchased: <span><?= htmlspecialchars($testimonial['product_name']) ?></span>
-                        </div>
-                        <?php endif; ?>
-                        
-                        <div class="testimonial-author">
-                            <img src="<?= htmlspecialchars($testimonial['avatar']) ?>" alt="<?= htmlspecialchars($testimonial['name']) ?>" class="testimonial-avatar">
-                            <div class="testimonial-info">
-                                <h4><?= htmlspecialchars($testimonial['name']) ?></h4>
-                                <p><?= htmlspecialchars($testimonial['role']) ?></p>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-            <?php else: ?>
-            <div style="text-align: center; padding: 1rem 0 0; color: var(--color-text-light);">
-                No approved customer reviews yet.
-            </div>
-            <?php endif; ?>
-            
-            <!-- Trust Stats -->
-            <div class="trust-stats">
-                <div class="trust-stat">
-                    <div class="trust-stat-value">50K+</div>
-                    <div class="trust-stat-label">Happy Customers</div>
-                </div>
-                <div class="trust-stat">
-                    <div class="trust-stat-value">4.9</div>
-                    <div class="trust-stat-label">Average Rating</div>
-                </div>
-                <div class="trust-stat">
-                    <div class="trust-stat-value">100K+</div>
-                    <div class="trust-stat-label">Products Sold</div>
-                </div>
-                <div class="trust-stat">
-                    <div class="trust-stat-value">24/7</div>
-                    <div class="trust-stat-label">Customer Support</div>
-                </div>
-            </div>
-        </div>
-    </section>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
 
