@@ -172,7 +172,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $price = floatval($_POST['price']);
     $sale_price = !empty($_POST['sale_price']) ? floatval($_POST['sale_price']) : null;
     $stock_quantity = intval($_POST['stock_quantity']);
-    $description = sanitize($_POST['description']);
+    // Allow basic HTML for the rich text editor
+    $description = strip_tags($_POST['description'] ?? '', '<b><i><u><strong><em><p><br><ul><li><ol><h1><h2><h3><h4><h5><h6><a><span><div>');
+    
+    // New fields
+    $brand = sanitize($_POST['brand'] ?? '');
+    $key_features = sanitize($_POST['key_features'] ?? '');
+    $variants = sanitize($_POST['variants'] ?? '');
+
     $is_featured = isset($_POST['is_featured']) ? 1 : 0;
     $is_new = isset($_POST['is_new']) ? 1 : 0;
     $is_bestseller = isset($_POST['is_bestseller']) ? 1 : 0;
@@ -254,8 +261,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$error) {
         try {
             if ($action === 'edit' && $productId) {
-                $stmt = $db->prepare("UPDATE products SET name=?, slug=?, category_id=?, price=?, sale_price=?, stock_quantity=?, description=?, main_image=?, gallery_images=?, is_featured=?, is_new=?, is_bestseller=?, status=? WHERE id=?");
-                $saved = $stmt->execute([$name, $slug, $category_id, $price, $sale_price, $stock_quantity, $description, $mainImage, $galleryImagesJson, $is_featured, $is_new, $is_bestseller, $status, $productId]);
+                $stmt = $db->prepare("UPDATE products SET name=?, slug=?, category_id=?, price=?, sale_price=?, stock_quantity=?, description=?, brand=?, key_features=?, variants=?, main_image=?, gallery_images=?, is_featured=?, is_new=?, is_bestseller=?, status=? WHERE id=?");
+                $saved = $stmt->execute([$name, $slug, $category_id, $price, $sale_price, $stock_quantity, $description, $brand, $key_features, $variants, $mainImage, $galleryImagesJson, $is_featured, $is_new, $is_bestseller, $status, $productId]);
                 if ($saved) {
                     $message = 'Product updated successfully';
                     $action = 'list';
@@ -263,8 +270,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $error = 'Unable to update product.';
                 }
             } else {
-                $stmt = $db->prepare("INSERT INTO products (name, slug, category_id, price, sale_price, stock_quantity, description, main_image, gallery_images, is_featured, is_new, is_bestseller, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-                $saved = $stmt->execute([$name, $slug, $category_id, $price, $sale_price, $stock_quantity, $description, $mainImage, $galleryImagesJson, $is_featured, $is_new, $is_bestseller, $status]);
+                $stmt = $db->prepare("INSERT INTO products (name, slug, category_id, price, sale_price, stock_quantity, description, brand, key_features, variants, main_image, gallery_images, is_featured, is_new, is_bestseller, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $saved = $stmt->execute([$name, $slug, $category_id, $price, $sale_price, $stock_quantity, $description, $brand, $key_features, $variants, $mainImage, $galleryImagesJson, $is_featured, $is_new, $is_bestseller, $status]);
                 if ($saved) {
                     $message = 'Product created successfully';
                     $action = 'list';
@@ -324,6 +331,7 @@ $pageTitle = 'Products Management';
     <title><?= $pageTitle ?> - KARTLY Admin</title>
     <link rel="stylesheet" href="../assets/css/style.css">
 <link rel="stylesheet" href="css/admin.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 </head>
 <body>
     <div class="admin-layout">
@@ -399,8 +407,21 @@ $pageTitle = 'Products Management';
                                 <input type="text" name="name" class="form-input" required value="<?= htmlspecialchars($product['name'] ?? '') ?>">
                             </div>
                             <div class="form-group">
+                                <label class="form-label">Brand</label>
+                                <input type="text" name="brand" class="form-input" value="<?= htmlspecialchars($product['brand'] ?? '') ?>" placeholder="e.g., Sony">
+                            </div>
+                            <div class="form-group">
                                 <label class="form-label">Description</label>
-                                <textarea name="description" class="form-textarea" rows="6"><?= htmlspecialchars($product['description'] ?? '') ?></textarea>
+                                <div id="quill-editor" style="height: 200px; background: #fff;"><?= $product['description'] ?? '' ?></div>
+                                <input type="hidden" name="description" id="quill-description">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Key Features (One per line)</label>
+                                <textarea name="key_features" class="form-textarea" rows="4" placeholder="Model: PlayStation 5 Slim..."><?= htmlspecialchars($product['key_features'] ?? '') ?></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Variants (Comma separated)</label>
+                                <input type="text" name="variants" class="form-input" value="<?= htmlspecialchars($product['variants'] ?? '') ?>" placeholder="e.g., UK Edition, US Edition">
                             </div>
                         </div>
 
@@ -505,6 +526,35 @@ $pageTitle = 'Products Management';
         </main>
     </div>
     <script src="js/admin.js"></script>
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var editorEl = document.getElementById('quill-editor');
+            if (editorEl) {
+                var quill = new Quill('#quill-editor', {
+                    theme: 'snow',
+                    modules: {
+                        toolbar: [
+                            ['bold', 'italic', 'underline', 'strike'],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            [{ 'header': [1, 2, 3, false] }],
+                            ['clean']
+                        ]
+                    }
+                });
+
+                var form = document.querySelector('.admin-product-form-layout');
+                if (form) {
+                    form.addEventListener('submit', function() {
+                        var descriptionInput = document.getElementById('quill-description');
+                        var html = quill.root.innerHTML;
+                        // Avoid saving empty tags if editor is blank
+                        descriptionInput.value = (html === '<p><br></p>') ? '' : html;
+                    });
+                }
+            }
+        });
+    </script>
 </body>
 </html>
 

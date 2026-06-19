@@ -110,6 +110,21 @@ require_once __DIR__ . '/../includes/header.php';
                         </div>
                         <span style="color: var(--color-text-light);">(125 reviews)</span>
                     </div>
+
+                    <!-- Meta Data -->
+                    <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; font-size: 0.875rem;">
+                        <?php if (!empty($product['brand'])): ?>
+                        <div style="background: var(--color-bg-alt); padding: 0.35rem 0.75rem; border-radius: var(--radius-md);">
+                            <span style="color: var(--color-text-light);">Brand:</span> <strong style="color: var(--color-text);"><?= htmlspecialchars($product['brand']) ?></strong>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <?php if (!empty($product['sku'])): ?>
+                        <div style="background: var(--color-bg-alt); padding: 0.35rem 0.75rem; border-radius: var(--radius-md);">
+                            <span style="color: var(--color-text-light);">Product Code:</span> <strong style="color: var(--color-text);"><?= htmlspecialchars($product['sku']) ?></strong>
+                        </div>
+                        <?php endif; ?>
+                    </div>
                     
                     <!-- Price -->
                     <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
@@ -121,17 +136,48 @@ require_once __DIR__ . '/../includes/header.php';
                         <?php endif; ?>
                     </div>
 
+                    <!-- Key Features -->
+                    <?php if (!empty($product['key_features'])): ?>
+                    <div style="margin-bottom: 1.5rem;">
+                        <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;">Key Features</h3>
+                        <ul style="list-style-type: disc; padding-left: 1.25rem; color: var(--color-text-light); display: flex; flex-direction: column; gap: 0.25rem;">
+                            <?php foreach (explode("\n", $product['key_features']) as $feature): ?>
+                                <?php if (trim($feature) !== ''): ?>
+                                <li><?= htmlspecialchars(trim($feature)) ?></li>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                    <?php endif; ?>
+
                     <!-- Description -->
-                    <p style="color: var(--color-text-light); margin-bottom: 1.5rem;"><?= htmlspecialchars($product['description'] ?? $product['short_description'] ?? '') ?></p>
+                    <div style="color: var(--color-text-light); margin-bottom: 1.5rem; line-height: 1.6;" class="product-description-content">
+                        <?= !empty($product['description']) ? $product['description'] : htmlspecialchars($product['short_description'] ?? '') ?>
+                    </div>
                     
                     <!-- Stock Status -->
-                    <div style="margin-bottom: 1.5rem;">
+                    <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem;">
+                        <span style="color: var(--color-text-light);">Status:</span>
                         <?php if ($product['stock_quantity'] > 0): ?>
-                        <span style="color: var(--color-success); font-weight: 500;">✓ In Stock (<?= $product['stock_quantity'] ?> available)</span>
+                        <span style="color: var(--color-text); font-weight: 600;">In Stock</span>
                         <?php else: ?>
-                        <span style="color: var(--color-danger); font-weight: 500;">✗ Out of Stock</span>
+                        <span style="color: var(--color-danger); font-weight: 600;">Out of Stock</span>
                         <?php endif; ?>
                     </div>
+
+                    <!-- Variants -->
+                    <?php if (!empty($product['variants'])): ?>
+                    <div style="margin-bottom: 1.5rem;">
+                        <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;">Variant:</h3>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <?php foreach (explode(",", $product['variants']) as $variant): ?>
+                                <?php if (trim($variant) !== ''): ?>
+                                <button type="button" class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.875rem; border-color: var(--color-border); color: var(--color-text);"><?= htmlspecialchars(trim($variant)) ?></button>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                     
                     <!-- Add to Cart Form -->
                     <form action="api/cart.php" method="POST" class="add-to-cart-form" data-product-id="<?= $product['id'] ?>" style="margin-bottom: 1.5rem;">
