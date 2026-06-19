@@ -655,9 +655,7 @@ textarea {
     flex-wrap: nowrap;
     align-items: center;
     gap: 0;
-    overflow-x: auto;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
+    overflow: visible;
 }
 
 .header-nav-list li {
@@ -697,6 +695,56 @@ textarea {
 .header-nav-link:hover {
     color: #fff;
     background: rgba(255, 255, 255, 0.10);
+}
+
+/* Dropdown Menu CSS */
+.has-dropdown {
+    position: relative;
+}
+
+.nav-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 200px;
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    box-shadow: var(--shadow-md);
+    padding: 0.5rem 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all var(--transition-fast);
+    z-index: 1050;
+    list-style: none;
+    margin: 0;
+}
+
+.has-dropdown:hover .nav-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.nav-dropdown li {
+    display: block;
+    width: 100%;
+}
+
+.nav-dropdown a {
+    display: block;
+    padding: 0.65rem 1.2rem;
+    color: var(--color-text);
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.nav-dropdown a:hover {
+    background: var(--color-bg-secondary);
+    color: var(--color-primary);
 }
 
 .header-nav-link:hover::after {

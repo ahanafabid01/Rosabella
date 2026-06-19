@@ -14,13 +14,21 @@ $wishlistCount = getWishlistCount();
 // Get categories for navigation
 $db = getDB();
 $stmt = $db->query("
-    SELECT c.*, 
-           (SELECT COUNT(*) FROM categories child WHERE child.parent_id = c.id AND child.status = 'active') as child_count
-    FROM categories c 
-    WHERE c.status = 'active' AND (c.parent_id = 0 OR c.parent_id IS NULL)
-    ORDER BY c.sort_order, c.name
+    SELECT *
+    FROM categories 
+    WHERE status = 'active'
+    ORDER BY sort_order, name
 ");
-$categories = $stmt->fetchAll();
+$allCats = $stmt->fetchAll();
+$categories = [];
+$categoryChildren = [];
+foreach ($allCats as $cat) {
+    if (!$cat['parent_id']) {
+        $categories[] = $cat;
+    } else {
+        $categoryChildren[$cat['parent_id']][] = $cat;
+    }
+}
 $currencySymbol = getSetting('currency_symbol') ?: 'Tk';
 $freeShippingThreshold = floatval(getSetting('free_shipping_threshold') ?: 5000);
 ?>
@@ -152,15 +160,27 @@ $freeShippingThreshold = floatval(getSetting('free_shipping_threshold') ?: 5000)
                         </a>
                     </li>
                     <?php foreach ($categories as $category): ?>
-                        <li>
+                        <?php $hasChildren = !empty($categoryChildren[$category['id']]); ?>
+                        <li class="<?= $hasChildren ? 'has-dropdown' : '' ?>">
                             <a href="<?= BASE_URL ?>/category/<?= urlencode($category['slug']) ?>" class="header-nav-link">
                                 <?= htmlspecialchars($category['name']) ?>
-                                <?php if ($category['child_count'] > 0): ?>
+                                <?php if ($hasChildren): ?>
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                     <polyline points="6 9 12 15 18 9"/>
                                 </svg>
                                 <?php endif; ?>
                             </a>
+                            <?php if ($hasChildren): ?>
+                                <ul class="nav-dropdown">
+                                    <?php foreach ($categoryChildren[$category['id']] as $child): ?>
+                                        <li>
+                                            <a href="<?= BASE_URL ?>/category/<?= urlencode($child['slug']) ?>">
+                                                <?= htmlspecialchars($child['name']) ?>
+                                            </a>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            <?php endif; ?>
                         </li>
                     <?php endforeach; ?>
                 </ul>
