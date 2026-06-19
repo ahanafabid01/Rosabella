@@ -323,7 +323,7 @@ function initCart() {
         buyNowBtn.disabled = false;
 
         if (result && result.success) {
-            window.location.href = 'cart.php';
+            window.location.href = (window.BASE_URL || '') + '/cart.php';
         }
     });
 
