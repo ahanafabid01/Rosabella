@@ -20,6 +20,15 @@ $featuredProducts = $stmt->fetchAll();
 $stmt = $db->query("SELECT * FROM categories WHERE status = 'active' AND show_on_home = 1 ORDER BY sort_order LIMIT 12");
 $categories = $stmt->fetchAll();
 
+// Get new arrivals
+$stmt = $db->query("SELECT p.*, c.name as category_name 
+                    FROM products p 
+                    LEFT JOIN categories c ON p.category_id = c.id 
+                    WHERE p.status = 'active' 
+                    ORDER BY p.created_at DESC 
+                    LIMIT 4");
+$newArrivalProducts = $stmt->fetchAll();
+
 function formatCountdownDisplay(int $remainingSeconds): string
 {
     $remainingSeconds = max(0, $remainingSeconds);
@@ -298,6 +307,95 @@ try {
             </script>
         </div>
     </section>
+
+    <!-- New Arrivals Section -->
+    <?php if (!empty($newArrivalProducts)): ?>
+    <section class="section">
+        <div class="container">
+            <div class="section-header" style="text-align: center; flex-direction: column; margin-bottom: 2.5rem;">
+                <div style="display: inline-flex; align-items: center; gap: 0.5rem; background-color: #ecfdf5; color: #059669; padding: 0.375rem 1rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500; margin-bottom: 1rem;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                    </svg>
+                    Just Dropped
+                </div>
+                <h2 class="section-title">New Arrivals</h2>
+                <p class="section-subtitle" style="max-width: 500px; margin: 0.5rem auto 0;">
+                    Be the first to check out our newest additions
+                </p>
+            </div>
+            
+            <div class="products-grid">
+                <?php foreach ($newArrivalProducts as $product): ?>
+                    <?php
+                    // Calculate discount
+                    $discount = 0;
+                    if ($product['sale_price'] && $product['price'] > 0) {
+                        $discount = round((($product['price'] - $product['sale_price']) / $product['price']) * 100);
+                    }
+                    
+                    // Default image
+                    $image = $product['main_image'] ?: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80';
+                    ?>
+                    <div class="product-card">
+                        <div class="product-image">
+                            <a href="<?= BASE_URL ?>/product/<?= $product['slug'] ?>" class="product-image-link" aria-label="View <?= htmlspecialchars($product['name']) ?>"></a>
+                            <img src="<?= htmlspecialchars($image) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
+                            
+                            <!-- Badges -->
+                            <div class="product-badges">
+                                <span class="badge badge-new">New</span>
+                                <?php if ($discount > 0): ?>
+                                    <span class="badge badge-sale">-<?= $discount ?>%</span>
+                                <?php endif; ?>
+                            </div>
+                            
+                            <!-- Wishlist Button -->
+                            <button class="product-wishlist" data-product-id="<?= $product['id'] ?>" aria-label="Add to wishlist">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                </svg>
+                            </button>
+                            
+                            <!-- Quick Actions -->
+                            <div class="product-actions">
+                                <button class="btn btn-primary product-add-cart" data-product-id="<?= $product['id'] ?>" style="flex: 1;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                                    </svg>
+                                    Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="product-content">
+                            <h3 class="product-name">
+                                <a href="<?= BASE_URL ?>/product/<?= $product['slug'] ?>"><?= htmlspecialchars($product['name']) ?></a>
+                            </h3>
+                            <div class="product-price">
+                                <span class="price-current">
+                                    <?= formatPrice($product['sale_price'] ?: $product['price']) ?>
+                                </span>
+                                <?php if ($product['sale_price']): ?>
+                                    <span class="price-original"><?= formatPrice($product['price']) ?></span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            
+            <div style="text-align: center; margin-top: 2.5rem;">
+                <a href="<?= BASE_URL ?>/shop" class="btn btn-outline btn-lg">
+                    View All Products
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
 
     <!-- Hot Deals Section -->
     <?php if (!empty($hotDeals)): ?>
