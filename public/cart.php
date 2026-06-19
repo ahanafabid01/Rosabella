@@ -108,6 +108,11 @@ $total = $subtotal; // Shipping and tax are calculated at checkout
                                             <h3 style="font-weight: 600; margin-bottom: 0.25rem;">
                                                 <a href="<?= BASE_URL ?>/product/<?= $item['slug'] ?>"><?= htmlspecialchars($item['name']) ?></a>
                                             </h3>
+                                            <?php if (!empty($item['size'])): ?>
+                                            <p style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.25rem;">
+                                                Size: <strong style="color: var(--color-text);"><?= htmlspecialchars($item['size']) ?></strong>
+                                            </p>
+                                            <?php endif; ?>
                                             <p style="font-size: 0.875rem; color: var(--color-text-light);">
                                                 <?= $item['stock_quantity'] > 0 ? 'In Stock' : 'Out of Stock' ?>
                                             </p>

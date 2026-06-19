@@ -480,11 +480,12 @@ try {
     <section class="section">
         <div class="container">
             <div class="section-header" style="margin-bottom: 2.5rem;">
-
-                <h2 class="section-title">Featured Products</h2>
-                <p class="section-subtitle" style="max-width: 500px; margin: 0.5rem auto 0;">
-                    Discover our most popular items, carefully selected for quality and style
-                </p>
+                <div>
+                    <h2 class="section-title">Featured Products</h2>
+                    <p class="section-subtitle" style="max-width: 500px; margin-top: 0.5rem;">
+                        Discover our most popular items, carefully selected for quality and style
+                    </p>
+                </div>
             </div>
             
             <div class="products-grid">

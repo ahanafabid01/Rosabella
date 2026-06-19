@@ -139,6 +139,14 @@ require_once __DIR__ . '/../includes/header.php';
                         <span style="width: 1px; height: 1rem; background: var(--color-border); display: inline-block; margin-right: 1rem;"></span>
                         <?php endif; ?>
 
+                        <?php if (!empty($product['style'])): ?>
+                        <div style="padding: 0 1rem 0 0; display: flex; align-items: center; gap: 0.3rem;">
+                            <span>Style:</span>
+                            <strong style="color: var(--color-text); font-weight: 600;"><?= htmlspecialchars($product['style']) ?></strong>
+                        </div>
+                        <span style="width: 1px; height: 1rem; background: var(--color-border); display: inline-block; margin-right: 1rem;"></span>
+                        <?php endif; ?>
+
                         <div style="display: flex; align-items: center; gap: 0.4rem;">
                             <span>Availability:</span>
                             <?php if ($product['stock_quantity'] > 0): ?>
@@ -176,9 +184,44 @@ require_once __DIR__ . '/../includes/header.php';
                     </div>
                     <?php endif; ?>
 
+                    <!-- Colors -->
+                    <?php 
+                    $colorsJson = $product['colors'] ?? '';
+                    $colorsArr = [];
+                    if (!empty($colorsJson)) {
+                        $decoded = json_decode($colorsJson, true);
+                        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                            $colorsArr = $decoded;
+                        }
+                    }
+                    ?>
+                    <?php if (!empty($colorsArr)): ?>
+                    <div style="margin-bottom: 1.5rem;">
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <?php foreach ($colorsArr as $c): ?>
+                                <?php if (!empty($c['image'])): ?>
+                                <a href="<?= BASE_URL ?>/product/<?= htmlspecialchars($c['url'] ?? '#') ?>" style="display: block; border: 2px solid <?= ($c['url'] ?? '') === $product['slug'] ? 'var(--color-primary)' : 'var(--color-border)' ?>; padding: 2px; border-radius: 4px;" title="<?= htmlspecialchars($c['color'] ?? '') ?>">
+                                    <img src="<?= htmlspecialchars(strpos($c['image'], 'http') === 0 ? $c['image'] : BASE_URL . '/' . ltrim($c['image'], '/')) ?>" alt="<?= htmlspecialchars($c['color'] ?? '') ?>" style="width: 50px; height: 50px; object-fit: contain;">
+                                </a>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
 
-                    
-
+                    <!-- Sizes -->
+                    <?php if (!empty($product['sizes'])): ?>
+                    <div style="margin-bottom: 1.5rem;">
+                        <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; color: #1e293b;">Sizes</h3>
+                        <div class="size-selector" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <?php foreach (explode(",", $product['sizes']) as $size): ?>
+                                <?php $size = trim($size); if ($size !== ''): ?>
+                                <button type="button" class="size-btn" data-size="<?= htmlspecialchars($size) ?>" style="min-width: 3rem; padding: 0.5rem; text-align: center; border: 1px solid var(--color-border); background: #fff; color: var(--color-text); border-radius: 4px; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;"><?= htmlspecialchars($size) ?></button>
+                                <?php endif; ?>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
 
                     <!-- Variants -->
                     <?php if (!empty($product['variants'])): ?>
@@ -195,9 +238,12 @@ require_once __DIR__ . '/../includes/header.php';
                     <?php endif; ?>
                     
                     <!-- Add to Cart Form -->
-                    <form action="api/cart.php" method="POST" class="add-to-cart-form" data-product-id="<?= $product['id'] ?>" style="margin-bottom: 1.5rem;">
+                    <form action="api/cart.php" method="POST" id="add-to-cart-form" class="add-to-cart-form" data-product-id="<?= $product['id'] ?>" style="margin-bottom: 1.5rem;">
                         <input type="hidden" name="action" value="add">
                         <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
+                        <?php if (!empty($product['sizes'])): ?>
+                        <input type="hidden" name="selected_size" id="selected-size-input" required>
+                        <?php endif; ?>
                         
                         <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
                             <label style="font-weight: 500;">Quantity:</label>
@@ -281,6 +327,37 @@ require_once __DIR__ . '/../includes/header.php';
 
         </div>
     </section>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle size selection
+        const sizeBtns = document.querySelectorAll('.size-btn');
+        const sizeInput = document.getElementById('selected-size-input');
+        
+        sizeBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active styling from all buttons
+                sizeBtns.forEach(b => {
+                    b.style.borderColor = 'var(--color-border)';
+                    b.style.backgroundColor = '#fff';
+                    b.style.color = 'var(--color-text)';
+                    b.style.fontWeight = 'normal';
+                });
+                
+                // Add active styling to clicked button
+                this.style.borderColor = 'var(--color-primary)';
+                this.style.backgroundColor = 'var(--color-primary-light)';
+                this.style.color = 'var(--color-primary)';
+                this.style.fontWeight = '600';
+                
+                // Set hidden input value
+                if (sizeInput) {
+                    sizeInput.value = this.dataset.size;
+                }
+            });
+        });
+    });
+    </script>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
 

@@ -254,9 +254,18 @@ function initCart() {
     const addToCartForm = document.querySelector('.add-to-cart-form');
     addToCartForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
+        
+        const sizeInput = document.getElementById('selected-size-input');
+        if (sizeInput && !sizeInput.value) {
+            showToast('Please select a size first.', 'error');
+            return;
+        }
+        
         const productId = addToCartForm.dataset.productId;
         const quantity = parseInt(addToCartForm.querySelector('input[name="quantity"]')?.value || 1);
-        await addToCart(productId, quantity);
+        const size = sizeInput ? sizeInput.value : null;
+        
+        await addToCart(productId, quantity, size);
     });
 
     const buyNowBtn = addToCartForm?.querySelector('.buy-now-btn');
@@ -266,14 +275,21 @@ function initCart() {
             return;
         }
 
+        const sizeInput = document.getElementById('selected-size-input');
+        if (sizeInput && !sizeInput.value) {
+            showToast('Please select a size first.', 'error');
+            return;
+        }
+
         const productId = addToCartForm.dataset.productId;
         const quantity = parseInt(addToCartForm.querySelector('input[name="quantity"]')?.value || 1);
+        const size = sizeInput ? sizeInput.value : null;
 
         buyNowBtn.disabled = true;
         const originalLabel = buyNowBtn.textContent;
         buyNowBtn.textContent = 'Processing...';
 
-        const result = await addToCart(productId, quantity);
+        const result = await addToCart(productId, quantity, size);
 
         buyNowBtn.textContent = originalLabel;
         buyNowBtn.disabled = false;
@@ -333,13 +349,16 @@ function initCart() {
     initCartPageControls();
 }
 
-async function addToCart(productId, quantity = 1) {
+async function addToCart(productId, quantity = 1, size = null) {
     try {
-        const data = await apiRequest('api/cart.php', {
+        const payload = {
             action: 'add',
             product_id: productId,
             quantity: quantity
-        });
+        };
+        if (size) payload.selected_size = size;
+
+        const data = await apiRequest('api/cart.php', payload);
         
         if (data.success) {
             showToast('Product added to cart!', 'success');
@@ -350,11 +369,11 @@ async function addToCart(productId, quantity = 1) {
         return data;
     } catch (error) {
         // Fallback to local storage
-        const existingItem = cart.find(item => item.product_id === productId);
+        const existingItem = cart.find(item => item.product_id === productId && item.size === size);
         if (existingItem) {
             existingItem.quantity += quantity;
         } else {
-            cart.push({ product_id: productId, quantity: quantity });
+            cart.push({ product_id: productId, quantity: quantity, size: size });
         }
         localStorage.setItem('kartly_cart', JSON.stringify(cart));
         updateCartBadge();

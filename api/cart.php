@@ -85,6 +85,8 @@ function handleAddToCart() {
 
     $productId = getIntInput('product_id');
     $quantity = getIntInput('quantity', 1);
+    $size = getInput('selected_size', null);
+    if ($size === '') $size = null;
 
     if ($productId <= 0 || $quantity <= 0) {
         respond(false, 'Invalid product or quantity', [], 422);
@@ -103,11 +105,11 @@ function handleAddToCart() {
     }
 
     if ($userId) {
-        $stmt = $db->prepare("SELECT id, quantity FROM cart WHERE product_id = ? AND (user_id = ? OR session_id = ?) LIMIT 1");
-        $stmt->execute([$productId, $userId, $sessionId]);
+        $stmt = $db->prepare("SELECT id, quantity FROM cart WHERE product_id = ? AND IFNULL(size, '') = IFNULL(?, '') AND (user_id = ? OR session_id = ?) LIMIT 1");
+        $stmt->execute([$productId, $size, $userId, $sessionId]);
     } else {
-        $stmt = $db->prepare("SELECT id, quantity FROM cart WHERE product_id = ? AND session_id = ? LIMIT 1");
-        $stmt->execute([$productId, $sessionId]);
+        $stmt = $db->prepare("SELECT id, quantity FROM cart WHERE product_id = ? AND IFNULL(size, '') = IFNULL(?, '') AND session_id = ? LIMIT 1");
+        $stmt->execute([$productId, $size, $sessionId]);
     }
     $existingItem = $stmt->fetch();
 
@@ -116,8 +118,8 @@ function handleAddToCart() {
         $stmt = $db->prepare("UPDATE cart SET quantity = ? WHERE id = ?");
         $stmt->execute([$newQuantity, $existingItem['id']]);
     } else {
-        $stmt = $db->prepare("INSERT INTO cart (session_id, user_id, product_id, quantity) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$sessionId, $userId, $productId, $quantity]);
+        $stmt = $db->prepare("INSERT INTO cart (session_id, user_id, product_id, size, quantity) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$sessionId, $userId, $productId, $size, $quantity]);
     }
 
     respond(true, 'Product added to cart', ['cart_count' => getCartCount()]);

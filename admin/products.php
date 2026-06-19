@@ -176,6 +176,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $description = strip_tags($_POST['description'] ?? '', '<b><i><u><strong><em><p><br><ul><li><ol><h1><h2><h3><h4><h5><h6><a><span><div>');
     
     // New fields
+    $sku = sanitize($_POST['sku'] ?? '');
+    $style = sanitize($_POST['style'] ?? '');
+    $sizes = sanitize($_POST['sizes'] ?? '');
+    $colors = sanitize($_POST['colors'] ?? '');
+    
     $brand = sanitize($_POST['brand'] ?? '');
     $key_features = sanitize($_POST['key_features'] ?? '');
     $variants = sanitize($_POST['variants'] ?? '');
@@ -261,8 +266,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$error) {
         try {
             if ($action === 'edit' && $productId) {
-                $stmt = $db->prepare("UPDATE products SET name=?, slug=?, category_id=?, price=?, sale_price=?, stock_quantity=?, description=?, brand=?, key_features=?, variants=?, main_image=?, gallery_images=?, is_featured=?, is_new=?, is_bestseller=?, status=? WHERE id=?");
-                $saved = $stmt->execute([$name, $slug, $category_id, $price, $sale_price, $stock_quantity, $description, $brand, $key_features, $variants, $mainImage, $galleryImagesJson, $is_featured, $is_new, $is_bestseller, $status, $productId]);
+                $stmt = $db->prepare("UPDATE products SET name=?, slug=?, sku=?, style=?, sizes=?, colors=?, category_id=?, price=?, sale_price=?, stock_quantity=?, description=?, brand=?, key_features=?, variants=?, main_image=?, gallery_images=?, is_featured=?, is_new=?, is_bestseller=?, status=? WHERE id=?");
+                $saved = $stmt->execute([$name, $slug, $sku, $style, $sizes, $colors, $category_id, $price, $sale_price, $stock_quantity, $description, $brand, $key_features, $variants, $mainImage, $galleryImagesJson, $is_featured, $is_new, $is_bestseller, $status, $productId]);
                 if ($saved) {
                     $message = 'Product updated successfully';
                     $action = 'list';
@@ -270,8 +275,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $error = 'Unable to update product.';
                 }
             } else {
-                $stmt = $db->prepare("INSERT INTO products (name, slug, category_id, price, sale_price, stock_quantity, description, brand, key_features, variants, main_image, gallery_images, is_featured, is_new, is_bestseller, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-                $saved = $stmt->execute([$name, $slug, $category_id, $price, $sale_price, $stock_quantity, $description, $brand, $key_features, $variants, $mainImage, $galleryImagesJson, $is_featured, $is_new, $is_bestseller, $status]);
+                $stmt = $db->prepare("INSERT INTO products (name, slug, sku, style, sizes, colors, category_id, price, sale_price, stock_quantity, description, brand, key_features, variants, main_image, gallery_images, is_featured, is_new, is_bestseller, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $saved = $stmt->execute([$name, $slug, $sku, $style, $sizes, $colors, $category_id, $price, $sale_price, $stock_quantity, $description, $brand, $key_features, $variants, $mainImage, $galleryImagesJson, $is_featured, $is_new, $is_bestseller, $status]);
                 if ($saved) {
                     $message = 'Product created successfully';
                     $action = 'list';
@@ -410,6 +415,16 @@ $pageTitle = 'Products Management';
                                 <label class="form-label">Brand</label>
                                 <input type="text" name="brand" class="form-input" value="<?= htmlspecialchars($product['brand'] ?? '') ?>" placeholder="e.g., Sony">
                             </div>
+                            <div class="admin-two-col-grid">
+                                <div class="form-group">
+                                    <label class="form-label">SKU</label>
+                                    <input type="text" name="sku" class="form-input" value="<?= htmlspecialchars($product['sku'] ?? '') ?>" placeholder="e.g., 9455BA03">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Style</label>
+                                    <input type="text" name="style" class="form-input" value="<?= htmlspecialchars($product['style'] ?? '') ?>" placeholder="e.g., Sports Shoes">
+                                </div>
+                            </div>
                             <div class="form-group">
                                 <label class="form-label">Description</label>
                                 <div id="quill-editor" style="height: 200px; background: #fff;"><?= $product['description'] ?? '' ?></div>
@@ -420,7 +435,16 @@ $pageTitle = 'Products Management';
                                 <textarea name="key_features" class="form-textarea" rows="4" placeholder="Model: PlayStation 5 Slim..."><?= htmlspecialchars($product['key_features'] ?? '') ?></textarea>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Variants (Comma separated)</label>
+                                <label class="form-label">Sizes (Comma separated)</label>
+                                <input type="text" name="sizes" class="form-input" value="<?= htmlspecialchars($product['sizes'] ?? '') ?>" placeholder="e.g., 39, 40, 41, 42, 43, 44">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Color Variants (JSON Format)</label>
+                                <textarea name="colors" class="form-textarea" rows="4" placeholder='[{"color":"Red","image":"path.jpg","url":"slug"}]'><?= htmlspecialchars($product['colors'] ?? '') ?></textarea>
+                                <p class="admin-upload-help" style="margin-top: 0.25rem;">Advanced: Add color swatches that link to other products.</p>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Other Variants (Comma separated)</label>
                                 <input type="text" name="variants" class="form-input" value="<?= htmlspecialchars($product['variants'] ?? '') ?>" placeholder="e.g., UK Edition, US Edition">
                             </div>
                         </div>
