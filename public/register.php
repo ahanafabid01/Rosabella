@@ -60,10 +60,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
+    <!-- Breadcrumb -->
+    <div style="background: #fff; border-bottom: 1px solid #eee; padding: 1rem 0; margin-bottom: 2rem;">
+        <div class="container">
+            <nav style="font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; color: var(--color-text-light);">
+                <a href="<?= BASE_URL ?>/" style="color: var(--color-text-light); display: flex; align-items: center;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                </a>
+                <span>/</span>
+                <a href="<?= BASE_URL ?>/account" style="color: var(--color-text); text-decoration: none; font-weight: 500;">Account</a>
+                <span>/</span>
+                <span style="color: var(--color-text-light);">Register</span>
+            </nav>
+        </div>
+    </div>
+
     <!-- Register Section -->
-    <section class="section" style="padding-top: 3rem; padding-bottom: 5rem;">
+    <section style="padding: 1.5rem 0 5rem;">
         <div class="container" style="max-width: 540px; width: 100%;">
-            <div style="padding: 3rem 2.5rem;">
+            <div style="padding: 0 1rem;">
                 <div style="text-align: left; margin-bottom: 2rem;">
                     <h1 style="font-size: 1.5rem; font-weight: 500; color: var(--color-text); margin-bottom: 0.5rem;">Register Account</h1>
                 </div>

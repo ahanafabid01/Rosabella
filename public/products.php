@@ -92,7 +92,7 @@ $categories = $stmt->fetchAll();
         <div class="container">
             <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                 <nav style="font-size: 0.875rem; color: var(--color-text-light);">
-                    <a href="<?= BASE_URL ?>/" style="color: var(--color-text-light);">Home</a>
+                    <a href="<?= BASE_URL ?>/" style="color: var(--color-text-light); display: inline-flex; align-items: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></a>
                     <span> / </span>
                     <span style="color: var(--color-text);">Products</span>
                     <?php if ($currentCategory): ?>

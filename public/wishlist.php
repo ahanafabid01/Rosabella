@@ -23,7 +23,7 @@ $wishlistItems = $stmt->fetchAll();
     <section class="section section-bg" style="padding: 1.5rem 0 2rem;">
         <div class="container">
             <nav style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.5rem;">
-                <a href="<?= BASE_URL ?>/" style="color: var(--color-text-light);">Home</a>
+                <a href="<?= BASE_URL ?>/" style="color: var(--color-text-light); display: inline-flex; align-items: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></a>
                 <span> / </span>
                 <span style="color: var(--color-text);">Wishlist</span>
             </nav>
