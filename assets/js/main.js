@@ -689,6 +689,11 @@ async function apiRequest(url, payload = {}, method = 'POST') {
     const options = { method: upperMethod, headers: {} };
     let requestUrl = url;
 
+    // Resolve relative URL using BASE_URL
+    if (!requestUrl.startsWith('http') && !requestUrl.startsWith('/')) {
+        requestUrl = (window.BASE_URL || '') + '/' + requestUrl;
+    }
+
     if (upperMethod === 'GET') {
         const query = new URLSearchParams(payload).toString();
         if (query) {

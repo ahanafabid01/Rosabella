@@ -42,6 +42,10 @@ $freeShippingThreshold = floatval(getSetting('free_shipping_threshold') ?: 5000)
     <?php if (isset($additionalStyles)): ?>
         <style><?= $additionalStyles ?></style>
     <?php endif; ?>
+    
+    <script>
+        window.BASE_URL = '<?= BASE_URL ?>';
+    </script>
 </head>
 <body>
     <!-- Header -->
