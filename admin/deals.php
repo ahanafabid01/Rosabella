@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * KARTLY - Admin Deals Management
  */
@@ -122,10 +122,20 @@ function toDateTimeLocalValue(?string $value): string
 
 function seedDefaultDeals(PDO $db): void
 {
-    $count = intval($db->query("SELECT COUNT(*) FROM deals")->fetchColumn());
-    if ($count > 0) {
+    $seeded = $db->query("SELECT setting_value FROM settings WHERE setting_key = 'deals_seeded'")->fetchColumn();
+    if ($seeded === '1') {
         return;
     }
+
+    $count = intval($db->query("SELECT COUNT(*) FROM deals")->fetchColumn());
+    if ($count > 0) {
+        $db->exec("INSERT IGNORE INTO settings (setting_key, setting_value, setting_type) VALUES ('deals_seeded', '1', 'boolean')");
+        return;
+    }
+
+    $db->exec("INSERT IGNORE INTO settings (setting_key, setting_value, setting_type) VALUES ('deals_seeded', '1', 'boolean')");
+
+
 
     $defaultDeals = [
         [
