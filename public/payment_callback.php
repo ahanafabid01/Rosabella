@@ -16,7 +16,7 @@ function redirectPaymentResult(string $status, ?string $orderNumber, string $mes
     if ($message !== '') {
         $query['message'] = $message;
     }
-    header('Location: ' . paymentAbsoluteUrl('payment_result.php', $query));
+    header('Location: ' . paymentAbsoluteUrl('payment_result', $query));
     exit;
 }
 

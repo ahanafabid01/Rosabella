@@ -637,11 +637,11 @@ $pageTitle = 'Deals Management';
                                         $displayLink = $deal['link_url'];
                                         if ($deal['link_url'] === 'sale') {
                                             $displayLink = '★ Sale & Discount';
-                                        } elseif ($deal['link_url'] === 'products.php') {
+                                        } elseif (in_array($deal['link_url'], ['shop', 'products.php'], true)) {
                                             $displayLink = 'All Products';
                                         } else {
                                             foreach ($allCategories as $cat) {
-                                                if ($deal['link_url'] === 'products.php?category=' . $cat['slug']) {
+                                                if (in_array($deal['link_url'], ['category/' . $cat['slug'], 'products.php?category=' . $cat['slug']], true)) {
                                                     $displayLink = 'Category: ' . $cat['name'];
                                                     break;
                                                 }
@@ -684,11 +684,12 @@ $pageTitle = 'Deals Management';
                         <?php $currentLink = $editingDeal['link_url'] ?? $_POST['link_url'] ?? 'sale'; ?>
                         <select name="link_url" class="form-select">
                             <option value="sale" <?= ($currentLink === 'sale') ? 'selected' : '' ?>>★ All Sale & Discount Products</option>
-                            <option value="products.php" <?= ($currentLink === 'products.php') ? 'selected' : '' ?>>All Products (Storefront)</option>
+                            <option value="shop" <?= (in_array($currentLink, ['shop', 'products.php'], true)) ? 'selected' : '' ?>>All Products (Storefront)</option>
                             <optgroup label="Categories">
                                 <?php foreach ($allCategories as $cat): ?>
-                                    <?php $catVal = 'products.php?category=' . $cat['slug']; ?>
-                                    <option value="<?= htmlspecialchars($catVal) ?>" <?= ($currentLink === $catVal) ? 'selected' : '' ?>>
+                                    <?php $catVal = 'category/' . $cat['slug']; ?>
+                                    <?php $legacyCatVal = 'products.php?category=' . $cat['slug']; ?>
+                                    <option value="<?= htmlspecialchars($catVal) ?>" <?= (in_array($currentLink, [$catVal, $legacyCatVal], true)) ? 'selected' : '' ?>>
                                         <?= htmlspecialchars($cat['name']) ?>
                                     </option>
                                 <?php endforeach; ?>

@@ -1,6 +1,6 @@
 # KARTLY Admin - Clean URL Rewriting
 RewriteEngine On
-RewriteBase /Kartly/admin/
+Options -MultiViews
 
 # Serve real files and directories directly
 RewriteCond %{REQUEST_FILENAME} -f [OR]
@@ -16,6 +16,7 @@ RewriteRule ^deals/?$                   deals.php           [L,QSA]
 RewriteRule ^orders/?$                  orders.php          [L,QSA]
 RewriteRule ^order/([0-9]+)/?$          order-detail.php?id=$1 [L,QSA]
 RewriteRule ^reviews/?$                 reviews.php         [L,QSA]
+RewriteRule ^view-review/?$             view-review.php     [L,QSA]
 RewriteRule ^users/?$                   users.php           [L,QSA]
 RewriteRule ^coupons/?$                 coupons.php         [L,QSA]
 RewriteRule ^hero/?$                    hero.php            [L,QSA]

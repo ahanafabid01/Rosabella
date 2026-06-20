@@ -13,14 +13,20 @@ define('DB_CHARSET', 'utf8mb4');
 
 // Site Configuration
 define('SITE_NAME', 'KARTLY');
-define('SITE_URL', 'http://localhost/kartly');  // Change to your domain
 define('SITE_EMAIL', 'support@kartly.com');
 
-// BASE_URL is used for all internal links.
-// LOCAL (XAMPP subfolder):  define('BASE_URL', '/Kartly');
-// LIVE DOMAIN (web root):   define('BASE_URL', '');
-// Also update RewriteBase in .htaccess and admin/.htaccess when going live.
-define('BASE_URL', '/Kartly');
+$requestScheme = 'http';
+if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+    $requestScheme = 'https';
+} elseif (!empty($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443) {
+    $requestScheme = 'https';
+}
+$requestHost = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
+// XAMPP uses /Kartly locally; hosted production is served from the domain root.
+$isLocalHost = preg_match('/^(localhost|127\.0\.0\.1)(:\d+)?$/', $requestHost) === 1;
+define('BASE_URL', $isLocalHost ? '/Kartly' : '');
+define('SITE_URL', $requestScheme . '://' . $requestHost . BASE_URL);
 
 // Security
 define('SECRET_KEY', 'your-secret-key-change-this-in-production');
@@ -115,8 +121,70 @@ function formatPrice($price) {
  * Redirect function
  */
 function redirect($url) {
-    header("Location: " . SITE_URL . "/" . $url);
+    header("Location: " . cleanUrl($url, true));
     exit();
+}
+
+/**
+ * Build a clean public URL and normalize old internal .php paths.
+ */
+function cleanUrl(string $path = '', bool $absolute = false): string
+{
+    $path = trim($path);
+
+    if ($path === '') {
+        return $absolute ? rtrim(SITE_URL, '/') . '/' : (BASE_URL !== '' ? BASE_URL . '/' : '/');
+    }
+
+    if (preg_match('~^(https?:)?//~i', $path) || preg_match('~^(mailto:|tel:|#)~i', $path)) {
+        return $path;
+    }
+
+    $parts = parse_url($path);
+    $route = trim((string)($parts['path'] ?? ''), '/');
+    $query = [];
+    if (!empty($parts['query'])) {
+        parse_str($parts['query'], $query);
+    }
+
+    $localBase = trim(BASE_URL, '/');
+    if ($localBase !== '' && ($route === $localBase || str_starts_with($route, $localBase . '/'))) {
+        $route = trim(substr($route, strlen($localBase)), '/');
+    }
+
+    $route = preg_replace('#^(public|pages)/#', '', $route) ?? $route;
+    $route = preg_replace('/\.php$/', '', $route) ?? $route;
+
+    if ($route === 'products') {
+        if (!empty($query['category'])) {
+            $route = 'category/' . rawurlencode((string)$query['category']);
+            unset($query['category']);
+        } elseif (($query['filter'] ?? '') === 'sale') {
+            $route = 'sale';
+            unset($query['filter']);
+        } elseif (($query['filter'] ?? '') === 'new') {
+            $route = 'new-arrivals';
+            unset($query['filter']);
+        } elseif (($query['filter'] ?? '') === 'bestseller') {
+            $route = 'best-sellers';
+            unset($query['filter']);
+        } else {
+            $route = 'shop';
+        }
+    }
+
+    $base = $absolute ? rtrim(SITE_URL, '/') : rtrim(BASE_URL, '/');
+    $url = $base . '/' . ltrim($route, '/');
+
+    if (!empty($query)) {
+        $url .= '?' . http_build_query($query);
+    }
+
+    if (!empty($parts['fragment'])) {
+        $url .= '#' . $parts['fragment'];
+    }
+
+    return $url;
 }
 
 /**

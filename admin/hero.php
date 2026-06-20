@@ -220,7 +220,7 @@ $pageTitle = 'Hero Banners';
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Link URL (Optional)</label>
-                                <input type="text" name="link_url" class="form-input" value="<?= htmlspecialchars($editingSlide['link_url'] ?? '') ?>" placeholder="e.g. products.php?category=electronics">
+                                <input type="text" name="link_url" class="form-input" value="<?= htmlspecialchars($editingSlide['link_url'] ?? '') ?>" placeholder="e.g. category/electronics">
                             </div>
                         </div>
 

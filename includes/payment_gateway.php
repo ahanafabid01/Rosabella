@@ -27,10 +27,9 @@ function paymentStringSetting(string $key, string $default = ''): string
 
 function paymentAbsoluteUrl(string $path, array $query = []): string
 {
-    $base = rtrim(SITE_URL, '/');
-    $url = $base . '/' . ltrim($path, '/');
+    $url = cleanUrl($path, true);
     if (!empty($query)) {
-        $url .= '?' . http_build_query($query);
+        $url .= (str_contains($url, '?') ? '&' : '?') . http_build_query($query);
     }
 
     return $url;
@@ -320,10 +319,10 @@ function paymentStartSslCommerz(PDO $db, array $order, string $preferredChannel 
         'total_amount' => number_format((float)$order['total'], 2, '.', ''),
         'currency' => 'BDT',
         'tran_id' => $order['order_number'],
-        'success_url' => paymentAbsoluteUrl('payment_callback.php', ['gateway' => 'sslcommerz', 'action' => 'success']),
-        'fail_url' => paymentAbsoluteUrl('payment_callback.php', ['gateway' => 'sslcommerz', 'action' => 'fail']),
-        'cancel_url' => paymentAbsoluteUrl('payment_callback.php', ['gateway' => 'sslcommerz', 'action' => 'cancel']),
-        'ipn_url' => paymentAbsoluteUrl('payment_ipn.php', ['gateway' => 'sslcommerz']),
+        'success_url' => paymentAbsoluteUrl('payment_callback', ['gateway' => 'sslcommerz', 'action' => 'success']),
+        'fail_url' => paymentAbsoluteUrl('payment_callback', ['gateway' => 'sslcommerz', 'action' => 'fail']),
+        'cancel_url' => paymentAbsoluteUrl('payment_callback', ['gateway' => 'sslcommerz', 'action' => 'cancel']),
+        'ipn_url' => paymentAbsoluteUrl('payment_ipn', ['gateway' => 'sslcommerz']),
         'cus_name' => trim(($order['shipping_first_name'] ?? '') . ' ' . ($order['shipping_last_name'] ?? '')),
         'cus_email' => $order['shipping_email'] ?? '',
         'cus_add1' => $order['shipping_address'] ?? '',
@@ -482,7 +481,7 @@ function paymentStartBkash(PDO $db, array $order): array
     $payloadArr = [
         'mode' => '0011',
         'payerReference' => (string)($order['shipping_phone'] ?? ''),
-        'callbackURL' => paymentAbsoluteUrl('payment_callback.php', ['gateway' => 'bkash']),
+        'callbackURL' => paymentAbsoluteUrl('payment_callback', ['gateway' => 'bkash']),
         'amount' => number_format((float)$order['total'], 2, '.', ''),
         'currency' => 'BDT',
         'intent' => 'sale',

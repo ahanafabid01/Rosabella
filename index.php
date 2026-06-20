@@ -2,6 +2,9 @@
 /**
  * KARTLY - Homepage
  */
+require_once __DIR__ . '/includes/router.php';
+dispatchCleanRoute();
+
 $pageTitle = 'Home';
 require_once __DIR__ . '/includes/header.php';
 
@@ -48,7 +51,7 @@ function formatCountdownDisplay(int $remainingSeconds): string
 $hotDealsSectionTitle = getSetting('home_deals_title') ?: 'Hot Deals';
 $hotDealsSectionSubtitle = getSetting('home_deals_subtitle') ?: "Don't miss out on these amazing offers";
 $hotDealsCtaLabel = getSetting('home_deals_cta_label') ?: 'View All Deals';
-$hotDealsCtaUrl = getSetting('home_deals_cta_url') ?: 'products.php?filter=sale';
+$hotDealsCtaUrl = cleanUrl(getSetting('home_deals_cta_url') ?: 'sale');
 
 $hotDeals = [];
 $hotDealsTableReady = true;
@@ -69,7 +72,7 @@ if (!$hotDealsTableReady) {
             'badge_style' => 'danger',
             'timer_text' => '12:45:30',
             'image_path' => 'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=800&q=80',
-            'link_url' => 'products.php?category=electronics',
+            'link_url' => 'category/electronics',
             'overlay_start' => 'rgba(15, 118, 110, 0.84)',
             'overlay_end' => 'rgba(11, 91, 85, 0.62)',
             'image_position' => 'center center',
@@ -81,7 +84,7 @@ if (!$hotDealsTableReady) {
             'badge_style' => 'primary',
             'timer_text' => '23:59:59',
             'image_path' => 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=80',
-            'link_url' => 'products.php?category=fashion',
+            'link_url' => 'category/fashion',
             'overlay_start' => 'rgba(30, 64, 175, 0.82)',
             'overlay_end' => 'rgba(30, 58, 138, 0.62)',
             'image_position' => 'center top',
@@ -93,7 +96,7 @@ if (!$hotDealsTableReady) {
             'badge_style' => 'success',
             'timer_text' => '48:00:00',
             'image_path' => 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80',
-            'link_url' => 'products.php?category=home-living',
+            'link_url' => 'category/home-living',
             'overlay_start' => 'rgba(15, 118, 110, 0.84)',
             'overlay_end' => 'rgba(13, 89, 97, 0.62)',
             'image_position' => 'center center',
@@ -133,7 +136,7 @@ try {
                     <div class="hero-slider">
                         <?php foreach ($heroMain as $slideIdx => $slide): ?>
                         <div class="hero-slide <?= $slideIdx === 0 ? 'active' : '' ?>">
-                            <?php $slideLink = !empty($slide['link_url']) ? BASE_URL . '/' . ltrim($slide['link_url'], '/') : null; ?>
+                            <?php $slideLink = !empty($slide['link_url']) ? cleanUrl($slide['link_url']) : null; ?>
                             <?php if ($slideLink): ?>
                                 <a href="<?= htmlspecialchars($slideLink) ?>" style="display:block;width:100%;height:100%;">
                                     <img src="<?= BASE_URL . '/' . htmlspecialchars($slide['image_path']) ?>" alt="<?= htmlspecialchars($slide['title'] ?? 'Banner') ?>">
@@ -171,14 +174,14 @@ try {
                 <?php if ($heroSideTop || $heroSideBottom): ?>
                 <div class="hero-side-banners">
                     <?php if ($heroSideTop): ?>
-                    <?php $sideTopLink = !empty($heroSideTop['link_url']) ? BASE_URL . '/' . ltrim($heroSideTop['link_url'], '/') : BASE_URL . '/shop'; ?>
+                    <?php $sideTopLink = !empty($heroSideTop['link_url']) ? cleanUrl($heroSideTop['link_url']) : cleanUrl('shop'); ?>
                     <a href="<?= htmlspecialchars($sideTopLink) ?>" class="hero-side-banner">
                         <img src="<?= BASE_URL . '/' . htmlspecialchars($heroSideTop['image_path']) ?>" alt="<?= htmlspecialchars($heroSideTop['title'] ?? 'Banner') ?>">
                     </a>
                     <?php endif; ?>
 
                     <?php if ($heroSideBottom): ?>
-                    <?php $sideBotLink = !empty($heroSideBottom['link_url']) ? BASE_URL . '/' . ltrim($heroSideBottom['link_url'], '/') : BASE_URL . '/sale'; ?>
+                    <?php $sideBotLink = !empty($heroSideBottom['link_url']) ? cleanUrl($heroSideBottom['link_url']) : cleanUrl('sale'); ?>
                     <a href="<?= htmlspecialchars($sideBotLink) ?>" class="hero-side-banner">
                         <img src="<?= BASE_URL . '/' . htmlspecialchars($heroSideBottom['image_path']) ?>" alt="<?= htmlspecialchars($heroSideBottom['title'] ?? 'Banner') ?>">
                     </a>
@@ -460,10 +463,11 @@ try {
                     if ($dealImage === '') {
                         $dealImage = 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80';
                     }
-                    $dealLink = trim((string)($deal['link_url'] ?? 'products.php?filter=sale'));
+                    $dealLink = trim((string)($deal['link_url'] ?? 'sale'));
                     if ($dealLink === '') {
-                        $dealLink = 'products.php?filter=sale';
+                        $dealLink = 'sale';
                     }
+                    $dealLink = cleanUrl($dealLink);
                     $overlayStart = trim((string)($deal['overlay_start'] ?? 'rgba(15, 118, 110, 0.84)'));
                     $overlayEnd = trim((string)($deal['overlay_end'] ?? 'rgba(11, 91, 85, 0.62)'));
                     $imagePosition = trim((string)($deal['image_position'] ?? 'center center'));

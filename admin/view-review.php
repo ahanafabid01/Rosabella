@@ -99,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $_SESSION['admin_message'] = 'Review deleted successfully.';
-            header('Location: ' . BASE_URL . '/admin/reviews.php');
+            header('Location: ' . BASE_URL . '/admin/reviews');
             exit;
         } catch (Throwable $e) {
             if ($db->inTransaction()) {
@@ -127,7 +127,7 @@ if ($viewReviewId > 0) {
 
     if (!$viewReview) {
         $_SESSION['admin_error'] = 'Review not found.';
-        header('Location: ' . BASE_URL . '/admin/reviews.php');
+        header('Location: ' . BASE_URL . '/admin/reviews');
         exit;
     }
 
@@ -135,7 +135,7 @@ if ($viewReviewId > 0) {
     $viewImagesStmt->execute([$viewReviewId]);
     $viewReviewImages = $viewImagesStmt->fetchAll();
 } else {
-    header('Location: ' . BASE_URL . '/admin/reviews.php');
+    header('Location: ' . BASE_URL . '/admin/reviews');
     exit;
 }
 
@@ -167,7 +167,7 @@ $pageTitle = 'Review Details #' . intval($viewReview['id']);
                     <?= htmlspecialchars(ucfirst($viewReview['status'] ?? 'pending')) ?>
                 </span>
             </div>
-            <a href="<?= BASE_URL ?>/admin/reviews.php" class="btn btn-secondary">Back to Reviews</a>
+            <a href="<?= BASE_URL ?>/admin/reviews" class="btn btn-secondary">Back to Reviews</a>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 350px; gap: 2rem; align-items: start;">

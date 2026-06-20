@@ -239,7 +239,7 @@ $pageTitle = 'Reviews Management';
                         <td><?= htmlspecialchars(date('M j, Y', strtotime($review['created_at'] ?? 'now'))) ?></td>
                         <td>
                             <div class="admin-form-row">
-                                <a href="<?= BASE_URL ?>/admin/view-review.php?id=<?= intval($review['id']) ?>" class="btn btn-sm btn-outline">View</a>
+                                <a href="<?= BASE_URL ?>/admin/view-review?id=<?= intval($review['id']) ?>" class="btn btn-sm btn-outline">View</a>
                                 <form method="POST" onsubmit="return confirm('Delete this review permanently?');">
                                     <input type="hidden" name="action" value="delete_review">
                                     <input type="hidden" name="review_id" value="<?= intval($review['id']) ?>">

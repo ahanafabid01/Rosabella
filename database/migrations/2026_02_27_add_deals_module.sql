@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS deals (
     timer_text VARCHAR(32),
     countdown_end_at DATETIME NULL,
     image_path VARCHAR(255),
-    link_url VARCHAR(255) NOT NULL DEFAULT 'products.php?filter=sale',
+    link_url VARCHAR(255) NOT NULL DEFAULT 'sale',
     overlay_start VARCHAR(40) DEFAULT 'rgba(15, 118, 110, 0.84)',
     overlay_end VARCHAR(40) DEFAULT 'rgba(11, 91, 85, 0.62)',
     image_position VARCHAR(100) DEFAULT 'center center',
@@ -48,26 +48,26 @@ VALUES ('home_deals_cta_label', 'View All Deals', 'text')
 ON DUPLICATE KEY UPDATE setting_value = setting_value;
 
 INSERT INTO settings (setting_key, setting_value, setting_type)
-VALUES ('home_deals_cta_url', 'products.php?filter=sale', 'text')
+VALUES ('home_deals_cta_url', 'sale', 'text')
 ON DUPLICATE KEY UPDATE setting_value = setting_value;
 
 INSERT INTO deals (title, subtitle, badge_text, badge_style, timer_text, countdown_end_at, image_path, link_url, overlay_start, overlay_end, image_position, sort_order, status)
 SELECT 'Up to 70% Off', 'Electronics & Gadgets', 'Limited Time', 'danger', '12:45:30', DATE_ADD(NOW(), INTERVAL 12 HOUR),
        'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=800&q=80',
-       'products.php?category=electronics',
+       'category/electronics',
        'rgba(15, 118, 110, 0.84)', 'rgba(11, 91, 85, 0.62)', 'center center', 1, 'active'
 WHERE NOT EXISTS (SELECT 1 FROM deals LIMIT 1);
 
 INSERT INTO deals (title, subtitle, badge_text, badge_style, timer_text, countdown_end_at, image_path, link_url, overlay_start, overlay_end, image_position, sort_order, status)
 SELECT 'Fashion Forward', 'Summer Collection 2024', 'New Arrivals', 'primary', '23:59:59', DATE_ADD(NOW(), INTERVAL 24 HOUR),
        'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=80',
-       'products.php?category=fashion',
+       'category/fashion',
        'rgba(30, 64, 175, 0.82)', 'rgba(30, 58, 138, 0.62)', 'center top', 2, 'active'
 WHERE (SELECT COUNT(*) FROM deals) = 1;
 
 INSERT INTO deals (title, subtitle, badge_text, badge_style, timer_text, countdown_end_at, image_path, link_url, overlay_start, overlay_end, image_position, sort_order, status)
 SELECT 'Buy 2 Get 1 Free', 'Home & Living Essentials', 'This Weekend', 'success', '48:00:00', DATE_ADD(NOW(), INTERVAL 48 HOUR),
        'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80',
-       'products.php?category=home-living',
+       'category/home-living',
        'rgba(15, 118, 110, 0.84)', 'rgba(13, 89, 97, 0.62)', 'center center', 3, 'active'
 WHERE (SELECT COUNT(*) FROM deals) = 2;

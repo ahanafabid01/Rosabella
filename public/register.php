@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $success = 'Account created successfully! Redirecting...';
                 
                 // Redirect after 2 seconds
-                header("refresh:2;url=account.php");
+                header('refresh:2;url=' . cleanUrl('account'));
             } else {
                 $error = 'Failed to create account. Please try again.';
             }

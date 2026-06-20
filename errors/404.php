@@ -2,6 +2,101 @@
 /**
  * KARTLY - 404 Page Not Found
  */
+
+function dispatchCleanUrlFallback(): void
+{
+    $requestPath = parse_url(
+        $_SERVER['REDIRECT_URL']
+            ?? $_SERVER['REDIRECT_SCRIPT_URL']
+            ?? $_SERVER['REQUEST_URI']
+            ?? '/',
+        PHP_URL_PATH
+    );
+    $requestPath = '/' . trim(rawurldecode((string)$requestPath), '/');
+
+    $basePath = defined('BASE_URL') ? BASE_URL : '';
+    if ($basePath !== '' && str_starts_with($requestPath, $basePath . '/')) {
+        $requestPath = substr($requestPath, strlen($basePath));
+    }
+
+    $route = trim($requestPath, '/');
+    if ($route === 'errors/404.php') {
+        return;
+    }
+
+    $publicPages = [
+        'shop' => __DIR__ . '/../public/products.php',
+        'products' => __DIR__ . '/../public/products.php',
+        'search' => __DIR__ . '/../public/products.php',
+        'cart' => __DIR__ . '/../public/cart.php',
+        'checkout' => __DIR__ . '/../public/checkout.php',
+        'wishlist' => __DIR__ . '/../public/wishlist.php',
+        'account' => __DIR__ . '/../public/account.php',
+        'login' => __DIR__ . '/../public/login.php',
+        'register' => __DIR__ . '/../public/register.php',
+        'logout' => __DIR__ . '/../public/logout.php',
+        'contact' => __DIR__ . '/../public/contact.php',
+        'my-orders' => __DIR__ . '/../public/my-orders.php',
+        'track-order' => __DIR__ . '/../public/track-order.php',
+        'gift-cards' => __DIR__ . '/../public/gift-cards.php',
+        'payment_callback' => __DIR__ . '/../public/payment_callback.php',
+        'payment_ipn' => __DIR__ . '/../public/payment_ipn.php',
+        'payment_result' => __DIR__ . '/../public/payment_result.php',
+    ];
+
+    $infoPages = [
+        'about' => __DIR__ . '/../pages/about.php',
+        'help' => __DIR__ . '/../pages/help.php',
+        'shipping' => __DIR__ . '/../pages/shipping.php',
+        'returns' => __DIR__ . '/../pages/returns.php',
+        'terms' => __DIR__ . '/../pages/terms.php',
+        'privacy' => __DIR__ . '/../pages/privacy.php',
+        'cookies' => __DIR__ . '/../pages/cookies.php',
+        'careers' => __DIR__ . '/../pages/careers.php',
+        'press' => __DIR__ . '/../pages/press.php',
+        'affiliate' => __DIR__ . '/../pages/affiliate.php',
+        'accessibility' => __DIR__ . '/../pages/accessibility.php',
+        'sustainability' => __DIR__ . '/../pages/sustainability.php',
+        'size-guide' => __DIR__ . '/../pages/size-guide.php',
+    ];
+
+    $filters = [
+        'sale' => 'sale',
+        'new-arrivals' => 'new',
+        'best-sellers' => 'bestseller',
+    ];
+
+    $targetFile = $publicPages[$route] ?? $infoPages[$route] ?? null;
+
+    if ($targetFile === null && isset($filters[$route])) {
+        $_GET['filter'] = $filters[$route];
+        $targetFile = __DIR__ . '/../public/products.php';
+    }
+
+    if ($targetFile === null && preg_match('#^category/([a-zA-Z0-9_-]+)/?$#', $route, $match)) {
+        $_GET['category'] = $match[1];
+        $targetFile = __DIR__ . '/../public/products.php';
+    }
+
+    if ($targetFile === null && preg_match('#^product/([a-zA-Z0-9_-]+)/?$#', $route, $match)) {
+        $_GET['slug'] = $match[1];
+        $targetFile = __DIR__ . '/../public/product.php';
+    }
+
+    if ($targetFile === null && preg_match('#^track/([a-zA-Z0-9_-]+)/?$#', $route, $match)) {
+        $_GET['order'] = $match[1];
+        $targetFile = __DIR__ . '/../public/track-order.php';
+    }
+
+    if ($targetFile !== null && is_file($targetFile)) {
+        http_response_code(200);
+        require $targetFile;
+        exit;
+    }
+}
+
+dispatchCleanUrlFallback();
+
 $pageTitle = 'Page Not Found';
 require_once __DIR__ . '/../includes/header.php';
 ?>
