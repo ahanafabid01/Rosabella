@@ -388,8 +388,8 @@ require_once __DIR__ . '/../includes/header.php';
                         <a href="<?= BASE_URL ?>/shop" class="btn btn-primary">Start Shopping</a>
                     </div>
                     <?php else: ?>
-                    <div style="overflow-x: auto;">
-                        <table style="width: 100%; border-collapse: collapse; min-width: 600px; text-align: left;">
+                    <div style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+                        <table style="width: 100%; border-collapse: collapse; min-width: 600px; text-align: left; white-space: nowrap;">
                             <thead>
                                 <tr style="border-bottom: 2px solid var(--color-border);">
                                     <th style="padding: 1rem; font-weight: 600;">Order ID</th>
