@@ -626,6 +626,10 @@ body {
 .admin-table th,
 .admin-table td {
     padding: 1rem 2rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 350px;
 }
 
 .admin-title, .admin-page-title {
