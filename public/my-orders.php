@@ -9,7 +9,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/payment_gateway.php';
 
 if (!isLoggedIn()) {
-    header('Location: login.php');
+    header('Location: ' . BASE_URL . '/login');
     exit;
 }
 

@@ -31,9 +31,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Redirect to account or admin
             if ($user['role'] === 'admin') {
-                redirect('admin/index.php');
+                redirect('admin/');
             } else {
-                redirect('account.php');
+                redirect('account');
             }
         } else {
             $error = 'Invalid email or password';

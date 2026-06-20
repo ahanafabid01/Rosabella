@@ -3,7 +3,7 @@
  * KARTLY - Homepage
  */
 $pageTitle = 'Home';
-require_once __DIR__ . '/../includes/header.php';
+require_once __DIR__ . '/includes/header.php';
 
 $db = getDB();
 
@@ -613,7 +613,6 @@ try {
     </section>
 
 
-<?php require_once __DIR__ . '/../includes/footer.php'; ?>
-
+<?php require_once __DIR__ . '/includes/footer.php'; ?>
 
 

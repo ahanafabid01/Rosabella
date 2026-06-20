@@ -7,7 +7,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/payment_gateway.php';
 
 if (!isLoggedIn()) {
-    header('Location: login.php?redirect=checkout.php');
+    header('Location: ' . BASE_URL . '/login?redirect=checkout');
     exit;
 }
 
@@ -21,7 +21,7 @@ $stmt->execute([$_SESSION['user_id'], $sessionId]);
 $cartItems = $stmt->fetchAll();
 
 if (empty($cartItems)) {
-    header('Location: cart.php');
+    header('Location: ' . BASE_URL . '/cart');
     exit;
 }
 
@@ -501,6 +501,5 @@ function updateShipping(radio) {
 </script>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
-
 
 

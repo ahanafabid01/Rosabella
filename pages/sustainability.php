@@ -82,7 +82,7 @@ require_once __DIR__ . '/../includes/header.php';
             <div style="background: var(--color-bg-secondary); border-radius: var(--radius-xl); padding: 2rem; margin-bottom: 3rem;">
                 <h3 style="font-weight: 600; margin-bottom: 1rem;">🛒 Shop Green</h3>
                 <p style="color: var(--color-text-light); margin-bottom: 1.5rem;">Look for the "Eco-Friendly" badge on products throughout our store to identify sustainable options.</p>
-                <a href="products.php?search=organic" class="btn btn-primary">Browse Eco-Friendly Products</a>
+                <a href="<?= BASE_URL ?>/products?search=organic" class="btn btn-primary">Browse Eco-Friendly Products</a>
             </div>
 
             <!-- Certifications -->

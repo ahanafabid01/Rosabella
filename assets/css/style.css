@@ -681,17 +681,6 @@ textarea {
     transition: color var(--transition-fast), background var(--transition-fast);
 }
 
-.header-nav-link::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    right: 50%;
-    height: 2px;
-    background: #fff;
-    transition: left var(--transition-fast), right var(--transition-fast);
-}
-
 .header-nav-list li:hover .header-nav-link,
 .header-nav-link:hover {
     color: #fff;
@@ -753,11 +742,6 @@ textarea {
     background: var(--color-bg-secondary);
     color: var(--color-primary);
     padding-left: 1.5rem; /* Very subtle indentation on hover like StarTech */
-}
-
-.header-nav-link:hover::after {
-    left: 0;
-    right: 0;
 }
 
 .header-nav-link svg {

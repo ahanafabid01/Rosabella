@@ -1,5 +1,5 @@
 # KARTLY - Apache Configuration
-# Organized structure: /public/ (shop), /pages/ (info), /admin/, /api/, /errors/
+# Organized structure: root index.php (homepage), /public/ (shop), /pages/ (info), /admin/, /api/, /errors/
 
 # Enable rewrite engine
 RewriteEngine On
@@ -94,8 +94,8 @@ RewriteRule ^track/([a-zA-Z0-9_-]+)/?$      public/track-order.php?order=$1 [L,Q
 # ─────────────────────────────────────────────────────────────
 # SECTION 8: Core pages (clean, no .php extension)
 # ─────────────────────────────────────────────────────────────
-RewriteRule ^$                         public/index.php            [L]
-RewriteRule ^index(\.php)?$            public/index.php            [L]
+RewriteRule ^$                         index.php                   [L]
+RewriteRule ^index(\.php)?$            index.php                   [L]
 RewriteRule ^products(\.php)?$         public/products.php         [L,QSA]
 RewriteRule ^product(\.php)?$          public/product.php          [L,QSA]
 RewriteRule ^cart(\.php)?$             public/cart.php             [L]

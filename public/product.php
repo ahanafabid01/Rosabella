@@ -89,7 +89,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <span> / </span>
                 <a href="<?= BASE_URL ?>/shop" style="color: var(--color-text-light);">Products</a>
                 <span> / </span>
-                <a href="products.php?category=<?= urlencode($product['category_slug']) ?>" style="color: var(--color-text-light);"><?= htmlspecialchars($product['category_name']) ?></a>
+                <a href="<?= BASE_URL ?>/products?category=<?= urlencode($product['category_slug']) ?>" style="color: var(--color-text-light);"><?= htmlspecialchars($product['category_name']) ?></a>
                 <span> / </span>
                 <span style="color: var(--color-text);"><?= htmlspecialchars($product['name']) ?></span>
             </nav>
@@ -274,7 +274,7 @@ require_once __DIR__ . '/../includes/header.php';
                     <?php endif; ?>
                     
                     <!-- Add to Cart Form -->
-                    <form action="api/cart.php" method="POST" id="add-to-cart-form" class="add-to-cart-form" data-product-id="<?= $product['id'] ?>" style="margin-bottom: 1.5rem;">
+                    <form action="<?= BASE_URL ?>/api/cart.php" method="POST" id="add-to-cart-form" class="add-to-cart-form" data-product-id="<?= $product['id'] ?>" style="margin-bottom: 1.5rem;">
                         <input type="hidden" name="action" value="add">
                         <input type="hidden" name="product_id" value="<?= $product['id'] ?>">
                         <?php if (!empty($product['sizes'])): ?>
