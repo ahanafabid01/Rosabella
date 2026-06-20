@@ -7,17 +7,9 @@ require_once __DIR__ . '/../includes/header.php';
 ?>
 
     <!-- Hero -->
-    <section class="section section-bg" style="padding: 1rem 0;">
+    <section style="background: var(--color-primary); padding: 3rem 0; color: white; text-align: center;">
         <div class="container">
-            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                <h1 style="font-size: 1.875rem; font-weight: 700;">Press & Media</h1>
-                <nav style="font-size: 0.875rem; color: var(--color-text-light); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                    <a href="<?= BASE_URL ?>/" style="color: var(--color-text-light); display: flex; align-items: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></a>
-                    <span>/</span>
-                    <span style="color: var(--color-text);">Press</span>
-                </nav>
-            </div>
-            <p style="color: var(--color-text-light); margin-top: 0.5rem; font-size: 0.875rem;">Latest news and media coverage about KARTLY</p>
+            <h1 style="font-size: 2.5rem; font-weight: 700;">Press & Media</h1>
         </div>
     </section>
 
