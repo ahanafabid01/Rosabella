@@ -7,15 +7,17 @@ require_once __DIR__ . '/../includes/header.php';
 ?>
 
     <!-- Page Header -->
-    <section class="section section-bg">
+    <section class="section section-bg" style="padding: 1rem 0;">
         <div class="container">
-            <nav style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.5rem;">
-                <a href="<?= BASE_URL ?>/" style="color: var(--color-text-light);">Home</a>
-                <span> / </span>
-                <span style="color: var(--color-text);">Privacy Policy</span>
-            </nav>
-            <h1 style="font-size: 2rem; font-weight: 700;">Privacy Policy</h1>
-            <p style="color: var(--color-text-light); margin-top: 0.5rem;">Last updated: December 15, 2024</p>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <h1 style="font-size: 1.875rem; font-weight: 700;">Privacy Policy</h1>
+                <nav style="font-size: 0.875rem; color: var(--color-text-light); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                    <a href="<?= BASE_URL ?>/" style="color: var(--color-text-light); display: flex; align-items: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></a>
+                    <span>/</span>
+                    <span style="color: var(--color-text);">Privacy Policy</span>
+                </nav>
+            </div>
+            <p style="color: var(--color-text-light); margin-top: 0.5rem; font-size: 0.875rem;">Last updated: December 15, 2024</p>
         </div>
     </section>
 
