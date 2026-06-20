@@ -160,6 +160,30 @@ function initHeroSlider() {
         });
     });
     
+    // Touch swipe support
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    slider.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    
+    slider.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        if (touchEndX < touchStartX - 40) {
+            // Swiped left -> next slide
+            stopAutoPlay();
+            nextSlide();
+            startAutoPlay();
+        }
+        if (touchEndX > touchStartX + 40) {
+            // Swiped right -> prev slide
+            stopAutoPlay();
+            prevSlide();
+            startAutoPlay();
+        }
+    }, { passive: true });
+    
     // Start autoplay
     startAutoPlay();
 }

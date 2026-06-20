@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * KARTLY - Homepage
  */
@@ -192,7 +192,33 @@ try {
             </div>
         </div>
     </section>
-    <?php endif; ?>
+        <script>
+    (function() {
+        if (window.innerWidth >= 768) return;
+        var grid = document.querySelector('.hero-bento-grid');
+        if (!grid || grid.children.length < 2) return;
+        var slides = Array.from(grid.children);
+        Object.assign(grid.style, {display:'flex',flexDirection:'row',overflowX:'scroll',scrollSnapType:'x mandatory',scrollBehavior:'smooth',gap:'0',msOverflowStyle:'none',scrollbarWidth:'none'});
+        var s = document.createElement('style');
+        s.textContent = '.hero-bento-grid::-webkit-scrollbar{display:none}';
+        document.head.appendChild(s);
+        slides.forEach(function(sl){Object.assign(sl.style,{minWidth:'100%',width:'100%',flexShrink:'0',scrollSnapAlign:'start'});});
+        var wrap = document.createElement('div');
+        wrap.style.cssText = 'display:flex;justify-content:center;gap:8px;margin-top:10px;';
+        var dots = slides.map(function(_,i){
+            var d=document.createElement('button');
+            d.style.cssText='width:8px;height:8px;border-radius:50%;border:none;padding:0;cursor:pointer;transition:background .2s,transform .2s;background:'+(i===0?'var(--color-primary,#0f766e)':'#d1d5db');
+            d.onclick=function(){grid.scrollTo({left:grid.offsetWidth*i,behavior:'smooth'});};
+            wrap.appendChild(d); return d;
+        });
+        grid.parentNode.insertBefore(wrap,grid.nextSibling);
+        grid.addEventListener('scroll',function(){var idx=Math.round(grid.scrollLeft/Math.max(grid.offsetWidth,1));dots.forEach(function(d,i){d.style.background=i===idx?'var(--color-primary,#0f766e)':'#d1d5db';d.style.transform=i===idx?'scale(1.4)':'scale(1)';});},{passive:true});
+        var sx=0;
+        grid.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
+        grid.addEventListener('touchend',function(e){var diff=sx-e.changedTouches[0].clientX;if(Math.abs(diff)>40){var idx=Math.round(grid.scrollLeft/grid.offsetWidth);idx+=diff>0?1:-1;idx=Math.max(0,Math.min(idx,slides.length-1));grid.scrollTo({left:grid.offsetWidth*idx,behavior:'smooth'});}},{passive:true});
+    })();
+    </script>
+<?php endif; ?>
 
     <!-- Categories Section -->
     <section class="section" style="padding-top: 1rem; padding-bottom: 2rem;">
