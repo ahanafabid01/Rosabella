@@ -186,6 +186,9 @@ $colorVars = [
     'bg_tertiary' => '#edf1f5',
     'border' => '#d8dee6',
     'border_light' => '#e8edf3',
+    'topbar_bg' => '#ffffff',
+    'navbar_bg' => '#0f766e',
+    'footer_bg' => '#f6f8fb',
 ];
 $colors = [];
 foreach ($colorVars as $key => $defaultHex) {
@@ -637,6 +640,9 @@ $pageTitle = 'Settings';
                             'bg' => 'Main Background',
                             'bg_secondary' => 'Secondary Background (Cards)',
                             'bg_tertiary' => 'Tertiary Background (Hover states)',
+                            'topbar_bg' => 'Topbar Background',
+                            'navbar_bg' => 'Navbar Background',
+                            'footer_bg' => 'Footer Background',
                         ],
                         'Text' => [
                             'text' => 'Main Text',

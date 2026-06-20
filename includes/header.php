@@ -54,7 +54,8 @@ $colorVars = [
     'success', 'danger', 'warning', 'info',
     'text', 'text_light', 'text_muted',
     'bg', 'bg_secondary', 'bg_tertiary',
-    'border', 'border_light'
+    'border', 'border_light',
+    'topbar_bg', 'navbar_bg', 'footer_bg'
 ];
 $customColors = [];
 foreach ($colorVars as $k) {
