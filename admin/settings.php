@@ -126,6 +126,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_setting'])) {
         }
     }
 }
+// ---- Handle Colors settings ----
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_colors'])) {
+    $colorFields = $_POST['color'] ?? [];
+    $upsertColor = $db->prepare(
+        "INSERT INTO settings (setting_key, setting_value, setting_type)
+         VALUES (?, ?, 'text')
+         ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)"
+    );
+    foreach ($colorFields as $key => $value) {
+        if (preg_match('/^color_[a-zA-Z0-9_-]+$/', $key)) {
+            $upsertColor->execute([$key, trim((string)$value)]);
+        }
+    }
+    $message = 'Color palette saved successfully.';
+}
 
 $settings = $db->query("SELECT * FROM settings ORDER BY setting_key ASC")->fetchAll();
 
@@ -133,12 +148,13 @@ $settings = $db->query("SELECT * FROM settings ORDER BY setting_key ASC")->fetch
 $groups = [
     'branding'   => ['label' => 'Branding',   'icon' => 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z', 'items' => []],
     'typography' => ['label' => 'Typography', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', 'items' => []],
+    'colors'     => ['label' => 'Colors',     'icon' => 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01', 'items' => []],
     'general'    => ['label' => 'General',    'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', 'items' => []],
-    'payment'  => ['label' => 'Payment',   'icon' => 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z', 'items' => []],
-    'shipping' => ['label' => 'Shipping',  'icon' => 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4', 'items' => []],
-    'email'    => ['label' => 'Email',     'icon' => 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', 'items' => []],
-    'security' => ['label' => 'Security',  'icon' => 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z', 'items' => []],
-    'advanced' => ['label' => 'Advanced',  'icon' => 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z', 'items' => []],
+    'payment'    => ['label' => 'Payment',    'icon' => 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z', 'items' => []],
+    'shipping'   => ['label' => 'Shipping',   'icon' => 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4', 'items' => []],
+    'email'      => ['label' => 'Email',      'icon' => 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', 'items' => []],
+    'security'   => ['label' => 'Security',   'icon' => 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z', 'items' => []],
+    'advanced'   => ['label' => 'Advanced',   'icon' => 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z', 'items' => []],
 ];
 
 // Current branding values
@@ -152,7 +168,30 @@ foreach ($typoTags as $tag) {
     $typoFonts[$tag] = getSetting('typo_font_' . $tag) ?: '';
 }
 
-
+// Color Palette
+$colorVars = [
+    'primary' => '#0f766e',
+    'primary_hover' => '#0b5b55',
+    'secondary' => '#f8f9fa',
+    'secondary_hover' => '#e9ecef',
+    'success' => '#198754',
+    'danger' => '#c0392b',
+    'warning' => '#f39c12',
+    'info' => '#0ea5e9',
+    'text' => '#102133',
+    'text_light' => '#5f7083',
+    'text_muted' => '#9aa8b5',
+    'bg' => '#ffffff',
+    'bg_secondary' => '#f6f8fb',
+    'bg_tertiary' => '#edf1f5',
+    'border' => '#d8dee6',
+    'border_light' => '#e8edf3',
+];
+$colors = [];
+foreach ($colorVars as $key => $defaultHex) {
+    $val = getSetting('color_' . $key);
+    $colors[$key] = ($val !== null && $val !== '') ? $val : $defaultHex;
+}
 
 foreach ($settings as $s) {
     $key = strtolower($s['setting_key']);
@@ -579,10 +618,75 @@ $pageTitle = 'Settings';
 
 
 
+        <!-- === Colors Tab === -->
+        <div class="settings-tab-panel" id="tab-colors">
+            <div class="admin-card">
+                <h2 class="admin-section-heading">Color Palette</h2>
+                <p style="font-size:0.82rem;color:var(--color-text-light);margin:-0.25rem 0 1.5rem;">
+                    Customize the global colors used throughout the store. Changes affect buttons, text, backgrounds, and accents.
+                </p>
+
+                <form method="POST">
+                    <?php
+                    $colorGroups = [
+                        'Brand & Accent' => [
+                            'primary' => 'Primary (Buttons, Links)',
+                            'primary_hover' => 'Primary Hover',
+                        ],
+                        'Backgrounds' => [
+                            'bg' => 'Main Background',
+                            'bg_secondary' => 'Secondary Background (Cards)',
+                            'bg_tertiary' => 'Tertiary Background (Hover states)',
+                        ],
+                        'Text' => [
+                            'text' => 'Main Text',
+                            'text_light' => 'Light Text',
+                            'text_muted' => 'Muted / Placeholder Text',
+                        ],
+                        'Borders' => [
+                            'border' => 'Main Border',
+                            'border_light' => 'Light Border (Dividers)',
+                        ],
+                        'Status & Alerts' => [
+                            'success' => 'Success (Green)',
+                            'danger' => 'Danger (Red)',
+                            'warning' => 'Warning (Yellow)',
+                            'info' => 'Info (Blue)',
+                        ],
+                    ];
+                    ?>
+
+                    <?php foreach ($colorGroups as $groupName => $groupVars): ?>
+                        <div style="background:var(--color-bg-secondary);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1.25rem;">
+                            <h3 style="margin:0 0 1rem;font-size:0.88rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-light);"><?= $groupName ?></h3>
+                            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;">
+                                <?php foreach ($groupVars as $k => $label): ?>
+                                    <div>
+                                        <label style="font-size:0.75rem;font-weight:600;color:var(--color-text);display:block;margin-bottom:0.4rem;"><?= htmlspecialchars($label) ?></label>
+                                        <div style="display:flex;gap:0.5rem;align-items:center;">
+                                            <input type="color" name="color[color_<?= $k ?>]" value="<?= htmlspecialchars($colors[$k] ?? '#000000') ?>" style="width:40px;height:36px;padding:2px;border:1px solid var(--color-border);border-radius:6px;cursor:pointer;">
+                                            <input class="form-input" type="text" name="color[color_<?= $k ?>_hex]" value="<?= htmlspecialchars($colors[$k] ?? '#000000') ?>" style="font-family:monospace;font-size:0.8rem;" placeholder="#000000" readonly>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+
+                    <div style="margin-top:1.5rem;display:flex;justify-content:flex-end;">
+                        <button type="submit" name="save_colors" value="1" class="btn btn-primary">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-2px;margin-right:4px;"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                            Save Colors
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <!-- === Dynamic Settings Tabs === -->
         <form method="POST" id="settings-form">
             <?php $first = false; foreach ($groups as $groupKey => $group):
-                  if ($groupKey === 'branding' || $groupKey === 'typography') { continue; } ?>
+                  if ($groupKey === 'branding' || $groupKey === 'typography' || $groupKey === 'colors') { continue; } ?>
             <div class="settings-tab-panel" id="tab-<?= $groupKey ?>">
                 <div class="admin-card">
                     <h2 class="admin-section-heading"><?= htmlspecialchars($group['label']) ?> Settings</h2>

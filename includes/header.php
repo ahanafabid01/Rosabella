@@ -47,6 +47,20 @@ foreach ($typoTags as $tag) {
         $uniqueFonts[$font] = true;
     }
 }
+
+// Color Palette settings from DB
+$colorVars = [
+    'primary', 'primary_hover', 'secondary', 'secondary_hover',
+    'success', 'danger', 'warning', 'info',
+    'text', 'text_light', 'text_muted',
+    'bg', 'bg_secondary', 'bg_tertiary',
+    'border', 'border_light'
+];
+$customColors = [];
+foreach ($colorVars as $k) {
+    $val = getSetting('color_' . $k);
+    if ($val) $customColors[$k] = $val;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -70,8 +84,16 @@ foreach ($typoTags as $tag) {
     <link href="https://fonts.googleapis.com/css2?family=<?= urlencode(trim($fontName)) ?>:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <?php endforeach; ?>
 
-    <!-- Dynamic Typography CSS from Admin Settings -->
+    <!-- Dynamic Typography & Colors CSS from Admin Settings -->
     <style>
+        <?php if (!empty($customColors)): ?>
+        :root {
+            <?php foreach ($customColors as $key => $hex): ?>
+            --color-<?= str_replace('_', '-', $key) ?>: <?= htmlspecialchars($hex) ?>;
+            <?php endforeach; ?>
+        }
+        <?php endif; ?>
+
         <?php foreach ($typoFonts as $tag => $fontName): ?>
         <?= $tag ?> { font-family: '<?= htmlspecialchars(trim($fontName)) ?>', sans-serif !important; }
         <?php endforeach; ?>
