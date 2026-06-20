@@ -310,6 +310,37 @@ foreach ($colorVars as $k) {
                 </li>
             <?php endforeach; ?>
         </ul>
+
+        <!-- Mobile Nav Footer: Login / Account -->
+        <div class="mobile-nav-footer">
+            <?php if (isLoggedIn()): ?>
+                <a href="<?= BASE_URL ?>/account" class="mobile-nav-account-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    My Account
+                </a>
+                <a href="<?= BASE_URL ?>/logout" class="mobile-nav-logout-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    Logout
+                </a>
+            <?php else: ?>
+                <a href="<?= BASE_URL ?>/login" class="mobile-nav-login-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
+                    </svg>
+                    Login
+                </a>
+                <a href="<?= BASE_URL ?>/register" class="mobile-nav-register-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
+                    </svg>
+                    Register
+                </a>
+            <?php endif; ?>
+        </div>
     </nav>
 
     <!-- Toast Container -->

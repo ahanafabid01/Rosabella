@@ -1021,6 +1021,87 @@ textarea {
     transform: rotate(180deg);
 }
 
+/* ---- Mobile Nav Footer (Login / Account) ---- */
+.mobile-nav-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 1rem 1.25rem 1.5rem;
+    border-top: 1px solid var(--color-border-light);
+    margin-top: auto;
+}
+
+.mobile-nav-login-btn,
+.mobile-nav-register-btn,
+.mobile-nav-account-btn,
+.mobile-nav-logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.8rem 1.1rem;
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.18s, color 0.18s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-nav-login-btn {
+    background: var(--color-primary);
+    color: #fff;
+    justify-content: center;
+}
+.mobile-nav-login-btn:hover {
+    background: var(--color-primary-hover);
+    color: #fff;
+}
+
+.mobile-nav-register-btn {
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
+    border: 1.5px solid var(--color-border);
+    justify-content: center;
+}
+.mobile-nav-register-btn:hover {
+    background: var(--color-bg-tertiary);
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.mobile-nav-account-btn {
+    background: var(--color-primary);
+    color: #fff;
+    justify-content: center;
+}
+.mobile-nav-account-btn:hover {
+    background: var(--color-primary-hover);
+    color: #fff;
+}
+
+.mobile-nav-logout-btn {
+    background: transparent;
+    color: var(--color-danger);
+    border: 1.5px solid var(--color-danger);
+    justify-content: center;
+    font-size: 0.88rem;
+}
+.mobile-nav-logout-btn:hover {
+    background: var(--color-danger);
+    color: #fff;
+}
+
+/* Make the mobile nav a flex column so footer sticks to bottom */
+.mobile-nav {
+    display: flex;
+    flex-direction: column;
+}
+.mobile-nav-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+
 /* ---- Responsive: show desktop elements ---- */
 @media (min-width: 640px) {
     .header-cart-label {
