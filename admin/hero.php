@@ -1,8 +1,9 @@
-﻿<?php
+<?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../includes/image_helper.php';
 require_once __DIR__ . '/includes/layout.php';
 
 if (!isLoggedIn() || !isAdmin()) {
@@ -59,17 +60,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // File upload
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
         $uploadDir = __DIR__ . '/../assets/images/hero/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
-        
-        $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9.-]/', '_', $_FILES['image']['name']);
-        $targetPath = $uploadDir . $fileName;
-        
-        if (move_uploaded_file($_FILES['image']['tmp_name'], $targetPath)) {
-            $imagePath = 'assets/images/hero/' . $fileName;
+        $newPath = optimizeAndSaveImage($_FILES['image'], $uploadDir, 1600);
+        if ($newPath) {
+            $imagePath = $newPath;
         } else {
-            $error = "Failed to upload image.";
+            $error = "Failed to process and upload image as WebP.";
         }
     }
     

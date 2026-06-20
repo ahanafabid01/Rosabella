@@ -13,6 +13,8 @@ $sitePhone = getSetting('site_phone') ?: '+880 1700-000000';
 $siteEmail = getSetting('site_email') ?: SITE_EMAIL;
 ?>
 
+</main><!-- /#main-content -->
+
     <!-- Trust Badges Section (Separate from Footer) -->
     <section class="site-trust-badges" style="background-color: var(--color-bg); padding: 2rem 0; border-top: 1px solid var(--color-border);">
         <div class="container">
@@ -57,7 +59,7 @@ $siteEmail = getSetting('site_email') ?: SITE_EMAIL;
                     <p>Get the latest updates, deals, and exclusive offers directly in your inbox.</p>
                 </div>
                 <form class="newsletter-form">
-                    <input type="email" placeholder="Enter your email" required>
+                    <input type="email" placeholder="Enter your email" aria-label="Email address" required>
                     <button type="submit" class="btn btn-primary">Subscribe</button>
                 </form>
             </div>
@@ -73,7 +75,7 @@ $siteEmail = getSetting('site_email') ?: SITE_EMAIL;
                         $footerSiteLogo = getSetting('site_logo');
                         if ($footerSiteLogo): 
                         ?>
-                            <img src="<?= BASE_URL ?>/<?= htmlspecialchars($footerSiteLogo) ?>" alt="<?= htmlspecialchars(getSetting('site_name') ?: 'KARTLY') ?>" style="height:40px;width:auto;object-fit:contain;display:block;">
+                            <img src="<?= BASE_URL ?>/<?= htmlspecialchars($footerSiteLogo) ?>" alt="<?= htmlspecialchars(getSetting('site_name') ?: 'KARTLY') ?>" width="133" height="40" style="height:40px;width:auto;object-fit:contain;display:block;">
                         <?php else: ?>
                             <div class="logo-icon">K</div>
                             <span style="font-size: 1.5rem; font-weight: 700;">KARTLY</span>
@@ -192,8 +194,8 @@ $siteEmail = getSetting('site_email') ?: SITE_EMAIL;
         </div>
     </footer>
     
-    <!-- Scripts -->
-    <script src="<?= BASE_URL ?>/assets/js/main.js"></script>
+    <!-- Scripts - deferred so they never block rendering -->
+    <script src="<?= BASE_URL ?>/assets/js/main.js" defer></script>
     
     <!-- Additional page-specific scripts -->
     <?php if (isset($additionalScripts)): ?>

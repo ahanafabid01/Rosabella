@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * KARTLY - Admin Products Management
  */
@@ -83,19 +83,14 @@ function uploadProductImage(array $file, ?string &$uploadError): ?string
         return null;
     }
 
-    try {
-        $fileName = 'product_' . date('YmdHis') . '_' . bin2hex(random_bytes(4)) . '.' . $allowedMimeToExtension[$mimeType];
-    } catch (Throwable $e) {
-        $fileName = 'product_' . date('YmdHis') . '_' . mt_rand(1000, 9999) . '.' . $allowedMimeToExtension[$mimeType];
-    }
-
-    $targetPath = $uploadDir . '/' . $fileName;
-    if (!move_uploaded_file($tmpName, $targetPath)) {
-        $uploadError = 'Unable to move uploaded image.';
+    require_once __DIR__ . '/../includes/image_helper.php';
+    $newPath = optimizeAndSaveImage($file, $uploadDir, 1200);
+    if (!$newPath) {
+        $uploadError = 'Unable to process and save image as WebP.';
         return null;
     }
 
-    return 'assets/uploads/products/' . $fileName;
+    return $newPath;
 }
 
 function parseGalleryImages(?string $raw): array

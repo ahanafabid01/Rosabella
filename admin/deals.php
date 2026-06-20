@@ -287,19 +287,14 @@ function uploadDealImage(array $file, ?string &$uploadError): ?string
         return null;
     }
 
-    try {
-        $fileName = 'deal_' . date('YmdHis') . '_' . bin2hex(random_bytes(4)) . '.' . $allowedMimeToExtension[$mimeType];
-    } catch (Throwable $e) {
-        $fileName = 'deal_' . date('YmdHis') . '_' . mt_rand(1000, 9999) . '.' . $allowedMimeToExtension[$mimeType];
-    }
-
-    $targetPath = $uploadDir . '/' . $fileName;
-    if (!move_uploaded_file($tmpName, $targetPath)) {
-        $uploadError = 'Unable to move uploaded image.';
+    require_once __DIR__ . '/../includes/image_helper.php';
+    $newPath = optimizeAndSaveImage($file, $uploadDir, 1200);
+    if (!$newPath) {
+        $uploadError = 'Unable to process and move uploaded image as WebP.';
         return null;
     }
 
-    return 'assets/uploads/deals/' . $fileName;
+    return $newPath;
 }
 
 $dealsTableReady = ensureDealsTable($db);

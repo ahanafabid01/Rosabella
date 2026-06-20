@@ -81,17 +81,50 @@ foreach ($colorVars as $k) {
     <?php endif; ?>
     
     <!-- Google Fonts from Settings -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <?php foreach (array_keys($uniqueFonts) as $fontName): ?>
     <link href="https://fonts.googleapis.com/css2?family=<?= urlencode(trim($fontName)) ?>:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <?php endforeach; ?>
 
-    
+    <?php 
+    // PRELOAD CRITICAL HERO IMAGE (LCP) FOR HOMEPAGE
+    $isHome = ($_SERVER['REQUEST_URI'] === '/' || $_SERVER['REQUEST_URI'] === '/index.php' || strpos($_SERVER['REQUEST_URI'], '/Kartly/') !== false);
+    if ($isHome) {
+        $stmtHero = $db->query("SELECT image_path FROM hero_slides WHERE position = 'main' AND status = 'active' ORDER BY sort_order ASC LIMIT 1");
+        $lcpHero = $stmtHero->fetch(PDO::FETCH_ASSOC);
+        if ($lcpHero && !empty($lcpHero['image_path'])) {
+            echo '<link rel="preload" as="image" href="'.BASE_URL.'/' . htmlspecialchars($lcpHero['image_path']) . '">';
+        }
+    }
+    ?>
+
     <script>
         window.BASE_URL = '<?= BASE_URL ?>';
     </script>
     
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css">
+    <!-- Non-blocking Main Stylesheet -->
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css"></noscript>
+
+    <!-- Critical CSS — inlined to eliminate render-blocking -->
+    <style>
+        /* Critical above-fold CSS: Design tokens, reset, header, hero skeleton */
+        :root{--color-primary:#0f766e;--color-primary-hover:#0b5b55;--color-primary-light:rgba(15,118,110,.14);--color-secondary:#f8f9fa;--color-secondary-hover:#e9ecef;--color-success:#198754;--color-danger:#c0392b;--color-warning:#f39c12;--color-text:#102133;--color-text-light:#475569;--color-text-muted:#64748b;--color-bg:#fff;--color-bg-secondary:#f6f8fb;--color-bg-tertiary:#edf1f5;--color-border:#d8dee6;--color-border-light:#e8edf3;--font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;--font-size-xs:.75rem;--font-size-sm:.875rem;--font-size-base:1rem;--font-size-lg:1.125rem;--font-size-xl:1.25rem;--font-size-2xl:1.5rem;--radius-sm:.25rem;--radius-md:.5rem;--radius-lg:.75rem;--radius-xl:1rem;--radius-full:9999px;--shadow-sm:0 1px 2px rgba(16,33,51,.06);--shadow-md:0 6px 18px rgba(16,33,51,.08);--transition-fast:150ms ease;--transition-base:250ms ease;--container-max:1440px;--container-padding:1.5rem}
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+        body{font-family:var(--font-family);font-size:var(--font-size-base);line-height:1.6;color:var(--color-text);background-color:var(--color-bg);min-height:100vh;display:flex;flex-direction:column}
+        .container{width:100%;max-width:var(--container-max);margin-left:auto;margin-right:auto;padding-left:var(--container-padding);padding-right:var(--container-padding)}
+        img{max-width:100%;height:auto;display:block}
+        a{color:inherit;text-decoration:none}
+        .header{position:sticky;top:0;z-index:100;background:var(--color-bg);box-shadow:var(--shadow-sm)}
+        .header-main{padding:1rem 0;border-bottom:1px solid var(--color-border-light)}
+        .header-content{display:flex;align-items:center;justify-content:space-between;gap:2rem}
+        .logo{font-size:1.75rem;font-weight:800;color:var(--color-primary);letter-spacing:-.5px;display:flex;align-items:center;gap:.5rem}
+        .header-search{flex:1;max-width:600px;position:relative}
+        .header-actions{display:flex;align-items:center;gap:1rem}
+        @media (max-width:991px){.header-search,.header-nav{display:none}}
+    </style>
 
     <!-- Dynamic Typography & Colors CSS from Admin Settings -->
     <style>
@@ -311,38 +344,44 @@ foreach ($colorVars as $k) {
                         <?php endif; ?>
                     </li>
                 <?php endforeach; ?>
-            </ul>
 
-            <!-- Mobile Nav Footer: Login / Account -->
-            <div class="mobile-nav-footer" style="margin-top: 1rem; border-top: none; padding-top: 0;">
+                <!-- Mobile Nav Footer: Login / Account (inside ul for scrolling) -->
                 <?php if (isLoggedIn()): ?>
-                    <a href="<?= BASE_URL ?>/account" class="mobile-nav-account-btn">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                        </svg>
-                        My Account
-                    </a>
-                    <a href="<?= BASE_URL ?>/logout" class="mobile-nav-logout-btn">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-                        </svg>
-                        Logout
-                    </a>
+                    <li class="mobile-nav-item" style="border-top: 1px solid var(--color-border-light); margin-top: 1rem; padding-top: 1rem;">
+                        <a href="<?= BASE_URL ?>/account" class="mobile-nav-account-btn" style="display:flex;align-items:center;gap:0.5rem;padding:0.75rem 1.25rem;font-weight:600;color:var(--color-primary);background:var(--color-bg-secondary);margin:0 1.25rem 0.5rem;border-radius:var(--radius-md);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                            </svg>
+                            My Account
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a href="<?= BASE_URL ?>/logout" class="mobile-nav-logout-btn" style="display:flex;align-items:center;gap:0.5rem;padding:0.75rem 1.25rem;font-weight:600;color:var(--color-danger);margin:0 1.25rem 1rem;border-radius:var(--radius-md);background:var(--color-bg-tertiary);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+                            </svg>
+                            Logout
+                        </a>
+                    </li>
                 <?php else: ?>
-                    <a href="<?= BASE_URL ?>/login" class="mobile-nav-login-btn">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
-                        </svg>
-                        Login
-                    </a>
-                    <a href="<?= BASE_URL ?>/register" class="mobile-nav-register-btn">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
-                        </svg>
-                        Register
-                    </a>
+                    <li class="mobile-nav-item" style="border-top: 1px solid var(--color-border-light); margin-top: 1rem; padding-top: 1rem;">
+                        <a href="<?= BASE_URL ?>/login" class="mobile-nav-login-btn" style="display:flex;align-items:center;gap:0.5rem;padding:0.75rem 1.25rem;font-weight:600;color:white;background:var(--color-primary);margin:0 1.25rem 0.5rem;border-radius:var(--radius-md);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
+                            </svg>
+                            Login
+                        </a>
+                    </li>
+                    <li class="mobile-nav-item">
+                        <a href="<?= BASE_URL ?>/register" class="mobile-nav-register-btn" style="display:flex;align-items:center;gap:0.5rem;padding:0.75rem 1.25rem;font-weight:600;color:var(--color-text);border:1px solid var(--color-border);margin:0 1.25rem 1rem;border-radius:var(--radius-md);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
+                            </svg>
+                            Register
+                        </a>
+                    </li>
                 <?php endif; ?>
-            </div>
+            </ul>
         </div>
     </nav>
 
@@ -424,3 +463,5 @@ foreach ($colorVars as $k) {
             <a href="<?= BASE_URL ?>/cart" class="btn btn-primary mini-cart-btn" style="width: 100%;">View Cart</a>
         </div>
     </div>
+
+<main id="main-content">

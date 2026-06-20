@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * KARTLY - Admin Categories Management
  */
@@ -6,6 +6,9 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 require_once '../config/database.php';
+require_once '../includes/auth.php';
+require_once '../includes/image_helper.php';
+require_once '../includes/image_helper.php';
 require_once __DIR__ . '/includes/layout.php';
 
 if (!isLoggedIn() || !isAdmin()) {
@@ -40,14 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Handle file upload
     if (isset($_FILES['image_file']) && $_FILES['image_file']['error'] === UPLOAD_ERR_OK) {
         $uploadDir = '../assets/images/categories/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
-        $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9.\-_]/', '', basename($_FILES['image_file']['name']));
-        $targetPath = $uploadDir . $fileName;
-        
-        if (move_uploaded_file($_FILES['image_file']['tmp_name'], $targetPath)) {
-            $image = 'assets/images/categories/' . $fileName;
+        $newPath = optimizeAndSaveImage($_FILES['image_file'], $uploadDir, 600);
+        if ($newPath) {
+            $image = $newPath;
         }
     }
     $parentId = intval($_POST['parent_id'] ?? 0);

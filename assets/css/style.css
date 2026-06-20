@@ -23,8 +23,8 @@
     --color-info: #0ea5e9;
 
     --color-text: #102133;
-    --color-text-light: #5f7083;
-    --color-text-muted: #9aa8b5;
+    --color-text-light: #475569;
+    --color-text-muted: #64748b;
 
     --color-bg: #ffffff;
     --color-bg-secondary: #f6f8fb;
@@ -1572,17 +1572,34 @@ textarea {
 }
 
 .hero-dot {
-    width: 16px;
+    width: 24px;
+    height: 24px;
+    border-radius: 0;
+    position: relative;
+    background: transparent;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.hero-dot::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 4px;
+    right: 4px;
     height: 4px;
     border-radius: 4px;
-    background-color: rgba(255, 255, 255, 0.4);
-    transition: all var(--transition-base);
-    cursor: pointer;
+    background-color: white;
+    opacity: 0.5;
+    transition: width 0.3s ease, opacity 0.3s ease;
 }
 
 .hero-dot.active {
-    width: 32px;
-    background-color: white;
+    width: 40px;
+}
+
+.hero-dot.active::before {
+    opacity: 1;
 }
 
 /* =============================================

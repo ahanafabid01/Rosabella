@@ -6,6 +6,20 @@ require_once __DIR__ . '/includes/router.php';
 dispatchCleanRoute();
 
 $pageTitle = 'Home';
+
+// ── LCP PRELOAD: Get first hero image URL before <head> is written ──
+// This lets header.php emit <link rel="preload" as="image"> for the
+// Largest Contentful Paint element so the browser fetches it immediately.
+(function() use (&$lcpImagePreload) {
+    try {
+        $db = getDB();
+        $row = $db->query("SELECT image_path FROM hero_slides WHERE status='active' AND position='main' ORDER BY sort_order ASC, created_at DESC LIMIT 1")->fetch();
+        if ($row && !empty($row['image_path'])) {
+            $lcpImagePreload = BASE_URL . '/' . ltrim($row['image_path'], '/');
+        }
+    } catch (Throwable $e) { /* silently ignore */ }
+})();
+
 require_once __DIR__ . '/includes/header.php';
 
 $db = getDB();
@@ -138,11 +152,11 @@ try {
                         <div class="hero-slide <?= $slideIdx === 0 ? 'active' : '' ?>">
                             <?php $slideLink = !empty($slide['link_url']) ? cleanUrl($slide['link_url']) : null; ?>
                             <?php if ($slideLink): ?>
-                                <a href="<?= htmlspecialchars($slideLink) ?>" style="display:block;width:100%;height:100%;">
-                                    <img src="<?= BASE_URL . '/' . htmlspecialchars($slide['image_path']) ?>" alt="<?= htmlspecialchars($slide['title'] ?? 'Banner') ?>">
+                                <a href="<?= htmlspecialchars($slideLink) ?>" aria-label="Hero Slide <?= $slideIdx + 1 ?>" style="display:block;width:100%;height:100%;">
+                                    <img src="<?= BASE_URL . '/' . htmlspecialchars($slide['image_path']) ?>" alt="<?= htmlspecialchars($slide['title'] ?? 'Promotion Banner') ?>" <?= $slideIdx === 0 ? 'fetchpriority="high" loading="eager"' : 'loading="lazy"' ?> width="800" height="400">
                                 </a>
                             <?php else: ?>
-                                <img src="<?= BASE_URL . '/' . htmlspecialchars($slide['image_path']) ?>" alt="<?= htmlspecialchars($slide['title'] ?? 'Banner') ?>">
+                                <img src="<?= BASE_URL . '/' . htmlspecialchars($slide['image_path']) ?>" alt="<?= htmlspecialchars($slide['title'] ?? 'Promotion Banner') ?>" <?= $slideIdx === 0 ? 'fetchpriority="high" loading="eager"' : 'loading="lazy"' ?> width="800" height="400">
                             <?php endif; ?>
                         </div>
                         <?php endforeach; ?>
@@ -174,13 +188,22 @@ try {
                 <?php if (!empty($heroSideTop) || !empty($heroSideBottom)): ?>
                 <div class="hero-side-banners">
                     <?php if (!empty($heroSideTop)): ?>
-                    <div class="hero-side-slider" data-slide-interval="4000">
+                    <div class="hero-side-slider" data-slide-interval="5000">
                         <div class="side-slides-wrapper" style="display:flex; width:100%; height:100%;">
                             <?php foreach($heroSideTop as $idx => $sideTop): ?>
-                            <?php $sideTopLink = !empty($sideTop['link_url']) ? cleanUrl($sideTop['link_url']) : 'javascript:void(0);'; ?>
-                            <a href="<?= htmlspecialchars($sideTopLink) ?>" class="hero-side-banner side-slide <?= $idx === 0 ? 'active' : '' ?>" <?= empty($sideTop['link_url']) ? 'style="cursor:default;"' : '' ?>>
-                                <img src="<?= BASE_URL . '/' . htmlspecialchars($sideTop['image_path']) ?>" alt="<?= htmlspecialchars($sideTop['title'] ?? 'Banner') ?>">
-                            </a>
+                            <?php $hasLink = !empty($sideTop['link_url']); ?>
+                            <<?= $hasLink ? 'a href="'.htmlspecialchars(cleanUrl($sideTop['link_url'])).'"' : 'div' ?> aria-label="Side Promotion" class="hero-side-banner side-slide <?= $idx === 0 ? 'active' : '' ?>">
+                                <img src="<?= BASE_URL . '/' . htmlspecialchars($sideTop['image_path']) ?>" alt="<?= htmlspecialchars($sideTop['title'] ?? 'Promotion Banner') ?>" loading="lazy" width="400" height="200">
+                                <div class="hero-side-overlay"></div>
+                                <div class="hero-side-content">
+                                    <?php if (!empty($sideTop['subtitle'])): ?>
+                                        <div class="hero-side-subtitle"><?= htmlspecialchars($sideTop['subtitle']) ?></div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($sideTop['title'])): ?>
+                                        <div class="hero-side-title"><?= htmlspecialchars($sideTop['title']) ?></div>
+                                    <?php endif; ?>
+                                </div>
+                            </<?= $hasLink ? 'a' : 'div' ?>>
                             <?php endforeach; ?>
                         </div>
                         <?php if (count($heroSideTop) > 1): ?>
@@ -194,13 +217,22 @@ try {
                     <?php endif; ?>
 
                     <?php if (!empty($heroSideBottom)): ?>
-                    <div class="hero-side-slider" data-slide-interval="6000">
+                    <div class="hero-side-slider" data-slide-interval="5000">
                         <div class="side-slides-wrapper" style="display:flex; width:100%; height:100%;">
                             <?php foreach($heroSideBottom as $idx => $sideBottom): ?>
-                            <?php $sideBotLink = !empty($sideBottom['link_url']) ? cleanUrl($sideBottom['link_url']) : 'javascript:void(0);'; ?>
-                            <a href="<?= htmlspecialchars($sideBotLink) ?>" class="hero-side-banner side-slide <?= $idx === 0 ? 'active' : '' ?>" <?= empty($sideBottom['link_url']) ? 'style="cursor:default;"' : '' ?>>
-                                <img src="<?= BASE_URL . '/' . htmlspecialchars($sideBottom['image_path']) ?>" alt="<?= htmlspecialchars($sideBottom['title'] ?? 'Banner') ?>">
-                            </a>
+                            <?php $hasLink = !empty($sideBottom['link_url']); ?>
+                            <<?= $hasLink ? 'a href="'.htmlspecialchars(cleanUrl($sideBottom['link_url'])).'"' : 'div' ?> aria-label="Side Promotion" class="hero-side-banner side-slide <?= $idx === 0 ? 'active' : '' ?>">
+                                <img src="<?= BASE_URL . '/' . htmlspecialchars($sideBottom['image_path']) ?>" alt="<?= htmlspecialchars($sideBottom['title'] ?? 'Promotion Banner') ?>" loading="lazy" width="400" height="200">
+                                <div class="hero-side-overlay"></div>
+                                <div class="hero-side-content">
+                                    <?php if (!empty($sideBottom['subtitle'])): ?>
+                                        <div class="hero-side-subtitle"><?= htmlspecialchars($sideBottom['subtitle']) ?></div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($sideBottom['title'])): ?>
+                                        <div class="hero-side-title"><?= htmlspecialchars($sideBottom['title']) ?></div>
+                                    <?php endif; ?>
+                                </div>
+                            </<?= $hasLink ? 'a' : 'div' ?>>
                             <?php endforeach; ?>
                         </div>
                         <?php if (count($heroSideBottom) > 1): ?>
@@ -233,6 +265,7 @@ try {
         wrap.style.cssText = 'display:flex;justify-content:center;gap:8px;margin-top:10px;';
         var dots = slides.map(function(_,i){
             var d=document.createElement('button');
+            d.setAttribute('aria-label', 'Go to slide ' + (i+1));
             d.style.cssText='width:8px;height:8px;border-radius:50%;border:none;padding:0;cursor:pointer;transition:background .2s,transform .2s;background:'+(i===0?'var(--color-primary,#0f766e)':'#d1d5db');
             d.onclick=function(){grid.scrollTo({left:grid.offsetWidth*i,behavior:'smooth'});};
             wrap.appendChild(d); return d;
@@ -276,7 +309,7 @@ try {
                         ?>
                         <a href="<?= BASE_URL ?>/category/<?= urlencode($category['slug']) ?>" class="category-card-clean">
                             <div class="category-card-img-wrap">
-                                <img src="<?= htmlspecialchars($catImage) ?>" alt="<?= htmlspecialchars($category['name']) ?>" loading="lazy">
+                                <img src="<?= htmlspecialchars($catImage) ?>" alt="<?= htmlspecialchars($category['name']) ?>" loading="lazy" width="150" height="150">
                             </div>
                             <div class="category-card-title"><?= htmlspecialchars($category['name']) ?></div>
                         </a>
@@ -390,7 +423,7 @@ try {
                     <div class="product-card <?= $idx === 14 ? 'hide-on-mobile-grid' : '' ?>">
                         <div class="product-image">
                             <a href="<?= BASE_URL ?>/product/<?= $product['slug'] ?>" class="product-image-link" aria-label="View <?= htmlspecialchars($product['name']) ?>"></a>
-                            <img src="<?= htmlspecialchars($image) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
+                            <img src="<?= htmlspecialchars($image) ?>" alt="<?= htmlspecialchars($product['name']) ?>" width="400" height="400" loading="lazy">
                             
                             <!-- Badges -->
                             <div class="product-badges">
@@ -585,7 +618,7 @@ try {
                     <div class="product-card <?= $idx === 14 ? 'hide-on-mobile-grid' : '' ?>">
                         <div class="product-image">
                             <a href="<?= BASE_URL ?>/product/<?= $product['slug'] ?>" class="product-image-link" aria-label="View <?= htmlspecialchars($product['name']) ?>"></a>
-                            <img src="<?= htmlspecialchars($image) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
+                            <img src="<?= htmlspecialchars($image) ?>" alt="<?= htmlspecialchars($product['name']) ?>" width="400" height="400" loading="lazy">
                             
                             <!-- Badges -->
                             <div class="product-badges">
