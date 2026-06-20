@@ -122,13 +122,21 @@ try {
     $heroSideTop = null;
     $heroSideBottom = null;
 }
+
+$heroSideCount = ($heroSideTop ? 1 : 0) + ($heroSideBottom ? 1 : 0);
+$heroGridClasses = ['hero-bento-grid'];
+if ($heroSideCount === 0) {
+    $heroGridClasses[] = 'hero-bento-grid--full';
+} elseif ($heroSideCount === 1) {
+    $heroGridClasses[] = 'hero-bento-grid--single-side';
+}
 ?>
 
     <!-- Hero Section -->
     <?php if (!empty($heroMain) || $heroSideTop || $heroSideBottom): ?>
     <section class="section" style="padding-top: 1.5rem; padding-bottom: 2rem;">
         <div class="container">
-            <div class="hero-bento-grid <?= (!$heroSideTop && !$heroSideBottom) ? 'hero-bento-grid--full' : '' ?>">
+            <div class="<?= htmlspecialchars(implode(' ', $heroGridClasses)) ?>">
 
                 <!-- Main Banner (Left Side Slider) -->
                 <?php if (!empty($heroMain)): ?>
@@ -137,12 +145,14 @@ try {
                         <?php foreach ($heroMain as $slideIdx => $slide): ?>
                         <div class="hero-slide <?= $slideIdx === 0 ? 'active' : '' ?>">
                             <?php $slideLink = !empty($slide['link_url']) ? cleanUrl($slide['link_url']) : null; ?>
+                            <?php $heroImageSrc = BASE_URL . '/' . ltrim((string)$slide['image_path'], '/'); ?>
+                            <?php $heroImageLoadAttrs = $slideIdx === 0 ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'; ?>
                             <?php if ($slideLink): ?>
                                 <a href="<?= htmlspecialchars($slideLink) ?>" style="display:block;width:100%;height:100%;">
-                                    <img src="<?= BASE_URL . '/' . htmlspecialchars($slide['image_path']) ?>" alt="<?= htmlspecialchars($slide['title'] ?? 'Banner') ?>">
+                                    <img src="<?= htmlspecialchars($heroImageSrc) ?>" alt="<?= htmlspecialchars($slide['title'] ?? 'Banner') ?>" decoding="async" <?= $heroImageLoadAttrs ?>>
                                 </a>
                             <?php else: ?>
-                                <img src="<?= BASE_URL . '/' . htmlspecialchars($slide['image_path']) ?>" alt="<?= htmlspecialchars($slide['title'] ?? 'Banner') ?>">
+                                <img src="<?= htmlspecialchars($heroImageSrc) ?>" alt="<?= htmlspecialchars($slide['title'] ?? 'Banner') ?>" decoding="async" <?= $heroImageLoadAttrs ?>>
                             <?php endif; ?>
                         </div>
                         <?php endforeach; ?>
@@ -172,7 +182,7 @@ try {
 
                 <!-- Side Banners (Right Side) -->
                 <?php if ($heroSideTop || $heroSideBottom): ?>
-                <div class="hero-side-banners">
+                <div class="hero-side-banners <?= $heroSideCount === 1 ? 'hero-side-banners--single' : '' ?>">
                     <?php if ($heroSideTop): ?>
                     <?php $sideTopLink = !empty($heroSideTop['link_url']) ? cleanUrl($heroSideTop['link_url']) : cleanUrl('shop'); ?>
                     <a href="<?= htmlspecialchars($sideTopLink) ?>" class="hero-side-banner">
