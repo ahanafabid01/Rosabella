@@ -81,10 +81,10 @@ require_once __DIR__ . '/../includes/header.php';
                 
                 <form method="POST" action="">
                     <div class="form-group">
-                        <label class="form-label" for="email" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem; display: block;">Phone / E-Mail</label>
-                        <input type="text" id="email" name="email" class="form-input" placeholder="Phone / E-Mail" required style="border-radius: 4px;">
+                        <label class="form-label" for="email" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem; display: block;">Email Address</label>
+                        <input type="text" id="email" name="email" class="form-input" placeholder="Enter your Email Address" required style="border-radius: 4px;">
                     </div>
-                    
+                        
                     <div class="form-group">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
                             <label class="form-label" for="password" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0;">Password</label>

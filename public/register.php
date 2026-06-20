@@ -109,8 +109,8 @@ require_once __DIR__ . '/../includes/header.php';
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label" for="email" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem; display: block;">E-Mail <span style="color: red;">*</span></label>
-                        <input type="email" id="email" name="email" class="form-input" placeholder="E-Mail" required style="border-radius: 4px;">
+                        <label class="form-label" for="email" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem; display: block;">Email Address<span style="color: red;">*</span></label>
+                        <input type="email" id="email" name="email" class="form-input" placeholder="Enter your Email Address" required style="border-radius: 4px;">
                     </div>
                     
                     <div class="form-group">
