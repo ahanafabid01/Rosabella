@@ -1,4 +1,4 @@
-/*
+﻿/*
  * =============================================
  * KARTLY E-Commerce - Main Stylesheet
  * Pure CSS - No Framework Dependencies
@@ -2907,36 +2907,35 @@ textarea {
     }
 }
 
-.hero-side-banner {
+.hero-side-slider {
     position: relative;
     border-radius: var(--radius-xl);
     overflow: hidden;
     flex: 1;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
     min-height: 140px;
     box-shadow: var(--shadow-sm);
     background-color: #0f172a;
 }
+@media (min-width: 600px) { .hero-side-slider { min-height: 180px; } }
+@media (min-width: 768px) { .hero-side-slider { min-height: 240px; } }
+@media (min-width: 992px) { .hero-side-slider { min-height: 220px; } }
 
-@media (min-width: 600px) {
-    .hero-side-banner {
-        min-height: 180px;
-    }
+.hero-side-banner {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    z-index: 0;
+    transition: opacity 0.7s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    border-radius: var(--radius-xl);
 }
-
-@media (min-width: 768px) {
-    .hero-side-banner {
-        min-height: 240px;
-    }
-}
-
-@media (min-width: 992px) {
-    .hero-side-banner {
-        min-height: 220px;
-    }
+.hero-side-banner.active {
+    opacity: 1;
+    z-index: 1;
 }
 
 .hero-side-banner img {
@@ -3351,4 +3350,5 @@ textarea {
         gap: 1.5rem;
     }
 }
+
 

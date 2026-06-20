@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * KARTLY - Admin Dashboard
  */
@@ -32,6 +32,9 @@ $lowStockProducts = $db->query("SELECT * FROM products WHERE stock_quantity < 10
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <?php $siteFavicon = getSetting('site_favicon'); if ($siteFavicon): ?>
+    <link rel="icon" type="image/x-icon" href="<?= BASE_URL . '/' . htmlspecialchars($siteFavicon) ?>">
+    <?php endif; ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - KARTLY</title>
@@ -129,4 +132,5 @@ $lowStockProducts = $db->query("SELECT * FROM products WHERE stock_quantity < 10
     <script src="js/admin.js"></script>
 </body>
 </html>
+
 

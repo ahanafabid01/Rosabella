@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * KARTLY - Admin Order Detail
  */
@@ -73,6 +73,9 @@ $pageTitle = 'Order Detail';
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <?php $siteFavicon = getSetting('site_favicon'); if ($siteFavicon): ?>
+    <link rel="icon" type="image/x-icon" href="<?= BASE_URL . '/' . htmlspecialchars($siteFavicon) ?>">
+    <?php endif; ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $pageTitle ?> - KARTLY Admin</title>
@@ -277,4 +280,5 @@ $pageTitle = 'Order Detail';
     <script src="<?= BASE_URL ?>/admin/js/admin.js"></script>
 </body>
 </html>
+
 

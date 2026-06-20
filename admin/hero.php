@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -44,7 +44,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $link_url = $_POST['link_url'] ?? '';
     $position = $_POST['position'] ?? 'main';
     $status = $_POST['status'] ?? 'active';
-    $sort_order = (int)($_POST['sort_order'] ?? 0);
+    
+    if (!isset($_POST['sort_order']) || $_POST['sort_order'] === '') {
+        $stmtMax = $db->prepare("SELECT MAX(sort_order) FROM hero_slides WHERE position = ?");
+        $stmtMax->execute([$position]);
+        $maxOrder = $stmtMax->fetchColumn();
+        $sort_order = $maxOrder !== null ? ((int)$maxOrder + 1) : 0;
+    } else {
+        $sort_order = (int)$_POST['sort_order'];
+    }
     
     $imagePath = $_POST['existing_image'] ?? '';
     
@@ -112,6 +120,9 @@ $pageTitle = 'Hero Banners';
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <?php $siteFavicon = getSetting('site_favicon'); if ($siteFavicon): ?>
+    <link rel="icon" type="image/x-icon" href="<?= BASE_URL . '/' . htmlspecialchars($siteFavicon) ?>">
+    <?php endif; ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $pageTitle ?> - Admin Panel</title>
@@ -237,7 +248,8 @@ $pageTitle = 'Hero Banners';
                         <div class="admin-two-col-grid">
                             <div class="form-group">
                                 <label class="form-label">Sort Order</label>
-                                <input type="number" name="sort_order" class="form-input" value="<?= htmlspecialchars($editingSlide['sort_order'] ?? '0') ?>">
+                                <input type="number" name="sort_order" class="form-input" value="<?= isset($editingSlide['sort_order']) ? htmlspecialchars($editingSlide['sort_order']) : '' ?>" placeholder="Leave blank for auto">
+                                <div class="admin-upload-help" style="margin-top: 0.25rem;">Leave blank to automatically add at the end of the selected position.</div>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Status</label>
@@ -261,3 +273,4 @@ $pageTitle = 'Hero Banners';
     <script src="js/admin.js"></script>
 </body>
 </html>
+

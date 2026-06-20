@@ -45,7 +45,15 @@ if (!function_exists('renderAdminSidebar')) {
         <div class="admin-sidebar-backdrop" data-admin-sidebar-close></div>
         <aside class="admin-sidebar">
             <div class="admin-logo-centered">
-                <span class="logo-icon">K</span>
+                <?php
+                $siteLogo = getSetting('site_logo');
+                $siteName = getSetting('site_name') ?: 'KARTLY';
+                ?>
+                <?php if ($siteLogo): ?>
+                    <img src="<?= BASE_URL . '/' . htmlspecialchars($siteLogo) ?>" alt="Logo" style="max-height: 40px; border-radius: 4px;">
+                <?php else: ?>
+                    <span class="logo-icon"><?= strtoupper(substr($siteName, 0, 1)) ?></span>
+                <?php endif; ?>
                 <div class="logo-text">Admin Panel</div>
             </div>
             <div class="admin-nav-divider" style="margin-bottom: 1.5rem;"></div>

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * KARTLY E-Commerce - Main JavaScript
  * Pure Vanilla JS - No Framework Dependencies
  */
@@ -9,6 +9,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     initMobileMenu();
     initHeroSlider();
+    initSideBannersSlider();
     initDealTimers();
     initSearch();
     initProductCards();
@@ -1049,3 +1050,24 @@ function initQuantityControls() {
 
 // Initialize quantity controls
 document.addEventListener('DOMContentLoaded', initQuantityControls);
+
+// =============================================
+// Side Banners Auto Slider
+// =============================================
+function initSideBannersSlider() {
+    const sideSliders = document.querySelectorAll('.hero-side-slider');
+    
+    sideSliders.forEach(slider => {
+        const slides = slider.querySelectorAll('.side-slide');
+        if (slides.length <= 1) return;
+        
+        let currentSlide = 0;
+        const intervalTime = parseInt(slider.getAttribute('data-slide-interval')) || 4000;
+        
+        setInterval(() => {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+        }, intervalTime);
+    });
+}

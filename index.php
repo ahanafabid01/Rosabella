@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * KARTLY - Homepage
  */
@@ -112,11 +112,11 @@ try {
     $stmt = $db->query("SELECT * FROM hero_slides WHERE status = 'active' AND position = 'main' ORDER BY sort_order ASC, created_at DESC");
     $heroMain = $stmt->fetchAll();
 
-    $stmt = $db->query("SELECT * FROM hero_slides WHERE status = 'active' AND position = 'side_top' ORDER BY sort_order ASC LIMIT 1");
-    $heroSideTop = $stmt->fetch() ?: null;
+    $stmt = $db->query("SELECT * FROM hero_slides WHERE status = 'active' AND position = 'side_top' ORDER BY sort_order ASC, created_at DESC");
+    $heroSideTop = $stmt->fetchAll();
 
-    $stmt = $db->query("SELECT * FROM hero_slides WHERE status = 'active' AND position = 'side_bottom' ORDER BY sort_order ASC LIMIT 1");
-    $heroSideBottom = $stmt->fetch() ?: null;
+    $stmt = $db->query("SELECT * FROM hero_slides WHERE status = 'active' AND position = 'side_bottom' ORDER BY sort_order ASC, created_at DESC");
+    $heroSideBottom = $stmt->fetchAll();
 } catch (Throwable $e) {
     $heroMain = [];
     $heroSideTop = null;
@@ -171,20 +171,28 @@ try {
                 <?php endif; ?>
 
                 <!-- Side Banners (Right Side) -->
-                <?php if ($heroSideTop || $heroSideBottom): ?>
+                <?php if (!empty($heroSideTop) || !empty($heroSideBottom)): ?>
                 <div class="hero-side-banners">
-                    <?php if ($heroSideTop): ?>
-                    <?php $sideTopLink = !empty($heroSideTop['link_url']) ? cleanUrl($heroSideTop['link_url']) : cleanUrl('shop'); ?>
-                    <a href="<?= htmlspecialchars($sideTopLink) ?>" class="hero-side-banner">
-                        <img src="<?= BASE_URL . '/' . htmlspecialchars($heroSideTop['image_path']) ?>" alt="<?= htmlspecialchars($heroSideTop['title'] ?? 'Banner') ?>">
-                    </a>
+                    <?php if (!empty($heroSideTop)): ?>
+                    <div class="hero-side-slider" data-slide-interval="4000">
+                        <?php foreach($heroSideTop as $idx => $sideTop): ?>
+                        <?php $sideTopLink = !empty($sideTop['link_url']) ? cleanUrl($sideTop['link_url']) : cleanUrl('shop'); ?>
+                        <a href="<?= htmlspecialchars($sideTopLink) ?>" class="hero-side-banner side-slide <?= $idx === 0 ? 'active' : '' ?>">
+                            <img src="<?= BASE_URL . '/' . htmlspecialchars($sideTop['image_path']) ?>" alt="<?= htmlspecialchars($sideTop['title'] ?? 'Banner') ?>">
+                        </a>
+                        <?php endforeach; ?>
+                    </div>
                     <?php endif; ?>
 
-                    <?php if ($heroSideBottom): ?>
-                    <?php $sideBotLink = !empty($heroSideBottom['link_url']) ? cleanUrl($heroSideBottom['link_url']) : cleanUrl('sale'); ?>
-                    <a href="<?= htmlspecialchars($sideBotLink) ?>" class="hero-side-banner">
-                        <img src="<?= BASE_URL . '/' . htmlspecialchars($heroSideBottom['image_path']) ?>" alt="<?= htmlspecialchars($heroSideBottom['title'] ?? 'Banner') ?>">
-                    </a>
+                    <?php if (!empty($heroSideBottom)): ?>
+                    <div class="hero-side-slider" data-slide-interval="4000">
+                        <?php foreach($heroSideBottom as $idx => $sideBottom): ?>
+                        <?php $sideBotLink = !empty($sideBottom['link_url']) ? cleanUrl($sideBottom['link_url']) : cleanUrl('sale'); ?>
+                        <a href="<?= htmlspecialchars($sideBotLink) ?>" class="hero-side-banner side-slide <?= $idx === 0 ? 'active' : '' ?>">
+                            <img src="<?= BASE_URL . '/' . htmlspecialchars($sideBottom['image_path']) ?>" alt="<?= htmlspecialchars($sideBottom['title'] ?? 'Banner') ?>">
+                        </a>
+                        <?php endforeach; ?>
+                    </div>
                     <?php endif; ?>
                 </div>
                 <?php endif; ?>
@@ -644,5 +652,6 @@ try {
 
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
+
 
 
