@@ -103,54 +103,8 @@ body {
     display: flex;
     flex-direction: column;
 }
-.hero-bento-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-    height: auto;
-}
 
-@media (min-width: 992px) {
-    .hero-bento-grid {
-        grid-template-columns: 2fr 1fr;
-        height: clamp(520px, 62vh, 640px);
-    }
-    .hero-bento-grid.hero-bento-grid--full {
-        grid-template-columns: 1fr;
-    }
-}
 
-@media (min-width: 1200px) {
-    .hero-bento-grid {
-        height: clamp(580px, 66vh, 700px);
-    }
-}
-
-.hero-main-banner {
-    position: relative;
-    border-radius: var(--radius-xl);
-    overflow: hidden;
-    height: 260px;
-    box-shadow: var(--shadow-sm);
-}
-
-@media (min-width: 600px) {
-    .hero-main-banner {
-        height: 380px;
-    }
-}
-
-@media (min-width: 768px) {
-    .hero-main-banner {
-        height: clamp(420px, 58vh, 560px);
-    }
-}
-
-@media (min-width: 992px) {
-    .hero-main-banner {
-        height: 100%;
-    }
-}
 
 img {
     max-width: 100%;
@@ -2740,48 +2694,7 @@ textarea {
 /* =============================================
    Hero Bento Grid
    ============================================= */
-.hero-bento-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-    height: auto;
-}
 
-@media (min-width: 992px) {
-    .hero-bento-grid {
-        grid-template-columns: 2fr 1fr;
-        height: 500px;
-    }
-    .hero-bento-grid.hero-bento-grid--full {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (min-width: 1200px) {
-    .hero-bento-grid {
-        height: 560px;
-    }
-}
-
-.hero-main-banner {
-    position: relative;
-    border-radius: var(--radius-xl);
-    overflow: hidden;
-    height: 200px;
-    box-shadow: var(--shadow-sm);
-}
-
-@media (min-width: 768px) {
-    .hero-main-banner {
-        height: 300px;
-    }
-}
-
-@media (min-width: 992px) {
-    .hero-main-banner {
-        height: 100%;
-    }
-}
 
 .hero-side-banners {
     display: grid;
@@ -2808,9 +2721,21 @@ textarea {
     align-items: center;
     justify-content: center;
     text-decoration: none;
-    min-height: 120px;
+    min-height: 140px;
     box-shadow: var(--shadow-sm);
     background-color: #0f172a;
+}
+
+@media (min-width: 600px) {
+    .hero-side-banner {
+        min-height: 180px;
+    }
+}
+
+@media (min-width: 768px) {
+    .hero-side-banner {
+        min-height: 240px;
+    }
 }
 
 @media (min-width: 992px) {
@@ -3170,4 +3095,64 @@ textarea {
     font-size: 1.1rem;
     font-weight: 700;
     margin-bottom: 1.25rem;
+}
+
+
+/* =============================================
+   Hero Bento Grid
+   ============================================= */
+.hero-bento-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    height: auto;
+}
+
+@media (min-width: 992px) {
+    .hero-bento-grid {
+        grid-template-columns: 2fr 1fr;
+        height: clamp(520px, 62vh, 640px);
+    }
+    .hero-bento-grid.hero-bento-grid--full {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (min-width: 1200px) {
+    .hero-bento-grid {
+        height: clamp(580px, 66vh, 700px);
+    }
+}
+
+.hero-main-banner {
+    position: relative;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    height: 260px;
+    box-shadow: var(--shadow-sm);
+}
+
+@media (min-width: 600px) {
+    .hero-main-banner {
+        height: 380px;
+    }
+}
+
+@media (min-width: 768px) {
+    .hero-main-banner {
+        height: clamp(420px, 58vh, 560px);
+    }
+}
+
+@media (min-width: 992px) {
+    .hero-main-banner {
+        height: 100%;
+    }
+}
+
+/* Fix Side Banners Grid Gap on Tablet */
+@media (min-width: 768px) and (max-width: 991px) {
+    .hero-side-banners {
+        gap: 1.5rem;
+    }
 }
