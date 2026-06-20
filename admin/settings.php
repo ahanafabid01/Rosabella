@@ -665,7 +665,7 @@ $pageTitle = 'Settings';
                                         <label style="font-size:0.75rem;font-weight:600;color:var(--color-text);display:block;margin-bottom:0.4rem;"><?= htmlspecialchars($label) ?></label>
                                         <div style="display:flex;gap:0.5rem;align-items:center;">
                                             <input type="color" name="color[color_<?= $k ?>]" value="<?= htmlspecialchars($colors[$k] ?? '#000000') ?>" style="width:40px;height:36px;padding:2px;border:1px solid var(--color-border);border-radius:6px;cursor:pointer;">
-                                            <input class="form-input" type="text" name="color[color_<?= $k ?>_hex]" value="<?= htmlspecialchars($colors[$k] ?? '#000000') ?>" style="font-family:monospace;font-size:0.8rem;" placeholder="#000000" readonly>
+                                            <input class="form-input" type="text" name="color[color_<?= $k ?>_hex]" value="<?= htmlspecialchars($colors[$k] ?? '#000000') ?>" style="font-family:monospace;font-size:0.8rem;" placeholder="#000000">
                                         </div>
                                     </div>
                                 <?php endforeach; ?>
@@ -878,7 +878,30 @@ document.querySelectorAll('input[data-tag]').forEach(input => {
     });
 });
 
-
+// Color picker <-> hex text sync
+document.querySelectorAll('input[type="color"]').forEach(picker => {
+    const name = picker.name; // e.g. color[color_primary]
+    const hexKey = name.replace(']', '_hex]');
+    const hexInput = document.querySelector('input[name="' + hexKey + '"]');
+    if (!hexInput) return;
+    
+    // picker -> text
+    picker.addEventListener('input', () => { 
+        hexInput.value = picker.value; 
+    });
+    
+    // text -> picker
+    hexInput.addEventListener('input', () => {
+        const val = hexInput.value.trim();
+        if (/^#[0-9a-fA-F]{6}$/.test(val)) {
+            picker.value = val;
+        } else if (/^#[0-9a-fA-F]{3}$/.test(val)) {
+            // Expand 3-digit hex to 6-digit
+            const r = val[1], g = val[2], b = val[3];
+            picker.value = '#' + r + r + g + g + b + b;
+        }
+    });
+});
 </script>
 </body>
 </html>
