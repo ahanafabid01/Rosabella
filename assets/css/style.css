@@ -103,6 +103,54 @@ body {
     display: flex;
     flex-direction: column;
 }
+.hero-bento-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    height: auto;
+}
+
+@media (min-width: 992px) {
+    .hero-bento-grid {
+        grid-template-columns: 2fr 1fr;
+        height: clamp(520px, 62vh, 640px);
+    }
+    .hero-bento-grid.hero-bento-grid--full {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (min-width: 1200px) {
+    .hero-bento-grid {
+        height: clamp(580px, 66vh, 700px);
+    }
+}
+
+.hero-main-banner {
+    position: relative;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    height: 260px;
+    box-shadow: var(--shadow-sm);
+}
+
+@media (min-width: 600px) {
+    .hero-main-banner {
+        height: 380px;
+    }
+}
+
+@media (min-width: 768px) {
+    .hero-main-banner {
+        height: clamp(420px, 58vh, 560px);
+    }
+}
+
+@media (min-width: 992px) {
+    .hero-main-banner {
+        height: 100%;
+    }
+}
 
 img {
     max-width: 100%;
@@ -1145,26 +1193,37 @@ textarea {
    ============================================= */
 .hero {
     position: relative;
-    height: 500px;
+    /* Mobile: use viewport height so it scales with screen size */
+    height: clamp(320px, 55vw, 480px);
     overflow: hidden;
     width: 100%;
 }
 
+/* Small tablets (768px+) — was too short at flat 580px */
 @media (min-width: 768px) {
     .hero {
-        height: 580px;
+        height: clamp(480px, 60vh, 600px);
     }
 }
 
+/* Large tablets / small laptops (1024px+) */
 @media (min-width: 1024px) {
     .hero {
-        height: 640px;
+        height: clamp(580px, 65vh, 680px);
     }
 }
 
+/* Full desktop (1280px+) */
+@media (min-width: 1280px) {
+    .hero {
+        height: clamp(620px, 68vh, 720px);
+    }
+}
+
+/* Wide screens (1440px+) */
 @media (min-width: 1440px) {
     .hero {
-        height: 680px;
+        height: 720px;
     }
 }
 
