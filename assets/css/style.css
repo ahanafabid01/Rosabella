@@ -2621,6 +2621,9 @@ textarea {
         grid-template-columns: 2fr 1fr;
         height: 500px;
     }
+    .hero-bento-grid.hero-bento-grid--full {
+        grid-template-columns: 1fr;
+    }
 }
 
 @media (min-width: 1200px) {

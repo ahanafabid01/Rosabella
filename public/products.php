@@ -91,6 +91,15 @@ $categories = $stmt->fetchAll();
     <section class="section section-bg" style="padding: 1.5rem 0 2rem;">
         <div class="container">
             <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                <h1 style="font-size: 1.875rem; font-weight: 700; margin-bottom: 0.5rem;">
+                    <?php if ($currentCategory): ?>
+                        <?= htmlspecialchars($currentCategory['name']) ?>
+                    <?php elseif ($search): ?>
+                        Search Results for "<?= htmlspecialchars($search) ?>"
+                    <?php else: ?>
+                        All Products
+                    <?php endif; ?>
+                </h1>
                 <nav style="font-size: 0.875rem; color: var(--color-text-light);">
                     <a href="<?= BASE_URL ?>/" style="color: var(--color-text-light); display: inline-flex; align-items: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></a>
                     <span> / </span>
@@ -100,15 +109,6 @@ $categories = $stmt->fetchAll();
                         <span style="color: var(--color-text);"><?= htmlspecialchars($currentCategory['name']) ?></span>
                     <?php endif; ?>
                 </nav>
-                <h1 style="font-size: 1.875rem; font-weight: 700;">
-                    <?php if ($currentCategory): ?>
-                        <?= htmlspecialchars($currentCategory['name']) ?>
-                    <?php elseif ($search): ?>
-                        Search Results for "<?= htmlspecialchars($search) ?>"
-                    <?php else: ?>
-                        All Products
-                    <?php endif; ?>
-                </h1>
             </div>
         </div>
     </section>

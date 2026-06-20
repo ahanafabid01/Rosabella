@@ -62,16 +62,16 @@ if ($order) {
 ?>
 
     <!-- Page Header -->
-    <section class="section-bg" style="padding: 2rem 0; border-bottom: 1px solid var(--color-border);">
+    <section class="section section-bg" style="padding: 1.5rem 0 2rem; border-bottom: 1px solid var(--color-border);">
         <div class="container">
-            <nav style="font-size: 0.875rem; color: var(--color-text-light); margin-bottom: 0.5rem;">
+            <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;">Track Your Order</h1>
+            <nav style="font-size: 0.875rem; color: var(--color-text-light);">
                 <a href="<?= BASE_URL ?>/" style="color: var(--color-text-light); display: inline-flex; align-items: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></a>
                 <span> / </span>
                 <a href="<?= BASE_URL ?>/my-orders" style="color: var(--color-text-light);">Orders</a>
                 <span> / </span>
                 <span style="color: var(--color-text);">Track Order</span>
             </nav>
-            <h1 style="font-size: 2rem; font-weight: 700;">Track Your Order</h1>
         </div>
     </section>
 
