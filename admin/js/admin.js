@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+﻿document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.querySelector('.admin-sidebar');
     const backdrop = document.querySelector('.admin-sidebar-backdrop');
     const toggleButtons = document.querySelectorAll('[data-admin-sidebar-toggle]');
@@ -55,4 +55,22 @@ document.addEventListener('DOMContentLoaded', () => {
             closeSidebar();
         }
     });
+
+    // Auto-hide alerts after 1.5 seconds
+    const alerts = document.querySelectorAll('.alert');
+    if (alerts.length > 0) {
+        setTimeout(() => {
+            alerts.forEach(alert => {
+                alert.style.transition = 'opacity 0.4s ease';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 400);
+            });
+        }, 1500);
+
+        // Prevent form resubmission warning on page refresh
+        if (window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.href);
+        }
+    }
 });
+
