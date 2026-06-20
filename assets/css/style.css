@@ -1,4 +1,4 @@
-﻿/*
+/*
  * =============================================
  * KARTLY E-Commerce - Main Stylesheet
  * Pure CSS - No Framework Dependencies
@@ -1572,10 +1572,10 @@ textarea {
 }
 
 .hero-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: var(--radius-full);
-    background-color: rgba(255, 255, 255, 0.5);
+    width: 16px;
+    height: 4px;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.4);
     transition: all var(--transition-base);
     cursor: pointer;
 }

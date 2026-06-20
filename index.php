@@ -175,23 +175,41 @@ try {
                 <div class="hero-side-banners">
                     <?php if (!empty($heroSideTop)): ?>
                     <div class="hero-side-slider" data-slide-interval="4000">
-                        <?php foreach($heroSideTop as $idx => $sideTop): ?>
-                        <?php $sideTopLink = !empty($sideTop['link_url']) ? cleanUrl($sideTop['link_url']) : cleanUrl('shop'); ?>
-                        <a href="<?= htmlspecialchars($sideTopLink) ?>" class="hero-side-banner side-slide <?= $idx === 0 ? 'active' : '' ?>">
-                            <img src="<?= BASE_URL . '/' . htmlspecialchars($sideTop['image_path']) ?>" alt="<?= htmlspecialchars($sideTop['title'] ?? 'Banner') ?>">
-                        </a>
-                        <?php endforeach; ?>
+                        <div class="side-slides-wrapper" style="display:flex; width:100%; height:100%;">
+                            <?php foreach($heroSideTop as $idx => $sideTop): ?>
+                            <?php $sideTopLink = !empty($sideTop['link_url']) ? cleanUrl($sideTop['link_url']) : 'javascript:void(0);'; ?>
+                            <a href="<?= htmlspecialchars($sideTopLink) ?>" class="hero-side-banner side-slide <?= $idx === 0 ? 'active' : '' ?>" <?= empty($sideTop['link_url']) ? 'style="cursor:default;"' : '' ?>>
+                                <img src="<?= BASE_URL . '/' . htmlspecialchars($sideTop['image_path']) ?>" alt="<?= htmlspecialchars($sideTop['title'] ?? 'Banner') ?>">
+                            </a>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php if (count($heroSideTop) > 1): ?>
+                        <div class="hero-dots" style="bottom: 15px; z-index: 50; pointer-events: auto;">
+                            <?php foreach ($heroSideTop as $dotIdx => $dot): ?>
+                                <button class="hero-dot <?= $dotIdx === 0 ? 'active' : '' ?>" aria-label="Go to slide <?= $dotIdx + 1 ?>"></button>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php endif; ?>
                     </div>
                     <?php endif; ?>
 
                     <?php if (!empty($heroSideBottom)): ?>
-                    <div class="hero-side-slider" data-slide-interval="4000">
-                        <?php foreach($heroSideBottom as $idx => $sideBottom): ?>
-                        <?php $sideBotLink = !empty($sideBottom['link_url']) ? cleanUrl($sideBottom['link_url']) : cleanUrl('sale'); ?>
-                        <a href="<?= htmlspecialchars($sideBotLink) ?>" class="hero-side-banner side-slide <?= $idx === 0 ? 'active' : '' ?>">
-                            <img src="<?= BASE_URL . '/' . htmlspecialchars($sideBottom['image_path']) ?>" alt="<?= htmlspecialchars($sideBottom['title'] ?? 'Banner') ?>">
-                        </a>
-                        <?php endforeach; ?>
+                    <div class="hero-side-slider" data-slide-interval="6000">
+                        <div class="side-slides-wrapper" style="display:flex; width:100%; height:100%;">
+                            <?php foreach($heroSideBottom as $idx => $sideBottom): ?>
+                            <?php $sideBotLink = !empty($sideBottom['link_url']) ? cleanUrl($sideBottom['link_url']) : 'javascript:void(0);'; ?>
+                            <a href="<?= htmlspecialchars($sideBotLink) ?>" class="hero-side-banner side-slide <?= $idx === 0 ? 'active' : '' ?>" <?= empty($sideBottom['link_url']) ? 'style="cursor:default;"' : '' ?>>
+                                <img src="<?= BASE_URL . '/' . htmlspecialchars($sideBottom['image_path']) ?>" alt="<?= htmlspecialchars($sideBottom['title'] ?? 'Banner') ?>">
+                            </a>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php if (count($heroSideBottom) > 1): ?>
+                        <div class="hero-dots" style="bottom: 15px; z-index: 50; pointer-events: auto;">
+                            <?php foreach ($heroSideBottom as $dotIdx => $dot): ?>
+                                <button class="hero-dot <?= $dotIdx === 0 ? 'active' : '' ?>" aria-label="Go to slide <?= $dotIdx + 1 ?>"></button>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php endif; ?>
                     </div>
                     <?php endif; ?>
                 </div>

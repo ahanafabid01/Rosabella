@@ -1,4 +1,4 @@
-﻿/**
+/**
  * KARTLY E-Commerce - Main JavaScript
  * Pure Vanilla JS - No Framework Dependencies
  */
@@ -107,7 +107,7 @@ function initHeroSlider() {
     if (!slider) return;
     
     const slides = slider.querySelectorAll('.hero-slide');
-    const dots = document.querySelectorAll('.hero-dot');
+    const dots = slider.querySelectorAll('.hero-dot');
     const prevBtn = document.querySelector('.hero-nav-prev button');
     const nextBtn = document.querySelector('.hero-nav-next button');
     
@@ -1059,15 +1059,54 @@ function initSideBannersSlider() {
     
     sideSliders.forEach(slider => {
         const slides = slider.querySelectorAll('.side-slide');
+        const dots = slider.querySelectorAll('.hero-dot');
         if (slides.length <= 1) return;
         
         let currentSlide = 0;
         const intervalTime = parseInt(slider.getAttribute('data-slide-interval')) || 4000;
+        let interval;
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => slide.classList.toggle('active', i === index));
+            dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
+            currentSlide = index;
+        }
+
+        function startAutoPlay() {
+            interval = setInterval(() => {
+                showSlide((currentSlide + 1) % slides.length);
+            }, intervalTime);
+        }
+
+        function stopAutoPlay() { clearInterval(interval); }
+
+        dots.forEach((dot, i) => {
+            dot.addEventListener('click', (e) => {
+                e.stopPropagation();
+                stopAutoPlay();
+                showSlide(i);
+                startAutoPlay();
+            });
+        });
+
+        startAutoPlay();
+
+        // Mobile swipe support
+        let startX = 0;
+        slider.addEventListener('touchstart', e => { 
+            startX = e.touches[0].clientX; 
+        }, {passive:true});
         
-        setInterval(() => {
-            slides[currentSlide].classList.remove('active');
-            currentSlide = (currentSlide + 1) % slides.length;
-            slides[currentSlide].classList.add('active');
-        }, intervalTime);
+        slider.addEventListener('touchend', e => {
+            let diff = startX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 40) {
+                e.stopPropagation();
+                stopAutoPlay();
+                if (diff > 0) showSlide((currentSlide + 1) % slides.length);
+                else showSlide((currentSlide - 1 + slides.length) % slides.length);
+                startAutoPlay();
+            }
+        });
     });
 }
+
