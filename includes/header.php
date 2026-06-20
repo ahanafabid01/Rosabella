@@ -84,6 +84,14 @@ foreach ($colorVars as $k) {
     <link href="https://fonts.googleapis.com/css2?family=<?= urlencode(trim($fontName)) ?>:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <?php endforeach; ?>
 
+    
+    <script>
+        window.BASE_URL = '<?= BASE_URL ?>';
+    </script>
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css">
+
     <!-- Dynamic Typography & Colors CSS from Admin Settings -->
     <style>
         <?php if (!empty($customColors)): ?>
@@ -99,13 +107,7 @@ foreach ($colorVars as $k) {
         <?php endforeach; ?>
     </style>
     
-    <script>
-        window.BASE_URL = '<?= BASE_URL ?>';
-    </script>
-    
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css">
-    
+
     <!-- Additional page-specific styles -->
     <?php if (isset($additionalStyles)): ?>
         <style><?= $additionalStyles ?></style>
