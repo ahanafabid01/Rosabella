@@ -17,6 +17,48 @@ $db = getDB();
 $message = '';
 $error = '';
 
+// ---- Handle Branding uploads ----
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_branding'])) {
+    $uploadDir = __DIR__ . '/../assets/uploads/branding/';
+    if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+
+    $upsert = $db->prepare(
+        "INSERT INTO settings (setting_key, setting_value, setting_type)
+         VALUES (?, ?, 'text')
+         ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)"
+    );
+
+    $fields = ['site_logo' => 'logo', 'site_icon' => 'icon'];
+
+    // Handle clear requests
+    if (!empty($_POST['clear_branding_key'])) {
+        $clearKey = $_POST['clear_branding_key'];
+        if (in_array($clearKey, array_keys($fields), true)) {
+            $db->prepare("UPDATE settings SET setting_value = '' WHERE setting_key = ?")->execute([$clearKey]);
+            $message = 'Image removed successfully.';
+        }
+    }
+
+    foreach ($fields as $dbKey => $fileField) {
+        if (!empty($_FILES[$fileField]['tmp_name']) && $_FILES[$fileField]['error'] === UPLOAD_ERR_OK) {
+            $ext = strtolower(pathinfo($_FILES[$fileField]['name'], PATHINFO_EXTENSION));
+            $allowed = ['jpg','jpeg','png','gif','svg','webp','ico'];
+            if (!in_array($ext, $allowed)) {
+                $error = 'Invalid file type for ' . $fileField . '. Allowed: ' . implode(', ', $allowed);
+                continue;
+            }
+            $filename = $dbKey . '_' . time() . '.' . $ext;
+            $dest = $uploadDir . $filename;
+            if (move_uploaded_file($_FILES[$fileField]['tmp_name'], $dest)) {
+                $upsert->execute([$dbKey, 'assets/uploads/branding/' . $filename]);
+            } else {
+                $error = 'Failed to upload ' . $fileField . '.';
+            }
+        }
+    }
+    if (!$error) $message = 'Branding updated successfully.';
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_settings'])) {
     $postedSettings = $_POST['settings'] ?? [];
 
@@ -73,6 +115,7 @@ $settings = $db->query("SELECT * FROM settings ORDER BY setting_key ASC")->fetch
 
 // Group settings by prefix
 $groups = [
+    'branding' => ['label' => 'Branding',  'icon' => 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z', 'items' => []],
     'general'  => ['label' => 'General',   'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', 'items' => []],
     'payment'  => ['label' => 'Payment',   'icon' => 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z', 'items' => []],
     'shipping' => ['label' => 'Shipping',  'icon' => 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4', 'items' => []],
@@ -80,6 +123,11 @@ $groups = [
     'security' => ['label' => 'Security',  'icon' => 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z', 'items' => []],
     'advanced' => ['label' => 'Advanced',  'icon' => 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z', 'items' => []],
 ];
+
+// Current branding values
+$siteLogo = getSetting('site_logo') ?? '';
+$siteIcon = getSetting('site_icon') ?? '';
+
 
 foreach ($settings as $s) {
     $key = strtolower($s['setting_key']);
@@ -259,7 +307,82 @@ $pageTitle = 'Settings';
         @media (max-width: 600px) {
             .add-setting-grid { grid-template-columns: 1fr; }
         }
-
+        /* ---- Branding Upload ---- */
+        .branding-upload-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        @media (max-width: 700px) { .branding-upload-grid { grid-template-columns: 1fr; } }
+        .branding-upload-card {
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            background: var(--color-bg-secondary);
+        }
+        .branding-upload-card h3 {
+            margin: 0 0 0.25rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--color-text);
+        }
+        .branding-upload-card p {
+            margin: 0 0 1rem;
+            font-size: 0.78rem;
+            color: var(--color-text-light);
+        }
+        .branding-preview-wrap {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .branding-preview-box {
+            width: 80px;
+            height: 80px;
+            border-radius: var(--radius-md);
+            border: 2px dashed var(--color-border);
+            background: var(--color-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .branding-preview-box.icon-box {
+            width: 56px;
+            height: 56px;
+            border-radius: 10px;
+        }
+        .branding-preview-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .branding-preview-box .no-img {
+            color: var(--color-text-light);
+            font-size: 0.7rem;
+            text-align: center;
+        }
+        .branding-file-input-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .branding-file-input-wrap input[type=file] {
+            font-size: 0.8rem;
+        }
+        .branding-clear-btn {
+            background: none;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            color: var(--color-text-light);
+            font-size: 0.75rem;
+            padding: 0.3rem 0.7rem;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .branding-clear-btn:hover { border-color: var(--color-danger); color: var(--color-danger); }
 
     </style>
 </head>
@@ -293,9 +416,81 @@ $pageTitle = 'Settings';
         </div>
 
         <!-- Tab Panels -->
+
+        <!-- === Branding Tab (special - file upload) === -->
+        <div class="settings-tab-panel active" id="tab-branding">
+            <div class="admin-card">
+                <h2 class="admin-section-heading">Branding Settings</h2>
+                <p style="font-size:0.82rem;color:var(--color-text-light);margin:-0.25rem 0 1.5rem;">Upload your site logo and favicon icon. Stored in <code>assets/uploads/branding/</code> and saved to the database.</p>
+
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="branding-upload-grid">
+
+                        <!-- Site Logo -->
+                        <div class="branding-upload-card">
+                            <h3>Site Logo</h3>
+                            <p>Displayed in the header, emails, and receipts. Recommended: PNG/SVG, transparent background, min 200px wide.</p>
+                            <div class="branding-preview-wrap">
+                                <div class="branding-preview-box" id="logo-preview-box">
+                                    <?php if ($siteLogo): ?>
+                                        <img src="<?= htmlspecialchars(BASE_URL . '/' . $siteLogo) ?>" alt="Site Logo" id="logo-preview-img">
+                                    <?php else: ?>
+                                        <span class="no-img" id="logo-preview-img">No logo<br>uploaded</span>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="branding-file-input-wrap">
+                                    <input type="file" name="logo" id="logo-file" accept="image/*" onchange="previewImage(this,'logo-preview-box','logo-preview-img')">
+                                    <?php if ($siteLogo): ?>
+                                        <button type="button" class="branding-clear-btn" onclick="clearBranding('site_logo','logo-preview-box','logo-preview-img','logo-file')">✕ Remove Logo</button>
+                                    <?php endif; ?>
+                                    <?php if ($siteLogo): ?>
+                                        <span style="font-size:0.72rem;color:var(--color-text-light);word-break:break-all;"><?= htmlspecialchars($siteLogo) ?></span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Site Icon (Favicon) -->
+                        <div class="branding-upload-card">
+                            <h3>Site Icon / Favicon</h3>
+                            <p>Shown in browser tabs and bookmarks. Recommended: PNG or ICO, square, 512×512px.</p>
+                            <div class="branding-preview-wrap">
+                                <div class="branding-preview-box icon-box" id="icon-preview-box">
+                                    <?php if ($siteIcon): ?>
+                                        <img src="<?= htmlspecialchars(BASE_URL . '/' . $siteIcon) ?>" alt="Site Icon" id="icon-preview-img">
+                                    <?php else: ?>
+                                        <span class="no-img" id="icon-preview-img">No icon</span>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="branding-file-input-wrap">
+                                    <input type="file" name="icon" id="icon-file" accept="image/*,.ico" onchange="previewImage(this,'icon-preview-box','icon-preview-img')">
+                                    <?php if ($siteIcon): ?>
+                                        <button type="button" class="branding-clear-btn" onclick="clearBranding('site_icon','icon-preview-box','icon-preview-img','icon-file')">✕ Remove Icon</button>
+                                    <?php endif; ?>
+                                    <?php if ($siteIcon): ?>
+                                        <span style="font-size:0.72rem;color:var(--color-text-light);word-break:break-all;"><?= htmlspecialchars($siteIcon) ?></span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div style="margin-top:1.5rem;display:flex;justify-content:flex-end;">
+                        <button type="submit" name="save_branding" value="1" class="btn btn-primary">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-2px;margin-right:4px;"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                            Save Branding
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- === Dynamic Settings Tabs === -->
         <form method="POST" id="settings-form">
-            <?php $first = true; foreach ($groups as $groupKey => $group): ?>
-            <div class="settings-tab-panel <?= $first ? 'active' : '' ?>" id="tab-<?= $groupKey ?>">
+            <?php $first = false; foreach ($groups as $groupKey => $group):
+                  if ($groupKey === 'branding') { continue; } ?>
+            <div class="settings-tab-panel" id="tab-<?= $groupKey ?>">
                 <div class="admin-card">
                     <h2 class="admin-section-heading"><?= htmlspecialchars($group['label']) ?> Settings</h2>
                     <?php if (empty($group['items'])): ?>
@@ -415,6 +610,31 @@ document.querySelectorAll('.toggle-switch input[type="checkbox"]').forEach(cb =>
         if (label) label.textContent = cb.checked ? 'Enabled' : 'Disabled';
     });
 });
+
+// Live image preview on file pick
+function previewImage(input, boxId, imgId) {
+    if (!input.files || !input.files[0]) return;
+    const reader = new FileReader();
+    const box = document.getElementById(boxId);
+    reader.onload = e => {
+        box.innerHTML = '<img src="' + e.target.result + '" alt="Preview" style="max-width:100%;max-height:100%;object-fit:contain;">';
+    };
+    reader.readAsDataURL(input.files[0]);
+}
+
+// Remove / clear branding (sends a POST to clear the DB value)
+function clearBranding(key, boxId, imgId, fileInputId) {
+    if (!confirm('Remove this image?')) return;
+    const form = document.createElement('form');
+    form.method = 'POST';
+    const k = document.createElement('input');
+    k.type = 'hidden'; k.name = 'clear_branding_key'; k.value = key;
+    const b = document.createElement('input');
+    b.type = 'hidden'; b.name = 'save_branding'; b.value = '1';
+    form.appendChild(k); form.appendChild(b);
+    document.body.appendChild(form); form.submit();
+}
+
 </script>
 </body>
 </html>

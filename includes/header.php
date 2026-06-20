@@ -31,6 +31,10 @@ foreach ($allCats as $cat) {
 }
 $currencySymbol = getSetting('currency_symbol') ?: 'Tk';
 $freeShippingThreshold = floatval(getSetting('free_shipping_threshold') ?: 5000);
+$siteLogo = getSetting('site_logo') ?: '';
+$siteIcon = getSetting('site_icon') ?: '';
+$siteName = getSetting('site_name') ?: 'KARTLY';
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -41,7 +45,13 @@ $freeShippingThreshold = floatval(getSetting('free_shipping_threshold') ?: 5000)
     <title><?= isset($pageTitle) ? htmlspecialchars($pageTitle) . ' - ' : '' ?>KARTLY</title>
     
     <!-- Favicon -->
-    <link rel="icon" href="<?= BASE_URL ?>/assets/images/favicon.ico" type="image/x-icon">
+    <?php if ($siteIcon): ?>
+        <link rel="icon" href="<?= BASE_URL ?>/<?= htmlspecialchars($siteIcon) ?>" type="image/x-icon">
+        <link rel="shortcut icon" href="<?= BASE_URL ?>/<?= htmlspecialchars($siteIcon) ?>">
+        <link rel="apple-touch-icon" href="<?= BASE_URL ?>/<?= htmlspecialchars($siteIcon) ?>">
+    <?php else: ?>
+        <link rel="icon" href="<?= BASE_URL ?>/assets/images/favicon.ico" type="image/x-icon">
+    <?php endif; ?>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
@@ -80,8 +90,12 @@ $freeShippingThreshold = floatval(getSetting('free_shipping_threshold') ?: 5000)
 
                 <!-- Logo -->
                 <a href="<?= BASE_URL ?>/" class="logo">
-                    <div class="logo-icon">K</div>
-                    <span>KARTLY</span>
+                    <?php if ($siteLogo): ?>
+                        <img src="<?= BASE_URL ?>/<?= htmlspecialchars($siteLogo) ?>" alt="<?= htmlspecialchars($siteName) ?>" style="height:36px;width:auto;object-fit:contain;display:block;">
+                    <?php else: ?>
+                        <div class="logo-icon">K</div>
+                        <span><?= htmlspecialchars($siteName) ?></span>
+                    <?php endif; ?>
                 </a>
 
                 <!-- Search Bar (center, desktop) -->
@@ -200,8 +214,12 @@ $freeShippingThreshold = floatval(getSetting('free_shipping_threshold') ?: 5000)
     <nav class="mobile-nav">
         <div class="mobile-nav-header">
             <a href="<?= BASE_URL ?>/" class="logo">
-                <div class="logo-icon">K</div>
-                <span>KARTLY</span>
+                <?php if ($siteLogo): ?>
+                    <img src="<?= BASE_URL ?>/<?= htmlspecialchars($siteLogo) ?>" alt="<?= htmlspecialchars($siteName) ?>" style="height:32px;width:auto;object-fit:contain;display:block;">
+                <?php else: ?>
+                    <div class="logo-icon">K</div>
+                    <span><?= htmlspecialchars($siteName) ?></span>
+                <?php endif; ?>
             </a>
             <button class="btn btn-ghost btn-icon mobile-nav-close" aria-label="Close menu">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

@@ -66,9 +66,16 @@ $siteEmail = getSetting('site_email') ?: SITE_EMAIL;
             <div class="footer-grid container">
                 <!-- Brand -->
                 <div class="footer-brand">
-                    <div class="footer-logo">
-                        <div class="logo-icon">K</div>
-                        <span style="font-size: 1.5rem; font-weight: 700;">KARTLY</span>
+                    <div class="footer-logo" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                        <?php 
+                        $footerSiteLogo = getSetting('site_logo');
+                        if ($footerSiteLogo): 
+                        ?>
+                            <img src="<?= BASE_URL ?>/<?= htmlspecialchars($footerSiteLogo) ?>" alt="<?= htmlspecialchars(getSetting('site_name') ?: 'KARTLY') ?>" style="height:40px;width:auto;object-fit:contain;display:block;">
+                        <?php else: ?>
+                            <div class="logo-icon">K</div>
+                            <span style="font-size: 1.5rem; font-weight: 700;">KARTLY</span>
+                        <?php endif; ?>
                     </div>
                     <p class="footer-description">
                         Your one-stop destination for quality products at unbeatable prices. Shop smart, shop KARTLY.
