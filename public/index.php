@@ -125,7 +125,7 @@ try {
     <?php if (!empty($heroMain) || $heroSideTop || $heroSideBottom): ?>
     <section class="section" style="padding-top: 1.5rem; padding-bottom: 2rem;">
         <div class="container">
-            <div class="hero-bento-grid">
+            <div class="hero-bento-grid <?= (!$heroSideTop && !$heroSideBottom) ? 'hero-bento-grid--full' : '' ?>">
 
                 <!-- Main Banner (Left Side Slider) -->
                 <?php if (!empty($heroMain)): ?>

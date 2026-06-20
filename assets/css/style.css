@@ -2633,8 +2633,14 @@ textarea {
     position: relative;
     border-radius: var(--radius-xl);
     overflow: hidden;
-    height: 400px;
+    height: 200px;
     box-shadow: var(--shadow-sm);
+}
+
+@media (min-width: 768px) {
+    .hero-main-banner {
+        height: 300px;
+    }
 }
 
 @media (min-width: 992px) {
@@ -2644,10 +2650,19 @@ textarea {
 }
 
 .hero-side-banners {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    height: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    height: auto;
+}
+
+@media (min-width: 992px) {
+    .hero-side-banners {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        height: 100%;
+    }
 }
 
 .hero-side-banner {
@@ -2659,9 +2674,15 @@ textarea {
     align-items: center;
     justify-content: center;
     text-decoration: none;
-    min-height: 220px;
+    min-height: 120px;
     box-shadow: var(--shadow-sm);
     background-color: #0f172a;
+}
+
+@media (min-width: 992px) {
+    .hero-side-banner {
+        min-height: 220px;
+    }
 }
 
 .hero-side-banner img {
