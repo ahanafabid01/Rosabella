@@ -3352,3 +3352,10 @@ textarea {
 }
 
 
+
+/* Hide 15th product on mobile grid for even layout */
+@media (max-width: 767px) {
+    .hide-on-mobile-grid {
+        display: none !important;
+    }
+}

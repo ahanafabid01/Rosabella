@@ -16,7 +16,7 @@ $stmt = $db->query("SELECT p.*, c.name as category_name
                     LEFT JOIN categories c ON p.category_id = c.id 
                     WHERE p.status = 'active' AND p.is_featured = 1 
                     ORDER BY p.created_at DESC 
-                    LIMIT 8");
+                    LIMIT 15");
 $featuredProducts = $stmt->fetchAll();
 
 // Get categories
@@ -27,9 +27,9 @@ $categories = $stmt->fetchAll();
 $stmt = $db->query("SELECT p.*, c.name as category_name 
                     FROM products p 
                     LEFT JOIN categories c ON p.category_id = c.id 
-                    WHERE p.status = 'active' 
+                    WHERE p.status = 'active' AND p.is_new = 1 
                     ORDER BY p.created_at DESC 
-                    LIMIT 3");
+                    LIMIT 15");
 $newArrivalProducts = $stmt->fetchAll();
 
 function formatCountdownDisplay(int $remainingSeconds): string
@@ -376,7 +376,7 @@ try {
             </div>
             
             <div class="products-grid">
-                <?php foreach ($newArrivalProducts as $product): ?>
+                <?php foreach ($newArrivalProducts as $idx => $product): ?>
                     <?php
                     // Calculate discount
                     $discount = 0;
@@ -387,7 +387,7 @@ try {
                     // Default image
                     $image = $product['main_image'] ?: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80';
                     ?>
-                    <div class="product-card">
+                    <div class="product-card <?= $idx === 14 ? 'hide-on-mobile-grid' : '' ?>">
                         <div class="product-image">
                             <a href="<?= BASE_URL ?>/product/<?= $product['slug'] ?>" class="product-image-link" aria-label="View <?= htmlspecialchars($product['name']) ?>"></a>
                             <img src="<?= htmlspecialchars($image) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
@@ -567,7 +567,7 @@ try {
             </div>
             
             <div class="products-grid">
-                <?php foreach ($featuredProducts as $product): ?>
+                <?php foreach ($featuredProducts as $idx => $product): ?>
                     <?php
                     // Calculate discount
                     $discount = 0;
@@ -582,7 +582,7 @@ try {
                     // Default image
                     $image = $product['main_image'] ?: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80';
                     ?>
-                    <div class="product-card">
+                    <div class="product-card <?= $idx === 14 ? 'hide-on-mobile-grid' : '' ?>">
                         <div class="product-image">
                             <a href="<?= BASE_URL ?>/product/<?= $product['slug'] ?>" class="product-image-link" aria-label="View <?= htmlspecialchars($product['name']) ?>"></a>
                             <img src="<?= htmlspecialchars($image) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
