@@ -274,73 +274,75 @@ foreach ($colorVars as $k) {
                 </svg>
             </button>
         </div>
-        <ul class="mobile-nav-list">
-            <li class="mobile-nav-item">
-                <a href="<?= BASE_URL ?>/shop" class="mobile-nav-link main-cat">
-                    All Products
-                </a>
-            </li>
-            <?php foreach ($categories as $category): ?>
-                <?php $hasChildren = !empty($categoryChildren[$category['id']]); ?>
+        <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column;">
+            <ul class="mobile-nav-list" style="flex: none; overflow-y: visible;">
                 <li class="mobile-nav-item">
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <a href="<?= BASE_URL ?>/category/<?= urlencode($category['slug']) ?>" class="mobile-nav-link main-cat" style="flex: 1;">
-                            <?= htmlspecialchars($category['name']) ?>
-                        </a>
+                    <a href="<?= BASE_URL ?>/shop" class="mobile-nav-link main-cat">
+                        All Products
+                    </a>
+                </li>
+                <?php foreach ($categories as $category): ?>
+                    <?php $hasChildren = !empty($categoryChildren[$category['id']]); ?>
+                    <li class="mobile-nav-item">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <a href="<?= BASE_URL ?>/category/<?= urlencode($category['slug']) ?>" class="mobile-nav-link main-cat" style="flex: 1;">
+                                <?= htmlspecialchars($category['name']) ?>
+                            </a>
+                            <?php if ($hasChildren): ?>
+                            <button class="mobile-toggle-btn" aria-label="Toggle Submenu" onclick="const container = this.parentElement.nextElementSibling; this.classList.toggle('open'); container.classList.toggle('open');">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"/>
+                                </svg>
+                            </button>
+                            <?php endif; ?>
+                        </div>
                         <?php if ($hasChildren): ?>
-                        <button class="mobile-toggle-btn" aria-label="Toggle Submenu" onclick="const container = this.parentElement.nextElementSibling; this.classList.toggle('open'); container.classList.toggle('open');">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="6 9 12 15 18 9"/>
-                            </svg>
-                        </button>
-                        <?php endif; ?>
-                    </div>
-                    <?php if ($hasChildren): ?>
-                    <div class="mobile-subnav-container">
-                        <div class="mobile-subnav">
-                            <div class="mobile-subnav-inner">
-                                <?php foreach ($categoryChildren[$category['id']] as $child): ?>
-                                    <a href="<?= BASE_URL ?>/category/<?= urlencode($child['slug']) ?>" class="mobile-nav-link sub-cat">
-                                        <?= htmlspecialchars($child['name']) ?>
-                                    </a>
-                                <?php endforeach; ?>
+                        <div class="mobile-subnav-container">
+                            <div class="mobile-subnav">
+                                <div class="mobile-subnav-inner">
+                                    <?php foreach ($categoryChildren[$category['id']] as $child): ?>
+                                        <a href="<?= BASE_URL ?>/category/<?= urlencode($child['slug']) ?>" class="mobile-nav-link sub-cat">
+                                            <?= htmlspecialchars($child['name']) ?>
+                                        </a>
+                                    <?php endforeach; ?>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <?php endif; ?>
-                </li>
-            <?php endforeach; ?>
-        </ul>
+                        <?php endif; ?>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
 
-        <!-- Mobile Nav Footer: Login / Account -->
-        <div class="mobile-nav-footer">
-            <?php if (isLoggedIn()): ?>
-                <a href="<?= BASE_URL ?>/account" class="mobile-nav-account-btn">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                    </svg>
-                    My Account
-                </a>
-                <a href="<?= BASE_URL ?>/logout" class="mobile-nav-logout-btn">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-                    </svg>
-                    Logout
-                </a>
-            <?php else: ?>
-                <a href="<?= BASE_URL ?>/login" class="mobile-nav-login-btn">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
-                    </svg>
-                    Login
-                </a>
-                <a href="<?= BASE_URL ?>/register" class="mobile-nav-register-btn">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
-                    </svg>
-                    Register
-                </a>
-            <?php endif; ?>
+            <!-- Mobile Nav Footer: Login / Account -->
+            <div class="mobile-nav-footer" style="margin-top: 1rem; border-top: none; padding-top: 0;">
+                <?php if (isLoggedIn()): ?>
+                    <a href="<?= BASE_URL ?>/account" class="mobile-nav-account-btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        My Account
+                    </a>
+                    <a href="<?= BASE_URL ?>/logout" class="mobile-nav-logout-btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                        Logout
+                    </a>
+                <?php else: ?>
+                    <a href="<?= BASE_URL ?>/login" class="mobile-nav-login-btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
+                        </svg>
+                        Login
+                    </a>
+                    <a href="<?= BASE_URL ?>/register" class="mobile-nav-register-btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/>
+                        </svg>
+                        Register
+                    </a>
+                <?php endif; ?>
+            </div>
         </div>
     </nav>
 
