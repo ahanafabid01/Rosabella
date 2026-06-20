@@ -59,6 +59,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_branding'])) {
     if (!$error) $message = 'Branding updated successfully.';
 }
 
+// ---- Handle Typography settings ----
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_typography'])) {
+    $typoFields = $_POST['typo'] ?? [];
+    $upsertTypo = $db->prepare(
+        "INSERT INTO settings (setting_key, setting_value, setting_type)
+         VALUES (?, ?, 'text')
+         ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)"
+    );
+    foreach ($typoFields as $key => $value) {
+        if (preg_match('/^typo_[a-zA-Z0-9_]+$/', $key)) {
+            $upsertTypo->execute([$key, trim((string)$value)]);
+        }
+    }
+    $message = 'Typography settings saved successfully.';
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_settings'])) {
     $postedSettings = $_POST['settings'] ?? [];
 
@@ -115,8 +131,9 @@ $settings = $db->query("SELECT * FROM settings ORDER BY setting_key ASC")->fetch
 
 // Group settings by prefix
 $groups = [
-    'branding' => ['label' => 'Branding',  'icon' => 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z', 'items' => []],
-    'general'  => ['label' => 'General',   'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', 'items' => []],
+    'branding'   => ['label' => 'Branding',   'icon' => 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z', 'items' => []],
+    'typography' => ['label' => 'Typography', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', 'items' => []],
+    'general'    => ['label' => 'General',    'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', 'items' => []],
     'payment'  => ['label' => 'Payment',   'icon' => 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z', 'items' => []],
     'shipping' => ['label' => 'Shipping',  'icon' => 'M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4', 'items' => []],
     'email'    => ['label' => 'Email',     'icon' => 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z', 'items' => []],
@@ -127,6 +144,14 @@ $groups = [
 // Current branding values
 $siteLogo = getSetting('site_logo') ?? '';
 $siteIcon = getSetting('site_icon') ?? '';
+
+// Typography — per-tag font family only
+$typoTags = ['body', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a', 'small', 'label', 'button', 'input'];
+$typoFonts = [];
+foreach ($typoTags as $tag) {
+    $typoFonts[$tag] = getSetting('typo_font_' . $tag) ?: '';
+}
+
 
 
 foreach ($settings as $s) {
@@ -486,10 +511,78 @@ $pageTitle = 'Settings';
             </div>
         </div>
 
+        <!-- === Typography Tab === -->
+        <div class="settings-tab-panel" id="tab-typography">
+            <div class="admin-card">
+                <h2 class="admin-section-heading">Typography — Font Style</h2>
+                <p style="font-size:0.82rem;color:var(--color-text-light);margin:-0.25rem 0 1.5rem;">
+                    Set a Google Font for each HTML tag. Leave blank to inherit the parent font.
+                    Font names must match exactly on <a href="https://fonts.google.com" target="_blank">fonts.google.com</a>.
+                </p>
+
+                <form method="POST">
+                    <?php
+                    $typoTagLabels = [
+                        'body'   => ['label' => 'Body',           'desc' => 'Base font for the entire page'],
+                        'h1'     => ['label' => 'Heading 1',      'desc' => 'Main page titles'],
+                        'h2'     => ['label' => 'Heading 2',      'desc' => 'Section headings'],
+                        'h3'     => ['label' => 'Heading 3',      'desc' => 'Sub-section headings'],
+                        'h4'     => ['label' => 'Heading 4',      'desc' => 'Card / panel headings'],
+                        'h5'     => ['label' => 'Heading 5',      'desc' => 'Small headings'],
+                        'h6'     => ['label' => 'Heading 6',      'desc' => 'Tiny headings'],
+                        'p'      => ['label' => 'Paragraph',      'desc' => 'Body text and descriptions'],
+                        'a'      => ['label' => 'Links',          'desc' => 'Anchor / hyperlink text'],
+                        'small'  => ['label' => 'Small Text',     'desc' => 'Fine print, badges, meta text'],
+                        'label'  => ['label' => 'Labels',         'desc' => 'Form labels and captions'],
+                        'button' => ['label' => 'Buttons',        'desc' => 'All button text'],
+                        'input'  => ['label' => 'Inputs & Fields','desc' => 'Form inputs, selects, textareas'],
+                    ];
+                    ?>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;">
+                    <?php foreach ($typoTagLabels as $tag => $info): ?>
+                        <div style="border:1px solid var(--color-border);border-radius:var(--radius-md);padding:1rem;background:var(--color-bg-secondary);">
+                            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">
+                                <code style="background:var(--color-bg);border:1px solid var(--color-border);border-radius:4px;padding:0.1rem 0.4rem;font-size:0.75rem;color:var(--color-primary);font-weight:700;">&lt;<?= $tag ?>&gt;</code>
+                                <div>
+                                    <div style="font-size:0.82rem;font-weight:600;color:var(--color-text);"><?= $info['label'] ?></div>
+                                    <div style="font-size:0.72rem;color:var(--color-text-light);"><?= $info['desc'] ?></div>
+                                </div>
+                            </div>
+                            <input
+                                class="form-input"
+                                type="text"
+                                name="typo[typo_font_<?= $tag ?>]"
+                                value="<?= htmlspecialchars($typoFonts[$tag] ?? '') ?>"
+                                placeholder="e.g. Inter, Roboto, Poppins"
+                                style="font-size:0.82rem;"
+                                data-tag="<?= $tag ?>"
+                            >
+                            <?php if (!empty($typoFonts[$tag])): ?>
+                            <div style="margin-top:0.5rem;padding:0.4rem 0.6rem;background:var(--color-bg);border-radius:4px;border:1px solid var(--color-border);">
+                                <span style="font-size:0.75rem;color:var(--color-text-light);">Preview: </span>
+                                <span class="font-preview-span" data-font="<?= htmlspecialchars($typoFonts[$tag]) ?>" style="font-size:0.88rem;"><?= htmlspecialchars($typoFonts[$tag]) ?> — Aa Bb Cc</span>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                    </div>
+
+                    <div style="margin-top:1.5rem;display:flex;justify-content:flex-end;">
+                        <button type="submit" name="save_typography" value="1" class="btn btn-primary">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-2px;margin-right:4px;"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                            Save Typography
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+
         <!-- === Dynamic Settings Tabs === -->
         <form method="POST" id="settings-form">
             <?php $first = false; foreach ($groups as $groupKey => $group):
-                  if ($groupKey === 'branding') { continue; } ?>
+                  if ($groupKey === 'branding' || $groupKey === 'typography') { continue; } ?>
             <div class="settings-tab-panel" id="tab-<?= $groupKey ?>">
                 <div class="admin-card">
                     <h2 class="admin-section-heading"><?= htmlspecialchars($group['label']) ?> Settings</h2>
@@ -634,6 +727,53 @@ function clearBranding(key, boxId, imgId, fileInputId) {
     form.appendChild(k); form.appendChild(b);
     document.body.appendChild(form); form.submit();
 }
+
+// Live Google Font preview for each tag
+function loadFontPreview(fontName, previewSpan) {
+    if (!fontName) {
+        if (previewSpan) previewSpan.style.fontFamily = 'inherit';
+        return;
+    }
+    const encoded = encodeURIComponent(fontName.trim());
+    const id = 'gf-preview-' + encoded;
+    if (!document.getElementById(id)) {
+        const link = document.createElement('link');
+        link.id = id;
+        link.rel = 'stylesheet';
+        link.href = 'https://fonts.googleapis.com/css2?family=' + encoded + ':wght@400;700&display=swap';
+        document.head.appendChild(link);
+    }
+    if (previewSpan) {
+        previewSpan.style.fontFamily = '"' + fontName.trim() + '", sans-serif';
+        previewSpan.innerHTML = fontName.trim() + ' — Aa Bb Cc';
+    }
+}
+
+document.querySelectorAll('input[data-tag]').forEach(input => {
+    const parent = input.closest('div');
+    let previewSpan = parent.querySelector('.font-preview-span');
+    
+    // Initial load
+    if (input.value) loadFontPreview(input.value, previewSpan);
+
+    input.addEventListener('input', () => {
+        if (input.value.trim() && !previewSpan) {
+            // Create preview if it didn't exist
+            const pWrap = document.createElement('div');
+            pWrap.style = "margin-top:0.5rem;padding:0.4rem 0.6rem;background:var(--color-bg);border-radius:4px;border:1px solid var(--color-border);";
+            pWrap.innerHTML = '<span style="font-size:0.75rem;color:var(--color-text-light);">Preview: </span> <span class="font-preview-span" style="font-size:0.88rem;"></span>';
+            parent.appendChild(pWrap);
+            previewSpan = pWrap.querySelector('.font-preview-span');
+        }
+        if (!input.value.trim() && previewSpan) {
+            // Remove preview if cleared
+            previewSpan.parentElement.remove();
+            previewSpan = null;
+        }
+        loadFontPreview(input.value, previewSpan);
+    });
+});
+
 
 </script>
 </body>

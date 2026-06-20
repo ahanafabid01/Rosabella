@@ -35,6 +35,18 @@ $siteLogo = getSetting('site_logo') ?: '';
 $siteIcon = getSetting('site_icon') ?: '';
 $siteName = getSetting('site_name') ?: 'KARTLY';
 
+// Typography settings from DB (font family only)
+$typoTags = ['body', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a', 'small', 'label', 'button', 'input'];
+$typoFonts = [];
+$uniqueFonts = [];
+
+foreach ($typoTags as $tag) {
+    $font = getSetting('typo_font_' . $tag);
+    if ($font) {
+        $typoFonts[$tag] = $font;
+        $uniqueFonts[$font] = true;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -53,7 +65,17 @@ $siteName = getSetting('site_name') ?: 'KARTLY';
         <link rel="icon" href="<?= BASE_URL ?>/assets/images/favicon.ico" type="image/x-icon">
     <?php endif; ?>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts from Settings -->
+    <?php foreach (array_keys($uniqueFonts) as $fontName): ?>
+    <link href="https://fonts.googleapis.com/css2?family=<?= urlencode(trim($fontName)) ?>:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <?php endforeach; ?>
+
+    <!-- Dynamic Typography CSS from Admin Settings -->
+    <style>
+        <?php foreach ($typoFonts as $tag => $fontName): ?>
+        <?= $tag ?> { font-family: '<?= htmlspecialchars(trim($fontName)) ?>', sans-serif !important; }
+        <?php endforeach; ?>
+    </style>
     
     <script>
         window.BASE_URL = '<?= BASE_URL ?>';
