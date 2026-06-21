@@ -36,7 +36,7 @@ $siteIcon = getSetting('site_icon') ?: '';
 $siteName = getSetting('site_name') ?: 'KARTLY';
 
 // Typography settings from DB (font family only)
-$typoTags = ['body', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a', 'small', 'label', 'button', 'input'];
+$typoTags = ['body', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a', 'small', 'label', 'button', 'input', 'nav'];
 $typoFonts = [];
 $uniqueFonts = [];
 
@@ -126,7 +126,7 @@ foreach ($colorVars as $k) {
         @media (max-width:991px){.header-search,.header-nav{display:none}}
         /* CLS fix: Reserve space for hero grid so images don't cause layout shift */
         .hero-bento-grid{display:grid;grid-template-columns:1fr;min-height:350px}
-        @media(min-width:768px){.hero-bento-grid{grid-template-columns:1.5fr 1fr;min-height:420px}}
+        @media(min-width:992px){.hero-bento-grid{grid-template-columns:1.5fr 1fr;min-height:420px}}
         .hero-main-banner,.hero-side-banners{width:100%;background:#f0f0f0}
         .hero-main-banner{min-height:350px}
         @media(min-width:768px){.hero-main-banner{min-height:420px}}
@@ -312,8 +312,8 @@ foreach ($colorVars as $k) {
                     <span><?= htmlspecialchars($siteName) ?></span>
                 <?php endif; ?>
             </a>
-            <button class="btn btn-ghost btn-icon mobile-nav-close" aria-label="Close menu">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <button class="mobile-nav-close" aria-label="Close menu" style="margin-left:auto; width:36px; height:36px; min-width:36px; padding:0; border-radius:50%; background:var(--color-primary); display:flex; align-items:center; justify-content:center; transition:background 0.2s; border:none; cursor:pointer; flex-shrink:0;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round">
                     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                 </svg>
             </button>

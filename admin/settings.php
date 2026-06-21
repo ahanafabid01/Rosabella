@@ -162,7 +162,7 @@ $siteLogo = getSetting('site_logo') ?? '';
 $siteIcon = getSetting('site_icon') ?? '';
 
 // Typography — per-tag font family only
-$typoTags = ['body', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a', 'small', 'label', 'button', 'input'];
+$typoTags = ['body', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a', 'small', 'label', 'button', 'input', 'nav'];
 $typoFonts = [];
 foreach ($typoTags as $tag) {
     $typoFonts[$tag] = getSetting('typo_font_' . $tag) ?: '';
@@ -581,6 +581,7 @@ $pageTitle = 'Settings';
                         'label'  => ['label' => 'Labels',         'desc' => 'Form labels and captions'],
                         'button' => ['label' => 'Buttons',        'desc' => 'All button text'],
                         'input'  => ['label' => 'Inputs & Fields','desc' => 'Form inputs, selects, textareas'],
+                        'nav'    => ['label' => 'Navigation / Sidebar','desc' => 'Mobile sidebar & nav menu links'],
                     ];
                     ?>
                     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;">

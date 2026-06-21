@@ -1144,13 +1144,13 @@ textarea {
 }
 .mobile-nav-link {
     display: block;
-    padding: 1.15rem 1.5rem;
+    padding: 0.9rem 1.5rem;
     border-radius: 0;
     text-decoration: none;
     transition: background-color 0.2s, color 0.2s;
 }
 .mobile-nav-link.main-cat {
-    font-size: 1.05rem;
+    font-size: 0.9rem;
     font-weight: 600;
     color: #1e293b;
     letter-spacing: -0.01em;
@@ -1159,10 +1159,10 @@ textarea {
     background-color: rgba(0,0,0,0.02);
 }
 .mobile-nav-link.sub-cat {
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     font-weight: 500;
     color: #64748b;
-    padding: 0.85rem 1.5rem 0.85rem 2.5rem;
+    padding: 0.7rem 1.5rem 0.7rem 2.5rem;
     border-bottom: 1px solid rgba(0,0,0,0.03);
 }
 .mobile-nav-link.sub-cat:last-child {
@@ -3367,6 +3367,7 @@ textarea {
         gap: 1.5rem;
     }
 }
+
 
 
 

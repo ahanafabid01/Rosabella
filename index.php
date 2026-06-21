@@ -562,7 +562,7 @@ try {
                     ?>
                     <a href="<?= htmlspecialchars($dealLink) ?>" class="deal-card">
                         <img src="<?= htmlspecialchars($dealImage) ?>" alt="<?= htmlspecialchars($dealTitle) ?>" style="object-position: <?= htmlspecialchars($imagePosition) ?>;">
-                        <div class="deal-overlay" style="background: linear-gradient(135deg, <?= htmlspecialchars($overlayStart) ?>, <?= htmlspecialchars($overlayEnd) ?>);"></div>
+
                         <?php if ($dealBadgeText !== ''): ?>
                         <div class="deal-badge">
                             <span class="badge badge-<?= htmlspecialchars($dealBadgeStyle) ?>"><?= htmlspecialchars($dealBadgeText) ?></span>
