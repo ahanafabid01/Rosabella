@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * KARTLY - Admin Settings
  */
@@ -758,36 +758,6 @@ $pageTitle = 'Settings';
             <?php $first = false; endforeach; ?>
         </form>
 
-        <!-- Advanced: Add New Setting -->
-        <div class="admin-card" style="margin-top:0.5rem;">
-            <h2 class="admin-section-heading">Advanced — Add New Setting</h2>
-            <p style="font-size:0.82rem;color:var(--color-text-light);margin-bottom:1rem;">Manually register a new configuration key into the database.</p>
-            <form method="POST">
-                <div class="add-setting-grid">
-                    <div>
-                        <label style="font-size:0.75rem;font-weight:600;color:var(--color-text-light);display:block;margin-bottom:0.4rem;">KEY</label>
-                        <input class="form-input" type="text" name="new_setting_key" placeholder="e.g. site_name" required>
-                    </div>
-                    <div>
-                        <label style="font-size:0.75rem;font-weight:600;color:var(--color-text-light);display:block;margin-bottom:0.4rem;">TYPE</label>
-                        <select class="form-select" name="new_setting_type">
-                            <option value="text">text</option>
-                            <option value="number">number</option>
-                            <option value="boolean">boolean</option>
-                            <option value="json">json</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="font-size:0.75rem;font-weight:600;color:var(--color-text-light);display:block;margin-bottom:0.4rem;">INITIAL VALUE</label>
-                        <input class="form-input" type="text" name="new_setting_value" placeholder="Initial value">
-                    </div>
-                    <div>
-                        <label style="font-size:0.75rem;display:block;margin-bottom:0.4rem;">&nbsp;</label>
-                        <button class="btn btn-secondary" type="submit" name="add_setting" value="1" style="width:100%;">Add Setting</button>
-                    </div>
-                </div>
-            </form>
-        </div>
 
     </main>
 </div>

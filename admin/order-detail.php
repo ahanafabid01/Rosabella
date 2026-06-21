@@ -130,9 +130,10 @@ $pageTitle = 'Order Detail';
         <?php if ($message): ?><div class="alert alert-success" style="margin-bottom: 1.5rem; border-radius: 8px;"><?= htmlspecialchars($message) ?></div><?php endif; ?>
         <?php if ($error): ?><div class="alert alert-error" style="margin-bottom: 1.5rem; border-radius: 8px;"><?= htmlspecialchars($error) ?></div><?php endif; ?>
 
-        <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
+        <div style="display: flex; flex-direction: column; gap: 1.5rem; min-width: 0; max-width: 100vw;">
             <!-- CSS for desktop 2-column layout -->
             <style>
+                .order-detail-layout { display: flex; flex-direction: column; gap: 1.5rem; }
                 @media (min-width: 1024px) {
                     .order-detail-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; align-items: start; }
                 }
@@ -142,13 +143,13 @@ $pageTitle = 'Order Detail';
                 .info-value { font-size: 0.95rem; color: var(--color-text); line-height: 1.5; }
             </style>
 
-            <div class="order-detail-layout">
+            <div class="order-detail-layout" style="min-width: 0; max-width: 100%;">
                 <!-- Left Column: Items & Summary -->
-                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                    <div class="admin-card" style="margin-bottom: 0;">
+                <div style="display: flex; flex-direction: column; gap: 1.5rem; min-width: 0;">
+                    <div class="admin-card" style="margin-bottom: 0; overflow: hidden; min-width: 0;">
                         <h2 class="detail-section-title">Order Items</h2>
-                        <div class="admin-table-wrap" style="border: none;">
-                            <table class="admin-table" style="min-width: 100%;">
+                        <div class="admin-table-wrap" style="border: none; overflow-x: auto; width: 100%;">
+                            <table class="admin-table" style="min-width: 600px; width: 100%;">
                                 <thead>
                                 <tr>
                                     <th style="padding-left: 0;">Product</th>
@@ -223,7 +224,7 @@ $pageTitle = 'Order Detail';
                 </div>
 
                 <!-- Right Column: Customer, Payment & Status -->
-                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <div style="display: flex; flex-direction: column; gap: 1.5rem; min-width: 0;">
                     
                     <!-- Status Update Card -->
                     <div class="admin-card" style="margin-bottom: 0; background: var(--color-bg-secondary); border-color: var(--color-border);">

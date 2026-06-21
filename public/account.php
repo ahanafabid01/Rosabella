@@ -13,6 +13,11 @@ if (!isLoggedIn()) {
     exit;
 }
 
+if (isAdmin()) {
+    header('Location: ' . BASE_URL . '/admin/');
+    exit;
+}
+
 $db = getDB();
 $user = getCurrentUser();
 $message = '';

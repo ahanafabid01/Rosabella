@@ -149,7 +149,29 @@ $total = $subtotal - $discount; // Shipping and tax are calculated at checkout
                                                 <div style="margin-bottom: 0.5rem;">
                                                     <select class="cart-attribute-select" data-cart-id="<?= $item['id'] ?>" data-attribute="selected_color" style="padding: 0.25rem; border: 1px solid var(--color-danger); border-radius: 4px; font-size: 0.875rem;">
                                                         <option value="">Select Color (Required)</option>
-                                                        <?php foreach (explode(',', $item['colors']) as $c): $c = trim($c); if ($c): ?>
+                                                        <?php 
+                                                        $colorsRaw = $item['colors'] ?? '';
+                                                        $parsedColors = [];
+                                                        if (!empty($colorsRaw)) {
+                                                            $decoded = json_decode($colorsRaw, true);
+                                                            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                                                                if (!isset($decoded[0])) {
+                                                                    // Format: {"Crimson": {...}, "Black": {...}}
+                                                                    $parsedColors = array_keys($decoded);
+                                                                } else {
+                                                                    // Format: [{"color": "Crimson", ...}] or ["Crimson", "Black"]
+                                                                    foreach ($decoded as $d) {
+                                                                        if (is_array($d) && isset($d['color'])) $parsedColors[] = $d['color'];
+                                                                        elseif (is_string($d)) $parsedColors[] = $d;
+                                                                    }
+                                                                }
+                                                            } else {
+                                                                // Fallback to comma separated string
+                                                                $parsedColors = explode(',', $colorsRaw);
+                                                            }
+                                                        }
+                                                        foreach ($parsedColors as $c): $c = trim((string)$c); if ($c): 
+                                                        ?>
                                                             <option value="<?= htmlspecialchars($c) ?>"><?= htmlspecialchars($c) ?></option>
                                                         <?php endif; endforeach; ?>
                                                     </select>

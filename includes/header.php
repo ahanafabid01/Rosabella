@@ -197,11 +197,11 @@ foreach ($colorVars as $k) {
 
                     <!-- Login / Register -->
                     <?php if (isLoggedIn()): ?>
-                        <a href="<?= BASE_URL ?>/account" class="header-login-link" aria-label="My Account">
+                        <a href="<?= BASE_URL ?><?= isAdmin() ? '/admin' : '/account' ?>" class="header-login-link" aria-label="My Account">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
                             </svg>
-                            <span>My Account</span>
+                            <span><?= isAdmin() ? 'Admin Panel' : 'My Account' ?></span>
                         </a>
                     <?php else: ?>
                         <a href="<?= BASE_URL ?>/login" class="header-login-link" aria-label="Login or Register">
@@ -348,11 +348,11 @@ foreach ($colorVars as $k) {
                 <!-- Mobile Nav Footer: Login / Account (inside ul for scrolling) -->
                 <?php if (isLoggedIn()): ?>
                     <li class="mobile-nav-item" style="border-top: 1px solid var(--color-border-light); margin-top: 1rem; padding-top: 1rem;">
-                        <a href="<?= BASE_URL ?>/account" class="mobile-nav-account-btn" style="display:flex;align-items:center;gap:0.5rem;padding:0.75rem 1.25rem;font-weight:600;color:var(--color-primary);background:var(--color-bg-secondary);margin:0 1.25rem 0.5rem;border-radius:var(--radius-md);">
+                        <a href="<?= BASE_URL ?><?= isAdmin() ? '/admin' : '/account' ?>" class="mobile-nav-account-btn" style="display:flex;align-items:center;gap:0.5rem;padding:0.75rem 1.25rem;font-weight:600;color:var(--color-primary);background:var(--color-bg-secondary);margin:0 1.25rem 0.5rem;border-radius:var(--radius-md);">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
                             </svg>
-                            My Account
+                            <?= isAdmin() ? 'Admin Panel' : 'My Account' ?>
                         </a>
                     </li>
                     <li class="mobile-nav-item">

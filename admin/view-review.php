@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * KARTLY - Admin View Review
  */
@@ -173,9 +173,15 @@ $pageTitle = 'Review Details #' . intval($viewReview['id']);
             <a href="<?= BASE_URL ?>/admin/reviews" class="btn btn-secondary">Back to Reviews</a>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 350px; gap: 2rem; align-items: start;">
+        <style>
+            .review-detail-layout { display: flex; flex-direction: column; gap: 1.5rem; min-width: 0; }
+            @media (min-width: 1024px) {
+                .review-detail-layout { display: grid; grid-template-columns: 1fr 350px; gap: 2rem; align-items: start; }
+            }
+        </style>
+        <div class="review-detail-layout">
             <!-- Left Column: Review Content -->
-            <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden;">
+            <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; min-width: 0;">
                 <div style="padding: 1.5rem; border-bottom: 1px solid var(--color-border); background: var(--color-bg-secondary);">
                     <div style="color: #f59e0b; font-size: 1.25rem; letter-spacing: 2px;">
                         <?= htmlspecialchars(renderAdminReviewStars(intval($viewReview['rating'] ?? 0))) ?>
@@ -201,7 +207,7 @@ $pageTitle = 'Review Details #' . intval($viewReview['id']);
             </div>
 
             <!-- Right Column: Meta & Actions -->
-            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div style="display: flex; flex-direction: column; gap: 1.5rem; min-width: 0;">
                 <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem;">
                     <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1.25rem;">Review Details</h3>
                     

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * KARTLY - Admin Reviews Management
  */
@@ -241,12 +241,12 @@ $pageTitle = 'Reviews Management';
                         <td><?= intval($review['image_count'] ?? 0) ?></td>
                         <td><?= htmlspecialchars(date('M j, Y', strtotime($review['created_at'] ?? 'now'))) ?></td>
                         <td>
-                            <div class="admin-form-row">
-                                <a href="<?= BASE_URL ?>/admin/view-review?id=<?= intval($review['id']) ?>" class="btn btn-sm btn-outline">View</a>
-                                <form method="POST" onsubmit="return confirm('Delete this review permanently?');">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: nowrap;">
+                                <a href="<?= BASE_URL ?>/admin/view-review?id=<?= intval($review['id']) ?>" class="btn btn-sm btn-outline" style="white-space: nowrap;">View</a>
+                                <form method="POST" onsubmit="return confirm('Delete this review permanently?');" style="margin: 0;">
                                     <input type="hidden" name="action" value="delete_review">
                                     <input type="hidden" name="review_id" value="<?= intval($review['id']) ?>">
-                                    <button type="submit" class="btn btn-sm btn-secondary">Delete</button>
+                                    <button type="submit" class="btn btn-sm btn-secondary" style="white-space: nowrap;">Delete</button>
                                 </form>
                             </div>
                         </td>
