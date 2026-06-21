@@ -183,7 +183,7 @@ foreach ($colorVars as $k) {
                     <svg class="header-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
                     </svg>
-                    <input type="search" name="search" placeholder="Search for products..." class="header-search-input">
+                    <input type="search" name="search" placeholder="Search for products..." class="header-search-input search-input-live">
                     <button type="submit" class="header-search-btn" aria-label="Search">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
@@ -240,7 +240,7 @@ foreach ($colorVars as $k) {
                     <svg class="mobile-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
                     </svg>
-                    <input type="search" name="search" placeholder="Search for products...">
+                    <input type="search" name="search" placeholder="Search for products..." class="search-input-live">
                     <button type="submit" aria-label="Search">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
@@ -463,5 +463,170 @@ foreach ($colorVars as $k) {
             <a href="<?= BASE_URL ?>/cart" class="btn btn-primary mini-cart-btn" style="width: 100%;">View Cart</a>
         </div>
     </div>
+
+<style>
+#live-search-dropdown {
+    display: none;
+    position: fixed;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+    z-index: 99999;
+    max-height: 420px;
+    overflow-y: auto;
+    min-width: 300px;
+}
+#live-search-dropdown a.lsd-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 18px;
+    text-decoration: none;
+    color: #111827;
+    font-size: 0.95rem;
+    border-bottom: 1px solid #f3f4f6;
+    transition: background 0.12s;
+}
+#live-search-dropdown a.lsd-item:last-child { border-bottom: none; }
+#live-search-dropdown a.lsd-item:hover { background: #f8f9fa; }
+#live-search-dropdown .lsd-item .lsd-icon { color: #9ca3af; flex-shrink: 0; }
+#live-search-dropdown .lsd-item .lsd-text { flex: 1; }
+#live-search-dropdown .lsd-item .lsd-arrow { color: #d1d5db; flex-shrink: 0; }
+#live-search-dropdown .lsd-empty {
+    padding: 20px;
+    text-align: center;
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+</style>
+
+<div id="live-search-dropdown"></div>
+
+<script>
+(function() {
+    var BASE = '<?= BASE_URL ?>';
+    var dropdown = document.getElementById('live-search-dropdown');
+    var activeInput = null;
+    var debounceTimer = null;
+
+    function positionDropdown(input) {
+        var rect = input.closest('form').getBoundingClientRect();
+        dropdown.style.top    = (rect.bottom + window.scrollY) + 'px';
+        dropdown.style.left   = rect.left + 'px';
+        dropdown.style.width  = rect.width + 'px';
+    }
+
+    function escapeRegex(s) {
+        return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function boldMatch(text, query) {
+        var re = new RegExp('(' + escapeRegex(query) + ')', 'gi');
+        return text.replace(re, '<span style="font-weight:400;color:#6b7280;">$1</span>');
+    }
+
+    function showDropdown(keywords, query) {
+        if (keywords.length === 0) {
+            dropdown.innerHTML = '<div class="lsd-empty">No suggestions found for "' + query + '"</div>';
+        } else {
+            var html = '';
+            keywords.forEach(function(kw) {
+                var bold = boldMatch(kw, query);
+                var encoded = encodeURIComponent(kw);
+                html += '<a href="' + BASE + '/search?search=' + encoded + '" class="lsd-item">' +
+                    '<svg class="lsd-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>' +
+                    '<span class="lsd-text" style="font-weight:700;">' + bold + '</span>' +
+                    '<svg class="lsd-arrow" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17l9.2-9.2M17 17V7H7"/></svg>' +
+                '</a>';
+            });
+            dropdown.innerHTML = html;
+        }
+        dropdown.style.display = 'block';
+    }
+
+    function hideDropdown() {
+        dropdown.style.display = 'none';
+        dropdown.innerHTML = '';
+    }
+
+    function handleInput(e) {
+        var query = e.target.value.trim();
+        activeInput = e.target;
+        clearTimeout(debounceTimer);
+
+        if (query.length < 2) {
+            hideDropdown();
+            return;
+        }
+
+        positionDropdown(e.target);
+
+        debounceTimer = setTimeout(function() {
+            fetch(BASE + '/api/search.php?q=' + encodeURIComponent(query))
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (!data.success) { hideDropdown(); return; }
+
+                    var keywords = [];
+                    (data.categories || []).forEach(function(c) { keywords.push(c.name); });
+                    (data.products || []).forEach(function(p) {
+                        keywords.push(p.name);
+                        if (p.brand) keywords.push(p.brand + ' ' + p.name);
+                    });
+
+                    // Deduplicate
+                    keywords = keywords.filter(function(v, i, a) { return a.indexOf(v) === i; });
+                    keywords = keywords.slice(0, 8);
+
+                    showDropdown(keywords, query);
+                    positionDropdown(e.target);
+                })
+                .catch(function() { hideDropdown(); });
+        }, 250);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.search-input-live').forEach(function(input) {
+            input.setAttribute('autocomplete', 'off');
+            input.addEventListener('input', handleInput);
+            input.addEventListener('focus', function(e) {
+                if (e.target.value.trim().length >= 2 && dropdown.innerHTML !== '') {
+                    positionDropdown(e.target);
+                    dropdown.style.display = 'block';
+                }
+            });
+        });
+
+        // Reposition on scroll/resize
+        window.addEventListener('scroll', function() {
+            if (activeInput && dropdown.style.display === 'block') {
+                positionDropdown(activeInput);
+            }
+        }, true);
+        window.addEventListener('resize', function() {
+            if (activeInput && dropdown.style.display === 'block') {
+                positionDropdown(activeInput);
+            }
+        });
+
+        // Close on outside click
+        document.addEventListener('click', function(e) {
+            if (!dropdown.contains(e.target) && !e.target.closest('.search-input-live')) {
+                hideDropdown();
+                activeInput = null;
+            }
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideDropdown();
+                activeInput = null;
+            }
+        });
+    });
+})();
+</script>
 
 <main id="main-content">
