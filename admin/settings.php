@@ -162,7 +162,7 @@ $siteLogo = getSetting('site_logo') ?? '';
 $siteIcon = getSetting('site_icon') ?? '';
 
 // Typography — per-tag font family only
-$typoTags = ['body', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a', 'small', 'label', 'button', 'input', 'nav'];
+$typoTags = ['body', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a', 'small', 'label', 'button', 'input', 'nav', 'logo_text'];
 $typoFonts = [];
 foreach ($typoTags as $tag) {
     $typoFonts[$tag] = getSetting('typo_font_' . $tag) ?: '';
@@ -582,6 +582,7 @@ $pageTitle = 'Settings';
                         'button' => ['label' => 'Buttons',        'desc' => 'All button text'],
                         'input'  => ['label' => 'Inputs & Fields','desc' => 'Form inputs, selects, textareas'],
                         'nav'    => ['label' => 'Navigation / Sidebar','desc' => 'Mobile sidebar & nav menu links'],
+                        'logo_text' => ['label' => 'Text Logo','desc' => 'Site name font when no image logo is uploaded'],
                     ];
                     ?>
                     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;">
@@ -639,6 +640,7 @@ $pageTitle = 'Settings';
                         'Brand & Accent' => [
                             'primary' => 'Primary (Buttons, Links)',
                             'primary_hover' => 'Primary Hover',
+                            'logo_text' => 'Text Logo Color',
                         ],
                         'Backgrounds' => [
                             'bg' => 'Main Background',

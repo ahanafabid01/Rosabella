@@ -36,7 +36,7 @@ $siteIcon = getSetting('site_icon') ?: '';
 $siteName = getSetting('site_name') ?: 'KARTLY';
 
 // Typography settings from DB (font family only)
-$typoTags = ['body', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a', 'small', 'label', 'button', 'input', 'nav'];
+$typoTags = ['body', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a', 'small', 'label', 'button', 'input', 'nav', 'logo_text'];
 $typoFonts = [];
 $uniqueFonts = [];
 
@@ -55,13 +55,18 @@ $colorVars = [
     'text', 'text_light', 'text_muted',
     'bg', 'bg_secondary', 'bg_tertiary',
     'border', 'border_light',
-    'topbar_bg', 'navbar_bg', 'footer_bg'
+    'topbar_bg', 'navbar_bg', 'footer_bg', 'logo_text'
 ];
 $customColors = [];
 foreach ($colorVars as $k) {
     $val = getSetting('color_' . $k);
     if ($val) $customColors[$k] = $val;
 }
+
+$logoStyle = "";
+$logoStyle .= !empty($typoFonts['logo_text']) ? "font-family:'".htmlspecialchars($typoFonts['logo_text'])."', sans-serif; " : "font-weight: 800; font-size: 1.5rem; ";
+$logoStyle .= !empty($customColors['logo_text']) ? "color:".htmlspecialchars($customColors['logo_text'])."; " : "color: var(--color-primary); ";
+$logoStyle .= "line-height: 1; letter-spacing: -0.02em;";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -127,7 +132,8 @@ foreach ($colorVars as $k) {
         /* CLS fix: Reserve space for hero grid so images don't cause layout shift */
         .hero-bento-grid{display:grid;grid-template-columns:1fr;min-height:350px}
         @media(min-width:992px){.hero-bento-grid{grid-template-columns:1.5fr 1fr;min-height:420px}}
-        .hero-main-banner,.hero-side-banners{width:100%;background:#f0f0f0}
+        .hero-main-banner,.hero-side-banners{width:100%}
+        .hero-main-banner{background:transparent}
         .hero-main-banner{min-height:350px}
         @media(min-width:768px){.hero-main-banner{min-height:420px}}
         .hero-slider,.hero-slide,.hero-side-slider,.hero-side-banner{width:100%;height:100%}
@@ -184,8 +190,7 @@ foreach ($colorVars as $k) {
                     <?php if ($siteLogo): ?>
                         <img src="<?= BASE_URL ?>/<?= htmlspecialchars($siteLogo) ?>" alt="<?= htmlspecialchars($siteName) ?>" width="140" height="36" style="height:36px;width:auto;max-width:140px;object-fit:contain;display:block;">
                     <?php else: ?>
-                        <div class="logo-icon">K</div>
-                        <span><?= htmlspecialchars($siteName) ?></span>
+                        <span style="<?= $logoStyle ?>"><?= htmlspecialchars($siteName) ?></span>
                     <?php endif; ?>
                 </a>
 
@@ -308,8 +313,7 @@ foreach ($colorVars as $k) {
                 <?php if ($siteLogo): ?>
                     <img src="<?= BASE_URL ?>/<?= htmlspecialchars($siteLogo) ?>" alt="<?= htmlspecialchars($siteName) ?>" style="height:32px;width:auto;object-fit:contain;display:block;">
                 <?php else: ?>
-                    <div class="logo-icon">K</div>
-                    <span><?= htmlspecialchars($siteName) ?></span>
+                    <span style="<?= $logoStyle ?>"><?= htmlspecialchars($siteName) ?></span>
                 <?php endif; ?>
             </a>
             <button class="mobile-nav-close" aria-label="Close menu" style="margin-left:auto; width:36px; height:36px; min-width:36px; padding:0; border-radius:50%; background:var(--color-primary); display:flex; align-items:center; justify-content:center; transition:background 0.2s; border:none; cursor:pointer; flex-shrink:0;">

@@ -2932,7 +2932,7 @@ textarea {
     display: flex;
     min-height: 140px;
     box-shadow: var(--shadow-sm);
-    background-color: #0f172a;
+    background-color: transparent;
 }
 @media (min-width: 600px) { .hero-side-slider { min-height: 180px; } }
 @media (min-width: 768px) { .hero-side-slider { min-height: 240px; } }

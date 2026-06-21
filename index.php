@@ -194,7 +194,7 @@ try {
                             <?php $hasLink = !empty($sideTop['link_url']); ?>
                             <<?= $hasLink ? 'a href="'.htmlspecialchars(cleanUrl($sideTop['link_url'])).'"' : 'div' ?> aria-label="Side Promotion" class="hero-side-banner side-slide <?= $idx === 0 ? 'active' : '' ?>">
                                 <img src="<?= BASE_URL . '/' . htmlspecialchars($sideTop['image_path']) ?>" alt="<?= htmlspecialchars($sideTop['title'] ?? 'Promotion Banner') ?>" loading="lazy" width="400" height="200">
-                                <div class="hero-side-overlay"></div>
+
                                 <div class="hero-side-content">
                                     <?php if (!empty($sideTop['subtitle'])): ?>
                                         <div class="hero-side-subtitle"><?= htmlspecialchars($sideTop['subtitle']) ?></div>
@@ -223,7 +223,7 @@ try {
                             <?php $hasLink = !empty($sideBottom['link_url']); ?>
                             <<?= $hasLink ? 'a href="'.htmlspecialchars(cleanUrl($sideBottom['link_url'])).'"' : 'div' ?> aria-label="Side Promotion" class="hero-side-banner side-slide <?= $idx === 0 ? 'active' : '' ?>">
                                 <img src="<?= BASE_URL . '/' . htmlspecialchars($sideBottom['image_path']) ?>" alt="<?= htmlspecialchars($sideBottom['title'] ?? 'Promotion Banner') ?>" loading="lazy" width="400" height="200">
-                                <div class="hero-side-overlay"></div>
+
                                 <div class="hero-side-content">
                                     <?php if (!empty($sideBottom['subtitle'])): ?>
                                         <div class="hero-side-subtitle"><?= htmlspecialchars($sideBottom['subtitle']) ?></div>

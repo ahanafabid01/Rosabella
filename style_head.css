@@ -2723,7 +2723,7 @@ textarea {
     text-decoration: none;
     min-height: 140px;
     box-shadow: var(--shadow-sm);
-    background-color: #0f172a;
+    background-color: transparent;
 }
 
 @media (min-width: 600px) {
