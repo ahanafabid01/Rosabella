@@ -94,7 +94,8 @@ foreach ($colorVars as $k) {
         $stmtHero = $db->query("SELECT image_path FROM hero_slides WHERE position = 'main' AND status = 'active' ORDER BY sort_order ASC LIMIT 1");
         $lcpHero = $stmtHero->fetch(PDO::FETCH_ASSOC);
         if ($lcpHero && !empty($lcpHero['image_path'])) {
-            echo '<link rel="preload" as="image" href="'.BASE_URL.'/' . htmlspecialchars($lcpHero['image_path']) . '">';
+            $lcpUrl = BASE_URL . '/' . htmlspecialchars($lcpHero['image_path']);
+            echo '<link rel="preload" as="image" href="'.$lcpUrl.'" fetchpriority="high">';
         }
     }
     ?>
@@ -103,9 +104,8 @@ foreach ($colorVars as $k) {
         window.BASE_URL = '<?= BASE_URL ?>';
     </script>
     
-    <!-- Non-blocking Main Stylesheet -->
-    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css"></noscript>
+    <!-- Main Stylesheet (synchronous to prevent CLS) -->
+    <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/style.css">
 
     <!-- Critical CSS — inlined to eliminate render-blocking -->
     <style>
@@ -124,6 +124,20 @@ foreach ($colorVars as $k) {
         .header-search{flex:1;max-width:600px;position:relative}
         .header-actions{display:flex;align-items:center;gap:1rem}
         @media (max-width:991px){.header-search,.header-nav{display:none}}
+        /* CLS fix: Reserve space for hero grid so images don't cause layout shift */
+        .hero-bento-grid{display:grid;grid-template-columns:1fr;min-height:350px}
+        @media(min-width:768px){.hero-bento-grid{grid-template-columns:1.5fr 1fr;min-height:420px}}
+        .hero-main-banner,.hero-side-banners{width:100%;background:#f0f0f0}
+        .hero-main-banner{min-height:350px}
+        @media(min-width:768px){.hero-main-banner{min-height:420px}}
+        .hero-slider,.hero-slide,.hero-side-slider,.hero-side-banner{width:100%;height:100%}
+        .hero-slide img{width:100%;height:100%;object-fit:cover;display:block}
+        /* CLS fix: Category cards have fixed size */
+        .category-card-img-wrap{aspect-ratio:1/1;overflow:hidden}
+        .category-card-img-wrap img{width:100%;height:100%;object-fit:cover}
+        /* CLS fix: Product card images */
+        .product-image{aspect-ratio:1/1;overflow:hidden;background:#f8f9fa}
+        .product-image img{width:100%;height:100%;object-fit:cover}
     </style>
 
     <!-- Dynamic Typography & Colors CSS from Admin Settings -->
@@ -142,14 +156,11 @@ foreach ($colorVars as $k) {
     </style>
     
 
-    <!-- Additional page-specific styles -->
     <?php if (isset($additionalStyles)): ?>
         <style><?= $additionalStyles ?></style>
     <?php endif; ?>
-    
-    <script>
-        window.BASE_URL = '<?= BASE_URL ?>';
-    </script>
+
+    <script>window.BASE_URL = '<?= BASE_URL ?>';</script>
 </head>
 <body>
     <!-- Header -->
@@ -171,7 +182,7 @@ foreach ($colorVars as $k) {
                 <!-- Logo -->
                 <a href="<?= BASE_URL ?>/" class="logo">
                     <?php if ($siteLogo): ?>
-                        <img src="<?= BASE_URL ?>/<?= htmlspecialchars($siteLogo) ?>" alt="<?= htmlspecialchars($siteName) ?>" style="height:36px;width:auto;object-fit:contain;display:block;">
+                        <img src="<?= BASE_URL ?>/<?= htmlspecialchars($siteLogo) ?>" alt="<?= htmlspecialchars($siteName) ?>" width="140" height="36" style="height:36px;width:auto;max-width:140px;object-fit:contain;display:block;">
                     <?php else: ?>
                         <div class="logo-icon">K</div>
                         <span><?= htmlspecialchars($siteName) ?></span>
