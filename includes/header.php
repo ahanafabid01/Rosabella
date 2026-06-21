@@ -133,7 +133,7 @@ $logoStyle .= "line-height: 1; letter-spacing: -0.02em;";
         .hero-bento-grid{display:grid;grid-template-columns:1fr;min-height:350px}
         @media(min-width:992px){.hero-bento-grid{grid-template-columns:1.5fr 1fr;min-height:420px}}
         .hero-main-banner,.hero-side-banners{width:100%}
-        .hero-main-banner{background:transparent}
+        .hero-main-banner{background:#0f172a}
         .hero-main-banner{min-height:350px}
         @media(min-width:768px){.hero-main-banner{min-height:420px}}
         .hero-slider,.hero-slide,.hero-side-slider,.hero-side-banner{width:100%;height:100%}
