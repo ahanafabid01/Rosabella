@@ -108,7 +108,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (empty($payment_phone) || empty($payment_trx_id)) {
         $error = 'Please provide your bKash Number and Transaction ID.';
     } else {
-        try {
+        // Pre-flight Stock Verification
+        foreach ($cartItems as $item) {
+            if ($item['quantity'] > $item['stock_quantity']) {
+                $error = "The item '{$item['name']}' only has {$item['stock_quantity']} units left in stock. Please reduce the quantity.";
+                break;
+            }
+        }
+
+        if (empty($error)) {
+            try {
             $db->beginTransaction();
 
             $orderNumber = '';
@@ -153,6 +162,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $orderId = (int)$db->lastInsertId();
 
             $insertItemStmt = $db->prepare("INSERT INTO order_items (order_id, product_id, product_name, product_sku, size, color, variant, quantity, price, total) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $updateStockStmt = $db->prepare("UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ?");
             foreach ($cartItems as $item) {
                 $price = $item['sale_price'] ?: $item['price'];
                 $insertItemStmt->execute([
@@ -167,6 +177,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $price,
                     $price * $item['quantity'],
                 ]);
+                
+                // Deduct stock
+                $updateStockStmt->execute([$item['quantity'], $item['product_id']]);
             }
 
             // Update coupon usage if applicable
@@ -192,6 +205,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $db->rollBack();
             }
             $error = 'Failed to place order. Please try again.';
+        }
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * KARTLY - Admin Dashboard
  */
@@ -26,8 +26,8 @@ $totalRevenue = $db->query("SELECT COALESCE(SUM(total), 0) FROM orders WHERE pay
 // Get recent orders
 $recentOrders = $db->query("SELECT * FROM orders ORDER BY created_at DESC LIMIT 5")->fetchAll();
 
-// Get low stock products
-$lowStockProducts = $db->query("SELECT * FROM products WHERE stock_quantity < 10 AND status = 'active' LIMIT 5")->fetchAll();
+// Get low stock products (10 items or less)
+$lowStockProducts = $db->query("SELECT * FROM products WHERE stock_quantity <= 10 AND status = 'active' LIMIT 10")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">

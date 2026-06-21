@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * KARTLY - Admin Orders Management
  */
@@ -22,6 +22,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     $orderId = intval($_POST['order_id']);
     $status = sanitize($_POST['status']);
 
+    // Fetch old status to handle stock properly
+    $oldStatusStmt = $db->prepare("SELECT status FROM orders WHERE id = ?");
+    $oldStatusStmt->execute([$orderId]);
+    $oldStatus = $oldStatusStmt->fetchColumn();
+
     if ($status === 'delivered') {
         $stmt = $db->prepare("UPDATE orders SET status = ?, payment_status = 'paid' WHERE id = ?");
     } else {
@@ -30,6 +35,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
 
     if ($stmt->execute([$status, $orderId])) {
         $message = 'Order status updated';
+        
+        // Stock Synchronization Logic
+        if ($oldStatus && $oldStatus !== $status) {
+            $isOldCancelledOrRefunded = in_array($oldStatus, ['cancelled', 'refunded'], true);
+            $isNewCancelledOrRefunded = in_array($status, ['cancelled', 'refunded'], true);
+            
+            if (!$isOldCancelledOrRefunded && $isNewCancelledOrRefunded) {
+                // Order was active, now cancelled/refunded -> RESTOCK
+                $itemsStmt = $db->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = ?");
+                $itemsStmt->execute([$orderId]);
+                $restockStmt = $db->prepare("UPDATE products SET stock_quantity = stock_quantity + ? WHERE id = ?");
+                foreach ($itemsStmt->fetchAll() as $item) {
+                    $restockStmt->execute([$item['quantity'], $item['product_id']]);
+                }
+            } elseif ($isOldCancelledOrRefunded && !$isNewCancelledOrRefunded) {
+                // Order was cancelled/refunded, now active -> DEDUCT STOCK
+                $itemsStmt = $db->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = ?");
+                $itemsStmt->execute([$orderId]);
+                $destockStmt = $db->prepare("UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ?");
+                foreach ($itemsStmt->fetchAll() as $item) {
+                    $destockStmt->execute([$item['quantity'], $item['product_id']]);
+                }
+            }
+        }
     }
 }
 
