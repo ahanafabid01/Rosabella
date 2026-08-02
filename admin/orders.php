@@ -148,7 +148,12 @@ $pageTitle = 'Orders Management';
                             <td><span class="badge badge-<?= $order['payment_status'] === 'paid' ? 'success' : 'warning' ?>"><?= ucfirst($order['payment_status']) ?></span></td>
                             <td><?= htmlspecialchars(paymentDisplayName((string)$order['payment_method'])) ?></td>
                             <td><?= date('M j, Y', strtotime($order['created_at'])) ?></td>
-                            <td><a href="<?= BASE_URL ?>/admin/order/<?= $order['id'] ?>" class="btn btn-sm btn-outline">View</a></td>
+                            <td style="display: flex; gap: 0.5rem; align-items: center;">
+                                <a href="<?= BASE_URL ?>/admin/order/<?= $order['id'] ?>" class="btn btn-sm btn-outline">View</a>
+                                <a href="<?= BASE_URL ?>/invoice?order=<?= urlencode($order['order_number']) ?>" target="_blank" class="btn btn-sm btn-outline" style="color: var(--color-primary); border-color: var(--color-primary);" title="Download Invoice">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                </a>
+                            </td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>

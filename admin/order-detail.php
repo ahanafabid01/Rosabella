@@ -124,7 +124,13 @@ $pageTitle = 'Order Detail';
                     Placed on <?= htmlspecialchars(date('M j, Y \a\t H:i A', strtotime($order['created_at']))) ?>
                 </div>
             </div>
-            <a href="<?= BASE_URL ?>/admin/orders" class="btn btn-secondary">Back to Orders</a>
+            <div style="display: flex; gap: 0.75rem;">
+                <a href="<?= BASE_URL ?>/invoice?order=<?= urlencode($order['order_number']) ?>" target="_blank" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Invoice
+                </a>
+                <a href="<?= BASE_URL ?>/admin/orders" class="btn btn-secondary">Back</a>
+            </div>
         </div>
 
         <?php if ($message): ?><div class="alert alert-success" style="margin-bottom: 1.5rem; border-radius: 8px;"><?= htmlspecialchars($message) ?></div><?php endif; ?>
@@ -273,6 +279,17 @@ $pageTitle = 'Order Detail';
                             </div>
                         </div>
                     </div>
+
+                    <?php $orderNotes = !empty($order['order_notes']) ? $order['order_notes'] : (!empty($order['notes']) ? $order['notes'] : ''); ?>
+                    <?php if ($orderNotes): ?>
+                    <!-- Order Notes -->
+                    <div class="admin-card" style="margin-bottom: 0;">
+                        <h2 class="detail-section-title">Order Notes</h2>
+                        <div style="font-size: 0.95rem; line-height: 1.6; color: var(--color-text); background: var(--color-bg-secondary); padding: 1rem; border-radius: 8px; border: 1px solid var(--color-border);">
+                            <?= nl2br(htmlspecialchars($orderNotes)) ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
 
                     <!-- Payment Info -->
                     <div class="admin-card" style="margin-bottom: 0;">

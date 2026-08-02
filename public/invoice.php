@@ -26,12 +26,17 @@ $error      = '';
 if ($orderNumber) {
     $db = getDB();
 
-    // Logged-in user: verify ownership via user_id
+    // Admin or Logged-in user: verify ownership
     if (isLoggedIn()) {
         $user = getCurrentUser();
         if ($user) {
-            $stmt = $db->prepare("SELECT * FROM orders WHERE order_number = ? AND user_id = ?");
-            $stmt->execute([$orderNumber, $user['id']]);
+            if (isAdmin()) {
+                $stmt = $db->prepare("SELECT * FROM orders WHERE order_number = ?");
+                $stmt->execute([$orderNumber]);
+            } else {
+                $stmt = $db->prepare("SELECT * FROM orders WHERE order_number = ? AND user_id = ?");
+                $stmt->execute([$orderNumber, $user['id']]);
+            }
             $order = $stmt->fetch();
         }
     }
