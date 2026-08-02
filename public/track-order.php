@@ -519,8 +519,8 @@ if ($order) {
                             $paidAmount = 0;
                             $dueAmount  = $order['total'];
                             if ($order['payment_method'] === 'cod') {
-                                $paidAmount = 200;
-                                $dueAmount  = max(0, $order['total'] - 200);
+                                $paidAmount = 150;
+                                $dueAmount  = max(0, $order['total'] - 150);
                             } elseif ($order['payment_status'] === 'paid') {
                                 $paidAmount = $order['total'];
                                 $dueAmount  = 0;
