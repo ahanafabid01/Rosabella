@@ -256,7 +256,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin: 0 auto 1rem;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                 <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem;">Order Placed Successfully!</h2>
                 <p style="color: var(--color-text-light); margin-bottom: 1rem;"><?= htmlspecialchars($success) ?></p>
-                <a href="<?= BASE_URL ?>/account" class="btn btn-primary">View My Orders</a>
+                <a href="<?= BASE_URL ?>/my-orders" class="btn btn-primary">View My Orders</a>
             </div>
             <?php else: ?>
             
@@ -528,12 +528,12 @@ function toggleBkash() {
 function updateShipping(radio) {
     let cost = parseFloat($(radio).data('cost'));
     let subtotal = <?= $subtotal ?>;
-    let total = subtotal + cost;
-    $('#summary_shipping').text('৳' + cost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
-    $('#summary_total').text('৳' + total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+    let discount = <?= $discount ?>;
+    let total = subtotal + cost - discount;
+    $('#summary_shipping').text('Tk ' + cost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+    $('#summary_total').text('Tk ' + total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
 }
-
-
+</script>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
 

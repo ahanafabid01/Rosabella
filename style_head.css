@@ -2586,7 +2586,7 @@ textarea {
    ============================================= */
 .toast-container {
     position: fixed;
-    top: var(--spacing-lg);
+    bottom: var(--spacing-lg);
     right: var(--spacing-lg);
     z-index: 9999;
     display: flex;
