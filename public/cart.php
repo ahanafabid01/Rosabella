@@ -282,12 +282,21 @@ $total = $subtotal - $discount; // Shipping and tax are calculated at checkout
                                 Continue Shopping
                             </a>
                             <?php if ($canProceedToCheckout): ?>
+                            <?php if (isLoggedIn()): ?>
                             <a href="<?= BASE_URL ?>/checkout" class="btn btn-primary btn-lg" style="width: 100%;">
                                 Proceed to Checkout
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
                                 </svg>
                             </a>
+                            <?php else: ?>
+                            <a href="<?= BASE_URL ?>/login?redirect=checkout" class="btn btn-primary btn-lg" style="width: 100%;">
+                                Proceed to Checkout
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                                </svg>
+                            </a>
+                            <?php endif; ?>
                             <?php else: ?>
                             <button class="btn btn-primary btn-lg" style="width: 100%; opacity: 0.6; cursor: not-allowed;" onclick="showToast('Please select all required sizes, colors, and variants for your items before checking out.', 'error');">
                                 Proceed to Checkout

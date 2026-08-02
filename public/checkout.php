@@ -34,8 +34,8 @@ foreach ($cartItems as $item) {
 $taxRate = 0;
 $tax = 0;
 
-// Default shipping cost for initial page load
-$shippingCost = 300; 
+// Default shipping cost matches pre-selected 'Inside Dhaka' option
+$shippingCost = 80;
 
 $discount = 0;
 $couponId = null;
@@ -89,15 +89,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $payment_trx_id = sanitize($_POST['payment_trx_id'] ?? '');
     
     // Capture and calculate delivery method
-    $delivery_method = sanitize($_POST['delivery_method'] ?? 'home_courier');
-    if ($delivery_method === 'home_courier' || $delivery_method === 'pickup_courier') {
-        $shippingCost = 300;
-    } elseif ($delivery_method === 'express_courier') {
-        $shippingCost = 360;
-    } elseif ($delivery_method === 'pickup_post') {
-        $shippingCost = 100;
+    $delivery_method = sanitize($_POST['delivery_method'] ?? 'inside_dhaka');
+    if ($delivery_method === 'inside_dhaka') {
+        $shippingCost = 80;
+    } elseif ($delivery_method === 'dhaka_sub') {
+        $shippingCost = 120;
+    } elseif ($delivery_method === 'outside_dhaka') {
+        $shippingCost = 150;
     } else {
-        $shippingCost = 300;
+        $shippingCost = 80;
     }
     $total = $subtotal + $shippingCost;
 
@@ -340,7 +340,7 @@ require_once __DIR__ . '/../includes/header.php';
                                     
                                     <!-- bKash Instructions Box (Visible for both) -->
                                     <div id="bkash_instructions" style="background: #fafafa; border: 1px solid rgba(0,0,0,0.05); border-radius: var(--radius-md); padding: 1rem; margin-top: 0.5rem; font-size: 0.85rem;">
-                                        <p style="margin-bottom: 0.5rem; color: #555;"><span id="cod_extra_msg1">We usually take payment 200 taka in advance to avoid fake orders.<br></span>Please complete your bKash payment at first, then fill up the form below.<span id="cod_extra_msg2"><br>Pay the remaining amount in cash when you receive the product.</span></p>
+                                        <p style="margin-bottom: 0.5rem; color: #555;"><span id="cod_extra_msg1">We usually take payment 150 taka in advance to avoid fake orders.<br></span>Please complete your bKash payment at first, then fill up the form below.<span id="cod_extra_msg2"><br>Pay the remaining amount in cash when you receive the product.</span></p>
                                         <p style="margin-bottom: 1rem; font-weight: 600;">bKash Personal Number : 01706941756</p>
                                         
                                         <div style="display: flex; flex-direction: column; gap: 0.75rem;">
@@ -373,27 +373,32 @@ require_once __DIR__ . '/../includes/header.php';
                                 </div>
                                 <p style="font-size: 0.85rem; color: var(--color-text-light); margin-bottom: 1rem;">Select a delivery method</p>
 
-                                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                                    <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
-                                        <input type="radio" name="delivery_method" value="home_courier" data-cost="300" checked style="width: 18px; height: 18px;" onchange="updateShipping(this)">
-                                        <span>Home Delivery By Courier - 300৳</span>
+                                <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                    <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 0.6rem 0.75rem; border: 1px solid var(--color-border); border-radius: var(--radius-md); transition: border-color 0.2s;">
+                                        <input type="radio" name="delivery_method" value="inside_dhaka" data-cost="80" checked style="width: 16px; height: 16px; flex-shrink:0;" onchange="updateShipping(this)">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                                            <span style="font-size:0.9rem; font-weight:500;">Inside Dhaka</span>
+                                            <span style="font-weight:700; color:var(--color-primary);">Tk 80</span>
+                                        </div>
                                     </label>
-                                    <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
-                                        <input type="radio" name="delivery_method" value="express_courier" data-cost="360" style="width: 18px; height: 18px;" onchange="updateShipping(this)">
-                                        <span>Request Express Delivery By Courier - 360৳</span>
+                                    <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 0.6rem 0.75rem; border: 1px solid var(--color-border); border-radius: var(--radius-md); transition: border-color 0.2s;">
+                                        <input type="radio" name="delivery_method" value="dhaka_sub" data-cost="120" style="width: 16px; height: 16px; flex-shrink:0;" onchange="updateShipping(this)">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                                            <span style="font-size:0.9rem; font-weight:500;">Dhaka Sub Area</span>
+                                            <span style="font-weight:700; color:var(--color-primary);">Tk 120</span>
+                                        </div>
                                     </label>
-                                    <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
-                                        <input type="radio" name="delivery_method" value="pickup_courier" data-cost="300" style="width: 18px; height: 18px;" onchange="updateShipping(this)">
-                                        <span>Pickup From Courier - 300৳</span>
-                                    </label>
-                                    <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
-                                        <input type="radio" name="delivery_method" value="pickup_post" data-cost="100" style="width: 18px; height: 18px;" onchange="updateShipping(this)">
-                                        <span>Pickup from Post Office - 100৳</span>
+                                    <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 0.6rem 0.75rem; border: 1px solid var(--color-border); border-radius: var(--radius-md); transition: border-color 0.2s;">
+                                        <input type="radio" name="delivery_method" value="outside_dhaka" data-cost="150" style="width: 16px; height: 16px; flex-shrink:0;" onchange="updateShipping(this)">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                                            <span style="font-size:0.9rem; font-weight:500;">Outside Dhaka</span>
+                                            <span style="font-weight:700; color:var(--color-primary);">Tk 150</span>
+                                        </div>
                                     </label>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
+                            </div><!-- /delivery card -->
+                        </div><!-- /form-grid-2 payment+delivery -->
+                    </div><!-- /left column -->
                     
                     <!-- Order Summary -->
                     <div>
@@ -507,12 +512,11 @@ function updateShipping(radio) {
     let cost = parseFloat($(radio).data('cost'));
     let subtotal = <?= $subtotal ?>;
     let total = subtotal + cost;
-    
-    // Format appropriately assuming standard Tk symbol formatting used in formatPrice
     $('#summary_shipping').text('৳' + cost.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
     $('#summary_total').text('৳' + total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
 }
-</script>
+
+
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
 

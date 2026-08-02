@@ -489,12 +489,18 @@ async function refreshMiniCartFromServer() {
                 </div>
             `;
         });
-        
-        html += '</div>';
+
+        const formattedTotal = 'Tk ' + total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        html += `</div>
+        <div class="mini-cart-footer" style="border-top: 1px solid var(--color-border); padding-top: 1.25rem; margin-top: 1.25rem;">
+            <div class="mini-cart-subtotal">
+                <span>Sub Total:</span>
+                <span class="subtotal-amount">${formattedTotal}</span>
+            </div>
+            <a href="${window.BASE_URL}/cart" class="btn btn-primary mini-cart-btn" style="width: 100%;">View Cart</a>
+        </div>`;
+
         miniCartBody.innerHTML = html;
-        if (miniCartSubtotal) {
-            miniCartSubtotal.textContent = 'Tk ' + total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        }
         
         // Re-bind remove buttons inside mini cart
         const removeButtons = miniCartBody.querySelectorAll('.cart-remove');

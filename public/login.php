@@ -7,6 +7,10 @@ require_once __DIR__ . '/../config/database.php';
 
 $error = '';
 $success = '';
+$redirect = sanitize($_GET['redirect'] ?? $_POST['redirect'] ?? '');
+// Whitelist allowed redirect paths to prevent open redirect attacks
+$allowedRedirects = ['checkout', 'cart', 'account'];
+$redirectPath = in_array($redirect, $allowedRedirects) ? $redirect : 'account';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = sanitize($_POST['email'] ?? '');
@@ -25,15 +29,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user_role'] = $user['role'];
             $_SESSION['user_name'] = $user['first_name'];
             
-            // Update cart items with user ID
+            // Merge guest cart into user cart
             $stmt = $db->prepare("UPDATE cart SET user_id = ? WHERE session_id = ?");
             $stmt->execute([$user['id'], session_id()]);
             
-            // Redirect to account or admin
+            // Redirect to intended page (checkout, cart, etc.) or admin/account
             if ($user['role'] === 'admin') {
                 redirect('admin/');
             } else {
-                redirect('account');
+                redirect($redirectPath);
             }
         } else {
             $error = 'Invalid email or password';
@@ -80,6 +84,11 @@ require_once __DIR__ . '/../includes/header.php';
                 <?php endif; ?>
                 
                 <form method="POST" action="">
+                    <!-- Carry redirect param through POST -->
+                    <?php if ($redirect): ?>
+                    <input type="hidden" name="redirect" value="<?= htmlspecialchars($redirect) ?>">
+                    <?php endif; ?>
+
                     <div class="form-group">
                         <label class="form-label" for="email" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem; display: block;">Email Address</label>
                         <input type="text" id="email" name="email" class="form-input" placeholder="Enter your Email Address" required style="border-radius: 4px;">
@@ -103,7 +112,8 @@ require_once __DIR__ . '/../includes/header.php';
                         <span style="background: #fff; padding: 0 10px; color: var(--color-text-light); font-size: 0.9rem; position: relative; z-index: 1;">Don't have an account?</span>
                         <div style="position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #eee; z-index: 0;"></div>
                     </div>
-                    <a href="<?= BASE_URL ?>/register" class="btn" style="display: block; width: 100%; border: 1px solid var(--color-primary); color: var(--color-primary); border-radius: 4px; padding: 0.875rem; font-weight: 600; font-size: 0.95rem; background: #fff; text-decoration: none;">
+                    <!-- Pass redirect through to register page too -->
+                    <a href="<?= BASE_URL ?>/register<?= $redirect ? '?redirect=' . urlencode($redirect) : '' ?>" class="btn" style="display: block; width: 100%; border: 1px solid var(--color-primary); color: var(--color-primary); border-radius: 4px; padding: 0.875rem; font-weight: 600; font-size: 0.95rem; background: #fff; text-decoration: none;">
                         Create Your Account
                     </a>
                 </div>
@@ -112,6 +122,3 @@ require_once __DIR__ . '/../includes/header.php';
     </section>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
-
-
-

@@ -7,6 +7,9 @@ require_once __DIR__ . '/../config/database.php';
 
 $error = '';
 $success = '';
+$redirect = sanitize($_GET['redirect'] ?? $_POST['redirect'] ?? '');
+$allowedRedirects = ['checkout', 'cart', 'account'];
+$redirectPath = in_array($redirect, $allowedRedirects) ? $redirect : 'account';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $firstName = sanitize($_POST['first_name'] ?? '');
@@ -45,11 +48,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['user_id'] = $userId;
                 $_SESSION['user_role'] = 'customer';
                 $_SESSION['user_name'] = $firstName;
+
+                // Merge guest cart
+                $stmtCart = $db->prepare("UPDATE cart SET user_id = ? WHERE session_id = ?");
+                $stmtCart->execute([$userId, session_id()]);
                 
                 $success = 'Account created successfully! Redirecting...';
                 
-                // Redirect after 2 seconds
-                header('refresh:2;url=' . cleanUrl('account'));
+                // Redirect to intended page (checkout, cart, etc.) after 2 seconds
+                header('refresh:2;url=' . cleanUrl($redirectPath));
             } else {
                 $error = 'Failed to create account. Please try again.';
             }
@@ -96,16 +103,19 @@ require_once __DIR__ . '/../includes/header.php';
                 <?php endif; ?>
                 
                 <form method="POST" action="">
-                    <div class="form-grid-2" style="gap: 1.5rem;">
-                        <div class="form-group">
-                            <label class="form-label" for="first_name" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem; display: block;">First Name <span style="color: red;">*</span></label>
-                            <input type="text" id="first_name" name="first_name" class="form-input" placeholder="First Name" required style="border-radius: 4px;">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label" for="last_name" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem; display: block;">Last Name <span style="color: red;">*</span></label>
-                            <input type="text" id="last_name" name="last_name" class="form-input" placeholder="Last Name" required style="border-radius: 4px;">
-                        </div>
+                    <!-- Carry redirect param through POST -->
+                    <?php if ($redirect): ?>
+                    <input type="hidden" name="redirect" value="<?= htmlspecialchars($redirect) ?>">
+                    <?php endif; ?>
+
+                    <div class="form-group">
+                        <label class="form-label" for="first_name" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem; display: block;">First Name <span style="color: red;">*</span></label>
+                        <input type="text" id="first_name" name="first_name" class="form-input" placeholder="First Name" required style="border-radius: 4px;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="last_name" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem; display: block;">Last Name <span style="color: red;">*</span></label>
+                        <input type="text" id="last_name" name="last_name" class="form-input" placeholder="Last Name" required style="border-radius: 4px;">
                     </div>
                     
                     <div class="form-group">
@@ -142,7 +152,8 @@ require_once __DIR__ . '/../includes/header.php';
                         <span style="background: #fff; padding: 0 10px; color: var(--color-text-light); font-size: 0.9rem; position: relative; z-index: 1;">Already have an account?</span>
                         <div style="position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #eee; z-index: 0;"></div>
                     </div>
-                    <a href="<?= BASE_URL ?>/login" class="btn" style="display: block; width: 100%; border: 1px solid var(--color-primary); color: var(--color-primary); border-radius: 4px; padding: 0.875rem; font-weight: 600; font-size: 0.95rem; background: #fff; text-decoration: none;">
+                    <!-- Pass redirect through to login page too -->
+                    <a href="<?= BASE_URL ?>/login<?= $redirect ? '?redirect=' . urlencode($redirect) : '' ?>" class="btn" style="display: block; width: 100%; border: 1px solid var(--color-primary); color: var(--color-primary); border-radius: 4px; padding: 0.875rem; font-weight: 600; font-size: 0.95rem; background: #fff; text-decoration: none;">
                         Login to Account
                     </a>
                 </div>
@@ -151,6 +162,3 @@ require_once __DIR__ . '/../includes/header.php';
     </section>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
-
-
-
