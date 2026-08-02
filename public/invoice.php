@@ -206,42 +206,91 @@ if ($order) {
             .inv-body    { padding: 1.25rem; }
         }
 
+        .inv-info-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
         .inv-label {
-            font-size: 0.68rem;
+            font-size: 0.72rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: #9ca3af;
-            margin-bottom: 0.55rem;
-            padding-bottom: 0.4rem;
-            border-bottom: 1px solid #e5e7eb;
+            letter-spacing: 0.08em;
+            color: #6b7280;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .inv-label::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #e5e7eb;
         }
         .inv-addr-text {
             font-size: 0.9rem;
-            line-height: 1.75;
-            color: #374151;
+            color: #4b5563;
         }
-        .inv-addr-text strong { color: #1a1a2e; font-weight: 700; }
+        .inv-addr-name {
+            color: #111827;
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 0.4rem;
+        }
+        .inv-addr-line {
+            margin-bottom: 0.2rem;
+            line-height: 1.5;
+        }
         .inv-phone {
             display: inline-flex;
             align-items: center;
-            gap: 0.3rem;
-            margin-top: 0.4rem;
+            gap: 0.4rem;
+            margin-top: 1rem;
+            padding-top: 0.8rem;
+            border-top: 1px dashed #e5e7eb;
             font-size: 0.85rem;
             font-weight: 600;
-            color: #e74c3c;
+            color: #111827;
+            width: 100%;
+        }
+        .inv-phone svg { color: #9ca3af; }
+
+        .inv-pay-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+        .inv-pay-row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+        .inv-pay-lbl {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #6b7280;
+        }
+        .inv-pay-val {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #111827;
+            word-break: break-all;
         }
         .inv-pay-badge {
             display: inline-flex;
             align-items: center;
             gap: 0.35rem;
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            color: #15803d;
-            padding: 0.3rem 0.7rem;
+            background: #fff;
+            border: 1px solid #d1d5db;
+            color: #374151;
+            padding: 0.35rem 0.75rem;
             border-radius: 6px;
             font-size: 0.8rem;
             font-weight: 600;
+            width: fit-content;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
 
         /* ── Products table ── */
@@ -310,13 +359,11 @@ if ($order) {
             padding: 1.1rem 2.5rem;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
             gap: 1rem;
             flex-wrap: wrap;
         }
-        .inv-footer-note  { font-size: 0.78rem; color: #9ca3af; }
-        .inv-footer-brand { font-size: 0.8rem; color: #6b7280; font-weight: 700; }
-        .inv-footer-brand span { color: #e74c3c; }
+        .inv-footer-note  { font-size: 0.78rem; color: #9ca3af; text-align: center; }
 
         /* ── Error page ── */
         .inv-error-page {
@@ -333,10 +380,16 @@ if ($order) {
 
         /* ── PRINT ── */
         @media print {
-            @page { size: A4; margin: 12mm 14mm; }
-            body { background: #fff !important; font-size: 12px !important; }
+            /* Margin 0 hides the browser's default URL/Date header & footer */
+            @page { size: A4; margin: 0; }
+            body { 
+                background: #fff !important; 
+                font-size: 12px !important; 
+                /* Add padding so the actual content isn't clipped by the printer */
+                padding: 12mm 14mm; 
+            }
             .invoice-toolbar { display: none !important; }
-            .invoice-paper   { max-width: 100%; margin: 0; box-shadow: none; border-radius: 0; }
+            .invoice-paper   { max-width: 100%; margin: 0; border: none; box-shadow: none; border-radius: 0; }
             .inv-header { padding: 1.25rem 1.5rem; }
             .inv-body   { padding: 1.25rem 1.5rem; }
             .inv-footer { padding: 0.75rem 1.5rem; }
@@ -404,15 +457,15 @@ if ($order) {
 
         <!-- Ship To / Payment Info -->
         <div class="inv-two-col">
-            <div>
+            <div class="inv-info-card">
                 <div class="inv-label">Ship To</div>
                 <div class="inv-addr-text">
-                    <strong><?= htmlspecialchars(trim($order['shipping_first_name'] . ' ' . $order['shipping_last_name'])) ?></strong><br>
-                    <?= nl2br(htmlspecialchars((string)$order['shipping_address'])) ?><br>
+                    <div class="inv-addr-name"><?= htmlspecialchars(trim($order['shipping_first_name'] . ' ' . $order['shipping_last_name'])) ?></div>
+                    <div class="inv-addr-line"><?= nl2br(htmlspecialchars((string)$order['shipping_address'])) ?></div>
                     <?php if (!empty($order['shipping_city'])): ?>
-                        <?= htmlspecialchars($order['shipping_city']) ?><br>
+                        <div class="inv-addr-line"><?= htmlspecialchars($order['shipping_city']) ?></div>
                     <?php endif; ?>
-                    <?= htmlspecialchars((string)$order['shipping_country']) ?>
+                    <div class="inv-addr-line"><?= htmlspecialchars((string)$order['shipping_country']) ?></div>
                 </div>
                 <?php if (!empty($order['shipping_phone'])): ?>
                 <div class="inv-phone">
@@ -424,25 +477,29 @@ if ($order) {
                 <?php endif; ?>
             </div>
 
-            <div>
+            <div class="inv-info-card">
                 <div class="inv-label">Payment Details</div>
-                <div class="inv-addr-text">
-                    <strong>Method</strong><br>
-                    <span class="inv-pay-badge">
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
-                        </svg>
-                        <?= htmlspecialchars(paymentDisplayName((string)$order['payment_method'])) ?>
-                    </span>
-                    <br><br>
+                <div class="inv-pay-grid">
+                    <div class="inv-pay-row">
+                        <span class="inv-pay-lbl">Method</span>
+                        <span class="inv-pay-badge">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+                            </svg>
+                            <?= htmlspecialchars(paymentDisplayName((string)$order['payment_method'])) ?>
+                        </span>
+                    </div>
                     <?php if (!empty($order['shipping_email'])): ?>
-                    <strong>Email</strong><br>
-                    <?= htmlspecialchars($order['shipping_email']) ?>
+                    <div class="inv-pay-row">
+                        <span class="inv-pay-lbl">Email</span>
+                        <span class="inv-pay-val"><?= htmlspecialchars($order['shipping_email']) ?></span>
+                    </div>
                     <?php endif; ?>
                     <?php if (!empty($order['transaction_id']) || !empty($order['payment_trx_id'])): ?>
-                    <br><br>
-                    <strong>Transaction ID</strong><br>
-                    <span style="font-size:0.82rem; color:#6b7280;"><?= htmlspecialchars((string)($order['payment_trx_id'] ?: $order['transaction_id'])) ?></span>
+                    <div class="inv-pay-row">
+                        <span class="inv-pay-lbl">Transaction ID</span>
+                        <span class="inv-pay-val" style="font-family: monospace; font-size: 0.85rem; color:#6b7280;"><?= htmlspecialchars((string)($order['payment_trx_id'] ?: $order['transaction_id'])) ?></span>
+                    </div>
                     <?php endif; ?>
                 </div>
             </div>
