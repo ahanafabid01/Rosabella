@@ -468,14 +468,14 @@ $logoStyle .= "line-height: 1; letter-spacing: -0.02em;";
                         </div>
                     <?php endforeach; ?>
                 </div>
+                <div class="mini-cart-footer" style="border-top: 1px solid var(--color-border); padding-top: 1.25rem; margin-top: 1.25rem;">
+                    <div class="mini-cart-subtotal">
+                        <span>Sub Total:</span>
+                        <span class="subtotal-amount"><?= $currencySymbol ?> <?= number_format($miniCartSubtotal, 2) ?></span>
+                    </div>
+                    <a href="<?= BASE_URL ?>/cart" class="btn btn-primary mini-cart-btn" style="width: 100%;">View Cart</a>
+                </div>
             <?php endif; ?>
-        </div>
-        <div class="mini-cart-footer">
-            <div class="mini-cart-subtotal">
-                <span>Sub Total:</span>
-                <span class="subtotal-amount"><?= $currencySymbol ?> <?= number_format($miniCartSubtotal, 2) ?></span>
-            </div>
-            <a href="<?= BASE_URL ?>/cart" class="btn btn-primary mini-cart-btn" style="width: 100%;">View Cart</a>
         </div>
     </div>
 
