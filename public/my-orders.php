@@ -416,7 +416,13 @@ require_once __DIR__ . '/../includes/header.php';
                                         <span style="font-size: 0.75rem; color: var(--color-text-light); font-weight: normal;"><?= htmlspecialchars(paymentDisplayName((string)$order['payment_method'])) ?></span>
                                     </td>
                                     <td style="padding: 1rem; text-align: center;">
-                                        <a href="<?= BASE_URL ?>/track/<?= htmlspecialchars($order['order_number']) ?>" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.875rem;">View</a>
+                                        <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                                            <a href="<?= BASE_URL ?>/track/<?= htmlspecialchars($order['order_number']) ?>" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.875rem;">View</a>
+                                            <a href="<?= BASE_URL ?>/invoice?order=<?= htmlspecialchars($order['order_number']) ?>" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.875rem;" target="_blank">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px; vertical-align: text-bottom;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                                Invoice
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
