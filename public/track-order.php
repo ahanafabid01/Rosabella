@@ -585,7 +585,7 @@ if ($order) {
                     <!-- Order Comments -->
                     <div class="track-comments">
                         <h3>Order Notes</h3>
-                        <p><?= htmlspecialchars($order['notes'] ?: 'No comments provided.') ?></p>
+                        <p><?= htmlspecialchars(!empty($order['order_notes']) ? $order['order_notes'] : (!empty($order['notes']) ? $order['notes'] : 'No comments provided.')) ?></p>
                     </div>
                 </div>
             </div><!-- end left -->

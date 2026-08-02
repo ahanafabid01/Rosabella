@@ -189,6 +189,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 unset($_SESSION['coupon']);
             }
 
+            // Save checkout shipping details to user profile
+            $updateUserStmt = $db->prepare("
+                UPDATE users 
+                SET first_name = ?, last_name = ?, phone = ?, address = ?, upazila = ?, city = ?, postal_code = ? 
+                WHERE id = ?
+            ");
+            $updateUserStmt->execute([
+                $shipping_first_name,
+                $shipping_last_name,
+                $shipping_phone,
+                $shipping_address,
+                $shipping_upazila,
+                $shipping_city,
+                $shipping_postal_code,
+                $_SESSION['user_id']
+            ]);
+
             // Clear cart for all successful manual orders
             paymentClearUserCart($db, (int)$_SESSION['user_id']);
             $db->commit();
