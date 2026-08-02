@@ -460,6 +460,23 @@ if ($order) {
                 </div>
 
                 <div class="track-card-body">
+                    <!-- Download Invoice button -->
+                    <div style="display:flex; justify-content:flex-end; margin-bottom:1.25rem;">
+                        <a href="<?= BASE_URL ?>/invoice?order=<?= urlencode($order['order_number']) ?>&email=<?= urlencode($order['shipping_email']) ?>"
+                           target="_blank"
+                           id="btn-download-invoice"
+                           style="display:inline-flex; align-items:center; gap:0.4rem; padding:0.55rem 1.15rem; background:linear-gradient(135deg,#1a1a2e,#2d2d5e); color:#fff; border-radius:8px; font-size:0.82rem; font-weight:600; text-decoration:none; transition:opacity 0.2s,transform 0.15s; box-shadow:0 2px 10px rgba(0,0,0,0.15);"
+                           onmouseover="this.style.opacity='0.85';this.style.transform='translateY(-1px)'"
+                           onmouseout="this.style.opacity='1';this.style.transform='translateY(0)'">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                <polyline points="8 17 12 21 16 17"/>
+                                <line x1="12" y1="12" x2="12" y2="21"/>
+                                <path d="M20.88 18.09A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.29"/>
+                            </svg>
+                            Download Invoice (PDF)
+                        </a>
+                    </div>
+
                     <!-- Address + Summary -->
                     <div class="track-info-grid">
                         <!-- Shipping Address -->

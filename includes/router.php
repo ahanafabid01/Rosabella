@@ -83,6 +83,8 @@ function resolveCleanRoute(string $route): ?string
         'public/payment_ipn' => __DIR__ . '/../public/payment_ipn.php',
         'payment_result' => __DIR__ . '/../public/payment_result.php',
         'public/payment_result' => __DIR__ . '/../public/payment_result.php',
+        'invoice' => __DIR__ . '/../public/invoice.php',
+        'public/invoice' => __DIR__ . '/../public/invoice.php',
     ];
 
     $infoPages = [
