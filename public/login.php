@@ -34,15 +34,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($user && password_verify($password, $user['password'])) {
                 // ── 3. Session Fixation Fix ───────────────────────────────
+                // IMPORTANT: save old session ID BEFORE regenerating —
+                // the guest cart is stored under the old ID in the DB.
+                $oldSessionId = session_id();
                 session_regenerate_id(true);
 
                 $_SESSION['user_id']   = $user['id'];
                 $_SESSION['user_role'] = $user['role'];
                 $_SESSION['user_name'] = $user['first_name'];
 
-                // Merge guest cart into user cart
+                // Merge guest cart using the OLD session ID (before regeneration)
                 $stmt = $db->prepare("UPDATE cart SET user_id = ? WHERE session_id = ?");
-                $stmt->execute([$user['id'], session_id()]);
+                $stmt->execute([$user['id'], $oldSessionId]);
 
                 // Redirect to intended page (checkout, cart, etc.) or admin/account
                 if ($user['role'] === 'admin') {

@@ -52,6 +52,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $userId = $db->lastInsertId();
 
                     // ── 3. Session Fixation Fix ───────────────────────────
+                    // IMPORTANT: save old session ID BEFORE regenerating —
+                    // the guest cart is stored under the old ID in the DB.
+                    $oldSessionId = session_id();
                     session_regenerate_id(true);
 
                     // Auto login
@@ -59,9 +62,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['user_role'] = 'customer';
                     $_SESSION['user_name'] = $firstName;
 
-                    // Merge guest cart
+                    // Merge guest cart using the OLD session ID (before regeneration)
                     $stmtCart = $db->prepare("UPDATE cart SET user_id = ? WHERE session_id = ?");
-                    $stmtCart->execute([$userId, session_id()]);
+                    $stmtCart->execute([$userId, $oldSessionId]);
 
                     $success = 'Account created successfully! Redirecting...';
 
