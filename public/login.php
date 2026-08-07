@@ -13,37 +13,50 @@ $allowedRedirects = ['checkout', 'cart', 'account'];
 $redirectPath = in_array($redirect, $allowedRedirects) ? $redirect : 'account';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = sanitize($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
-    
-    if (empty($email) || empty($password)) {
-        $error = 'Please fill in all fields';
+    // ── 1. CSRF Verification ──────────────────────────────────────────────
+    requireCSRF();
+
+    // ── 2. Rate Limiting — max 10 attempts per 10 minutes per IP ─────────
+    if (!checkRateLimit('login', 10, 600)) {
+        $cooldown = getRateLimitCooldown('login', 10, 600);
+        $error = "Too many login attempts. Please wait " . ceil($cooldown / 60) . " minute(s) before trying again.";
     } else {
-        $db = getDB();
-        $stmt = $db->prepare("SELECT * FROM users WHERE email = ?");
-        $stmt->execute([$email]);
-        $user = $stmt->fetch();
-        
-        if ($user && password_verify($password, $user['password'])) {
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['user_role'] = $user['role'];
-            $_SESSION['user_name'] = $user['first_name'];
-            
-            // Merge guest cart into user cart
-            $stmt = $db->prepare("UPDATE cart SET user_id = ? WHERE session_id = ?");
-            $stmt->execute([$user['id'], session_id()]);
-            
-            // Redirect to intended page (checkout, cart, etc.) or admin/account
-            if ($user['role'] === 'admin') {
-                redirect('admin/');
-            } else {
-                redirect($redirectPath);
-            }
+        $email    = sanitize($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
+
+        if (empty($email) || empty($password)) {
+            $error = 'Please fill in all fields';
         } else {
-            $error = 'Invalid email or password';
+            $db   = getDB();
+            $stmt = $db->prepare("SELECT * FROM users WHERE email = ? AND status = 'active'");
+            $stmt->execute([$email]);
+            $user = $stmt->fetch();
+
+            if ($user && password_verify($password, $user['password'])) {
+                // ── 3. Session Fixation Fix ───────────────────────────────
+                session_regenerate_id(true);
+
+                $_SESSION['user_id']   = $user['id'];
+                $_SESSION['user_role'] = $user['role'];
+                $_SESSION['user_name'] = $user['first_name'];
+
+                // Merge guest cart into user cart
+                $stmt = $db->prepare("UPDATE cart SET user_id = ? WHERE session_id = ?");
+                $stmt->execute([$user['id'], session_id()]);
+
+                // Redirect to intended page (checkout, cart, etc.) or admin/account
+                if ($user['role'] === 'admin') {
+                    redirect('admin/');
+                } else {
+                    redirect($redirectPath);
+                }
+            } else {
+                $error = 'Invalid email or password';
+            }
         }
     }
 }
+
 
 require_once __DIR__ . '/../includes/header.php';
 ?>
@@ -84,6 +97,8 @@ require_once __DIR__ . '/../includes/header.php';
                 <?php endif; ?>
                 
                 <form method="POST" action="">
+                    <!-- Security: CSRF token -->
+                    <?= csrfField() ?>
                     <!-- Carry redirect param through POST -->
                     <?php if ($redirect): ?>
                     <input type="hidden" name="redirect" value="<?= htmlspecialchars($redirect) ?>">

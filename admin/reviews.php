@@ -14,6 +14,12 @@ if (!isLoggedIn() || !isAdmin()) {
 }
 
 $db = getDB();
+
+// \u2500\u2500 Security: Verify CSRF on all admin POST requests \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireCSRF();
+}
+
 $message = $_SESSION['admin_message'] ?? '';
 $error = $_SESSION['admin_error'] ?? '';
 unset($_SESSION['admin_message'], $_SESSION['admin_error']);
@@ -244,6 +250,8 @@ $pageTitle = 'Reviews Management';
                             <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: nowrap;">
                                 <a href="<?= BASE_URL ?>/admin/view-review?id=<?= intval($review['id']) ?>" class="btn btn-sm btn-outline" style="white-space: nowrap;">View</a>
                                 <form method="POST" onsubmit="return confirm('Delete this review permanently?');" style="margin: 0;">
+                        <!-- Security: CSRF token -->
+                        <?= csrfField() ?>
                                     <input type="hidden" name="action" value="delete_review">
                                     <input type="hidden" name="review_id" value="<?= intval($review['id']) ?>">
                                     <button type="submit" class="btn btn-sm btn-secondary" style="white-space: nowrap;">Delete</button>

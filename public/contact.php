@@ -9,8 +9,14 @@ $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = sanitize($_POST['name'] ?? '');
-    $email = sanitize($_POST['email'] ?? '');
+    // Security: CSRF verification
+    requireCSRF();
+    // Rate limit: max 5 contact submissions per 10 minutes
+    if (!checkRateLimit('contact', 5, 600)) {
+        $error = 'Too many submissions. Please wait a few minutes before trying again.';
+    } else {
+    $name    = sanitize($_POST['name'] ?? '');
+    $email   = sanitize($_POST['email'] ?? '');
     $subject = sanitize($_POST['subject'] ?? '');
     $message = sanitize($_POST['message'] ?? '');
 
@@ -20,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Please enter a valid email address.';
     } else {
         try {
-            $db = getDB();
+            $db   = getDB();
             $stmt = $db->prepare("INSERT INTO contact_messages (name, email, subject, message) VALUES (?, ?, ?, ?)");
             $stmt->execute([$name, $email, $subject, $message]);
             $success = 'Thanks for contacting us. We will get back to you shortly.';
@@ -28,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Unable to submit your message right now. Please try again later.';
         }
     }
+    } // end rate-limit else
 }
 
 require_once __DIR__ . '/../includes/header.php';
@@ -61,6 +68,8 @@ require_once __DIR__ . '/../includes/header.php';
                     <?php endif; ?>
 
                     <form method="POST">
+                        <!-- Security: CSRF token -->
+                        <?= csrfField() ?>
                         <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
                             <div class="form-group">
                                 <label class="form-label" for="name">Name *</label>

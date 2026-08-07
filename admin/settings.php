@@ -14,6 +14,12 @@ if (!isLoggedIn() || !isAdmin()) {
 }
 
 $db = getDB();
+
+// \u2500\u2500 Security: Verify CSRF on all admin POST requests \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireCSRF();
+}
+
 $message = '';
 $error = '';
 
@@ -494,6 +500,8 @@ $pageTitle = 'Settings';
                 <p style="font-size:0.82rem;color:var(--color-text-light);margin:-0.25rem 0 1.5rem;">Upload your site logo and favicon icon. Stored in <code>assets/uploads/branding/</code> and saved to the database.</p>
 
                 <form method="POST" enctype="multipart/form-data">
+                        <!-- Security: CSRF token -->
+                        <?= csrfField() ?>
                     <div class="branding-upload-grid">
 
                         <!-- Site Logo -->
@@ -566,6 +574,8 @@ $pageTitle = 'Settings';
                 </p>
 
                 <form method="POST">
+                        <!-- Security: CSRF token -->
+                        <?= csrfField() ?>
                     <?php
                     $typoTagLabels = [
                         'body'   => ['label' => 'Body',           'desc' => 'Base font for the entire page'],
@@ -635,6 +645,8 @@ $pageTitle = 'Settings';
                 </p>
 
                 <form method="POST">
+                        <!-- Security: CSRF token -->
+                        <?= csrfField() ?>
                     <?php
                     $colorGroups = [
                         'Brand & Accent' => [
@@ -697,6 +709,8 @@ $pageTitle = 'Settings';
 
         <!-- === Dynamic Settings Tabs === -->
         <form method="POST" id="settings-form">
+                        <!-- Security: CSRF token -->
+                        <?= csrfField() ?>
             <?php $first = false; foreach ($groups as $groupKey => $group):
                   if ($groupKey === 'branding' || $groupKey === 'typography' || $groupKey === 'colors') { continue; } ?>
             <div class="settings-tab-panel" id="tab-<?= $groupKey ?>">

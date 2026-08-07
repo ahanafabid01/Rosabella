@@ -17,6 +17,13 @@ if ($productId <= 0) {
     exit;
 }
 
+// Rate limit: max 120 requests per minute per IP (anti-scraping)
+if (!checkRateLimit('product_api', 120, 60)) {
+    http_response_code(429);
+    echo json_encode(['success' => false, 'message' => 'Too many requests.']);
+    exit;
+}
+
 try {
     $db = getDB();
     $stmt = $db->prepare("
@@ -52,7 +59,8 @@ try {
 
     echo json_encode(['success' => true, 'product' => $product]);
 } catch (Throwable $e) {
+    error_log('Product API error: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Failed to load product', 'error' => $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'Failed to load product. Please try again.']);
 }
 ?>

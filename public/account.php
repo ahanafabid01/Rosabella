@@ -151,7 +151,9 @@ function deleteManagedReviewUpload(string $path): void
 $reviewImagesEnabled = ensureReviewImagesTable($db);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_review'])) {
-    $orderId = intval($_POST['order_id'] ?? 0);
+    // Security: CSRF verification
+    requireCSRF();
+    $orderId   = intval($_POST['order_id'] ?? 0);
     $productId = intval($_POST['product_id'] ?? 0);
     $rating = intval($_POST['rating'] ?? 0);
     $reviewText = trim((string)($_POST['review_text'] ?? ''));
@@ -277,6 +279,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_review'])) {
 
 // Update profile
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
+    // Security: CSRF verification
+    requireCSRF();
     $firstName = sanitize($_POST['first_name']);
     $lastName = sanitize($_POST['last_name']);
     $phone = sanitize($_POST['phone']);
@@ -404,6 +408,8 @@ require_once __DIR__ . '/../includes/header.php';
                 <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem;">
                     <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem;">Profile Information</h2>
                     <form method="POST">
+                        <!-- Security: CSRF token -->
+                        <?= csrfField() ?>
                         <div class="form-grid-2">
                             <div class="form-group">
                                 <label class="form-label">First Name</label>

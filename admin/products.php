@@ -14,6 +14,12 @@ if (!isLoggedIn() || !isAdmin()) {
 }
 
 $db = getDB();
+
+// \u2500\u2500 Security: Verify CSRF on all admin POST requests \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireCSRF();
+}
+
 $message = '';
 $error = '';
 
@@ -524,6 +530,8 @@ $pageTitle = 'Products Management';
             <?php else: ?>
                 <!-- Professional Two-Column Product Form -->
                 <form method="POST" enctype="multipart/form-data" class="admin-product-form-layout">
+                        <!-- Security: CSRF token -->
+                        <?= csrfField() ?>
                     
                     <!-- Left Column: Main Details -->
                     <div class="admin-form-main">

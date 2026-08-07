@@ -15,6 +15,12 @@ if (!isLoggedIn() || !isAdmin()) {
 }
 
 $db = getDB();
+
+// \u2500\u2500 Security: Verify CSRF on all admin POST requests \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireCSRF();
+}
+
 $message = '';
 $error = '';
 
@@ -215,6 +221,8 @@ $pageTitle = 'Categories Management';
         <?php else: ?>
             <div class="admin-card" style="max-width: 800px; margin: 0 auto;">
                 <form method="POST" enctype="multipart/form-data">
+                        <!-- Security: CSRF token -->
+                        <?= csrfField() ?>
                     <div class="form-group">
                         <label class="form-label">Name *</label>
                         <input type="text" name="name" class="form-input" required value="<?= htmlspecialchars($editingCategory['name'] ?? $_POST['name'] ?? '') ?>">

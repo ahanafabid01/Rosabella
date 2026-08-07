@@ -73,6 +73,8 @@ $logoStyle .= "line-height: 1; letter-spacing: -0.02em;";
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Security: CSRF token for AJAX requests -->
+    <meta name="csrf-token" content="<?= htmlspecialchars(generateCSRFToken()) ?>">
     <meta name="description" content="<?= htmlspecialchars(getSetting('site_tagline') ?? 'Your Premium E-Commerce Destination') ?>">
     <title><?= isset($pageTitle) ? htmlspecialchars($pageTitle) . ' - ' : '' ?>KARTLY</title>
     
@@ -151,13 +153,13 @@ $logoStyle .= "line-height: 1; letter-spacing: -0.02em;";
         <?php if (!empty($customColors)): ?>
         :root {
             <?php foreach ($customColors as $key => $hex): ?>
-            --color-<?= str_replace('_', '-', $key) ?>: <?= htmlspecialchars($hex) ?>;
+            --color-<?= str_replace('_', '-', preg_replace('/[^a-zA-Z0-9_-]/', '', $key)) ?>: <?= htmlspecialchars($hex) ?>;
             <?php endforeach; ?>
         }
         <?php endif; ?>
 
         <?php foreach ($typoFonts as $tag => $fontName): ?>
-        <?= $tag ?> { font-family: '<?= htmlspecialchars(trim($fontName)) ?>', sans-serif !important; }
+        <?= htmlspecialchars(preg_replace('/[^a-zA-Z0-9_-]/', '', $tag), ENT_QUOTES) ?> { font-family: '<?= htmlspecialchars(trim($fontName)) ?>', sans-serif !important; }
         <?php endforeach; ?>
     </style>
     

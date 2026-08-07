@@ -35,6 +35,13 @@ if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
+// Rate limit: max 5 newsletter subscriptions per 10 minutes per IP
+if (!checkRateLimit('newsletter', 5, 600)) {
+    http_response_code(429);
+    echo json_encode(['success' => false, 'message' => 'Too many requests. Please try again later.']);
+    exit;
+}
+
 try {
     $db = getDB();
     $stmt = $db->prepare("
@@ -46,7 +53,8 @@ try {
 
     echo json_encode(['success' => true, 'message' => 'Subscribed successfully']);
 } catch (Throwable $e) {
+    error_log('Newsletter error: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Unable to subscribe right now', 'error' => $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'Unable to subscribe right now. Please try again later.']);
 }
 ?>

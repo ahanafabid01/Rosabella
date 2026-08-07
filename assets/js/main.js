@@ -952,6 +952,13 @@ async function apiRequest(url, payload = {}, method = 'POST') {
             requestUrl += (requestUrl.includes('?') ? '&' : '?') + query;
         }
     } else {
+        // Security: Automatically include CSRF token in every POST request
+        const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+        if (csrfMeta && csrfMeta.content) {
+            payload = Object.assign({}, payload, { csrf_token: csrfMeta.content });
+            // Also send as a header for APIs that check it there
+            options.headers['X-CSRF-TOKEN'] = csrfMeta.content;
+        }
         options.headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
         options.body = new URLSearchParams(payload).toString();
     }
@@ -966,6 +973,12 @@ async function apiRequest(url, payload = {}, method = 'POST') {
         } catch (error) {
             data = { success: false, message: 'Invalid server response' };
         }
+    }
+
+    // If the server rotated the CSRF token, update our meta tag so future requests work
+    if (data._csrf_token) {
+        const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+        if (csrfMeta) csrfMeta.content = data._csrf_token;
     }
 
     if (!response.ok && typeof data.success === 'undefined') {

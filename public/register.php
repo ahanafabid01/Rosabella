@@ -12,57 +12,69 @@ $allowedRedirects = ['checkout', 'cart', 'account'];
 $redirectPath = in_array($redirect, $allowedRedirects) ? $redirect : 'account';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $firstName = sanitize($_POST['first_name'] ?? '');
-    $lastName = sanitize($_POST['last_name'] ?? '');
-    $email = sanitize($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $confirmPassword = $_POST['confirm_password'] ?? '';
-    
-    // Validation
-    if (empty($firstName) || empty($lastName) || empty($email) || empty($password)) {
-        $error = 'Please fill in all fields';
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = 'Please enter a valid email address';
-    } elseif (strlen($password) < 6) {
-        $error = 'Password must be at least 6 characters';
-    } elseif ($password !== $confirmPassword) {
-        $error = 'Passwords do not match';
-    } else {
-        $db = getDB();
-        
-        // Check if email already exists
-        $stmt = $db->prepare("SELECT id FROM users WHERE email = ?");
-        $stmt->execute([$email]);
-        
-        if ($stmt->fetch()) {
-            $error = 'An account with this email already exists';
-        } else {
-            // Create user
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-            $stmt = $db->prepare("INSERT INTO users (first_name, last_name, email, password, country, role, status) VALUES (?, ?, ?, ?, 'Bangladesh', 'customer', 'active')");
-            
-            if ($stmt->execute([$firstName, $lastName, $email, $hashedPassword])) {
-                $userId = $db->lastInsertId();
-                
-                // Auto login
-                $_SESSION['user_id'] = $userId;
-                $_SESSION['user_role'] = 'customer';
-                $_SESSION['user_name'] = $firstName;
+    // ── 1. CSRF Verification ──────────────────────────────────────────────
+    requireCSRF();
 
-                // Merge guest cart
-                $stmtCart = $db->prepare("UPDATE cart SET user_id = ? WHERE session_id = ?");
-                $stmtCart->execute([$userId, session_id()]);
-                
-                $success = 'Account created successfully! Redirecting...';
-                
-                // Redirect to intended page (checkout, cart, etc.) after 2 seconds
-                header('refresh:2;url=' . cleanUrl($redirectPath));
+    // ── 2. Rate Limiting — max 5 registrations per 10 minutes per IP ─────
+    if (!checkRateLimit('register', 5, 600)) {
+        $error = 'Too many registration attempts. Please wait a few minutes and try again.';
+    } else {
+        $firstName       = sanitize($_POST['first_name'] ?? '');
+        $lastName        = sanitize($_POST['last_name'] ?? '');
+        $email           = sanitize($_POST['email'] ?? '');
+        $password        = $_POST['password'] ?? '';
+        $confirmPassword = $_POST['confirm_password'] ?? '';
+
+        // Validation
+        if (empty($firstName) || empty($lastName) || empty($email) || empty($password)) {
+            $error = 'Please fill in all fields';
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $error = 'Please enter a valid email address';
+        } elseif (strlen($password) < 8) {
+            $error = 'Password must be at least 8 characters';
+        } elseif ($password !== $confirmPassword) {
+            $error = 'Passwords do not match';
+        } else {
+            $db = getDB();
+
+            // Check if email already exists
+            $stmt = $db->prepare("SELECT id FROM users WHERE email = ?");
+            $stmt->execute([$email]);
+
+            if ($stmt->fetch()) {
+                $error = 'An account with this email already exists';
             } else {
-                $error = 'Failed to create account. Please try again.';
+                // Create user
+                $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+                $stmt = $db->prepare("INSERT INTO users (first_name, last_name, email, password, country, role, status) VALUES (?, ?, ?, ?, 'Bangladesh', 'customer', 'active')");
+
+                if ($stmt->execute([$firstName, $lastName, $email, $hashedPassword])) {
+                    $userId = $db->lastInsertId();
+
+                    // ── 3. Session Fixation Fix ───────────────────────────
+                    session_regenerate_id(true);
+
+                    // Auto login
+                    $_SESSION['user_id']   = $userId;
+                    $_SESSION['user_role'] = 'customer';
+                    $_SESSION['user_name'] = $firstName;
+
+                    // Merge guest cart
+                    $stmtCart = $db->prepare("UPDATE cart SET user_id = ? WHERE session_id = ?");
+                    $stmtCart->execute([$userId, session_id()]);
+
+                    $success = 'Account created successfully! Redirecting...';
+
+                    // Redirect to intended page (checkout, cart, etc.) after 2 seconds
+                    header('refresh:2;url=' . cleanUrl($redirectPath));
+                } else {
+                    $error = 'Failed to create account. Please try again.';
+                }
             }
         }
     }
 }
+
 
 require_once __DIR__ . '/../includes/header.php';
 ?>
@@ -103,6 +115,8 @@ require_once __DIR__ . '/../includes/header.php';
                 <?php endif; ?>
                 
                 <form method="POST" action="">
+                    <!-- Security: CSRF token -->
+                    <?= csrfField() ?>
                     <!-- Carry redirect param through POST -->
                     <?php if ($redirect): ?>
                     <input type="hidden" name="redirect" value="<?= htmlspecialchars($redirect) ?>">
@@ -125,7 +139,7 @@ require_once __DIR__ . '/../includes/header.php';
                     
                     <div class="form-group">
                         <label class="form-label" for="password" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem; display: block;">Password <span style="color: red;">*</span></label>
-                        <input type="password" id="password" name="password" class="form-input" placeholder="Password" required style="border-radius: 4px;">
+                        <input type="password" id="password" name="password" class="form-input" placeholder="Min. 8 characters" required style="border-radius: 4px;">
                     </div>
                     
                     <div class="form-group">

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * KARTLY - Admin Users Management
  */
@@ -14,6 +14,12 @@ if (!isLoggedIn() || !isAdmin()) {
 }
 
 $db = getDB();
+
+// -- Security: Verify CSRF on all admin POST requests --------------------------
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireCSRF();
+}
+
 $message = '';
 $error = '';
 
@@ -266,6 +272,8 @@ $pageTitle = 'Users Management';
                         <td style="text-align:center;">
                             <?php if (!$isSelf): ?>
                                 <form method="POST" onsubmit="return confirm('Delete this user permanently?');" style="display:inline;">
+                        <!-- Security: CSRF token -->
+                        <?= csrfField() ?>
                                     <input type="hidden" name="user_id"     value="<?= intval($user['id']) ?>">
                                     <input type="hidden" name="delete_user" value="1">
                                     <button type="submit"
@@ -327,6 +335,9 @@ $pageTitle = 'Users Management';
             fd.append('user_id', userId);
             fd.append('field',   field);
             fd.append('value',   value);
+            // Security: include CSRF token
+            const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            if (csrfMeta) fd.append('csrf_token', csrfMeta.content);
 
             try {
                 const res  = await fetch(location.pathname, { method: 'POST', body: fd });

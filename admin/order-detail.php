@@ -15,6 +15,12 @@ if (!isLoggedIn() || !isAdmin()) {
 }
 
 $db = getDB();
+
+// \u2500\u2500 Security: Verify CSRF on all admin POST requests \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireCSRF();
+}
+
 $message = '';
 $error = '';
 $orderId = intval($_GET['id'] ?? 0);
@@ -236,6 +242,8 @@ $pageTitle = 'Order Detail';
                     <div class="admin-card" style="margin-bottom: 0; background: var(--color-bg-secondary); border-color: var(--color-border);">
                         <h2 class="detail-section-title" style="border-bottom-color: rgba(0,0,0,0.05);">Order Status</h2>
                         <form method="POST" style="display: flex; flex-direction: column; gap: 1rem;">
+                        <!-- Security: CSRF token -->
+                        <?= csrfField() ?>
                             <input type="hidden" name="update_status" value="1">
                             <div>
                                 <select name="status" class="form-select" style="width: 100%; border-radius: 6px; padding: 0.75rem; font-weight: 500;">

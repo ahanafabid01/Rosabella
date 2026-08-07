@@ -15,6 +15,12 @@ if (!isLoggedIn() || !isAdmin()) {
 }
 
 $db = getDB();
+
+// \u2500\u2500 Security: Verify CSRF on all admin POST requests \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireCSRF();
+}
+
 $message = '';
 
 // Update order status
@@ -133,6 +139,8 @@ $pageTitle = 'Orders Management';
                             <td><?= formatPrice($order['total']) ?></td>
                             <td>
                                 <form method="POST" class="admin-form-row-center">
+                        <!-- Security: CSRF token -->
+                        <?= csrfField() ?>
                                     <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
                                     <input type="hidden" name="update_status" value="1">
                                     <select name="status" class="form-select admin-status-select" onchange="this.form.submit()">

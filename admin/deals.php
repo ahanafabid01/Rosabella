@@ -14,6 +14,12 @@ if (!isLoggedIn() || !isAdmin()) {
 }
 
 $db = getDB();
+
+// \u2500\u2500 Security: Verify CSRF on all admin POST requests \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireCSRF();
+}
+
 $message = '';
 $error = '';
 $action = $_GET['action'] ?? 'list';
@@ -565,6 +571,8 @@ $pageTitle = 'Deals Management';
             <div class="admin-card">
                 <h2 class="admin-subtitle">Homepage Deals Section</h2>
                 <form method="POST">
+                        <!-- Security: CSRF token -->
+                        <?= csrfField() ?>
                     <input type="hidden" name="save_section_settings" value="1">
                     <div class="admin-two-col-grid">
                         <div class="form-group">
@@ -676,6 +684,8 @@ $pageTitle = 'Deals Management';
         <?php else: ?>
             <div class="admin-card">
                 <form method="POST" enctype="multipart/form-data">
+                        <!-- Security: CSRF token -->
+                        <?= csrfField() ?>
                     <input type="hidden" name="save_deal" value="1">
                     <div class="form-group">
                         <label class="form-label">Deal Title *</label>

@@ -72,6 +72,11 @@ $hasReadyPaymentMethod = true;
 
 // Process order
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // ── Security: CSRF + Rate Limiting ───────────────────────────────────
+    requireCSRF();
+    if (!checkRateLimit('checkout', 5, 300)) {
+        $error = 'Too many order submissions. Please wait a few minutes before trying again.';
+    } else {
     $shipping_first_name = sanitize($_POST['shipping_first_name'] ?? '');
     $shipping_last_name = sanitize($_POST['shipping_last_name'] ?? '');
     $shipping_email = sanitize($_POST['shipping_email'] ?? '');
@@ -225,7 +230,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         }
     }
+    } // end rate-limit else
 }
+
 
 require_once __DIR__ . '/../includes/header.php';
 ?>
@@ -261,6 +268,8 @@ require_once __DIR__ . '/../includes/header.php';
             <?php else: ?>
             
             <form method="POST" action="">
+                <!-- Security: CSRF token -->
+                <?= csrfField() ?>
                 <div class="checkout-layout">
                     
                     <!-- Checkout Form -->

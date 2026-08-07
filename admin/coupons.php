@@ -14,6 +14,12 @@ if (!isLoggedIn() || !isAdmin()) {
 }
 
 $db = getDB();
+
+// \u2500\u2500 Security: Verify CSRF on all admin POST requests \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireCSRF();
+}
+
 $message = '';
 $error = '';
 
@@ -185,6 +191,8 @@ $pageTitle = 'Coupons Management';
         <?php else: ?>
             <div class="admin-card">
                 <form method="POST">
+                        <!-- Security: CSRF token -->
+                        <?= csrfField() ?>
                     <div class="form-group">
                         <label class="form-label">Code *</label>
                         <input type="text" name="code" class="form-input" required value="<?= htmlspecialchars($editingCoupon['code'] ?? $_POST['code'] ?? '') ?>">

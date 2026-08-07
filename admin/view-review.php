@@ -14,6 +14,12 @@ if (!isLoggedIn() || !isAdmin()) {
 }
 
 $db = getDB();
+
+// \u2500\u2500 Security: Verify CSRF on all admin POST requests \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireCSRF();
+}
+
 $message = '';
 $error = '';
 
@@ -236,6 +242,8 @@ $pageTitle = 'Review Details #' . intval($viewReview['id']);
                     <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1.25rem;">Actions</h3>
                     
                     <form method="POST" style="margin-bottom: 1rem;">
+                        <!-- Security: CSRF token -->
+                        <?= csrfField() ?>
                         <input type="hidden" name="action" value="update_status">
                         <input type="hidden" name="review_id" value="<?= intval($viewReview['id']) ?>">
                         <label style="display: block; font-size: 0.85rem; margin-bottom: 0.5rem; color: var(--color-text-light);">Update Status</label>
@@ -250,6 +258,8 @@ $pageTitle = 'Review Details #' . intval($viewReview['id']);
                     </form>
 
                     <form method="POST" onsubmit="return confirm('Are you sure you want to delete this review? This action cannot be undone.');" style="border-top: 1px solid var(--color-border); padding-top: 1rem;">
+                        <!-- Security: CSRF token -->
+                        <?= csrfField() ?>
                         <input type="hidden" name="action" value="delete_review">
                         <input type="hidden" name="review_id" value="<?= intval($viewReview['id']) ?>">
                         <button type="submit" class="btn btn-outline" style="width: 100%; color: var(--color-danger); border-color: var(--color-danger);">Delete Review Permanently</button>

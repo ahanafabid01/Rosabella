@@ -5,44 +5,61 @@
 RewriteEngine On
 
 # ─────────────────────────────────────────────────────────────
-# SECTION 1: Force HTTPS (uncomment in production)
+# SECTION 1: Force HTTPS (uncomment in production with SSL cert)
 # ─────────────────────────────────────────────────────────────
 # RewriteCond %{HTTPS} off
 # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 # ─────────────────────────────────────────────────────────────
-# SECTION 2: Security — prevent directory listing & protect files
+# SECTION 2: Security — block sensitive directories & files
 # ─────────────────────────────────────────────────────────────
 Options -Indexes -MultiViews
 
 # Block direct access to sensitive directories
 RedirectMatch 403 ^/(Kartly/)?config/
 RedirectMatch 403 ^/(Kartly/)?database/
+RedirectMatch 403 ^/(Kartly/)?logs/
 RedirectMatch 403 ^/(Kartly/)?errors/(?!$|404\.php$|500\.php$)
 
+# Block access to Git, agents, and hidden directories (prevents source code dumping)
+RedirectMatch 403 ^/(Kartly/)?\.git
+RedirectMatch 403 ^/(Kartly/)?\.agents
+RedirectMatch 403 ^/(Kartly/)?\.env
+
 # Protect sensitive file types
-<FilesMatch "\.(sql|log|ini|conf|env)$">
+<FilesMatch "\.(sql|log|ini|conf|env|bak|swp|sh|bash)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Protect composer files
+<FilesMatch "(composer\.(json|lock)|package\.json|package-lock\.json|\.gitignore|README\.md)$">
     Order allow,deny
     Deny from all
 </FilesMatch>
 
 # ─────────────────────────────────────────────────────────────
-# SECTION 3: Static assets — serve directly (no rewriting)
+# SECTION 3: Limit request body size (DoS protection)
+# ─────────────────────────────────────────────────────────────
+LimitRequestBody 10485760
+
+# ─────────────────────────────────────────────────────────────
+# SECTION 4: Static assets — serve directly (no rewriting)
 # ─────────────────────────────────────────────────────────────
 RewriteRule ^assets/ - [L]
 
 # ─────────────────────────────────────────────────────────────
-# SECTION 4: Admin panel — let admin/.htaccess handle routing
+# SECTION 5: Admin panel — let admin/.htaccess handle routing
 # ─────────────────────────────────────────────────────────────
 RewriteRule ^admin/ - [L]
 
 # ─────────────────────────────────────────────────────────────
-# SECTION 5: API endpoints — serve directly from /api/
+# SECTION 6: API endpoints — serve directly from /api/
 # ─────────────────────────────────────────────────────────────
 RewriteRule ^api/ - [L]
 
 # ─────────────────────────────────────────────────────────────
-# SECTION 6: Front controller — PHP resolves clean routes
+# SECTION 7: Front controller — PHP resolves clean routes
 # ─────────────────────────────────────────────────────────────
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
@@ -50,13 +67,15 @@ RewriteRule ^ - [L]
 
 RewriteRule ^ index.php [L,QSA]
 
-
 # ─────────────────────────────────────────────────────────────
-# SECTION 9: Error pages
+# SECTION 8: Error pages
 # ─────────────────────────────────────────────────────────────
 ErrorDocument 404 /index.php
 ErrorDocument 500 /errors/500.php
 
+# ─────────────────────────────────────────────────────────────
+# SECTION 9: PHP limits
+# ─────────────────────────────────────────────────────────────
 <IfModule mod_php7.c>
     php_value upload_max_filesize 10M
     php_value post_max_size 10M
@@ -72,7 +91,39 @@ ErrorDocument 500 /errors/500.php
 AddDefaultCharset UTF-8
 
 # ─────────────────────────────────────────────────────────────
-# SECTION 10: Performance — Compression
+# SECTION 10: Security Headers
+# ─────────────────────────────────────────────────────────────
+<IfModule mod_headers.c>
+    # Prevent clickjacking attacks
+    Header always set X-Frame-Options "SAMEORIGIN"
+
+    # Prevent MIME-type sniffing attacks
+    Header always set X-Content-Type-Options "nosniff"
+
+    # Enable XSS filter in older browsers
+    Header always set X-XSS-Protection "1; mode=block"
+
+    # Control referrer information sent with requests
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # Disable access to browser APIs that aren't needed
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=()"
+
+    # HTTP Strict Transport Security — only active on HTTPS connections
+    # max-age=31536000 = 1 year; remove 'env=HTTPS' prefix to force on HTTP too (don't do that)
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" env=HTTPS
+
+    # Content Security Policy — controls which resources are allowed to load
+    # Adjust 'connect-src' if you add external analytics/APIs
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self'; frame-ancestors 'self'; object-src 'none'; base-uri 'self';"
+
+    # Remove server version disclosure
+    Header always unset X-Powered-By
+    Header always unset Server
+</IfModule>
+
+# ─────────────────────────────────────────────────────────────
+# SECTION 11: Performance — Compression
 # ─────────────────────────────────────────────────────────────
 <IfModule mod_deflate.c>
     AddOutputFilterByType DEFLATE text/plain text/html text/xml text/css
@@ -89,7 +140,7 @@ AddDefaultCharset UTF-8
 </IfModule>
 
 # ─────────────────────────────────────────────────────────────
-# SECTION 11: Performance — Browser Caching
+# SECTION 12: Performance — Browser Caching
 # ─────────────────────────────────────────────────────────────
 <IfModule mod_expires.c>
     ExpiresActive On
@@ -119,5 +170,4 @@ AddDefaultCharset UTF-8
         Header set Cache-Control "public, max-age=2592000, stale-while-revalidate=86400"
         Header append Vary Accept-Encoding
     </FilesMatch>
-    Header always set X-Content-Type-Options "nosniff"
 </IfModule>

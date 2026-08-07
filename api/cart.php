@@ -17,6 +17,13 @@ $requestData = getRequestData();
 $action = getInput('action', '');
 
 try {
+    // Security: CSRF required for all state-changing actions
+    if (in_array($action, ['add', 'update', 'remove', 'apply_coupon', 'remove_coupon'], true)) {
+        $token = $_POST['csrf_token'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? '');
+        if (!verifyCSRFToken((string)$token)) {
+            respond(false, 'Invalid or expired security token.', [], 403);
+        }
+    }
     switch ($action) {
         case 'add':
             handleAddToCart();
@@ -43,7 +50,8 @@ try {
             respond(false, 'Invalid action', [], 400);
     }
 } catch (Throwable $e) {
-    respond(false, 'Cart request failed', ['error' => $e->getMessage()], 500);
+    error_log('Cart error: ' . $e->getMessage());
+    respond(false, 'A server error occurred. Please try again.', [], 500);
 }
 
 function getRequestData() {

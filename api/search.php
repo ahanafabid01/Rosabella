@@ -7,7 +7,14 @@ $q = $_GET['q'] ?? '';
 $q = trim($q);
 
 if (empty($q) || strlen($q) < 2) {
-    echo json_encode(['categories' => [], 'products' => []]);
+    echo json_encode(['success' => false, 'categories' => [], 'products' => []]);
+    exit;
+}
+
+// Rate limit search: max 60 requests per minute per IP (anti-scraping)
+if (!checkRateLimit('search', 60, 60)) {
+    http_response_code(429);
+    echo json_encode(['success' => false, 'message' => 'Too many requests.']);
     exit;
 }
 
@@ -70,6 +77,7 @@ try {
     ]);
     
 } catch (Exception $e) {
+    error_log('Search error: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    echo json_encode(['success' => false, 'error' => 'Search failed. Please try again.']);
 }
