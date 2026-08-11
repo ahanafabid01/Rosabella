@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Please fill in all fields';
         } else {
             $db   = getDB();
-            $stmt = $db->prepare("SELECT * FROM users WHERE email = ? AND status = 'active'");
+            $stmt = $db->prepare("SELECT id, first_name, password, role, status FROM users WHERE email = ? AND status = 'active'");
             $stmt->execute([$email]);
             $user = $stmt->fetch();
 
