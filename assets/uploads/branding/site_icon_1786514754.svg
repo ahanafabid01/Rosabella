@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>Rosabella Clothing Brand Icon</title>
+  <desc>Minimal luxury rose emblem designed for the Rosabella clothing brand.</desc>
+
+  <!-- Transparent background -->
+  <g fill="none" stroke="#6A3D86" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Elegant rose bloom -->
+    <path stroke-width="9" d="
+      M256 119
+      C224 91 180 109 184 145
+      C156 125 122 148 132 179
+      C99 181 88 219 114 238
+      C91 256 101 294 132 299
+      C122 332 153 355 181 339
+      C189 371 229 379 248 352
+      C270 379 309 369 316 338
+      C346 355 377 329 366 298
+      C397 291 405 254 380 237
+      C406 215 391 178 361 178
+      C371 146 337 124 309 143
+      C310 111 275 94 256 119 Z"/>
+
+    <!-- Rose inner spiral -->
+    <path stroke-width="7" d="
+      M256 166
+      C230 143 198 157 201 184
+      C203 208 230 222 253 211
+      C276 200 279 173 261 161
+      C243 149 222 160 224 178
+      C226 194 244 202 258 195
+      C269 189 269 176 261 170"/>
+
+    <!-- Stem -->
+    <path stroke-width="9" d="M258 207 C257 273 245 336 210 404"/>
+
+    <!-- Leaves -->
+    <path stroke-width="8" d="M244 287 C204 260 165 270 154 302 C187 316 221 309 244 287 Z"/>
+    <path stroke-width="8" d="M230 334 C270 306 311 316 323 348 C290 362 254 354 230 334 Z"/>
+
+    <!-- Leaf veins -->
+    <path stroke-width="5" d="M165 300 C191 296 214 292 239 287"/>
+    <path stroke-width="5" d="M312 346 C284 339 258 336 234 335"/>
+
+    <!-- Minimal fashion sparkles -->
+    <path stroke-width="6" d="M375 118 V146 M361 132 H389"/>
+    <path stroke-width="5" d="M404 160 V180 M394 170 H414"/>
+  </g>
+
+  <!-- Small monogram accent -->
+  <path d="M196 423 C216 438 239 445 263 445 C286 445 307 438 326 424"
+        fill="none" stroke="#C982A4" stroke-width="6" stroke-linecap="round"/>
+</svg>
