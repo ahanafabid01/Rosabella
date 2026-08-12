@@ -1,4 +1,4 @@
-# KARTLY — Premium E-Commerce Platform
+# ROSABELLA — Premium E-Commerce Platform
 
 > A full-featured, PHP-powered e-commerce platform built for the Bangladeshi market with multi-gateway payment processing, a complete admin dashboard, and clean URL routing.
 
@@ -27,7 +27,7 @@
 
 ## Overview
 
-**Kartly** is a self-hosted, PHP e-commerce solution designed for modern online retail in Bangladesh. It ships with an intuitive storefront, a powerful admin dashboard, and native integrations for local payment gateways — all running on a standard LAMP/XAMPP stack with zero external PHP framework dependencies.
+**Rosabella** is a self-hosted, PHP e-commerce solution designed for modern online retail in Bangladesh. It ships with an intuitive storefront, a powerful admin dashboard, and native integrations for local payment gateways — all running on a standard LAMP/XAMPP stack with zero external PHP framework dependencies.
 
 ---
 
@@ -96,7 +96,7 @@ All gateways support sandbox / live toggle from the admin settings panel with no
 ## Project Structure
 
 ```
-Kartly/
+Rosabella/
 ├── admin/                  # Admin dashboard (protected by .htaccess)
 │   ├── index.php           # Admin landing / redirect
 │   ├── products.php        # Product management
@@ -186,7 +186,7 @@ Kartly/
 
 ## Database Schema
 
-The `database/schema.sql` file creates the `kartly_db` database and all tables, then seeds default data. Key tables:
+The `database/schema.sql` file creates the `rosabella_db` database and all tables, then seeds default data. Key tables:
 
 | Table | Description |
 |---|---|
@@ -221,7 +221,7 @@ The `database/schema.sql` file creates the `kartly_db` database and all tables, 
 
 1. **Clone the repository** into your web root:
    ```bash
-   git clone https://github.com/ahanafabid01/Kartly-New.git C:/xampp/htdocs/Kartly
+   git clone https://github.com/ahanafabid01/Rosabella.git C:/xampp/htdocs/Rosabella
    ```
 
 2. **Start XAMPP** — ensure Apache and MySQL services are running.
@@ -229,11 +229,11 @@ The `database/schema.sql` file creates the `kartly_db` database and all tables, 
 3. **Import the database schema:**
    - Open **phpMyAdmin** → `http://localhost/phpmyadmin`
    - Click **Import** and select `database/schema.sql`
-   - This creates the `kartly_db` database, all tables, indexes, and seed data
+   - This creates the `rosabella_db` database, all tables, indexes, and seed data
 
 4. **Visit the site:**
    ```
-   http://localhost/Kartly
+   http://localhost/Rosabella
    ```
 
 ### Configuration
@@ -243,7 +243,7 @@ All configuration lives in **`config/database.php`**. Edit the constants at the 
 ```php
 // Database
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'kartly_db');
+define('DB_NAME', 'rosabella_db');
 define('DB_USER', 'root');
 define('DB_PASS', '');          // ← Set your MySQL password
 
@@ -257,8 +257,8 @@ define('SECRET_KEY', 'your-secret-key-change-this-in-production');
 
 | Field | Value |
 |---|---|
-| **URL** | `http://localhost/Kartly/admin` |
-| **Email** | `admin@kartly.com` |
+| **URL** | `http://localhost/Rosabella/admin` |
+| **Email** | `admin@rosabella.com` |
 | **Password** | `admin123` |
 
 > ⚠️ Change the admin password immediately after your first login.
@@ -290,7 +290,7 @@ All gateway credentials are managed through **Admin → Settings** — no code c
 
 ## Admin Panel
 
-Access the admin panel at `/admin` (or `http://localhost/Kartly/admin` locally).
+Access the admin panel at `/admin` (or `http://localhost/Rosabella/admin` locally).
 
 The admin `.htaccess` restricts direct file access. Admin session checks are enforced on every admin page — unauthenticated requests are redirected to the login page.
 

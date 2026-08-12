@@ -1,5 +1,6 @@
-# KARTLY - Apache Configuration
+# ROSABELLA - Apache Configuration
 # Organized structure: root index.php (homepage), /public/ (shop), /pages/ (info), /admin/, /api/, /errors/
+# Base URL is dynamically detected from folder name in config/database.php
 
 # Enable rewrite engine
 RewriteEngine On
@@ -16,15 +17,15 @@ RewriteEngine On
 Options -Indexes -MultiViews
 
 # Block direct access to sensitive directories
-RedirectMatch 403 ^/(Kartly/)?config/
-RedirectMatch 403 ^/(Kartly/)?database/
-RedirectMatch 403 ^/(Kartly/)?logs/
-RedirectMatch 403 ^/(Kartly/)?errors/(?!$|404\.php$|500\.php$)
+RedirectMatch 403 ^/config/
+RedirectMatch 403 ^/database/
+RedirectMatch 403 ^/logs/
+RedirectMatch 403 ^/errors/(?!$|404\.php$|500\.php$)
 
 # Block access to Git, agents, and hidden directories (prevents source code dumping)
-RedirectMatch 403 ^/(Kartly/)?\.git
-RedirectMatch 403 ^/(Kartly/)?\.agents
-RedirectMatch 403 ^/(Kartly/)?\.env
+RedirectMatch 403 ^/\.git
+RedirectMatch 403 ^/\.agents
+RedirectMatch 403 ^/\.env
 
 # Protect sensitive file types
 <FilesMatch "\.(sql|log|ini|conf|env|bak|swp|sh|bash)$">

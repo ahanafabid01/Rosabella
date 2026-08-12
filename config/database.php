@@ -12,8 +12,8 @@ define('DB_PASS', '');                // Database password
 define('DB_CHARSET', 'utf8mb4');
 
 // Site Configuration
-define('SITE_NAME', 'KARTLY');
-define('SITE_EMAIL', 'support@kartly.com');
+define('SITE_NAME', 'ROSABELLA');
+define('SITE_EMAIL', 'support@rosabella.com');
 
 $requestScheme = 'http';
 if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
@@ -23,9 +23,17 @@ if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
 }
 $requestHost = $_SERVER['HTTP_HOST'] ?? 'localhost';
 
-// XAMPP uses /Kartly locally; hosted production is served from the domain root.
+// Dynamically detect BASE_URL: on localhost, use the folder name; on production, use root
 $isLocalHost = preg_match('/^(localhost|127\.0\.0\.1)(:\d+)?$/', $requestHost) === 1;
-define('BASE_URL', $isLocalHost ? '/Kartly' : '');
+if ($isLocalHost) {
+    // Get the actual project folder name from the current file path
+    // __DIR__ is the config folder, so dirname(__DIR__) is the project root
+    $projectRoot = dirname(__DIR__);
+    $folderName = basename($projectRoot);
+    define('BASE_URL', ($folderName && $folderName !== 'htdocs') ? '/' . $folderName : '');
+} else {
+    define('BASE_URL', '');  // Production: served from domain root
+}
 define('SITE_URL', $requestScheme . '://' . $requestHost . BASE_URL);
 
 // Security — IMPORTANT: Change this to a long random value in production!

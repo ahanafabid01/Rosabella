@@ -96,7 +96,7 @@ $logoStyle .= "line-height: 1; letter-spacing: -0.02em;";
 
     <?php 
     // PRELOAD CRITICAL HERO IMAGE (LCP) FOR HOMEPAGE
-    $isHome = ($_SERVER['REQUEST_URI'] === '/' || $_SERVER['REQUEST_URI'] === '/index.php' || strpos($_SERVER['REQUEST_URI'], '/Kartly/') !== false);
+    $isHome = ($_SERVER['REQUEST_URI'] === '/' || $_SERVER['REQUEST_URI'] === '/index.php' || strpos($_SERVER['REQUEST_URI'], BASE_URL . '/') !== false);
     if ($isHome) {
         $stmtHero = $db->query("SELECT image_path FROM hero_slides WHERE position = 'main' AND status = 'active' ORDER BY sort_order ASC LIMIT 1");
         $lcpHero = $stmtHero->fetch(PDO::FETCH_ASSOC);
