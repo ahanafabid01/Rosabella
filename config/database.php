@@ -6,7 +6,7 @@
 
 // Database Configuration
 define('DB_HOST', 'localhost');      // Usually 'localhost' on shared hosting
-define('DB_NAME', 'kartly_db');       // Database name
+define('DB_NAME', 'rosabella_db');       // Database name
 define('DB_USER', 'root');            // Database username
 define('DB_PASS', '');                // Database password
 define('DB_CHARSET', 'utf8mb4');
