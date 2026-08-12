@@ -464,7 +464,7 @@ $pageTitle = 'Products Management';
     <title><?= $pageTitle ?> - Rosabella Admin</title>
     <link rel="stylesheet" href="../assets/css/style.css">
 <link rel="stylesheet" href="css/admin.css">
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link href="css/quill.snow.css" rel="stylesheet">
 </head>
 <body>
     <div class="admin-layout">
@@ -768,7 +768,7 @@ $pageTitle = 'Products Management';
         </main>
     </div>
     <script src="js/admin.js"></script>
-    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script src="js/quill.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var editorEl = document.getElementById('quill-editor');

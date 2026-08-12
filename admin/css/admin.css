@@ -993,3 +993,89 @@ body {
         padding: 0;
     }
 }
+
+/* =============================================
+   Fix: Quill Editor - Counteract Global CSS Reset
+   style.css applies * { margin:0; padding:0 } and
+   body { display:flex } which collapses the editor.
+   ============================================= */
+
+/* Fix admin body layout — style.css forces display:flex on body */
+body.admin-body,
+body:has(.admin-layout) {
+    display: block;
+    flex-direction: unset;
+}
+
+/* Restore Quill container border and sizing */
+#quill-editor {
+    border: 1px solid var(--color-border);
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    background: #fff;
+}
+
+/* Restore Quill toolbar */
+.ql-toolbar.ql-snow {
+    border: 1px solid var(--color-border) !important;
+    border-radius: var(--radius-md) var(--radius-md) 0 0 !important;
+    padding: 8px !important;
+    background: var(--color-bg-secondary);
+    box-sizing: border-box !important;
+}
+
+/* Restore Quill container */
+.ql-container.ql-snow {
+    border: 1px solid var(--color-border) !important;
+    border-top: 0 !important;
+    border-radius: 0 0 var(--radius-md) var(--radius-md) !important;
+    font-size: var(--font-size-base) !important;
+    font-family: var(--font-family) !important;
+}
+
+/* Restore Quill editor content area padding — zeroed out by the * reset */
+.ql-editor {
+    padding: 12px 15px !important;
+    min-height: 150px;
+    line-height: 1.6 !important;
+}
+
+/* Restore paragraph margins inside Quill that the reset strips */
+.ql-editor p,
+.ql-editor ol,
+.ql-editor ul,
+.ql-editor pre,
+.ql-editor blockquote,
+.ql-editor h1,
+.ql-editor h2,
+.ql-editor h3,
+.ql-editor h4,
+.ql-editor h5,
+.ql-editor h6 {
+    margin: 0 0 0.5em !important;
+    padding: 0 !important;
+}
+
+/* Restore toolbar button padding — zeroed out by the * reset */
+.ql-toolbar.ql-snow .ql-formats {
+    margin-right: 15px !important;
+}
+
+.ql-toolbar button,
+.ql-toolbar .ql-picker {
+    padding: 3px 5px !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* Restore list styles inside Quill that the reset clears */
+.ql-editor ul,
+.ql-editor ol {
+    padding-left: 1.5em !important;
+    list-style: revert !important;
+}
+
+.ql-editor ul > li,
+.ql-editor ol > li {
+    list-style: revert !important;
+}
+
