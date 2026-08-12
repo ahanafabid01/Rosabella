@@ -6,7 +6,7 @@
 
 // Database Configuration
 define('DB_HOST', 'localhost');      // Usually 'localhost' on shared hosting
-define('DB_NAME', 'rosabella_db');       // Database name
+define('DB_NAME', 'kartly_db');       // Database name
 define('DB_USER', 'root');            // Database username
 define('DB_PASS', '');                // Database password
 define('DB_CHARSET', 'utf8mb4');
@@ -30,7 +30,7 @@ define('SITE_URL', $requestScheme . '://' . $requestHost . BASE_URL);
 
 // Security — IMPORTANT: Change this to a long random value in production!
 // Generate one with: bin2hex(random_bytes(32))
-define('SECRET_KEY', '0a4b9c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b');
+define('SECRET_KEY', 'your-secret-key-change-this-in-production');
 
 // ─── Error Reporting ──────────────────────────────────────────────────────
 // IMPORTANT: Set display_errors to 0 on a live server.
@@ -229,7 +229,7 @@ function getCurrentUser() {
     if (!isLoggedIn()) return null;
     
     $db = getDB();
-    $stmt = $db->prepare("SELECT id, first_name, last_name, email, phone, address, city, country, role, status, created_at FROM users WHERE id = ?");
+    $stmt = $db->prepare("SELECT * FROM users WHERE id = ?");
     $stmt->execute([$_SESSION['user_id']]);
     return $stmt->fetch();
 }
