@@ -79,7 +79,7 @@ $total = $subtotal - $discount; // Shipping and tax are calculated at checkout
     </section>
 
     <!-- Cart Section -->
-    <section class="section">
+    <section class="section cart-page">
         <div class="container">
             <?php if (empty($cartItems)): ?>
                 <!-- Empty Cart -->

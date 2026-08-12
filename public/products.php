@@ -114,12 +114,12 @@ $categories = $stmt->fetchAll();
     </section>
 
     <!-- Products Section -->
-    <section class="section">
+    <section class="section catalog-page">
         <div class="container">
-            <div class="products-layout">
+            <div class="products-layout filters-hidden">
 
                 <!-- Sidebar Filters -->
-                <aside class="sidebar-desktop">
+                <aside class="sidebar-desktop" style="display: none;">
                     <div style="background: var(--color-bg); border-radius: var(--radius-lg); padding: 1.5rem; border: 1px solid var(--color-border); box-shadow: 0 4px 12px -2px rgba(0,0,0,0.03); position: sticky; top: 2rem; height: 100%;">
                         <!-- Mobile Close Button -->
                         <div class="mobile-close-btn" style="display: none; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--color-border-light);">
@@ -267,7 +267,7 @@ $categories = $stmt->fetchAll();
                             </div>
                             <button onclick="toggleSidebarFilters()" class="btn btn-outline btn-sm" id="toggle-filters-btn" style="display: flex; align-items: center; gap: 0.4rem; border-color: var(--color-border-dark); padding: 0.45rem 0.65rem;" title="Toggle Filters">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                                <span>Hide Filters</span>
+                                <span>Show Filters</span>
                             </button>
                         </div>
                         
@@ -303,10 +303,12 @@ $categories = $stmt->fetchAll();
                                     if (sidebar.style.display === 'none' || sidebar.style.display === '') {
                                         sidebar.style.display = 'block';
                                         layout.style.gridTemplateColumns = '';
+                                        layout.classList.remove('filters-hidden');
                                         btnSpan.textContent = 'Hide Filters';
                                     } else {
                                         sidebar.style.display = 'none';
                                         layout.style.gridTemplateColumns = '1fr';
+                                        layout.classList.add('filters-hidden');
                                         btnSpan.textContent = 'Show Filters';
                                     }
                                 }
@@ -493,6 +495,4 @@ $categories = $stmt->fetchAll();
     </section>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
-
-
 

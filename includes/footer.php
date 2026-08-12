@@ -11,12 +11,14 @@ $footerCategories = $stmt->fetchAll();
 $siteAddress = getSetting('site_address') ?: 'Dhaka, Bangladesh';
 $sitePhone = getSetting('site_phone') ?: '+880 1700-000000';
 $siteEmail = getSetting('site_email') ?: SITE_EMAIL;
+$isClothingBrandTheme = function_exists('getHomepageTheme') && getHomepageTheme() === 'clothing_brand';
+$footerSiteName = getSetting('site_name') ?: 'KARTLY';
 ?>
 
 </main><!-- /#main-content -->
 
     <!-- Trust Badges Section (Separate from Footer) -->
-    <section class="site-trust-badges" style="background-color: var(--color-bg); padding: 2rem 0; border-top: 1px solid var(--color-border);">
+    <section class="site-trust-badges <?= $isClothingBrandTheme ? 'clothing-brand-trust' : '' ?>" style="background-color: var(--color-bg); padding: 2rem 0; border-top: 1px solid var(--color-border);">
         <div class="container">
             <div class="footer-trust-grid">
                 <div class="footer-trust-item" style="box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid var(--color-border-light);">
@@ -48,15 +50,15 @@ $siteEmail = getSetting('site_email') ?: SITE_EMAIL;
     </section>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer class="footer <?= $isClothingBrandTheme ? 'clothing-brand-footer' : '' ?>">
 
         
         <!-- Newsletter -->
         <div class="newsletter">
             <div class="newsletter-content container">
                 <div class="newsletter-text">
-                    <h3>Subscribe to our newsletter</h3>
-                    <p>Get the latest updates, deals, and exclusive offers directly in your inbox.</p>
+                    <h3><?= $isClothingBrandTheme ? 'Join the inner circle' : 'Subscribe to our newsletter' ?></h3>
+                    <p><?= $isClothingBrandTheme ? 'First access to new collections, private offers, and journal updates.' : 'Get the latest updates, deals, and exclusive offers directly in your inbox.' ?></p>
                 </div>
                 <form class="newsletter-form">
                     <input type="email" placeholder="Enter your email" aria-label="Email address" required>
@@ -77,12 +79,12 @@ $siteEmail = getSetting('site_email') ?: SITE_EMAIL;
                         ?>
                             <img src="<?= BASE_URL ?>/<?= htmlspecialchars($footerSiteLogo) ?>" alt="<?= htmlspecialchars(getSetting('site_name') ?: 'KARTLY') ?>" width="133" height="40" style="height:40px;width:auto;object-fit:contain;display:block;">
                         <?php else: ?>
-                            <div class="logo-icon">K</div>
-                            <span style="font-size: 1.5rem; font-weight: 700;">KARTLY</span>
+                            <div class="logo-icon"><?= htmlspecialchars(strtoupper(substr($footerSiteName, 0, 1))) ?></div>
+                            <span style="font-size: 1.5rem; font-weight: 700;"><?= htmlspecialchars($footerSiteName) ?></span>
                         <?php endif; ?>
                     </div>
                     <p class="footer-description">
-                        Your one-stop destination for quality products at unbeatable prices. Shop smart, shop KARTLY.
+                        <?= $isClothingBrandTheme ? 'Modern essentials, thoughtfully made for the way you live and dress.' : 'Your one-stop destination for quality products at unbeatable prices. Shop smart, shop KARTLY.' ?>
                     </p>
                     <div class="footer-contact">
                         <div class="footer-contact-item">
@@ -159,7 +161,7 @@ $siteEmail = getSetting('site_email') ?: SITE_EMAIL;
         <div class="footer-bottom">
             <div class="footer-bottom-content container">
                 <p class="footer-copyright">
-                    &copy; <?= date('Y') ?> KARTLY. All rights reserved.
+                    &copy; <?= date('Y') ?> <?= htmlspecialchars($footerSiteName) ?>. All rights reserved.
                 </p>
                 <div class="footer-social">
                     <a href="#" aria-label="Facebook">

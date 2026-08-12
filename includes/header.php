@@ -6,6 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/themes.php';
 
 // Get cart and wishlist counts
 $cartCount = getCartCount();
@@ -34,6 +35,7 @@ $freeShippingThreshold = floatval(getSetting('free_shipping_threshold') ?: 5000)
 $siteLogo = getSetting('site_logo') ?: '';
 $siteIcon = getSetting('site_icon') ?: '';
 $siteName = getSetting('site_name') ?: 'KARTLY';
+$isClothingBrandTheme = getHomepageTheme() === 'clothing_brand';
 
 // Typography settings from DB (font family only)
 $typoTags = ['body', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a', 'small', 'label', 'button', 'input', 'nav', 'logo_text'];
@@ -76,7 +78,7 @@ $logoStyle .= "line-height: 1; letter-spacing: -0.02em;";
     <!-- Security: CSRF token for AJAX requests -->
     <meta name="csrf-token" content="<?= htmlspecialchars(generateCSRFToken()) ?>">
     <meta name="description" content="<?= htmlspecialchars(getSetting('site_tagline') ?? 'Your Premium E-Commerce Destination') ?>">
-    <title><?= isset($pageTitle) ? htmlspecialchars($pageTitle) . ' - ' : '' ?>KARTLY</title>
+    <title><?= isset($pageTitle) ? htmlspecialchars($pageTitle) . ' - ' : '' ?><?= htmlspecialchars($siteName) ?></title>
     
     <!-- Favicon -->
     <?php if ($siteIcon): ?>
@@ -175,9 +177,21 @@ $logoStyle .= "line-height: 1; letter-spacing: -0.02em;";
 
     <script>window.BASE_URL = '<?= BASE_URL ?>';</script>
 </head>
-<body>
+<body class="<?= $isClothingBrandTheme ? 'theme-clothing-brand' : '' ?>">
+    <?php if ($isClothingBrandTheme): ?>
+    <div class="clothing-brand-topbar" role="status">
+        <div class="container clothing-brand-topbar-content">
+            <span>Complimentary shipping on orders over <?= htmlspecialchars($currencySymbol) ?><?= number_format($freeShippingThreshold, 0) ?></span>
+            <div class="clothing-brand-topbar-links">
+                <a href="<?= BASE_URL ?>/track-order">Track order</a>
+                <a href="<?= BASE_URL ?>/size-guide">Size guide</a>
+                <a href="<?= BASE_URL ?>/contact">Contact</a>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
     <!-- Header -->
-    <header class="header">
+    <header class="header <?= $isClothingBrandTheme ? 'clothing-brand-header' : '' ?>">
 
         <!-- ===== MAIN BAR: Logo | Search | Actions ===== -->
         <div class="header-main">
@@ -227,11 +241,11 @@ $logoStyle .= "line-height: 1; letter-spacing: -0.02em;";
                             <span><?= isAdmin() ? 'Admin Panel' : 'My Account' ?></span>
                         </a>
                     <?php else: ?>
-                        <a href="<?= BASE_URL ?>/login" class="header-login-link" aria-label="Login or Register">
+                        <a href="<?= BASE_URL ?>/login" class="header-login-link" aria-label="Login">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
                             </svg>
-                            <span>Login / Register</span>
+                            <span>Login</span>
                         </a>
                     <?php endif; ?>
 

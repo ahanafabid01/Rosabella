@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_branding'])) {
 // ---- Handle Homepage Theme selection ----
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_homepage_theme'])) {
     $selectedTheme = trim((string)($_POST['homepage_theme'] ?? 'default_theme'));
-    $allowedThemes = ['default_theme', 'compact_layout', 'showcase_layout'];
+    $allowedThemes = ['default_theme', 'compact_layout', 'showcase_layout', 'clothing_brand'];
     
     if (!in_array($selectedTheme, $allowedThemes)) {
         $error = 'Invalid theme selection.';
@@ -614,6 +614,11 @@ $pageTitle = 'Settings';
                             'name' => 'Showcase Layout',
                             'description' => 'A premium showcase-focused layout with larger hero sections, bigger product cards with detailed info, and emphasis on high-quality imagery and product presentation.',
                             'features' => ['Large Hero', 'Premium Cards', 'Detailed Info', 'High Imagery', 'Spacious Design'],
+                        ],
+                        'clothing_brand' => [
+                            'name' => 'Clothing Brand',
+                            'description' => 'Professional fashion e-commerce layout optimized for clothing brands. Features full-width hero with overlay, prominent category showcase, product-focused grid, and promotional banners for maximum impact.',
+                            'features' => ['Full-Width Hero', 'Category Showcase', 'Promotional Sections', 'Fashion Optimized', 'Modern Grid Layout'],
                         ],
                     ];
                     ?>

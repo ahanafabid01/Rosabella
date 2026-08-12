@@ -28,6 +28,10 @@ $db = getDB();
 // Get current theme
 $currentTheme = getHomepageTheme();
 $themeConfig = getThemeConfig($currentTheme);
+$isClothingBrandTheme = $currentTheme === 'clothing_brand';
+
+// Theme-specific data loading
+$categoryCount = ($currentTheme === 'clothing_brand') ? 4 : 12;
 
 // Get featured products
 $stmt = $db->query("SELECT p.*, c.name as category_name 
@@ -39,7 +43,7 @@ $stmt = $db->query("SELECT p.*, c.name as category_name
 $featuredProducts = $stmt->fetchAll();
 
 // Get categories
-$stmt = $db->query("SELECT * FROM categories WHERE status = 'active' AND show_on_home = 1 ORDER BY sort_order LIMIT 12");
+$stmt = $db->query("SELECT * FROM categories WHERE status = 'active' AND show_on_home = 1 ORDER BY sort_order LIMIT " . $categoryCount);
 $categories = $stmt->fetchAll();
 
 // Get new arrivals
@@ -50,6 +54,13 @@ $stmt = $db->query("SELECT p.*, c.name as category_name
                     ORDER BY p.created_at DESC 
                     LIMIT 15");
 $newArrivalProducts = $stmt->fetchAll();
+
+// Helper function to get product grid columns CSS
+function getProductGridCols($theme) {
+    $config = getThemeConfig($theme);
+    $cols = $config['products_columns_desktop'] ?? 4;
+    return 'grid-template-columns: repeat(' . $cols . ', 1fr);';
+}
 
 function formatCountdownDisplay(int $remainingSeconds): string
 {
@@ -145,9 +156,9 @@ try {
 
     <!-- Hero Section -->
     <?php if (!empty($heroMain) || $heroSideTop || $heroSideBottom): ?>
-    <section class="section" style="padding-top: 1.5rem; padding-bottom: 2rem;">
+    <section class="section <?= $isClothingBrandTheme ? 'clothing-brand-hero' : '' ?>" style="padding-top: 1.5rem; padding-bottom: 2rem;">
         <div class="container">
-            <div class="hero-bento-grid <?= (!$heroSideTop && !$heroSideBottom) ? 'hero-bento-grid--full' : '' ?>">
+            <div class="hero-bento-grid <?= ($isClothingBrandTheme || (!$heroSideTop && !$heroSideBottom)) ? 'hero-bento-grid--full' : '' ?>">
 
                 <!-- Main Banner (Left Side Slider) -->
                 <?php if (!empty($heroMain)): ?>
@@ -186,11 +197,19 @@ try {
                         </div>
                         <?php endif; ?>
                     </div>
+                    <?php if ($isClothingBrandTheme && !empty($heroMain)): ?>
+                    <?php $brandHeroLink = !empty($heroMain[0]['link_url']) ? cleanUrl($heroMain[0]['link_url']) : BASE_URL . '/shop'; ?>
+                    <div class="clothing-brand-hero-copy">
+                        <p>New season / 2026</p>
+                        <h1><?= htmlspecialchars($heroMain[0]['title'] ?? 'Modern essentials, made to last.') ?></h1>
+                        <a href="<?= htmlspecialchars($brandHeroLink) ?>">Shop the collection <span aria-hidden="true">→</span></a>
+                    </div>
+                    <?php endif; ?>
                 </div>
                 <?php endif; ?>
 
                 <!-- Side Banners (Right Side) -->
-                <?php if (!empty($heroSideTop) || !empty($heroSideBottom)): ?>
+                <?php if (!$isClothingBrandTheme && (!empty($heroSideTop) || !empty($heroSideBottom))): ?>
                 <div class="hero-side-banners">
                     <?php if (!empty($heroSideTop)): ?>
                     <div class="hero-side-slider" data-slide-interval="5000">
@@ -285,6 +304,60 @@ try {
 <?php endif; ?>
 
     <!-- Categories Section -->
+    <?php if ($isClothingBrandTheme): ?>
+    <section class="section clothing-brand-categories" style="padding-top: 1rem; padding-bottom: 2rem;">
+        <div class="container">
+            <div class="section-header clothing-brand-section-header">
+                <p class="clothing-brand-eyebrow">Shop by style</p>
+                <h2 class="section-title">Explore Our Collections</h2>
+                <p class="section-subtitle">Designed for every part of your wardrobe.</p>
+            </div>
+            <div class="category-showcase-grid">
+                <?php foreach ($categories as $category): ?>
+                    <?php
+                    if (!empty($category['image'])) {
+                        $catImage = str_starts_with($category['image'], 'http')
+                            ? $category['image']
+                            : BASE_URL . '/' . ltrim($category['image'], '/');
+                    } else {
+                        $catImage = 'https://placehold.co/800x1000/1f2937/ffffff?text=' . urlencode($category['name']);
+                    }
+                    ?>
+                    <a href="<?= BASE_URL ?>/category/<?= urlencode($category['slug']) ?>" class="category-showcase-card">
+                        <img src="<?= htmlspecialchars($catImage) ?>" alt="<?= htmlspecialchars($category['name']) ?>" loading="lazy" width="600" height="750">
+                        <span class="category-showcase-label"><?= htmlspecialchars($category['name']) ?></span>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+
+    <?php if (!empty($hotDeals)): ?>
+        <?php
+        $brandPromo = $hotDeals[0];
+        $brandPromoTitle = trim((string)($brandPromo['title'] ?? 'The New Season Is Here'));
+        $brandPromoSubtitle = trim((string)($brandPromo['subtitle'] ?? 'Discover considered pieces made for everyday wear.'));
+        $brandPromoImage = trim((string)($brandPromo['image_path'] ?? ''));
+        $brandPromoImage = $brandPromoImage !== '' ? $brandPromoImage : 'https://placehold.co/1200x800/1f2937/ffffff?text=New+Collection';
+        $brandPromoLink = cleanUrl(trim((string)($brandPromo['link_url'] ?? 'shop')) ?: 'shop');
+        ?>
+        <section class="section clothing-brand-promo">
+            <div class="container">
+                <div class="promo-banner-section">
+                    <div class="promo-banner-content">
+                        <img class="promo-banner-image" src="<?= htmlspecialchars($brandPromoImage) ?>" alt="<?= htmlspecialchars($brandPromoTitle) ?>" loading="lazy" width="1200" height="800">
+                        <div class="promo-banner-text">
+                            <p class="clothing-brand-eyebrow">Limited edit</p>
+                            <h2><?= htmlspecialchars($brandPromoTitle) ?></h2>
+                            <p><?= htmlspecialchars($brandPromoSubtitle) ?></p>
+                            <a href="<?= htmlspecialchars($brandPromoLink) ?>" class="promo-cta-btn">Shop the collection</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    <?php endif; ?>
+    <?php else: ?>
     <section class="section" style="padding-top: 1rem; padding-bottom: 2rem;">
         <div class="container">
             <div class="section-header" style="margin-bottom: 1.5rem;">
@@ -400,14 +473,15 @@ try {
             </script>
         </div>
     </section>
+    <?php endif; ?>
 
     <!-- New Arrivals Section -->
     <?php if (!empty($newArrivalProducts)): ?>
-    <section class="section">
+    <section class="section <?= $isClothingBrandTheme ? 'clothing-brand-new-arrivals' : '' ?>">
         <div class="container">
             <div class="section-header" style="text-align: center; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 2.5rem;">
 
-                <h2 class="section-title">New Arrivals</h2>
+                <h2 class="section-title"><?= htmlspecialchars($themeConfig['new_arrivals_title']) ?></h2>
                 <p class="section-subtitle" style="max-width: 500px; margin: 0.5rem auto 0;">
                     Be the first to check out our newest additions
                 </p>
@@ -509,7 +583,7 @@ try {
 
     <!-- Hot Deals Section -->
     <?php if (!empty($hotDeals)): ?>
-    <section class="section section-bg">
+    <section class="section section-bg <?= $isClothingBrandTheme ? 'clothing-brand-deals' : '' ?>">
         <div class="container">
             <div class="section-header">
                 <div>
@@ -593,11 +667,12 @@ try {
     <?php endif; ?>
 
     <!-- Featured Products Section -->
-    <section class="section">
+    <section class="section <?= $isClothingBrandTheme ? 'clothing-brand-featured' : '' ?>">
         <div class="container">
             <div class="section-header" style="margin-bottom: 2.5rem; text-align: center; display: flex; flex-direction: column; align-items: center;">
                 <div style="width: 100%;">
-                    <h2 class="section-title">Featured Products</h2>
+                    <?php if ($isClothingBrandTheme): ?><p class="clothing-brand-eyebrow">Curated for you</p><?php endif; ?>
+                    <h2 class="section-title"><?= htmlspecialchars($themeConfig['featured_section_title']) ?></h2>
                     <p class="section-subtitle" style="max-width: 500px; margin: 0.5rem auto 0;">
                         Discover our most popular items, carefully selected for quality and style
                     </p>

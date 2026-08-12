@@ -97,7 +97,7 @@ require_once __DIR__ . '/../includes/header.php';
     </section>
 
     <!-- Product Detail -->
-    <section class="section" style="padding-top: 1.2rem;">
+    <section class="section product-detail-page" style="padding-top: 1.2rem;">
         <div class="container">
             <div class="product-detail-grid">
                 

@@ -252,7 +252,7 @@ require_once __DIR__ . '/../includes/header.php';
     </section>
 
     <!-- Checkout Form -->
-    <section class="section">
+    <section class="section checkout-page">
         <div class="container">
             <?php if ($error): ?>
             <div style="background: rgba(220, 53, 69, 0.1); border: 1px solid var(--color-danger); color: var(--color-danger); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem;"><?= htmlspecialchars($error) ?></div>
@@ -545,5 +545,4 @@ function updateShipping(radio) {
 </script>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
-
 

@@ -83,7 +83,7 @@ require_once __DIR__ . '/../includes/header.php';
 ?>
 
     <!-- Breadcrumb -->
-    <div class="section-bg" style="border-bottom: 1px solid var(--color-border); padding: 1rem 0; margin-bottom: 2rem;">
+    <div class="section-bg auth-breadcrumb" style="border-bottom: 1px solid var(--color-border); padding: 1rem 0; margin-bottom: 2rem;">
         <div class="container">
             <nav style="font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; color: var(--color-text-light);">
                 <a href="<?= BASE_URL ?>/" style="color: var(--color-text-light); display: flex; align-items: center;">
@@ -98,9 +98,9 @@ require_once __DIR__ . '/../includes/header.php';
     </div>
 
     <!-- Register Section -->
-    <section style="padding: 1.5rem 0 5rem;">
-        <div class="container" style="max-width: 540px; width: 100%;">
-            <div style="padding: 0 1rem;">
+    <section class="auth-page" style="padding: 1.5rem 0 5rem;">
+        <div class="container auth-shell" style="max-width: 540px; width: 100%;">
+            <div class="auth-card" style="padding: 0 1rem;">
                 <div style="text-align: left; margin-bottom: 2rem;">
                     <h1 style="font-size: 1.5rem; font-weight: 500; color: var(--color-text); margin-bottom: 0.5rem;">Register Account</h1>
                 </div>
