@@ -1,0 +1,32 @@
+[12-Aug-2026 08:31:05 Europe/Berlin] PHP Fatal error:  Uncaught Error: Call to undefined function initializeDefaultSettings() in C:\xampp\htdocs\Rosabella\index.php:10
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\Rosabella\index.php on line 10
+[12-Aug-2026 08:31:06 Europe/Berlin] PHP Fatal error:  Uncaught Error: Call to undefined function initializeDefaultSettings() in C:\xampp\htdocs\Rosabella\index.php:10
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\Rosabella\index.php on line 10
+[12-Aug-2026 08:31:07 Europe/Berlin] PHP Fatal error:  Uncaught Error: Call to undefined function initializeDefaultSettings() in C:\xampp\htdocs\Rosabella\index.php:10
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\Rosabella\index.php on line 10
+[12-Aug-2026 08:31:07 Europe/Berlin] PHP Fatal error:  Uncaught Error: Call to undefined function initializeDefaultSettings() in C:\xampp\htdocs\Rosabella\index.php:10
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\Rosabella\index.php on line 10
+[12-Aug-2026 08:31:08 Europe/Berlin] PHP Fatal error:  Uncaught Error: Call to undefined function initializeDefaultSettings() in C:\xampp\htdocs\Rosabella\index.php:10
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\Rosabella\index.php on line 10
+[12-Aug-2026 08:31:35 Europe/Berlin] PHP Fatal error:  Uncaught Error: Call to undefined function initializeDefaultSettings() in C:\xampp\htdocs\Rosabella\index.php:10
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\Rosabella\index.php on line 10
+[12-Aug-2026 08:31:35 Europe/Berlin] PHP Fatal error:  Uncaught Error: Call to undefined function initializeDefaultSettings() in C:\xampp\htdocs\Rosabella\index.php:10
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\Rosabella\index.php on line 10
+[12-Aug-2026 08:31:36 Europe/Berlin] PHP Fatal error:  Uncaught Error: Call to undefined function initializeDefaultSettings() in C:\xampp\htdocs\Rosabella\index.php:10
+Stack trace:
+#0 {main}
+  thrown in C:\xampp\htdocs\Rosabella\index.php on line 10

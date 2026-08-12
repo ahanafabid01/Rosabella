@@ -168,6 +168,11 @@ $logoStyle .= "line-height: 1; letter-spacing: -0.02em;";
         <style><?= $additionalStyles ?></style>
     <?php endif; ?>
 
+    <!-- Theme CSS (if themes system is loaded) -->
+    <?php if (function_exists('getThemeCSS')): ?>
+        <style><?= getThemeCSS() ?></style>
+    <?php endif; ?>
+
     <script>window.BASE_URL = '<?= BASE_URL ?>';</script>
 </head>
 <body>

@@ -65,6 +65,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_branding'])) {
     if (!$error) $message = 'Branding updated successfully.';
 }
 
+// ---- Handle Homepage Theme selection ----
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_homepage_theme'])) {
+    $selectedTheme = trim((string)($_POST['homepage_theme'] ?? 'default_theme'));
+    $allowedThemes = ['default_theme', 'compact_layout', 'showcase_layout'];
+    
+    if (!in_array($selectedTheme, $allowedThemes)) {
+        $error = 'Invalid theme selection.';
+    } else {
+        try {
+            $db->prepare(
+                "INSERT INTO settings (setting_key, setting_value, setting_type)
+                 VALUES ('homepage_theme', ?, 'text')
+                 ON DUPLICATE KEY UPDATE setting_value = ?"
+            )->execute([$selectedTheme, $selectedTheme]);
+            $message = 'Homepage theme updated successfully.';
+        } catch (Throwable $e) {
+            $error = 'Failed to update theme: ' . $e->getMessage();
+        }
+    }
+}
+
 // ---- Handle Typography settings ----
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_typography'])) {
     $typoFields = $_POST['typo'] ?? [];
@@ -153,6 +174,7 @@ $settings = $db->query("SELECT * FROM settings ORDER BY setting_key ASC")->fetch
 // Group settings by prefix
 $groups = [
     'branding'   => ['label' => 'Branding',   'icon' => 'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z', 'items' => []],
+    'homepage_theme' => ['label' => 'Homepage Theme', 'icon' => 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01', 'items' => []],
     'typography' => ['label' => 'Typography', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2', 'items' => []],
     'colors'     => ['label' => 'Colors',     'icon' => 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01', 'items' => []],
     'general'    => ['label' => 'General',    'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', 'items' => []],
@@ -561,6 +583,99 @@ $pageTitle = 'Settings';
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- === Homepage Theme Tab === -->
+        <div class="settings-tab-panel" id="tab-homepage_theme">
+            <div class="admin-card">
+                <h2 class="admin-section-heading">Homepage Theme</h2>
+                <p style="font-size:0.82rem;color:var(--color-text-light);margin:-0.25rem 0 1.5rem;">Select your preferred homepage layout and design. Each theme provides a different visual presentation of your featured products, categories, and promotional content.</p>
+
+                <form method="POST">
+                    <?= csrfField() ?>
+                    <?php
+                    // Get current theme selection
+                    $currentTheme = getSetting('homepage_theme') ?: 'default_theme';
+                    
+                    // Define available themes
+                    $themes = [
+                        'default_theme' => [
+                            'name' => 'Default Theme',
+                            'description' => 'The current classic layout featuring a hero section with bento grid layout, category showcase, featured products grid, and hot deals section.',
+                            'features' => ['Hero Bento Grid', 'Categories Grid', 'Featured Products', 'Hot Deals Banner', 'New Arrivals'],
+                        ],
+                        'compact_layout' => [
+                            'name' => 'Compact Layout',
+                            'description' => 'A more streamlined and compact version with minimal spacing, condensed cards, and a focus on showing more products per row for higher product density.',
+                            'features' => ['Compact Spacing', 'Smaller Cards', 'More Products/Row', 'Simplified Hero', 'Dense Grid'],
+                        ],
+                        'showcase_layout' => [
+                            'name' => 'Showcase Layout',
+                            'description' => 'A premium showcase-focused layout with larger hero sections, bigger product cards with detailed info, and emphasis on high-quality imagery and product presentation.',
+                            'features' => ['Large Hero', 'Premium Cards', 'Detailed Info', 'High Imagery', 'Spacious Design'],
+                        ],
+                    ];
+                    ?>
+                    
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1.5rem;margin-bottom:2rem;">
+                        <?php foreach ($themes as $themeKey => $theme): ?>
+                        <div style="border:2px solid <?= $currentTheme === $themeKey ? 'var(--color-primary)' : 'var(--color-border)' ?>;border-radius:var(--radius-lg);padding:1.25rem;background:<?= $currentTheme === $themeKey ? 'rgba(15,118,110,0.05)' : 'var(--color-bg-secondary)' ?>;transition:all 0.2s ease;cursor:pointer;" onclick="selectTheme('<?= $themeKey ?>')">
+                            <label style="display:flex;align-items:flex-start;gap:0.75rem;cursor:pointer;">
+                                <input type="radio" name="homepage_theme" value="<?= $themeKey ?>" <?= $currentTheme === $themeKey ? 'checked' : '' ?> style="flex-shrink:0;width:18px;height:18px;margin-top:2px;cursor:pointer;">
+                                <div style="flex:1;">
+                                    <h3 style="margin:0 0 0.5rem;font-size:0.95rem;font-weight:700;color:var(--color-text);"><?= htmlspecialchars($theme['name']) ?></h3>
+                                    <p style="margin:0 0 1rem;font-size:0.82rem;color:var(--color-text-light);line-height:1.5;"><?= htmlspecialchars($theme['description']) ?></p>
+                                    <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
+                                        <?php foreach ($theme['features'] as $feature): ?>
+                                        <span style="display:inline-block;font-size:0.7rem;font-weight:600;padding:0.25rem 0.5rem;background:var(--color-bg);border:1px solid var(--color-border);border-radius:4px;color:var(--color-text-light);"><?= htmlspecialchars($feature) ?></span>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <div style="background:var(--color-bg-secondary);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1.5rem;">
+                        <h3 style="margin:0 0 0.5rem;font-size:0.88rem;font-weight:700;color:var(--color-text);">📋 Theme Details</h3>
+                        <div id="theme-details" style="font-size:0.82rem;color:var(--color-text-light);line-height:1.6;">
+                            <p><?= htmlspecialchars($themes[$currentTheme]['description']) ?></p>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:1.5rem;display:flex;justify-content:flex-end;gap:0.75rem;">
+                        <button type="button" class="btn btn-secondary" onclick="previewTheme()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            Preview Theme
+                        </button>
+                        <button type="submit" name="save_homepage_theme" value="1" class="btn btn-primary">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-2px;margin-right:4px;"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                            Save Theme
+                        </button>
+                    </div>
+                </form>
+
+                <script>
+                function selectTheme(themeKey) {
+                    document.querySelector('input[name="homepage_theme"][value="' + themeKey + '"]').checked = true;
+                    const themes = <?= json_encode($themes) ?>;
+                    document.getElementById('theme-details').innerHTML = '<p>' + themes[themeKey].description + '</p>';
+                    // Update card styling
+                    document.querySelectorAll('[onclick^="selectTheme"]').forEach(el => {
+                        el.style.borderColor = 'var(--color-border)';
+                        el.style.background = 'var(--color-bg-secondary)';
+                    });
+                    event.currentTarget.style.borderColor = 'var(--color-primary)';
+                    event.currentTarget.style.background = 'rgba(15,118,110,0.05)';
+                }
+
+                function previewTheme() {
+                    const selectedTheme = document.querySelector('input[name="homepage_theme"]:checked').value;
+                    const previewUrl = '<?= BASE_URL ?>/?theme_preview=' + selectedTheme;
+                    window.open(previewUrl, '_blank', 'width=1200,height=800');
+                }
+                </script>
             </div>
         </div>
 

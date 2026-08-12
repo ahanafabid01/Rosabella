@@ -3,6 +3,7 @@
  * KARTLY - Homepage
  */
 require_once __DIR__ . '/includes/router.php';
+require_once __DIR__ . '/includes/themes.php';  // Load theme system
 dispatchCleanRoute();
 
 $pageTitle = 'Home';
@@ -23,6 +24,10 @@ $pageTitle = 'Home';
 require_once __DIR__ . '/includes/header.php';
 
 $db = getDB();
+
+// Get current theme
+$currentTheme = getHomepageTheme();
+$themeConfig = getThemeConfig($currentTheme);
 
 // Get featured products
 $stmt = $db->query("SELECT p.*, c.name as category_name 
