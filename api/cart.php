@@ -263,7 +263,7 @@ function handleApplyCoupon() {
     }
     
     // Check if coupon exists and is valid
-    $stmt = $db->prepare("SELECT * FROM coupons WHERE code = ? AND status = 'active'");
+    $stmt = $db->prepare("SELECT id, code, type, value, start_date, end_date, max_uses, min_order_amount FROM coupons WHERE code = ? AND status = 'active'");
     $stmt->execute([$code]);
     $coupon = $stmt->fetch();
     

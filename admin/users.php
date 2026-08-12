@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * KARTLY - Admin Users Management
  */
@@ -75,7 +75,7 @@ if ($roleFilter)   { $where[] = "role = ?";   $params[] = $roleFilter; }
 if ($statusFilter) { $where[] = "status = ?"; $params[] = $statusFilter; }
 $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
-$stmt = $db->prepare("SELECT * FROM users $whereSql ORDER BY created_at DESC");
+$stmt = $db->prepare("SELECT id, first_name, last_name, email, role, status, created_at FROM users $whereSql ORDER BY created_at DESC");
 $stmt->execute($params);
 $users = $stmt->fetchAll();
 
