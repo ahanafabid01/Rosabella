@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Payment Gateway Helpers
+ * Rosabella - Payment Gateway Helpers
  */
 
 require_once __DIR__ . '/../config/database.php';
@@ -336,7 +336,7 @@ function paymentStartSslCommerz(PDO $db, array $order, string $preferredChannel 
         'ship_city' => $order['shipping_city'] ?? '',
         'ship_postcode' => $order['shipping_postal_code'] ?? '',
         'ship_country' => $order['shipping_country'] ?? 'Bangladesh',
-        'product_name' => 'KARTLY Order ' . $order['order_number'],
+        'product_name' => 'Rosabella Order ' . $order['order_number'],
         'product_category' => 'Ecommerce',
         'product_profile' => 'general',
     ];

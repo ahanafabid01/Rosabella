@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Admin View Review
+ * Rosabella - Admin View Review
  */
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -155,7 +155,7 @@ $pageTitle = 'Review Details #' . intval($viewReview['id']);
     <?php endif; ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $pageTitle ?> - KARTLY Admin</title>
+    <title><?= $pageTitle ?> - Rosabella Admin</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="css/admin.css">
 </head>

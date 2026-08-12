@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 /**
- * KARTLY - Database Migration CLI
+ * Rosabella - Database Migration CLI
  * 
  * Usage:
  *   php migrate.php status       - Show migration status

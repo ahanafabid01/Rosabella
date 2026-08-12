@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Press
+ * Rosabella - Press
  */
 $pageTitle = 'Press';
 require_once __DIR__ . '/../includes/header.php';
@@ -21,7 +21,7 @@ require_once __DIR__ . '/../includes/header.php';
             <div style="background: var(--color-bg-secondary); border-radius: var(--radius-lg); padding: 2rem; text-align: center; margin-bottom: 3rem;">
                 <h3 style="font-weight: 600; margin-bottom: 0.5rem;">Media Inquiries</h3>
                 <p style="color: var(--color-text-light); margin-bottom: 1rem;">For press inquiries, please contact our communications team</p>
-                <a href="mailto:press@kartly.com" class="btn btn-primary">press@kartly.com</a>
+                <a href="mailto:press@Rosabella.com" class="btn btn-primary">press@Rosabella.com</a>
             </div>
 
             <!-- Press Kit -->
@@ -55,8 +55,8 @@ require_once __DIR__ . '/../includes/header.php';
                         <span class="badge badge-primary">Press Release</span>
                         <time style="font-size: 0.875rem; color: var(--color-text-light);">December 15, 2024</time>
                     </div>
-                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem;">KARTLY Announces Expansion to 50 New Countries</h3>
-                    <p style="color: var(--color-text-light); margin-bottom: 1rem;">KARTLY today announced its expansion to 50 new countries across Europe, Asia, and South America, bringing quality products to millions more customers worldwide.</p>
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem;">Rosabella Announces Expansion to 50 New Countries</h3>
+                    <p style="color: var(--color-text-light); margin-bottom: 1rem;">Rosabella today announced its expansion to 50 new countries across Europe, Asia, and South America, bringing quality products to millions more customers worldwide.</p>
                     <a href="#" style="color: var(--color-primary); font-weight: 500; font-size: 0.875rem;">Read More →</a>
                 </article>
                 <article style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem;">
@@ -64,8 +64,8 @@ require_once __DIR__ . '/../includes/header.php';
                         <span class="badge badge-success">Award</span>
                         <time style="font-size: 0.875rem; color: var(--color-text-light);">November 28, 2024</time>
                     </div>
-                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem;">KARTLY Wins "Best E-Commerce Platform 2024"</h3>
-                    <p style="color: var(--color-text-light); margin-bottom: 1rem;">KARTLY has been recognized as the Best E-Commerce Platform at the 2024 Tech Excellence Awards for outstanding customer experience and innovation.</p>
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem;">Rosabella Wins "Best E-Commerce Platform 2024"</h3>
+                    <p style="color: var(--color-text-light); margin-bottom: 1rem;">Rosabella has been recognized as the Best E-Commerce Platform at the 2024 Tech Excellence Awards for outstanding customer experience and innovation.</p>
                     <a href="#" style="color: var(--color-primary); font-weight: 500; font-size: 0.875rem;">Read More →</a>
                 </article>
                 <article style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem;">
@@ -73,8 +73,8 @@ require_once __DIR__ . '/../includes/header.php';
                         <span class="badge badge-warning">Partnership</span>
                         <time style="font-size: 0.875rem; color: var(--color-text-light);">October 10, 2024</time>
                     </div>
-                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem;">KARTLY Partners with Leading Sustainable Brands</h3>
-                    <p style="color: var(--color-text-light); margin-bottom: 1rem;">In a move to promote sustainable shopping, KARTLY has partnered with over 100 eco-friendly brands to offer customers more environmentally conscious choices.</p>
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem;">Rosabella Partners with Leading Sustainable Brands</h3>
+                    <p style="color: var(--color-text-light); margin-bottom: 1rem;">In a move to promote sustainable shopping, Rosabella has partnered with over 100 eco-friendly brands to offer customers more environmentally conscious choices.</p>
                     <a href="#" style="color: var(--color-primary); font-weight: 500; font-size: 0.875rem;">Read More →</a>
                 </article>
             </div>

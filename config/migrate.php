@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Database Migration Runner
+ * Rosabella - Database Migration Runner
  * 
  * This script manages database schema changes through versioned migrations.
  * Run this script from the command line or access via web to execute pending migrations.

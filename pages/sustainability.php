@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Sustainability
+ * Rosabella - Sustainability
  */
 $pageTitle = 'Sustainability';
 require_once __DIR__ . '/../includes/header.php';

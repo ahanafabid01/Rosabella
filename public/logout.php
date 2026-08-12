@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Secure Logout
+ * Rosabella - Secure Logout
  * Properly destroys the session: clears data, deletes cookie, regenerates ID.
  */
 if (session_status() === PHP_SESSION_NONE) {

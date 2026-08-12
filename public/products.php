@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Products Page
+ * Rosabella - Products Page
  */
 $pageTitle = 'Products';
 require_once __DIR__ . '/../includes/header.php';

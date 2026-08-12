@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Wishlist
+ * Rosabella - Wishlist
  */
 $pageTitle = 'My Wishlist';
 require_once __DIR__ . '/../includes/header.php';

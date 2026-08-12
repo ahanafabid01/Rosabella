@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - User Login
+ * Rosabella - User Login
  */
 $pageTitle = 'Login';
 require_once __DIR__ . '/../config/database.php';

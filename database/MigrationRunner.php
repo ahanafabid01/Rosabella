@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Database Migration Runner
+ * Rosabella - Database Migration Runner
  * 
  * Handles execution of database migrations stored in database/migrations/
  * Tracks executed migrations to prevent duplicate runs

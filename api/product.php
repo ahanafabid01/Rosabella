@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Product API (Quick View)
+ * Rosabella - Product API (Quick View)
  */
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

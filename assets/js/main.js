@@ -1,5 +1,5 @@
 /**
- * KARTLY E-Commerce - Main JavaScript
+ * Rosabella E-Commerce - Main JavaScript
  * Pure Vanilla JS - No Framework Dependencies
  */
 
@@ -269,7 +269,7 @@ function initProductGallery() {
 // =============================================
 // Cart Functions
 // =============================================
-let cart = JSON.parse(localStorage.getItem('kartly_cart')) || [];
+let cart = JSON.parse(localStorage.getItem('Rosabella_cart')) || [];
 
 function initCart() {
     updateCartBadge();
@@ -430,7 +430,7 @@ async function addToCart(productId, quantity = 1, size = null, color = null, var
         } else {
             cart.push({ product_id: productId, quantity: quantity, size: size, color: color, variant: variant });
         }
-        localStorage.setItem('kartly_cart', JSON.stringify(cart));
+        localStorage.setItem('Rosabella_cart', JSON.stringify(cart));
         updateCartBadge();
         showToast('Product added to cart!', 'success');
         return { success: true, fallback: true };
@@ -657,7 +657,7 @@ function updateCartBadge(count) {
 // =============================================
 // Wishlist Functions
 // =============================================
-let wishlist = (JSON.parse(localStorage.getItem('kartly_wishlist')) || []).map(String);
+let wishlist = (JSON.parse(localStorage.getItem('Rosabella_wishlist')) || []).map(String);
 
 function initWishlist() {
     updateWishlistBadge();
@@ -692,7 +692,7 @@ async function toggleWishlist(productId, btn) {
                 } else {
                     wishlist = wishlist.filter((id) => id !== String(productId));
                 }
-                localStorage.setItem('kartly_wishlist', JSON.stringify(wishlist));
+                localStorage.setItem('Rosabella_wishlist', JSON.stringify(wishlist));
             } else {
                 btn.classList.toggle('active');
             }
@@ -718,7 +718,7 @@ async function toggleWishlist(productId, btn) {
             btn.classList.add('active');
             showToast('Added to wishlist!', 'success');
         }
-        localStorage.setItem('kartly_wishlist', JSON.stringify(wishlist));
+        localStorage.setItem('Rosabella_wishlist', JSON.stringify(wishlist));
         updateWishlistBadge();
     }
 }
@@ -731,7 +731,7 @@ async function syncWishlistButtonsFromServer() {
 
     const ids = new Set(data.items.map((item) => String(item.product_id)));
     wishlist = Array.from(ids);
-    localStorage.setItem('kartly_wishlist', JSON.stringify(wishlist));
+    localStorage.setItem('Rosabella_wishlist', JSON.stringify(wishlist));
 
     document.querySelectorAll('.product-wishlist').forEach((btn) => {
         btn.classList.toggle('active', ids.has(String(btn.dataset.productId)));

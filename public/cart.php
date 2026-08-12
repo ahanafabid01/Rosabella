@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Shopping Cart Page
+ * Rosabella - Shopping Cart Page
  */
 $pageTitle = 'Shopping Cart';
 require_once __DIR__ . '/../includes/header.php';

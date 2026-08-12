@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Footer Include
+ * Rosabella - Footer Include
  */
 $db = getDB();
 
@@ -12,7 +12,7 @@ $siteAddress = getSetting('site_address') ?: 'Dhaka, Bangladesh';
 $sitePhone = getSetting('site_phone') ?: '+880 1700-000000';
 $siteEmail = getSetting('site_email') ?: SITE_EMAIL;
 $isClothingBrandTheme = function_exists('getHomepageTheme') && getHomepageTheme() === 'clothing_brand';
-$footerSiteName = getSetting('site_name') ?: 'KARTLY';
+$footerSiteName = getSetting('site_name') ?: 'Rosabella';
 ?>
 
 </main><!-- /#main-content -->
@@ -77,14 +77,14 @@ $footerSiteName = getSetting('site_name') ?: 'KARTLY';
                         $footerSiteLogo = getSetting('site_logo');
                         if ($footerSiteLogo): 
                         ?>
-                            <img src="<?= BASE_URL ?>/<?= htmlspecialchars($footerSiteLogo) ?>" alt="<?= htmlspecialchars(getSetting('site_name') ?: 'KARTLY') ?>" width="133" height="40" style="height:40px;width:auto;object-fit:contain;display:block;">
+                            <img src="<?= BASE_URL ?>/<?= htmlspecialchars($footerSiteLogo) ?>" alt="<?= htmlspecialchars(getSetting('site_name') ?: 'Rosabella') ?>" width="133" height="40" style="height:40px;width:auto;object-fit:contain;display:block;">
                         <?php else: ?>
                             <div class="logo-icon"><?= htmlspecialchars(strtoupper(substr($footerSiteName, 0, 1))) ?></div>
                             <span style="font-size: 1.5rem; font-weight: 700;"><?= htmlspecialchars($footerSiteName) ?></span>
                         <?php endif; ?>
                     </div>
                     <p class="footer-description">
-                        <?= $isClothingBrandTheme ? 'Modern essentials, thoughtfully made for the way you live and dress.' : 'Your one-stop destination for quality products at unbeatable prices. Shop smart, shop KARTLY.' ?>
+                        <?= $isClothingBrandTheme ? 'Modern essentials, thoughtfully made for the way you live and dress.' : 'Your one-stop destination for quality products at unbeatable prices. Shop smart, shop Rosabella.' ?>
                     </p>
                     <div class="footer-contact">
                         <div class="footer-contact-item">

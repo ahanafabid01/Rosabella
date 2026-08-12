@@ -1,4 +1,4 @@
-# KARTLY Admin - Clean URL Rewriting + Security Headers
+# Rosabella Admin - Clean URL Rewriting + Security Headers
 RewriteEngine On
 Options -MultiViews -Indexes
 

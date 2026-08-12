@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Contact Us
+ * Rosabella - Contact Us
  */
 $pageTitle = 'Contact Us';
 require_once __DIR__ . '/../config/database.php';

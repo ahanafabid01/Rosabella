@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Shared Admin Layout Helpers
+ * Rosabella - Shared Admin Layout Helpers
  */
 
 if (!function_exists('adminIcon')) {
@@ -47,7 +47,7 @@ if (!function_exists('renderAdminSidebar')) {
             <div class="admin-logo-centered">
                 <?php
                 $siteLogo = getSetting('site_logo');
-                $siteName = getSetting('site_name') ?: 'KARTLY';
+                $siteName = getSetting('site_name') ?: 'Rosabella';
                 ?>
                 <?php if ($siteLogo): ?>
                     <img src="<?= BASE_URL . '/' . htmlspecialchars($siteLogo) ?>" alt="Logo" style="max-height: 40px; border-radius: 4px;">

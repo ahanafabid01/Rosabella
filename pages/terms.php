@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Terms of Service
+ * Rosabella - Terms of Service
  */
 $pageTitle = 'Terms of Service';
 require_once __DIR__ . '/../includes/header.php';
@@ -27,13 +27,13 @@ require_once __DIR__ . '/../includes/header.php';
             <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem;">
                 <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">1. Acceptance of Terms</h2>
                 <p style="color: var(--color-text-light); margin-bottom: 1.5rem;">
-                    By accessing and using KARTLY's website, you agree to be bound by these Terms of Service and all applicable laws and regulations. 
+                    By accessing and using Rosabella's website, you agree to be bound by these Terms of Service and all applicable laws and regulations. 
                     If you do not agree with any of these terms, you are prohibited from using this site.
                 </p>
 
                 <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">2. Use License</h2>
                 <p style="color: var(--color-text-light); margin-bottom: 1.5rem;">
-                    Permission is granted to temporarily access the materials on KARTLY's website for personal, non-commercial use only. 
+                    Permission is granted to temporarily access the materials on Rosabella's website for personal, non-commercial use only. 
                     This is the grant of a license, not a transfer of title. Under this license you may not:
                 </p>
                 <ul style="color: var(--color-text-light); margin-bottom: 1.5rem; padding-left: 1.5rem; list-style: disc;">
@@ -83,7 +83,7 @@ require_once __DIR__ . '/../includes/header.php';
 
                 <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">8. Limitation of Liability</h2>
                 <p style="color: var(--color-text-light); margin-bottom: 1.5rem;">
-                    KARTLY shall not be liable for any indirect, incidental, special, consequential, or punitive damages 
+                    Rosabella shall not be liable for any indirect, incidental, special, consequential, or punitive damages 
                     resulting from your use of or inability to use the service.
                 </p>
 
@@ -96,7 +96,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">10. Contact</h2>
                 <p style="color: var(--color-text-light);">
                     For questions about these Terms, contact us at:<br>
-                    Email: <a href="mailto:legal@kartly.com" style="color: var(--color-primary);">legal@kartly.com</a>
+                    Email: <a href="mailto:legal@Rosabella.com" style="color: var(--color-primary);">legal@Rosabella.com</a>
                 </p>
             </div>
         </div>

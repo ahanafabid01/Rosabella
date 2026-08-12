@@ -1,7 +1,7 @@
-# 🔐 Kartly — Full Security Audit Report
+# 🔐 Rosabella — Full Security Audit Report
 **Date:** 2026-08-07  
 **Auditor:** Antigravity AI (Full-Stack + CyberSecurity Audit)  
-**Codebase:** `c:\xampp\htdocs\Kartly` (PHP/MySQL E-Commerce)  
+**Codebase:** `c:\xampp\htdocs\Rosabella` (PHP/MySQL E-Commerce)  
 **Severity Levels:** 🔴 CRITICAL · 🟠 HIGH · 🟡 MEDIUM · 🟢 LOW · ✅ PASS
 
 ---
@@ -35,7 +35,7 @@
 
 ### 1. CSRF Protection — Defined But Never Used
 
-**File:** [`config/database.php`](file:///c:/xampp/htdocs/Kartly/config/database.php#L99-L111)  
+**File:** [`config/database.php`](file:///c:/xampp/htdocs/Rosabella/config/database.php#L99-L111)  
 **Severity:** 🔴 CRITICAL
 
 The `generateCSRFToken()` and `verifyCSRFToken()` functions **exist** in `database.php` but are **never called anywhere** in the codebase. Every single form — login, register, checkout, contact, profile update, admin settings, admin user management — processes POST requests with **zero CSRF verification**.
@@ -68,7 +68,7 @@ This means any malicious third-party website can silently submit forms as an aut
 
 ### 2. Session Fixation — No `session_regenerate_id()` on Login
 
-**File:** [`public/login.php`](file:///c:/xampp/htdocs/Kartly/public/login.php#L27-L34)  
+**File:** [`public/login.php`](file:///c:/xampp/htdocs/Rosabella/public/login.php#L27-L34)  
 **Severity:** 🔴 CRITICAL
 
 After a successful login, the session ID is never regenerated. An attacker who knows a victim's pre-login session ID (e.g., through session fixation or network sniffing) can **hijack the authenticated session** after the user logs in.
@@ -88,7 +88,7 @@ Same issue exists in `public/register.php` (auto-login after registration).
 
 ### 3. Session Cookie Not Secured
 
-**File:** [`config/database.php`](file:///c:/xampp/htdocs/Kartly/config/database.php#L38-L41)  
+**File:** [`config/database.php`](file:///c:/xampp/htdocs/Rosabella/config/database.php#L38-L41)  
 **Severity:** 🔴 CRITICAL
 
 Sessions are started with `session_start()` but no secure cookie parameters are set. This means:
@@ -114,8 +114,8 @@ session_start();
 ### 4. Debug Files Publicly Accessible
 
 **Files:** 
-- [`public/dump_schema.php`](file:///c:/xampp/htdocs/Kartly/public/dump_schema.php) — Dumps full DB table structure
-- [`public/migrate_color.php`](file:///c:/xampp/htdocs/Kartly/public/migrate_color.php) — Runs raw DDL `ALTER TABLE` on the DB
+- [`public/dump_schema.php`](file:///c:/xampp/htdocs/Rosabella/public/dump_schema.php) — Dumps full DB table structure
+- [`public/migrate_color.php`](file:///c:/xampp/htdocs/Rosabella/public/migrate_color.php) — Runs raw DDL `ALTER TABLE` on the DB
 
 **Severity:** 🔴 CRITICAL
 
@@ -129,7 +129,7 @@ session_start();
 
 ### 5. Default / Placeholder Credentials & Secret Key
 
-**File:** [`config/database.php`](file:///c:/xampp/htdocs/Kartly/config/database.php#L10-L32)  
+**File:** [`config/database.php`](file:///c:/xampp/htdocs/Rosabella/config/database.php#L10-L32)  
 **Severity:** 🔴 CRITICAL
 
 ```php
@@ -175,7 +175,7 @@ An automated bot can:
 
 ### 7. Error Reporting Enabled in Production Config
 
-**File:** [`config/database.php`](file:///c:/xampp/htdocs/Kartly/config/database.php#L35-L36)  
+**File:** [`config/database.php`](file:///c:/xampp/htdocs/Rosabella/config/database.php#L35-L36)  
 **Severity:** 🔴 CRITICAL (in production context)
 
 ```php
@@ -202,7 +202,7 @@ ini_set('error_log', __DIR__ . '/../logs/php_errors.log');
 
 ### 8. Missing Critical Security Headers
 
-**File:** [`.htaccess`](file:///c:/xampp/htdocs/Kartly/.htaccess)  
+**File:** [`.htaccess`](file:///c:/xampp/htdocs/Rosabella/.htaccess)  
 **Severity:** 🟠 HIGH
 
 The `.htaccess` only sets `X-Content-Type-Options: nosniff`. The following critical headers are missing:
@@ -230,7 +230,7 @@ Header always set Content-Security-Policy "default-src 'self'; script-src 'self'
 
 ### 9. HTTPS Not Enforced
 
-**File:** [`.htaccess`](file:///c:/xampp/htdocs/Kartly/.htaccess#L10-L11)  
+**File:** [`.htaccess`](file:///c:/xampp/htdocs/Rosabella/.htaccess#L10-L11)  
 **Severity:** 🟠 HIGH
 
 ```apache
@@ -246,7 +246,7 @@ HTTPS redirect is commented out. In production, all traffic including login cred
 
 ### 10. XSS — `$additionalStyles` Not Sanitized
 
-**File:** [`includes/header.php`](file:///c:/xampp/htdocs/Kartly/includes/header.php#L165-L167)  
+**File:** [`includes/header.php`](file:///c:/xampp/htdocs/Rosabella/includes/header.php#L165-L167)  
 **Severity:** 🟠 HIGH (potential, depending on who sets the variable)
 
 ```php
@@ -284,7 +284,7 @@ respond(false, 'A server error occurred. Please try again.', [], 500);
 
 ### 12. Admin Panel Uses HTTP Redirect (Not `exit` After Header) — Minor but Real
 
-**File:** [`admin/index.php`](file:///c:/xampp/htdocs/Kartly/admin/index.php#L13-L14)  
+**File:** [`admin/index.php`](file:///c:/xampp/htdocs/Rosabella/admin/index.php#L13-L14)  
 **Severity:** 🟢 (actually fine — `exit` IS present, confirmed)
 
 Admin pages correctly use `header() + exit` for auth checks. ✅
@@ -293,7 +293,7 @@ Admin pages correctly use `header() + exit` for auth checks. ✅
 
 ### 13. Logout Does Not Invalidate Session Properly
 
-**File:** [`public/logout.php`](file:///c:/xampp/htdocs/Kartly/public/logout.php)  
+**File:** [`public/logout.php`](file:///c:/xampp/htdocs/Rosabella/public/logout.php)  
 **Severity:** 🟠 HIGH
 
 ```php
@@ -329,7 +329,7 @@ session_regenerate_id(true);
 
 ### 14. Weak Password Policy
 
-**File:** [`public/register.php`](file:///c:/xampp/htdocs/Kartly/public/register.php#L26)  
+**File:** [`public/register.php`](file:///c:/xampp/htdocs/Rosabella/public/register.php#L26)  
 **Severity:** 🟡 MEDIUM
 
 Minimum password length is **6 characters** — far too low. Modern security standards (NIST 800-63B) recommend minimum 8 characters. There are no requirements for complexity (uppercase, numbers, symbols).
@@ -359,7 +359,7 @@ Admin forms (settings, user management) don't disable browser autocomplete. Shar
 
 ### 17. No File Upload Size Limits in Apache Config
 
-**File:** [`.htaccess`](file:///c:/xampp/htdocs/Kartly/.htaccess#L60-L70)  
+**File:** [`.htaccess`](file:///c:/xampp/htdocs/Rosabella/.htaccess#L60-L70)  
 **Severity:** 🟡 MEDIUM
 
 `upload_max_filesize = 10M` and `post_max_size = 10M` are set, but only for PHP 7 and PHP 8. An attacker who finds an upload endpoint could attempt **Denial-of-Service** attacks by sending large requests.
@@ -370,7 +370,7 @@ Admin forms (settings, user management) don't disable browser autocomplete. Shar
 
 ### 18. XSS — `typoFonts` Key Unescaped in CSS
 
-**File:** [`includes/header.php`](file:///c:/xampp/htdocs/Kartly/includes/header.php#L159-L161)  
+**File:** [`includes/header.php`](file:///c:/xampp/htdocs/Rosabella/includes/header.php#L159-L161)  
 **Severity:** 🟡 MEDIUM
 
 ```php
@@ -389,12 +389,12 @@ Admin forms (settings, user management) don't disable browser autocomplete. Shar
 
 ### 19. `config/` and `database/` Directories Protected by `RedirectMatch`
 
-**File:** [`.htaccess`](file:///c:/xampp/htdocs/Kartly/.htaccess#L19-L20)  
+**File:** [`.htaccess`](file:///c:/xampp/htdocs/Rosabella/.htaccess#L19-L20)  
 **Status:** ✅ PASS (but with a caveat)
 
 ```apache
-RedirectMatch 403 ^/(Kartly/)?config/
-RedirectMatch 403 ^/(Kartly/)?database/
+RedirectMatch 403 ^/(Rosabella/)?config/
+RedirectMatch 403 ^/(Rosabella/)?database/
 ```
 
 This protects these directories. However, `RedirectMatch` sends a `301/302` before the `403` on some Apache versions. Using `<Directory>` directives in server config or `FilesMatch Deny` is more reliable.

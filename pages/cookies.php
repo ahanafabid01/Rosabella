@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Cookie Policy
+ * Rosabella - Cookie Policy
  */
 $pageTitle = 'Cookie Policy';
 require_once __DIR__ . '/../includes/header.php';
@@ -85,7 +85,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">Contact Us</h2>
                 <p style="color: var(--color-text-light);">
                     If you have questions about our use of cookies, please contact us at:<br>
-                    Email: <a href="mailto:privacy@kartly.com" style="color: var(--color-primary);">privacy@kartly.com</a>
+                    Email: <a href="mailto:privacy@Rosabella.com" style="color: var(--color-primary);">privacy@Rosabella.com</a>
                 </p>
             </div>
         </div>

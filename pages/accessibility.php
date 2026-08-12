@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Accessibility
+ * Rosabella - Accessibility
  */
 $pageTitle = 'Accessibility';
 require_once __DIR__ . '/../includes/header.php';
@@ -26,7 +26,7 @@ require_once __DIR__ . '/../includes/header.php';
             <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem;">
                 <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">Our Commitment</h2>
                 <p style="color: var(--color-text-light); margin-bottom: 1.5rem;">
-                    At KARTLY, we are committed to ensuring digital accessibility for people with disabilities. 
+                    At Rosabella, we are committed to ensuring digital accessibility for people with disabilities. 
                     We are continually improving the user experience for everyone and applying the relevant accessibility standards.
                 </p>
 
@@ -72,7 +72,7 @@ require_once __DIR__ . '/../includes/header.php';
                 </p>
                 
                 <div style="background: var(--color-bg-secondary); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1.5rem;">
-                    <p style="margin-bottom: 0.5rem;"><strong>Email:</strong> <a href="mailto:accessibility@kartly.com" style="color: var(--color-primary);">accessibility@kartly.com</a></p>
+                    <p style="margin-bottom: 0.5rem;"><strong>Email:</strong> <a href="mailto:accessibility@Rosabella.com" style="color: var(--color-primary);">accessibility@Rosabella.com</a></p>
                     <p style="margin-bottom: 0.5rem;"><strong>Phone:</strong> +880 1700-000000</p>
                     <p><strong>Address:</strong> Dhaka, Bangladesh</p>
                 </div>

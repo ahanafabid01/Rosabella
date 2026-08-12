@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Payment Callback Handler
+ * Rosabella - Payment Callback Handler
  */
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/payment_gateway.php';

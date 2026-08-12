@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Careers
+ * Rosabella - Careers
  */
 $pageTitle = 'Careers';
 require_once __DIR__ . '/../includes/header.php';
@@ -17,7 +17,7 @@ require_once __DIR__ . '/../includes/header.php';
     <section class="section">
         <div class="container" style="max-width: 1000px;">
             
-            <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 2rem; text-align: center;">Why Work at KARTLY?</h2>
+            <h2 style="font-size: 1.5rem; font-weight: 600; margin-bottom: 2rem; text-align: center;">Why Work at Rosabella?</h2>
             
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-bottom: 4rem;">
                 <div style="text-align: center; padding: 1.5rem;">

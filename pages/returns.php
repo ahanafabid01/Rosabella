@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Returns & Exchanges
+ * Rosabella - Returns & Exchanges
  */
 $pageTitle = 'Returns & Exchanges';
 require_once __DIR__ . '/../includes/header.php';

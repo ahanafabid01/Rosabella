@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Newsletter API
+ * Rosabella - Newsletter API
  */
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Help Center
+ * Rosabella - Help Center
  */
 $pageTitle = 'Help Center';
 require_once __DIR__ . '/../includes/header.php';
@@ -111,7 +111,7 @@ require_once __DIR__ . '/../includes/header.php';
                     <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                         <details style="background: var(--color-bg-secondary); border-radius: var(--radius-md); padding: 1rem; cursor: pointer;">
                             <summary style="font-weight: 500; outline: none;">What payment methods do you accept?</summary>
-                            <p style="margin-top: 0.75rem; color: var(--color-text-light); font-size: 0.875rem;">We accept all major credit cards (Visa, MasterCard, American Express), PayPal, Apple Pay, Google Pay, and KARTLY gift cards.</p>
+                            <p style="margin-top: 0.75rem; color: var(--color-text-light); font-size: 0.875rem;">We accept all major credit cards (Visa, MasterCard, American Express), PayPal, Apple Pay, Google Pay, and Rosabella gift cards.</p>
                         </details>
                         <details style="background: var(--color-bg-secondary); border-radius: var(--radius-md); padding: 1rem; cursor: pointer;">
                             <summary style="font-weight: 500; outline: none;">Is my payment information secure?</summary>
@@ -137,7 +137,7 @@ require_once __DIR__ . '/../includes/header.php';
                         </details>
                         <details style="background: var(--color-bg-secondary); border-radius: var(--radius-md); padding: 1rem; cursor: pointer;">
                             <summary style="font-weight: 500; outline: none;">I forgot my password. What should I do?</summary>
-                            <p style="margin-top: 0.75rem; color: var(--color-text-light); font-size: 0.875rem;">Please contact support at <a href="mailto:support@kartly.com" style="color: var(--color-primary);">support@kartly.com</a> and we'll help you recover account access.</p>
+                            <p style="margin-top: 0.75rem; color: var(--color-text-light); font-size: 0.875rem;">Please contact support at <a href="mailto:support@Rosabella.com" style="color: var(--color-primary);">support@Rosabella.com</a> and we'll help you recover account access.</p>
                         </details>
                         <details style="background: var(--color-bg-secondary); border-radius: var(--radius-md); padding: 1rem; cursor: pointer;">
                             <summary style="font-weight: 500; outline: none;">How do I cancel my order?</summary>
@@ -152,7 +152,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">Still need help?</h3>
                 <p style="color: var(--color-text-light); margin-bottom: 1.5rem;">Our support team is available 24/7 to assist you</p>
                 <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
-                    <a href="mailto:support@kartly.com" class="btn btn-primary">
+                    <a href="mailto:support@Rosabella.com" class="btn btn-primary">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                         Email Support
                     </a>

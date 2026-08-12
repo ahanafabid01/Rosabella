@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Privacy Policy
+ * Rosabella - Privacy Policy
  */
 $pageTitle = 'Privacy Policy';
 require_once __DIR__ . '/../includes/header.php';
@@ -27,7 +27,7 @@ require_once __DIR__ . '/../includes/header.php';
             <div style="background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem;">
                 <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">1. Introduction</h2>
                 <p style="color: var(--color-text-light); margin-bottom: 1.5rem;">
-                    KARTLY ("we," "our," or "us") respects your privacy and is committed to protecting your personal data. 
+                    Rosabella ("we," "our," or "us") respects your privacy and is committed to protecting your personal data. 
                     This privacy policy explains how we collect, use, and safeguard your information when you visit our website.
                 </p>
 
@@ -84,7 +84,7 @@ require_once __DIR__ . '/../includes/header.php';
                     If you have questions about this Privacy Policy, please contact us:
                 </p>
                 <p style="color: var(--color-text-light);">
-                    Email: <a href="mailto:privacy@kartly.com" style="color: var(--color-primary);">privacy@kartly.com</a><br>
+                    Email: <a href="mailto:privacy@Rosabella.com" style="color: var(--color-primary);">privacy@Rosabella.com</a><br>
                     Phone: +1 (555) 123-4567<br>
                     Address: 123 Commerce Street, Shopping City, SC 12345
                 </p>

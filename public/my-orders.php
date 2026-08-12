@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - User Account
+ * Rosabella - User Account
  */
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

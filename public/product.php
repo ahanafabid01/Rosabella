@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Single Product Page
+ * Rosabella - Single Product Page
  */
 require_once __DIR__ . '/../config/database.php';
 

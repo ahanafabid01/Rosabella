@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Affiliate Program
+ * Rosabella - Affiliate Program
  */
 $pageTitle = 'Affiliate Program';
 require_once __DIR__ . '/../includes/header.php';
@@ -9,7 +9,7 @@ require_once __DIR__ . '/../includes/header.php';
     <!-- Hero -->
     <section style="background: var(--color-primary); padding: 3rem 0; color: white; text-align: center;">
         <div class="container">
-            <h1 style="font-size: 2.5rem; font-weight: 700;">Partner With KARTLY</h1>
+            <h1 style="font-size: 2.5rem; font-weight: 700;">Partner With Rosabella</h1>
         </div>
     </section>
 
@@ -118,7 +118,7 @@ require_once __DIR__ . '/../includes/header.php';
                         <input type="url" class="form-input" placeholder="https://" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">How will you promote KARTLY?</label>
+                        <label class="form-label">How will you promote Rosabella?</label>
                         <textarea class="form-textarea" rows="3" placeholder="Tell us about your audience and promotion strategy..." required></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">Submit Application</button>

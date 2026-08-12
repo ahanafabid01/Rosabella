@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Cart API
+ * Rosabella - Cart API
  */
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

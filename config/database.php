@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Database Configuration
+ * Rosabella - Database Configuration
  * Update these values with your hosting provider's database credentials
  */
 

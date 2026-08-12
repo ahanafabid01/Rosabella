@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - About Us
+ * Rosabella - About Us
  */
 $pageTitle = 'About Us';
 require_once __DIR__ . '/../includes/header.php';
@@ -21,7 +21,7 @@ require_once __DIR__ . '/../includes/header.php';
             <div style="text-align: center; margin-bottom: 4rem;">
                 <h2 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 1rem;">Our Mission</h2>
                 <p style="font-size: 1.125rem; color: var(--color-text-light); max-width: 700px; margin: 0 auto;">
-                    At KARTLY, we believe everyone deserves access to quality products at fair prices. 
+                    At Rosabella, we believe everyone deserves access to quality products at fair prices. 
                     Our mission is to make online shopping simple, enjoyable, and accessible for everyone.
                 </p>
             </div>
@@ -31,7 +31,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <div>
                     <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">How It Started</h3>
                     <p style="color: var(--color-text-light); margin-bottom: 1rem;">
-                        KARTLY was founded in 2020 with a simple idea: create an online shopping experience 
+                        Rosabella was founded in 2020 with a simple idea: create an online shopping experience 
                         that puts customers first. We noticed that many e-commerce platforms were complicated, 
                         impersonal, and often frustrating to use.
                     </p>
@@ -43,7 +43,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <div>
                     <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">Where We Are Today</h3>
                     <p style="color: var(--color-text-light); margin-bottom: 1rem;">
-                        Today, KARTLY serves millions of customers worldwide with a curated selection of 
+                        Today, Rosabella serves millions of customers worldwide with a curated selection of 
                         products across electronics, fashion, home goods, and more.
                     </p>
                     <p style="color: var(--color-text-light);">

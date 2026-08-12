@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - 404 Page Not Found
+ * Rosabella - 404 Page Not Found
  */
 
 function dispatchCleanUrlFallback(): void

@@ -309,7 +309,7 @@ The admin `.htaccess` restricts direct file access. Admin session checks are enf
 
 ## Routing
 
-Kartly uses Apache `mod_rewrite` to serve clean, extension-free URLs. The `.htaccess` forwards all non-file, non-directory requests to `index.php`, which delegates to `includes/router.php`.
+Rosabella uses Apache `mod_rewrite` to serve clean, extension-free URLs. The `.htaccess` forwards all non-file, non-directory requests to `index.php`, which delegates to `includes/router.php`.
 
 | URL Pattern | Resolves To |
 |---|---|

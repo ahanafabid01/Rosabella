@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - User Registration
+ * Rosabella - User Registration
  */
 $pageTitle = 'Create Account';
 require_once __DIR__ . '/../config/database.php';

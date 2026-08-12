@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Gift Cards Page
+ * Rosabella - Gift Cards Page
  */
 $pageTitle = 'Gift Cards';
 require_once __DIR__ . '/../includes/header.php';
@@ -15,7 +15,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <span> / </span>
                 <span style="color: var(--color-text);">Gift Cards</span>
             </nav>
-            <p style="color: var(--color-text-light); margin-top: 0.5rem;">Give the gift of choice with KARTLY gift cards</p>
+            <p style="color: var(--color-text-light); margin-top: 0.5rem;">Give the gift of choice with Rosabella gift cards</p>
         </div>
     </section>
 
@@ -25,7 +25,7 @@ require_once __DIR__ . '/../includes/header.php';
             <!-- Hero -->
             <div style="background: linear-gradient(135deg, var(--color-primary), #dc5603); border-radius: var(--radius-xl); padding: 3rem 2rem; text-align: center; color: white; margin-bottom: 3rem;">
                 <h2 style="font-size: 2rem; font-weight: 700; margin-bottom: 1rem;">The Perfect Gift for Everyone</h2>
-                <p style="max-width: 500px; margin: 0 auto 1.5rem; opacity: 0.9;">KARTLY gift cards are the perfect way to show you care. Let them choose exactly what they want.</p>
+                <p style="max-width: 500px; margin: 0 auto 1.5rem; opacity: 0.9;">Rosabella gift cards are the perfect way to show you care. Let them choose exactly what they want.</p>
                 <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>

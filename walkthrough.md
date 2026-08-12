@@ -1,4 +1,4 @@
-# ✅ Kartly — Security Fix Walkthrough
+# ✅ Rosabella — Security Fix Walkthrough
 **Date:** 2026-08-07  
 **Status: ALL CRITICAL & HIGH ISSUES FIXED**
 
@@ -39,7 +39,7 @@
 | 13 | Minimum password 6 chars | Increased to 8 characters minimum |
 | 14 | Rate limiting on brute-force | Login: 10 attempts/10 min · Register: 5/10 min · Contact: 5/10 min |
 | 15 | Rate limiting on API scraping | Search: 60/min · Product: 120/min · Newsletter: 5/10 min |
-| 16 | `logs/` directory not protected | Added `RedirectMatch 403 ^/(Kartly/)?logs/` + internal `.htaccess` |
+| 16 | `logs/` directory not protected | Added `RedirectMatch 403 ^/(Rosabella/)?logs/` + internal `.htaccess` |
 | 17 | Sensitive file types not fully blocked | Added `.bak .swp .sh .bash` and `composer.json README.md` to blocked list |
 
 ---
@@ -161,8 +161,8 @@ Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains
 Header always set Content-Security-Policy "default-src 'self'; ..."
 Header always unset X-Powered-By
 LimitRequestBody 10485760
-RedirectMatch 403 ^/(Kartly/)?\.git
-RedirectMatch 403 ^/(Kartly/)?logs/
+RedirectMatch 403 ^/(Rosabella/)?\.git
+RedirectMatch 403 ^/(Rosabella/)?logs/
 ```
 
 ---
@@ -186,10 +186,10 @@ RedirectMatch 403 ^/(Kartly/)?logs/
 
 > **Change the database credentials and SECRET_KEY before going live.**
 >
-> In [`config/database.php`](file:///c:/xampp/htdocs/Kartly/config/database.php):
+> In [`config/database.php`](file:///c:/xampp/htdocs/Rosabella/config/database.php):
 > ```php
 > // Create a dedicated MySQL user with limited permissions:
-> define('DB_USER', 'kartly_user');     // NOT root
+> define('DB_USER', 'Rosabella_user');     // NOT root
 > define('DB_PASS', 'your-strong-pass'); // NOT empty
 > define('SECRET_KEY', bin2hex(random_bytes(32))); // run once, paste result
 > ```

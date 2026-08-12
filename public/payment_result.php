@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Payment Result Page
+ * Rosabella - Payment Result Page
  */
 $pageTitle = 'Payment Status';
 require_once __DIR__ . '/../config/database.php';

@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Header Include
+ * Rosabella - Header Include
  */
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -34,7 +34,7 @@ $currencySymbol = getSetting('currency_symbol') ?: 'Tk';
 $freeShippingThreshold = floatval(getSetting('free_shipping_threshold') ?: 5000);
 $siteLogo = getSetting('site_logo') ?: '';
 $siteIcon = getSetting('site_icon') ?: '';
-$siteName = getSetting('site_name') ?: 'KARTLY';
+$siteName = getSetting('site_name') ?: 'Rosabella';
 $isClothingBrandTheme = getHomepageTheme() === 'clothing_brand';
 
 // Typography settings from DB (font family only)

@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Admin Products Management
+ * Rosabella - Admin Products Management
  */
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -461,7 +461,7 @@ $pageTitle = 'Products Management';
     <?php endif; ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $pageTitle ?> - KARTLY Admin</title>
+    <title><?= $pageTitle ?> - Rosabella Admin</title>
     <link rel="stylesheet" href="../assets/css/style.css">
 <link rel="stylesheet" href="css/admin.css">
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">

@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Wishlist API
+ * Rosabella - Wishlist API
  */
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

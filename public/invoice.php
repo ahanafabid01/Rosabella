@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Invoice / PDF Download
+ * Rosabella - Invoice / PDF Download
  * Accessible via:
  *   /invoice?order=KAR-XXXX          (logged-in user, owns the order)
  *   /invoice?order=KAR-XXXX&email=x  (guest, must supply order email)

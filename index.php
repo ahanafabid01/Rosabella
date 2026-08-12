@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Homepage
+ * Rosabella - Homepage
  */
 require_once __DIR__ . '/includes/router.php';
 require_once __DIR__ . '/includes/themes.php';  // Load theme system

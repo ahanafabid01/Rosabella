@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Size Guide
+ * Rosabella - Size Guide
  */
 $pageTitle = 'Size Guide';
 require_once __DIR__ . '/../includes/header.php';

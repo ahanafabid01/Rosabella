@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Shipping Information
+ * Rosabella - Shipping Information
  */
 $pageTitle = 'Shipping Information';
 require_once __DIR__ . '/../includes/header.php';

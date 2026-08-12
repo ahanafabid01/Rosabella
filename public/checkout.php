@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Checkout Page
+ * Rosabella - Checkout Page
  */
 $pageTitle = 'Checkout';
 require_once __DIR__ . '/../config/database.php';

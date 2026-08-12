@@ -1,6 +1,6 @@
 <?php
 /**
- * KARTLY - Homepage Theme Manager
+ * Rosabella - Homepage Theme Manager
  * 
  * This file provides theme loading and rendering functions for the homepage.
  * Each theme can customize the layout and presentation of sections.
