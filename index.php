@@ -94,44 +94,7 @@ try {
 }
 
 if (!$hotDealsTableReady) {
-    $hotDeals = [
-        [
-            'title' => 'Up to 70% Off',
-            'subtitle' => 'Electronics & Gadgets',
-            'badge_text' => 'Limited Time',
-            'badge_style' => 'danger',
-            'timer_text' => '12:45:30',
-            'image_path' => 'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=800&q=80',
-            'link_url' => 'category/electronics',
-            'overlay_start' => 'rgba(15, 118, 110, 0.84)',
-            'overlay_end' => 'rgba(11, 91, 85, 0.62)',
-            'image_position' => 'center center',
-        ],
-        [
-            'title' => 'Fashion Forward',
-            'subtitle' => 'Summer Collection 2024',
-            'badge_text' => 'New Arrivals',
-            'badge_style' => 'primary',
-            'timer_text' => '23:59:59',
-            'image_path' => 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=80',
-            'link_url' => 'category/fashion',
-            'overlay_start' => 'rgba(30, 64, 175, 0.82)',
-            'overlay_end' => 'rgba(30, 58, 138, 0.62)',
-            'image_position' => 'center top',
-        ],
-        [
-            'title' => 'Buy 2 Get 1 Free',
-            'subtitle' => 'Home & Living Essentials',
-            'badge_text' => 'This Weekend',
-            'badge_style' => 'success',
-            'timer_text' => '48:00:00',
-            'image_path' => 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80',
-            'link_url' => 'category/home-living',
-            'overlay_start' => 'rgba(15, 118, 110, 0.84)',
-            'overlay_end' => 'rgba(13, 89, 97, 0.62)',
-            'image_position' => 'center center',
-        ],
-    ];
+    $hotDeals = [];
 }
 
 // Fetch hero slides from DB

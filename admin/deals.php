@@ -123,100 +123,6 @@ function toDateTimeLocalValue(?string $value): string
         return '';
     }
 
-    return date('Y-m-d\TH:i', $timestamp);
-}
-
-function seedDefaultDeals(PDO $db): void
-{
-    $seeded = $db->query("SELECT setting_value FROM settings WHERE setting_key = 'deals_seeded'")->fetchColumn();
-    if ($seeded === '1') {
-        return;
-    }
-
-    $count = intval($db->query("SELECT COUNT(*) FROM deals")->fetchColumn());
-    if ($count > 0) {
-        $db->exec("INSERT IGNORE INTO settings (setting_key, setting_value, setting_type) VALUES ('deals_seeded', '1', 'boolean')");
-        return;
-    }
-
-    $db->exec("INSERT IGNORE INTO settings (setting_key, setting_value, setting_type) VALUES ('deals_seeded', '1', 'boolean')");
-
-
-
-    $defaultDeals = [
-        [
-            'title' => 'Up to 70% Off',
-            'subtitle' => 'Electronics & Gadgets',
-            'badge_text' => 'Limited Time',
-            'badge_style' => 'danger',
-            'timer_text' => '12:45:30',
-            'countdown_end_at' => date('Y-m-d H:i:s', time() + (12 * 3600)),
-            'image_path' => 'https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=800&q=80',
-            'link_url' => 'category/electronics',
-            'overlay_start' => 'rgba(15, 118, 110, 0.84)',
-            'overlay_end' => 'rgba(11, 91, 85, 0.62)',
-            'image_position' => 'center center',
-            'sort_order' => 1,
-        ],
-        [
-            'title' => 'Fashion Forward',
-            'subtitle' => 'Summer Collection 2024',
-            'badge_text' => 'New Arrivals',
-            'badge_style' => 'primary',
-            'timer_text' => '23:59:59',
-            'countdown_end_at' => date('Y-m-d H:i:s', time() + (24 * 3600)),
-            'image_path' => 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=80',
-            'link_url' => 'shop',
-            'overlay_start' => 'rgba(30, 64, 175, 0.82)',
-            'overlay_end' => 'rgba(30, 58, 138, 0.62)',
-            'image_position' => 'center top',
-            'sort_order' => 2,
-        ],
-        [
-            'title' => 'Buy 2 Get 1 Free',
-            'subtitle' => 'Home & Living Essentials',
-            'badge_text' => 'This Weekend',
-            'badge_style' => 'success',
-            'timer_text' => '48:00:00',
-            'countdown_end_at' => date('Y-m-d H:i:s', time() + (48 * 3600)),
-            'image_path' => 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80',
-            'link_url' => 'shop',
-            'overlay_start' => 'rgba(15, 118, 110, 0.84)',
-            'overlay_end' => 'rgba(13, 89, 97, 0.62)',
-            'image_position' => 'center center',
-            'sort_order' => 3,
-        ],
-    ];
-
-    $insertStmt = $db->prepare("
-        INSERT INTO deals (title, subtitle, badge_text, badge_style, timer_text, countdown_end_at, image_path, link_url, overlay_start, overlay_end, image_position, sort_order, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active')
-    ");
-    foreach ($defaultDeals as $defaultDeal) {
-        $insertStmt->execute([
-            $defaultDeal['title'],
-            $defaultDeal['subtitle'],
-            $defaultDeal['badge_text'],
-            $defaultDeal['badge_style'],
-            $defaultDeal['timer_text'],
-            $defaultDeal['countdown_end_at'],
-            $defaultDeal['image_path'],
-            $defaultDeal['link_url'],
-            $defaultDeal['overlay_start'],
-            $defaultDeal['overlay_end'],
-            $defaultDeal['image_position'],
-            $defaultDeal['sort_order'],
-        ]);
-    }
-}
-
-function resolveAdminDealImageSrc(?string $imagePath): string
-{
-    $imagePath = trim((string)$imagePath);
-    if ($imagePath === '') {
-        return '';
-    }
-
     if (preg_match('/^(https?:)?\/\//i', $imagePath) || strpos($imagePath, 'data:') === 0 || strpos($imagePath, '../') === 0 || strpos($imagePath, '/') === 0) {
         return $imagePath;
     }
@@ -309,7 +215,6 @@ if (!$dealsTableReady) {
 }
 ensureDealsSettings($db);
 if ($dealsTableReady) {
-    seedDefaultDeals($db);
 }
 
 if ($dealsTableReady && $action === 'delete' && $dealId > 0) {

@@ -31,7 +31,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_update'])) {
     $value  = sanitize($_POST['value'] ?? '');
 
     $allowed = [
-        'role'   => ['customer', 'admin'],
         'status' => ['active', 'inactive', 'banned'],
     ];
 
@@ -243,15 +242,10 @@ $pageTitle = 'Users Management';
                         <td style="color:#94a3b8;font-size:.8rem;"><?= date('M j, Y', strtotime($user['created_at'])) ?></td>
 
                         <!-- Role (auto-save) -->
+                        <!-- Role (Read-only) -->
                         <td>
-                            <span class="u-save-wrap">
-                                <select class="u-select" data-field="role" data-user-id="<?= intval($user['id']) ?>"
-                                    data-val="<?= htmlspecialchars($user['role']) ?>"
-                                    <?= $isSelf ? 'disabled title="Cannot change your own role"' : '' ?>>
-                                    <option value="customer" <?= $user['role'] === 'customer' ? 'selected' : '' ?>>Customer</option>
-                                    <option value="admin"    <?= $user['role'] === 'admin'    ? 'selected' : '' ?>>Admin</option>
-                                </select>
-                                <span class="u-saving-ring"></span>
+                            <span style="font-weight: 500; color: <?= $user['role'] === 'admin' ? '#6366f1' : 'var(--color-primary,#0f766e)' ?>;">
+                                <?= ucfirst(htmlspecialchars($user['role'])) ?>
                             </span>
                         </td>
 
