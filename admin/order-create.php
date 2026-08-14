@@ -430,6 +430,85 @@ $pageTitle = 'Order Create';
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="css/admin.css">
     <style>
+        /* Table Cell Padding Override - Counteracts admin-table padding!important */
+        #order-items-table th,
+        #order-items-table td,
+        .oc-table th,
+        .oc-table td {
+            padding: 10px 12px !important;
+            white-space: normal !important;
+            max-width: none !important;
+            box-sizing: border-box !important;
+        }
+        #order-items-table thead th {
+            white-space: nowrap !important;
+        }
+
+        /* Flex & Input Min-Width Containment */
+        .oc-card *, .admin-card * {
+            box-sizing: border-box !important;
+        }
+        .oc-form-group, .customer-search-box, .oc-prod-search-row {
+            min-width: 0 !important;
+            max-width: 100% !important;
+        }
+        .oc-input, .oc-select, .oc-textarea, .form-input, .form-select, .form-textarea {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            box-sizing: border-box !important;
+        }
+        .oc-prod-search-row > div {
+            min-width: 0 !important;
+            max-width: 100% !important;
+        }
+
+        /* Card Containment & Horizontal Scroll */
+        .oc-card, .admin-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            margin-bottom: 1.5rem;
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+            overflow: hidden !important;
+        }
+
+        .oc-table-wrap {
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            display: block !important;
+            box-sizing: border-box !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 10px !important;
+            margin-bottom: 20px !important;
+        }
+        
+        .oc-table-wrap::-webkit-scrollbar {
+            height: 6px;
+        }
+        .oc-table-wrap::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        .oc-table-wrap::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .oc-table-wrap::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .oc-table, #order-items-table {
+            min-width: 620px !important;
+            width: 100% !important;
+        }
+
         .oc-row-4 {
             display: grid !important;
             grid-template-columns: repeat(4, 1fr) !important;
@@ -440,16 +519,37 @@ $pageTitle = 'Order Create';
             .oc-row-4 { grid-template-columns: repeat(2, 1fr) !important; }
         }
         @media (max-width: 640px) {
-            .oc-row-4 { grid-template-columns: 1fr !important; }
+            .oc-row-4 { grid-template-columns: 1fr !important; gap: 12px !important; margin-bottom: 12px !important; }
         }
         .oc-two-col-layout {
             display: grid !important;
             grid-template-columns: 1fr 370px !important;
             gap: 20px !important;
             align-items: start !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+        }
+        .oc-two-col-layout > div {
+            min-width: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
         }
         @media (max-width: 1100px) {
-            .oc-two-col-layout { grid-template-columns: 1fr !important; }
+            .oc-two-col-layout { 
+                grid-template-columns: 100% !important; 
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 16px !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                align-items: stretch !important;
+            }
+            .oc-summary-card {
+                position: static !important;
+                top: auto !important;
+            }
         }
         .customer-search-box {
             background: #f8fafc;
@@ -461,6 +561,8 @@ $pageTitle = 'Order Create';
             align-items: center;
             gap: 12px;
             position: relative;
+            box-sizing: border-box;
+            width: 100%;
         }
         .customer-search-box:focus-within {
             border-color: #0f766e;
@@ -473,9 +575,64 @@ $pageTitle = 'Order Create';
             font-size: 0.95rem;
             outline: none;
             color: #0f172a;
+            min-width: 0;
         }
         .customer-search-input::placeholder {
             color: #94a3b8;
+        }
+        @media (max-width: 768px) {
+            .admin-content {
+                padding: 0.75rem 0.5rem !important;
+                box-sizing: border-box !important;
+            }
+            .oc-card, .admin-card {
+                padding: 0.85rem 0.75rem !important;
+                border-radius: 10px !important;
+                margin-bottom: 1rem !important;
+            }
+            .customer-search-box {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 10px !important;
+                padding: 10px 12px !important;
+            }
+            .customer-search-box button {
+                width: 100% !important;
+                justify-content: center !important;
+                height: 38px !important;
+            }
+            .oc-prod-search-row {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 8px !important;
+            }
+            .oc-prod-search-row button {
+                width: 100% !important;
+                justify-content: center !important;
+                height: 40px !important;
+            }
+            .oc-grid-2 {
+                grid-template-columns: 1fr !important;
+                gap: 12px !important;
+            }
+            .oc-summary-row {
+                padding: 0.55rem 0 !important;
+                font-size: 0.86rem !important;
+                gap: 8px !important;
+            }
+            .oc-summary-input {
+                width: 85px !important;
+                max-width: 85px !important;
+                padding: 0.35rem 0.45rem !important;
+                font-size: 0.85rem !important;
+            }
+            .oc-product-dropdown {
+                max-height: 280px !important;
+            }
+            .oc-prod-item {
+                padding: 8px 10px !important;
+                gap: 8px !important;
+            }
         }
     </style>
 </head>
@@ -604,8 +761,8 @@ $pageTitle = 'Order Create';
                         <div class="oc-form-group" style="margin-bottom: 16px; position: relative;">
                             <label class="oc-label">Search & Add Product</label>
                             
-                            <div style="display: flex; gap: 8px; align-items: center;">
-                                <div style="position: relative; flex: 1;">
+                            <div class="oc-prod-search-row" style="display: flex; gap: 8px; align-items: center;">
+                                <div style="position: relative; flex: 1; min-width: 0;">
                                     <div style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #64748b; pointer-events: none;">
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                                     </div>

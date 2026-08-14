@@ -104,7 +104,6 @@ $pageTitle = 'Orders Management';
             <div class="admin-header">
                 <h1 class="admin-title">Orders</h1>
                 <div class="admin-actions-row">
-                    <a href="<?= BASE_URL ?>/admin/order-create" class="btn btn-primary">+ Create Order</a>
                     <form method="GET" class="admin-actions-row" style="margin: 0;">
                         <select name="status" class="form-select" onchange="this.form.submit()">
                             <option value="">All Statuses</option>

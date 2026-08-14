@@ -87,3 +87,8 @@ Stack trace:
 [14-Aug-2026 14:19:23 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\Rosabella\admin\order-create.php on line 121
 [14-Aug-2026 14:21:19 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\Rosabella\admin\order-create.php on line 121
 [14-Aug-2026 14:22:05 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\Rosabella\admin\order-create.php on line 121
+[14-Aug-2026 14:26:17 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\Rosabella\admin\order-create.php on line 121
+[14-Aug-2026 14:29:19 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\Rosabella\admin\order-create.php on line 121
+[14-Aug-2026 14:30:57 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\Rosabella\admin\order-create.php on line 121
+[14-Aug-2026 14:32:30 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\Rosabella\admin\order-create.php on line 121
+[14-Aug-2026 14:33:42 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\Rosabella\admin\order-create.php on line 121
