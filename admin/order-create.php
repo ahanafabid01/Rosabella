@@ -828,19 +828,18 @@ $pageTitle = 'Order Create';
                         <!-- Dynamic Listed Products Table -->
                         <div class="oc-table-wrap">
                             <table class="oc-table" id="order-items-table">
-                                <thead>
+                                <thead id="order-items-head">
                                     <tr>
-                                        <th style="min-width: 200px;">Product</th>
-                                        <th style="width: 140px;">Variation</th>
-                                        <th style="width: 115px;" class="th-right">Price</th>
-                                        <th style="width: 80px;" class="th-center">Quantity</th>
-                                        <th style="width: 125px;" class="th-right">Sub Total</th>
-                                        <th style="width: 50px;" class="th-center"></th>
+                                        <th style="min-width: 200px;">PRODUCT</th>
+                                        <th style="width: 110px;" class="th-right">PRICE</th>
+                                        <th style="width: 80px;" class="th-center">QUANTITY</th>
+                                        <th style="width: 120px;" class="th-right">SUB TOTAL</th>
+                                        <th style="width: 40px;" class="th-center"></th>
                                     </tr>
                                 </thead>
                                 <tbody id="order-items-body">
                                     <tr id="empty-products-row">
-                                        <td colspan="6" class="oc-empty-state">
+                                        <td colspan="5" class="oc-empty-state">
                                             <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
                                                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                                                 <span>No products selected. Search or browse products above to add items.</span>
@@ -1309,6 +1308,143 @@ $pageTitle = 'Order Create';
     }
 
     // ── Listed Products Table Operations ───────────────────────────────────────
+    var selectedProducts = [];
+
+    function updateTableColumns() {
+        var anySize = selectedProducts.some(function(item) {
+            return item.data.sizes && item.data.sizes.trim().length > 0;
+        });
+        var anyColor = selectedProducts.some(function(item) {
+            return item.data.colors && item.data.colors.trim().length > 0;
+        });
+        var anyVariant = selectedProducts.some(function(item) {
+            return item.data.variants && item.data.variants.trim().length > 0;
+        });
+
+        // Update Header
+        var headRow = document.querySelector('#order-items-head tr');
+        if (headRow) {
+            var cols = '<th style="min-width: 200px;">PRODUCT</th>';
+            if (anySize) cols += '<th style="width: 115px;">SIZE</th>';
+            if (anyColor) cols += '<th style="width: 115px;">COLOR</th>';
+            if (anyVariant) cols += '<th style="width: 115px;">VARIANT</th>';
+            cols += '<th style="width: 110px;" class="th-right">PRICE</th>';
+            cols += '<th style="width: 80px;" class="th-center">QUANTITY</th>';
+            cols += '<th style="width: 120px;" class="th-right">SUB TOTAL</th>';
+            cols += '<th style="width: 40px;" class="th-center"></th>';
+            headRow.innerHTML = cols;
+        }
+
+        var totalCols = 4 + (anySize ? 1 : 0) + (anyColor ? 1 : 0) + (anyVariant ? 1 : 0);
+        var emptyTd = document.querySelector('#empty-products-row td');
+        if (emptyTd) {
+            emptyTd.colSpan = totalCols;
+        }
+
+        // Update Rows
+        selectedProducts.forEach(function(item) {
+            var row = document.getElementById('item-row-' + item.index);
+            if (!row) return;
+
+            // Size cell
+            var tdSize = row.querySelector('.col-size');
+            if (anySize) {
+                if (!tdSize) {
+                    tdSize = document.createElement('td');
+                    tdSize.className = 'col-size';
+                    row.insertBefore(tdSize, row.children[1]);
+                }
+                tdSize.innerHTML = renderSizeSelect(item.index, item.data);
+            } else if (tdSize) {
+                tdSize.remove();
+            }
+
+            // Color cell
+            var tdColor = row.querySelector('.col-color');
+            if (anyColor) {
+                if (!tdColor) {
+                    tdColor = document.createElement('td');
+                    tdColor.className = 'col-color';
+                    var priceTd = row.querySelector('.col-price');
+                    row.insertBefore(tdColor, priceTd);
+                }
+                tdColor.innerHTML = renderColorSelect(item.index, item.data);
+            } else if (tdColor) {
+                tdColor.remove();
+            }
+
+            // Variant cell
+            var tdVariant = row.querySelector('.col-variant');
+            if (anyVariant) {
+                if (!tdVariant) {
+                    tdVariant = document.createElement('td');
+                    tdVariant.className = 'col-variant';
+                    var priceTd = row.querySelector('.col-price');
+                    row.insertBefore(tdVariant, priceTd);
+                }
+                tdVariant.innerHTML = renderVariantSelect(item.index, item.data);
+            } else if (tdVariant) {
+                tdVariant.remove();
+            }
+        });
+    }
+
+    function renderSizeSelect(index, data) {
+        if (!data.sizes || !data.sizes.trim()) {
+            return '<span style="color:#cbd5e1; font-size:0.85rem;">-</span>';
+        }
+        var sizeList = data.sizes.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+        if (sizeList.length === 0) return '<span style="color:#cbd5e1; font-size:0.85rem;">-</span>';
+        
+        var html = '<select name="items[' + index + '][size]" class="oc-select" style="font-size:0.82rem; padding: 0.3rem 0.5rem; min-height: 32px;">';
+        html += '<option value="">Size</option>';
+        sizeList.forEach(function(sz) {
+            html += '<option value="' + escapeHtml(sz) + '">' + escapeHtml(sz) + '</option>';
+        });
+        html += '</select>';
+        return html;
+    }
+
+    function renderColorSelect(index, data) {
+        if (!data.colors || !data.colors.trim()) {
+            return '<span style="color:#cbd5e1; font-size:0.85rem;">-</span>';
+        }
+        var colorList = [];
+        try {
+            var parsed = JSON.parse(data.colors);
+            if (typeof parsed === 'object') {
+                colorList = Object.keys(parsed);
+            }
+        } catch(e) {
+            colorList = data.colors.split(',').map(function(c) { return c.split(':')[0].trim(); }).filter(Boolean);
+        }
+        if (colorList.length === 0) return '<span style="color:#cbd5e1; font-size:0.85rem;">-</span>';
+
+        var html = '<select name="items[' + index + '][color]" class="oc-select" style="font-size:0.82rem; padding: 0.3rem 0.5rem; min-height: 32px;">';
+        html += '<option value="">Color</option>';
+        colorList.forEach(function(cl) {
+            html += '<option value="' + escapeHtml(cl) + '">' + escapeHtml(cl) + '</option>';
+        });
+        html += '</select>';
+        return html;
+    }
+
+    function renderVariantSelect(index, data) {
+        if (!data.variants || !data.variants.trim()) {
+            return '<span style="color:#cbd5e1; font-size:0.85rem;">-</span>';
+        }
+        var varList = data.variants.split(',').map(function(v) { return v.trim(); }).filter(Boolean);
+        if (varList.length === 0) return '<span style="color:#cbd5e1; font-size:0.85rem;">-</span>';
+
+        var html = '<select name="items[' + index + '][variant]" class="oc-select" style="font-size:0.82rem; padding: 0.3rem 0.5rem; min-height: 32px;">';
+        html += '<option value="">Variant</option>';
+        varList.forEach(function(vt) {
+            html += '<option value="' + escapeHtml(vt) + '">' + escapeHtml(vt) + '</option>';
+        });
+        html += '</select>';
+        return html;
+    }
+
     function addProductRow(data) {
         var emptyRow = document.getElementById('empty-products-row');
         if (emptyRow) {
@@ -1317,62 +1453,8 @@ $pageTitle = 'Order Create';
 
         itemCount++;
         var index = itemCount;
+        selectedProducts.push({ index: index, data: data });
         var tbody = document.getElementById('order-items-body');
-
-        // Variations selector builder
-        var variationHtml = '<div style="display: flex; flex-direction: column; gap: 4px;">';
-        
-        // Sizes
-        if (data.sizes && data.sizes.trim()) {
-            var sizeList = data.sizes.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
-            if (sizeList.length > 0) {
-                variationHtml += '<select name="items[' + index + '][size]" class="oc-select" style="font-size:0.8rem; padding: 0.25rem 0.5rem; min-height: 28px;">';
-                variationHtml += '<option value="">Size</option>';
-                sizeList.forEach(function(sz) {
-                    variationHtml += '<option value="' + escapeHtml(sz) + '">' + escapeHtml(sz) + '</option>';
-                });
-                variationHtml += '</select>';
-            }
-        }
-
-        // Colors
-        if (data.colors && data.colors.trim()) {
-            var colorList = [];
-            try {
-                var parsed = JSON.parse(data.colors);
-                if (typeof parsed === 'object') {
-                    colorList = Object.keys(parsed);
-                }
-            } catch(e) {
-                colorList = data.colors.split(',').map(function(c) { return c.split(':')[0].trim(); }).filter(Boolean);
-            }
-            if (colorList.length > 0) {
-                variationHtml += '<select name="items[' + index + '][color]" class="oc-select" style="font-size:0.8rem; padding: 0.25rem 0.5rem; min-height: 28px;">';
-                variationHtml += '<option value="">Color</option>';
-                colorList.forEach(function(cl) {
-                    variationHtml += '<option value="' + escapeHtml(cl) + '">' + escapeHtml(cl) + '</option>';
-                });
-                variationHtml += '</select>';
-            }
-        }
-
-        // Other Variants
-        if (data.variants && data.variants.trim()) {
-            var varList = data.variants.split(',').map(function(v) { return v.trim(); }).filter(Boolean);
-            if (varList.length > 0) {
-                variationHtml += '<select name="items[' + index + '][variant]" class="oc-select" style="font-size:0.8rem; padding: 0.25rem 0.5rem; min-height: 28px;">';
-                variationHtml += '<option value="">Variant</option>';
-                varList.forEach(function(vt) {
-                    variationHtml += '<option value="' + escapeHtml(vt) + '">' + escapeHtml(vt) + '</option>';
-                });
-                variationHtml += '</select>';
-            }
-        }
-
-        if (variationHtml === '<div style="display: flex; flex-direction: column; gap: 4px;">') {
-            variationHtml += '<span style="color:#94a3b8; font-size:0.8rem;">Standard</span>';
-        }
-        variationHtml += '</div>';
 
         var tr = document.createElement('tr');
         tr.id = 'item-row-' + index;
@@ -1396,22 +1478,22 @@ $pageTitle = 'Order Create';
                 '<input type="hidden" name="items[' + index + '][product_name]" value="' + escapeHtml(data.name) + '">' +
                 '<input type="hidden" name="items[' + index + '][product_sku]" value="' + escapeHtml(data.sku) + '">' +
             '</td>' +
-            '<td>' + variationHtml + '</td>' +
-            '<td style="text-align: right;">' +
+            '<td style="text-align: right;" class="col-price">' +
                 '<span class="row-unit-price" style="font-weight: 600; color: #334155; font-size: 0.9rem; white-space: nowrap;">Tk ' + priceVal.toFixed(2) + '</span>' +
                 '<input type="hidden" name="items[' + index + '][price]" class="row-price-input" value="' + priceVal.toFixed(2) + '">' +
             '</td>' +
-            '<td style="text-align: center;">' +
+            '<td style="text-align: center;" class="col-qty">' +
                 '<input type="number" min="1" max="' + (data.stock || 100) + '" name="items[' + index + '][quantity]" class="oc-table-input row-qty" value="1" style="width: 70px; text-align: center;" oninput="recalculateRow(' + index + ')">' +
             '</td>' +
-            '<td style="text-align: right;">' +
+            '<td style="text-align: right;" class="col-subtotal">' +
                 '<div class="row-subtotal" style="font-weight: 700; color: #0f766e; font-size: 0.95rem; white-space: nowrap;">Tk ' + priceVal.toFixed(2) + '</div>' +
             '</td>' +
-            '<td style="text-align: center;">' +
+            '<td style="text-align: center;" class="col-action">' +
                 '<button type="button" class="oc-btn-remove" onclick="removeProductRow(' + index + ')" title="Remove item">&times;</button>' +
             '</td>';
 
         tbody.appendChild(tr);
+        updateTableColumns();
         recalculateTotals();
     }
 
@@ -1421,8 +1503,13 @@ $pageTitle = 'Order Create';
             tr.remove();
         }
 
-        var remainingRows = document.querySelectorAll('#order-items-body tr:not(#empty-products-row)');
-        if (remainingRows.length === 0) {
+        selectedProducts = selectedProducts.filter(function(item) {
+            return item.index !== index;
+        });
+
+        updateTableColumns();
+
+        if (selectedProducts.length === 0) {
             var emptyRow = document.getElementById('empty-products-row');
             if (emptyRow) {
                 emptyRow.style.display = '';
