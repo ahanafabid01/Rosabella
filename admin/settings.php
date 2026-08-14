@@ -605,16 +605,6 @@ $pageTitle = 'Settings';
                             'description' => 'The current classic layout featuring a hero section with bento grid layout, category showcase, featured products grid, and hot deals section.',
                             'features' => ['Hero Bento Grid', 'Categories Grid', 'Featured Products', 'Hot Deals Banner', 'New Arrivals'],
                         ],
-                        'compact_layout' => [
-                            'name' => 'Compact Layout',
-                            'description' => 'A more streamlined and compact version with minimal spacing, condensed cards, and a focus on showing more products per row for higher product density.',
-                            'features' => ['Compact Spacing', 'Smaller Cards', 'More Products/Row', 'Simplified Hero', 'Dense Grid'],
-                        ],
-                        'showcase_layout' => [
-                            'name' => 'Showcase Layout',
-                            'description' => 'A premium showcase-focused layout with larger hero sections, bigger product cards with detailed info, and emphasis on high-quality imagery and product presentation.',
-                            'features' => ['Large Hero', 'Premium Cards', 'Detailed Info', 'High Imagery', 'Spacious Design'],
-                        ],
                         'clothing_brand' => [
                             'name' => 'Clothing Brand',
                             'description' => 'Professional fashion e-commerce layout optimized for clothing brands. Features full-width hero with overlay, prominent category showcase, product-focused grid, and promotional banners for maximum impact.',

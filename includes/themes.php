@@ -8,7 +8,7 @@
 
 /**
  * Get the currently selected homepage theme
- * @return string Theme key (default_theme, compact_layout, showcase_layout)
+ * @return string Theme key (default_theme, clothing_brand)
  */
 function getHomepageTheme() {
     return getSetting('homepage_theme') ?: 'default_theme';
@@ -39,42 +39,6 @@ function getThemeConfig($theme = null) {
             'show_category_sidebar' => false,
             'featured_section_title' => 'Featured Products',
             'new_arrivals_title' => 'New Arrivals',
-            'compact_mode' => false,
-        ],
-        'compact_layout' => [
-            'name' => 'Compact Layout',
-            'hero_grid_layout' => 'minimal',
-            'hero_height_mobile' => 'clamp(280px, 45vw, 360px)',
-            'hero_height_tablet' => 'clamp(360px, 50vh, 480px)',
-            'hero_height_desktop' => 'clamp(460px, 58vh, 580px)',
-            'categories_columns_mobile' => 3,
-            'categories_columns_tablet' => 4,
-            'categories_columns_desktop' => 8,
-            'products_columns_mobile' => 2,
-            'products_columns_tablet' => 4,
-            'products_columns_desktop' => 5,
-            'product_card_style' => 'minimal',
-            'show_category_sidebar' => false,
-            'featured_section_title' => 'Top Products',
-            'new_arrivals_title' => 'New',
-            'compact_mode' => true,
-        ],
-        'showcase_layout' => [
-            'name' => 'Showcase Layout',
-            'hero_grid_layout' => 'full-width',
-            'hero_height_mobile' => 'clamp(400px, 70vw, 600px)',
-            'hero_height_tablet' => 'clamp(580px, 75vh, 720px)',
-            'hero_height_desktop' => 'clamp(720px, 80vh, 880px)',
-            'categories_columns_mobile' => 2,
-            'categories_columns_tablet' => 3,
-            'categories_columns_desktop' => 4,
-            'products_columns_mobile' => 1,
-            'products_columns_tablet' => 2,
-            'products_columns_desktop' => 3,
-            'product_card_style' => 'detailed',
-            'show_category_sidebar' => true,
-            'featured_section_title' => 'Handpicked Selection',
-            'new_arrivals_title' => 'Latest Arrivals',
             'compact_mode' => false,
         ],
         'clothing_brand' => [
@@ -115,11 +79,7 @@ function getThemeHeroCSS($theme = null) {
     $cssVars = [];
     
     // Set CSS variables for responsive heights
-    if ($theme === 'compact_layout') {
-        $cssVars['--hero-height-mobile'] = $config['hero_height_mobile'];
-        $cssVars['--hero-height-tablet'] = $config['hero_height_tablet'];
-        $cssVars['--hero-height-desktop'] = $config['hero_height_desktop'];
-    } else if ($theme === 'showcase_layout') {
+    if ($theme === 'clothing_brand') {
         $cssVars['--hero-height-mobile'] = $config['hero_height_mobile'];
         $cssVars['--hero-height-tablet'] = $config['hero_height_tablet'];
         $cssVars['--hero-height-desktop'] = $config['hero_height_desktop'];
