@@ -926,16 +926,28 @@ function previewImage(input, boxId, imgId) {
 }
 
 // Remove / clear branding (sends a POST to clear the DB value)
-function clearBranding(key, boxId, imgId, fileInputId) {
+function clearBranding(key, boxId, imgId, fileId) {
     if (!confirm('Remove this image?')) return;
+    const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || '<?= generateCSRFToken() ?>';
     const form = document.createElement('form');
     form.method = 'POST';
+    
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrf_token';
+    csrfInput.value = csrfToken;
+    form.appendChild(csrfInput);
+
     const k = document.createElement('input');
     k.type = 'hidden'; k.name = 'clear_branding_key'; k.value = key;
+    form.appendChild(k);
+
     const b = document.createElement('input');
     b.type = 'hidden'; b.name = 'save_branding'; b.value = '1';
-    form.appendChild(k); form.appendChild(b);
-    document.body.appendChild(form); form.submit();
+    form.appendChild(b);
+
+    document.body.appendChild(form);
+    form.submit();
 }
 
 // Live Google Font preview for each tag
