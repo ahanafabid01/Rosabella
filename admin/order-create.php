@@ -21,6 +21,20 @@ if (!isLoggedIn() || !isAdmin()) {
 
 $db = getDB();
 
+if (!function_exists('generateUniqueOrderNumber')) {
+    function generateUniqueOrderNumber(PDO $db): string
+    {
+        do {
+            $candidate = 'ORD-' . date('Ymd') . '-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 4));
+            $stmt = $db->prepare("SELECT COUNT(*) FROM orders WHERE order_number = ?");
+            $stmt->execute([$candidate]);
+            $exists = ((int)$stmt->fetchColumn()) > 0;
+        } while ($exists);
+
+        return $candidate;
+    }
+}
+
 // ── AJAX Endpoint: Live Customer Search Checking BOTH Users & Orders ──────────
 if (isset($_GET['action']) && $_GET['action'] === 'lookup_customer') {
     header('Content-Type: application/json');
@@ -132,8 +146,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $address        = sanitize($_POST['address'] ?? '');
 
     $orderNumber    = sanitize($_POST['order_number'] ?? '');
-    if (empty($orderNumber)) {
-        $orderNumber = 'ORD-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -4));
+    $chkStmt = $db->prepare("SELECT COUNT(*) FROM orders WHERE order_number = ?");
+    $chkStmt->execute([$orderNumber]);
+    if (empty($orderNumber) || (int)$chkStmt->fetchColumn() > 0) {
+        $orderNumber = generateUniqueOrderNumber($db);
     }
 
     $rawStatus      = sanitize($_POST['order_status'] ?? 'pending');
@@ -415,7 +431,7 @@ $coupons = $couponsStmt->fetchAll(PDO::FETCH_ASSOC);
 
 $districts = ["Bagerhat", "Bandarban", "Barguna", "Barisal", "Bhola", "Bogura", "Brahmanbaria", "Chandpur", "Chapai Nawabganj", "Chattogram - City", "Chattogram - Suburb", "Chuadanga", "Cox's Bazar", "Cumilla", "Dhaka - City", "Dhaka - Suburb", "Dinajpur", "Faridpur", "Feni", "Gaibandha", "Gazipur - City", "Gazipur - Suburb", "Gopalganj", "Habiganj", "Jamalpur", "Jashore", "Jhalokati", "Jhenaidah", "Joypurhat", "Khagrachari", "Khulna - City", "Khulna - Suburb", "Kishoreganj", "Kurigram", "Kushtia", "Lakshmipur", "Lalmonirhat", "Madaripur", "Magura", "Manikganj", "Meherpur", "Moulvibazar", "Munshiganj", "Mymensingh", "Naogaon", "Narail", "Narayanganj", "Narsingdi", "Natore", "Netrokona", "Nilphamari", "Noakhali", "Pabna", "Panchagarh", "Patuakhali", "Pirojpur", "Rajbari", "Rajshahi - Suburb", "Rajshahi City", "Rangamati", "Rangpur - Suburb", "Rangpur City", "Satkhira", "Shariatpur", "Sherpur", "Sirajganj", "Sunamganj", "Sylhet", "Tangail", "Thakurgaon"];
 
-$autoOrderNumber = 'ORD-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -4));
+$autoOrderNumber = generateUniqueOrderNumber($db);
 $pageTitle = 'Order Create';
 ?>
 <!DOCTYPE html>
