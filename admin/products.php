@@ -437,20 +437,77 @@ if ($action === 'edit' && $productId) {
 $productGalleryImages = parseGalleryImages($product['gallery_images'] ?? null);
 
 // Get all products for listing
-$search = $_GET['search'] ?? '';
-$where = '';
+$search         = trim($_GET['search'] ?? '');
+$categoryFilter = intval($_GET['category'] ?? 0);
+$statusFilter   = trim($_GET['status'] ?? '');
+$stockFilter    = trim($_GET['stock'] ?? '');
+$badgeFilter    = trim($_GET['badge'] ?? '');
+$sort           = trim($_GET['sort'] ?? 'newest');
+
+$whereConditions = [];
 $params = [];
-if ($search) {
-    $where = "WHERE p.name LIKE ? OR p.sku LIKE ?";
+
+if ($search !== '') {
+    $whereConditions[] = "(p.name LIKE ? OR p.sku LIKE ? OR p.brand LIKE ?)";
+    $params[] = "%$search%";
     $params[] = "%$search%";
     $params[] = "%$search%";
 }
+
+if ($categoryFilter > 0) {
+    $whereConditions[] = "p.category_id = ?";
+    $params[] = $categoryFilter;
+}
+
+if ($statusFilter !== '' && in_array($statusFilter, ['active', 'inactive', 'out_of_stock'], true)) {
+    $whereConditions[] = "p.status = ?";
+    $params[] = $statusFilter;
+}
+
+if ($stockFilter === 'in_stock') {
+    $whereConditions[] = "p.stock_quantity > 5";
+} elseif ($stockFilter === 'low_stock') {
+    $whereConditions[] = "(p.stock_quantity > 0 AND p.stock_quantity <= 5)";
+} elseif ($stockFilter === 'out_of_stock') {
+    $whereConditions[] = "p.stock_quantity = 0";
+}
+
+if ($badgeFilter === 'featured') {
+    $whereConditions[] = "p.is_featured = 1";
+} elseif ($badgeFilter === 'on_sale') {
+    $whereConditions[] = "(p.sale_price IS NOT NULL AND p.sale_price > 0 AND p.sale_price < p.price)";
+} elseif ($badgeFilter === 'new') {
+    $whereConditions[] = "p.is_new = 1";
+} elseif ($badgeFilter === 'bestseller') {
+    $whereConditions[] = "p.is_bestseller = 1";
+}
+
+$whereClause = !empty($whereConditions) ? "WHERE " . implode(" AND ", $whereConditions) : "";
+
+$orderBy = "p.created_at DESC";
+if ($sort === 'oldest') {
+    $orderBy = "p.created_at ASC";
+} elseif ($sort === 'price_asc') {
+    $orderBy = "COALESCE(NULLIF(p.sale_price, 0), p.price) ASC";
+} elseif ($sort === 'price_desc') {
+    $orderBy = "COALESCE(NULLIF(p.sale_price, 0), p.price) DESC";
+} elseif ($sort === 'stock_asc') {
+    $orderBy = "p.stock_quantity ASC";
+} elseif ($sort === 'stock_desc') {
+    $orderBy = "p.stock_quantity DESC";
+}
+
+// KPI Counters
+$statTotal     = (int)$db->query("SELECT COUNT(*) FROM products")->fetchColumn();
+$statActive    = (int)$db->query("SELECT COUNT(*) FROM products WHERE status = 'active'")->fetchColumn();
+$statLowStock  = (int)$db->query("SELECT COUNT(*) FROM products WHERE stock_quantity <= 5")->fetchColumn();
+$statDiscount  = (int)$db->query("SELECT COUNT(*) FROM products WHERE (sale_price IS NOT NULL AND sale_price > 0 AND sale_price < price) OR is_featured = 1")->fetchColumn();
 
 // Pagination Setup
 $perPage = max(1, min(100, intval($_GET['per_page'] ?? 15)));
 $page = max(1, intval($_GET['page'] ?? 1));
 
-$countStmt = $db->prepare("SELECT COUNT(*) FROM products p $where");
+$countStmt = $db->prepare("SELECT COUNT(*) FROM products p $whereClause");
 $countStmt->execute($params);
 $totalProducts = (int)$countStmt->fetchColumn();
 $totalPages = max(1, ceil($totalProducts / $perPage));
@@ -459,12 +516,12 @@ if ($page > $totalPages) {
 }
 $offset = ($page - 1) * $perPage;
 
-$stmt = $db->prepare("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id $where ORDER BY p.created_at DESC LIMIT $perPage OFFSET $offset");
+$stmt = $db->prepare("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id $whereClause ORDER BY $orderBy LIMIT $perPage OFFSET $offset");
 $stmt->execute($params);
 $products = $stmt->fetchAll();
 
-// Get categories
-$categories = $db->query("SELECT * FROM categories WHERE status = 'active'")->fetchAll();
+// Get categories for filter dropdown
+$categories = $db->query("SELECT * FROM categories WHERE status = 'active' ORDER BY name ASC")->fetchAll();
 
 $pageTitle = 'Products Management';
 ?>
@@ -478,7 +535,7 @@ $pageTitle = 'Products Management';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $pageTitle ?> - Rosabella Admin</title>
     <link rel="stylesheet" href="../assets/css/style.css">
-<link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/admin.css">
     <link href="css/quill.snow.css" rel="stylesheet">
 </head>
 <body>
@@ -489,7 +546,7 @@ $pageTitle = 'Products Management';
         <!-- Main Content -->
         <main class="admin-content">
         <?php renderAdminTopbar($pageTitle ?? 'Admin Panel'); ?>
-<div class="admin-header">
+            <div class="admin-header">
                 <h1 class="admin-title"><?= $action === 'add' ? 'Add New Product' : ($action === 'edit' ? 'Edit Product' : 'Products') ?></h1>
                 <?php if ($action === 'list'): ?>
                 <a href="?action=add" class="btn btn-primary">+ Add Product</a>
@@ -500,11 +557,179 @@ $pageTitle = 'Products Management';
             <?php if ($error): ?><div class="alert alert-error"><?= htmlspecialchars($error) ?></div><?php endif; ?>
 
             <?php if ($action === 'list'): ?>
-                <!-- Search -->
-                <div class="admin-card admin-card-gap-lg">
-                    <form method="GET" class="admin-form-row-center">
-                        <input type="text" name="search" class="form-input admin-input-max-300" placeholder="Search products by title, SKU..." value="<?= htmlspecialchars($search) ?>">
-                        <button type="submit" class="btn btn-secondary">Search</button>
+                <style>
+                    .prod-kpi-grid {
+                        display: grid;
+                        grid-template-columns: repeat(4, 1fr);
+                        gap: 1rem;
+                        margin-bottom: 1.25rem;
+                    }
+                    .prod-filter-card {
+                        margin-bottom: 1.25rem;
+                        padding: 0.85rem 1rem;
+                        background: #ffffff;
+                        border: 1.5px solid #e2e8f0;
+                        border-radius: 12px;
+                    }
+                    .prod-filter-form {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 10px;
+                        align-items: center;
+                        width: 100%;
+                    }
+                    .prod-filter-search {
+                        position: relative;
+                        flex: 2 1 200px;
+                        min-width: 170px;
+                    }
+                    .prod-filter-select {
+                        height: 38px;
+                        font-size: 0.85rem;
+                        flex: 1 1 120px;
+                        min-width: 120px;
+                        width: auto !important;
+                        border-radius: 8px;
+                    }
+                    .prod-filter-actions {
+                        display: flex;
+                        gap: 6px;
+                        margin-left: auto;
+                        flex-shrink: 0;
+                    }
+                    @media (max-width: 900px) {
+                        .prod-kpi-grid {
+                            grid-template-columns: repeat(2, 1fr) !important;
+                            gap: 0.75rem !important;
+                        }
+                    }
+                    @media (max-width: 768px) {
+                        .prod-filter-form {
+                            display: grid !important;
+                            grid-template-columns: repeat(2, 1fr) !important;
+                            gap: 8px !important;
+                        }
+                        .prod-filter-search {
+                            grid-column: span 2 !important;
+                            width: 100% !important;
+                        }
+                        .prod-filter-select {
+                            width: 100% !important;
+                            min-width: 0 !important;
+                            flex: none !important;
+                        }
+                        .prod-filter-actions {
+                            grid-column: span 2 !important;
+                            margin-left: 0 !important;
+                            width: 100% !important;
+                            justify-content: flex-end !important;
+                        }
+                        .prod-filter-actions button, .prod-filter-actions a {
+                            flex: 1 !important;
+                            justify-content: center !important;
+                            text-align: center !important;
+                        }
+                    }
+                </style>
+
+                <!-- Top Metric Cards (2 Columns per row on Mobile) -->
+                <div class="prod-kpi-grid">
+                    <a href="<?= BASE_URL ?>/admin/products" style="text-decoration: none; background: #ffffff; border: 1.5px solid <?= (!$statusFilter && !$stockFilter && !$badgeFilter) ? 'var(--color-primary)' : '#e2e8f0' ?>; border-radius: 12px; padding: 0.85rem 1rem; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <div style="font-size: 1.35rem; font-weight: 800; color: #1e293b; line-height: 1;"><?= number_format($statTotal) ?></div>
+                            <div style="font-size: 0.78rem; font-weight: 600; color: #64748b; margin-top: 4px;">Total Products</div>
+                        </div>
+                        <div style="width: 36px; height: 36px; border-radius: 8px; background: #f1f5f9; color: #475569; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                        </div>
+                    </a>
+                    <a href="<?= BASE_URL ?>/admin/products?status=active" style="text-decoration: none; background: #ffffff; border: 1.5px solid <?= $statusFilter === 'active' ? '#10b981' : '#e2e8f0' ?>; border-radius: 12px; padding: 0.85rem 1rem; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <div style="font-size: 1.35rem; font-weight: 800; color: #10b981; line-height: 1;"><?= number_format($statActive) ?></div>
+                            <div style="font-size: 0.78rem; font-weight: 600; color: #64748b; margin-top: 4px;">Active Products</div>
+                        </div>
+                        <div style="width: 36px; height: 36px; border-radius: 8px; background: #ecfdf5; color: #10b981; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        </div>
+                    </a>
+                    <a href="<?= BASE_URL ?>/admin/products?stock=low_stock" style="text-decoration: none; background: #ffffff; border: 1.5px solid <?= ($stockFilter === 'low_stock' || $stockFilter === 'out_of_stock') ? '#ef4444' : '#e2e8f0' ?>; border-radius: 12px; padding: 0.85rem 1rem; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <div style="font-size: 1.35rem; font-weight: 800; color: #ef4444; line-height: 1;"><?= number_format($statLowStock) ?></div>
+                            <div style="font-size: 0.78rem; font-weight: 600; color: #64748b; margin-top: 4px;">Low & Out of Stock</div>
+                        </div>
+                        <div style="width: 36px; height: 36px; border-radius: 8px; background: #fef2f2; color: #ef4444; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        </div>
+                    </a>
+                    <a href="<?= BASE_URL ?>/admin/products?badge=featured" style="text-decoration: none; background: #ffffff; border: 1.5px solid <?= ($badgeFilter === 'featured' || $badgeFilter === 'on_sale') ? '#0f766e' : '#e2e8f0' ?>; border-radius: 12px; padding: 0.85rem 1rem; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <div style="font-size: 1.35rem; font-weight: 800; color: #0f766e; line-height: 1;"><?= number_format($statDiscount) ?></div>
+                            <div style="font-size: 0.78rem; font-weight: 600; color: #64748b; margin-top: 4px;">Featured & Sale</div>
+                        </div>
+                        <div style="width: 36px; height: 36px; border-radius: 8px; background: #f0fdfa; color: #0f766e; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Professional Multi-Filter Control Toolbar -->
+                <div class="prod-filter-card">
+                    <form method="GET" action="<?= BASE_URL ?>/admin/products" class="prod-filter-form">
+                        <!-- Search Input -->
+                        <div class="prod-filter-search">
+                            <input type="text" name="search" class="form-input" placeholder="Search product, SKU, brand..." value="<?= htmlspecialchars($search) ?>" style="padding-left: 2.2rem; height: 38px; font-size: 0.85rem; width: 100%; border-radius: 8px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%);"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        </div>
+
+                        <!-- Category Filter -->
+                        <select name="category" class="form-select prod-filter-select" onchange="this.form.submit()">
+                            <option value="">All Categories</option>
+                            <?php foreach ($categories as $cat): ?>
+                                <option value="<?= $cat['id'] ?>" <?= $categoryFilter === intval($cat['id']) ? 'selected' : '' ?>><?= htmlspecialchars($cat['name']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+
+                        <!-- Status Filter -->
+                        <select name="status" class="form-select prod-filter-select" onchange="this.form.submit()">
+                            <option value="">All Statuses</option>
+                            <option value="active" <?= $statusFilter === 'active' ? 'selected' : '' ?>>Active</option>
+                            <option value="inactive" <?= $statusFilter === 'inactive' ? 'selected' : '' ?>>Inactive</option>
+                            <option value="out_of_stock" <?= $statusFilter === 'out_of_stock' ? 'selected' : '' ?>>Out of Stock</option>
+                        </select>
+
+                        <!-- Stock Filter -->
+                        <select name="stock" class="form-select prod-filter-select" onchange="this.form.submit()">
+                            <option value="">All Stock</option>
+                            <option value="in_stock" <?= $stockFilter === 'in_stock' ? 'selected' : '' ?>>In Stock (>5)</option>
+                            <option value="low_stock" <?= $stockFilter === 'low_stock' ? 'selected' : '' ?>>Low Stock (1-5)</option>
+                            <option value="out_of_stock" <?= $stockFilter === 'out_of_stock' ? 'selected' : '' ?>>Out of Stock (0)</option>
+                        </select>
+
+                        <!-- Badge Filter -->
+                        <select name="badge" class="form-select prod-filter-select" onchange="this.form.submit()">
+                            <option value="">All Types</option>
+                            <option value="featured" <?= $badgeFilter === 'featured' ? 'selected' : '' ?>>Featured</option>
+                            <option value="on_sale" <?= $badgeFilter === 'on_sale' ? 'selected' : '' ?>>On Sale</option>
+                            <option value="new" <?= $badgeFilter === 'new' ? 'selected' : '' ?>>New Arrival</option>
+                            <option value="bestseller" <?= $badgeFilter === 'bestseller' ? 'selected' : '' ?>>Best Seller</option>
+                        </select>
+
+                        <!-- Sort By -->
+                        <select name="sort" class="form-select prod-filter-select" onchange="this.form.submit()">
+                            <option value="newest" <?= $sort === 'newest' ? 'selected' : '' ?>>Sort: Newest</option>
+                            <option value="oldest" <?= $sort === 'oldest' ? 'selected' : '' ?>>Sort: Oldest</option>
+                            <option value="price_asc" <?= $sort === 'price_asc' ? 'selected' : '' ?>>Price: Low-High</option>
+                            <option value="price_desc" <?= $sort === 'price_desc' ? 'selected' : '' ?>>Price: High-Low</option>
+                            <option value="stock_asc" <?= $sort === 'stock_asc' ? 'selected' : '' ?>>Stock: Low-High</option>
+                            <option value="stock_desc" <?= $sort === 'stock_desc' ? 'selected' : '' ?>>Stock: High-Low</option>
+                        </select>
+
+                        <div class="prod-filter-actions">
+                            <button type="submit" class="btn btn-primary" style="height: 38px; font-size: 0.85rem; padding: 0 1rem; border-radius: 8px;">Filter</button>
+                            <?php if ($search || $categoryFilter || $statusFilter || $stockFilter || $badgeFilter || $sort !== 'newest'): ?>
+                                <a href="<?= BASE_URL ?>/admin/products" class="btn btn-secondary" style="height: 38px; font-size: 0.85rem; padding: 0 0.75rem; border-radius: 8px; display: inline-flex; align-items: center;">Clear</a>
+                            <?php endif; ?>
+                        </div>
                     </form>
                 </div>
 
@@ -513,36 +738,96 @@ $pageTitle = 'Products Management';
                     <table class="admin-table">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Name</th>
+                                <th style="width: 50px;">ID</th>
+                                <th style="min-width: 250px;">Product</th>
                                 <th>Category</th>
-                                <th>Price</th>
-                                <th>Stock</th>
-                                <th>Status</th>
-                                <th>Actions</th>
+                                <th style="text-align: right;">Price</th>
+                                <th style="text-align: center;">Stock</th>
+                                <th style="text-align: center;">Status</th>
+                                <th style="text-align: right;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($products as $p): ?>
-                            <tr>
-                                <td><?= $p['id'] ?></td>
-                                <td><?= htmlspecialchars($p['name']) ?></td>
-                                <td><?= htmlspecialchars($p['category_name'] ?? '-') ?></td>
-                                <td><?= formatPrice($p['sale_price'] ?: $p['price']) ?></td>
-                                <td><?= $p['stock_quantity'] ?></td>
-                                <td><span class="badge badge-<?= $p['status'] === 'active' ? 'success' : 'warning' ?>"><?= ucfirst($p['status']) ?></span></td>
-                                <td>
-                                    <div class="admin-actions-row">
-                                        <a href="?action=edit&id=<?= $p['id'] ?>" class="btn btn-sm btn-outline">Edit</a>
-                                        <a href="?action=delete&id=<?= $p['id'] ?>" class="btn btn-sm btn-secondary" onclick="return confirm('Are you sure?')">Delete</a>
-                                    </div>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
+                            <?php if (empty($products)): ?>
+                                <tr>
+                                    <td colspan="7" style="text-align: center; padding: 3rem; color: #94a3b8;">
+                                        No products found matching the selected filters.
+                                    </td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach ($products as $p): ?>
+                                <?php
+                                    $imgSrc = !empty($p['main_image']) ? resolveAdminImageSrc($p['main_image']) : '';
+                                    $hasSale = (!empty($p['sale_price']) && $p['sale_price'] > 0 && $p['sale_price'] < $p['price']);
+                                    $stockQty = intval($p['stock_quantity']);
+                                ?>
+                                <tr>
+                                    <td style="font-weight: 600; color: #64748b;">#<?= $p['id'] ?></td>
+                                    <td>
+                                        <div style="display: flex; align-items: center; gap: 12px;">
+                                            <?php if ($imgSrc): ?>
+                                                <img src="<?= htmlspecialchars($imgSrc) ?>" alt="" style="width: 44px; height: 44px; border-radius: 8px; object-fit: cover; border: 1px solid #e2e8f0; background: #f8fafc; flex-shrink: 0;">
+                                            <?php else: ?>
+                                                <div style="width: 44px; height: 44px; border-radius: 8px; background: #f1f5f9; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 0.7rem; font-weight: 700; flex-shrink: 0;">IMG</div>
+                                            <?php endif; ?>
+                                            <div style="display: flex; flex-direction: column; gap: 2px;">
+                                                <div style="font-weight: 700; color: #0f172a; font-size: 0.93rem; line-height: 1.25;">
+                                                    <?= htmlspecialchars($p['name']) ?>
+                                                </div>
+                                                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: #64748b;">
+                                                    <?php if (!empty($p['sku'])): ?><span>SKU: <strong style="color: #334155; font-family: monospace;"><?= htmlspecialchars($p['sku']) ?></strong></span><?php endif; ?>
+                                                    <?php if (!empty($p['brand'])): ?><span>• <?= htmlspecialchars($p['brand']) ?></span><?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span style="font-size: 0.82rem; background: #f1f5f9; color: #334155; padding: 3px 8px; border-radius: 6px; font-weight: 600;">
+                                            <?= htmlspecialchars($p['category_name'] ?? 'Uncategorized') ?>
+                                        </span>
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <?php if ($hasSale): ?>
+                                            <div style="font-weight: 700; color: #0f766e; font-size: 0.93rem;"><?= formatPrice($p['sale_price']) ?></div>
+                                            <div style="font-size: 0.76rem; color: #94a3b8; text-decoration: line-through;"><?= formatPrice($p['price']) ?></div>
+                                        <?php else: ?>
+                                            <div style="font-weight: 700; color: #1e293b; font-size: 0.93rem;"><?= formatPrice($p['price']) ?></div>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <?php if ($stockQty > 5): ?>
+                                            <span class="badge badge-success" style="font-size: 0.78rem; padding: 3px 8px; font-weight: 700;"><?= $stockQty ?> in stock</span>
+                                        <?php elseif ($stockQty > 0): ?>
+                                            <span class="badge badge-warning" style="font-size: 0.78rem; padding: 3px 8px; font-weight: 700;">Low Stock (<?= $stockQty ?>)</span>
+                                        <?php else: ?>
+                                            <span class="badge badge-error" style="font-size: 0.78rem; padding: 3px 8px; font-weight: 700;">Out of Stock</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <span class="badge badge-<?= $p['status'] === 'active' ? 'success' : ($p['status'] === 'inactive' ? 'secondary' : 'error') ?>" style="font-size: 0.78rem; padding: 3px 8px; font-weight: 700;">
+                                            <?= ucfirst($p['status']) ?>
+                                        </span>
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <div class="admin-actions-row" style="justify-content: flex-end; gap: 6px;">
+                                            <a href="<?= BASE_URL ?>/product/<?= htmlspecialchars($p['slug']) ?>" target="_blank" class="btn btn-sm btn-outline" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px;" title="View Product on Storefront">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                            </a>
+                                            <a href="?action=edit&id=<?= $p['id'] ?>" class="btn btn-sm btn-primary" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px;" title="Edit Product">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                            </a>
+                                            <a href="?action=delete&id=<?= $p['id'] ?>" class="btn btn-sm btn-secondary" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px;" onclick="return confirm('Are you sure you want to delete this product?')" title="Delete Product">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
-                <?php renderAdminPagination($page, $totalProducts, $perPage, BASE_URL . '/admin/products', array_filter(['search' => $search])); ?>
+                <?php renderAdminPagination($page, $totalProducts, $perPage, BASE_URL . '/admin/products', array_filter(['search' => $search, 'category' => $categoryFilter, 'status' => $statusFilter, 'stock' => $stockFilter, 'badge' => $badgeFilter, 'sort' => $sort])); ?>
             <?php else: ?>
                 <!-- Professional Two-Column Product Form -->
                 <form method="POST" enctype="multipart/form-data" class="admin-product-form-layout">
