@@ -16,7 +16,7 @@ if (!isLoggedIn() || !isAdmin()) {
 
 $db = getDB();
 
-// \u2500\u2500 Security: Verify CSRF on all admin POST requests \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── Security: Verify CSRF on all admin POST requests ─────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     requireCSRF();
 }
@@ -92,30 +92,34 @@ $pageTitle = 'Orders Management';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $pageTitle ?> - Rosabella Admin</title>
     <link rel="stylesheet" href="../assets/css/style.css">
-<link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
     <div class="admin-layout">
         <?php renderAdminSidebar('orders'); ?>
 
         <main class="admin-content">
-        <?php renderAdminTopbar($pageTitle ?? 'Admin Panel'); ?>
-<div class="admin-header">
+            <?php renderAdminTopbar($pageTitle ?? 'Admin Panel'); ?>
+            
+            <div class="admin-header">
                 <h1 class="admin-title">Orders</h1>
-                <form method="GET" class="admin-actions-row">
-                    <select name="status" class="form-select" onchange="this.form.submit()">
-                        <option value="">All Statuses</option>
-                        <option value="pending" <?= $status === 'pending' ? 'selected' : '' ?>>Pending</option>
-                        <option value="processing" <?= $status === 'processing' ? 'selected' : '' ?>>Processing</option>
-                        <option value="shipped" <?= $status === 'shipped' ? 'selected' : '' ?>>Shipped</option>
-                        <option value="delivered" <?= $status === 'delivered' ? 'selected' : '' ?>>Delivered</option>
-                        <option value="cancelled" <?= $status === 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
-                        <option value="refunded" <?= $status === 'refunded' ? 'selected' : '' ?>>Refunded</option>
-                    </select>
-                </form>
+                <div class="admin-actions-row">
+                    <a href="<?= BASE_URL ?>/admin/order-create" class="btn btn-primary">+ Create Order</a>
+                    <form method="GET" class="admin-actions-row" style="margin: 0;">
+                        <select name="status" class="form-select" onchange="this.form.submit()">
+                            <option value="">All Statuses</option>
+                            <option value="pending" <?= $status === 'pending' ? 'selected' : '' ?>>Pending</option>
+                            <option value="processing" <?= $status === 'processing' ? 'selected' : '' ?>>Processing</option>
+                            <option value="shipped" <?= $status === 'shipped' ? 'selected' : '' ?>>Shipped</option>
+                            <option value="delivered" <?= $status === 'delivered' ? 'selected' : '' ?>>Delivered</option>
+                            <option value="cancelled" <?= $status === 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
+                            <option value="refunded" <?= $status === 'refunded' ? 'selected' : '' ?>>Refunded</option>
+                        </select>
+                    </form>
+                </div>
             </div>
 
-            <?php if ($message): ?><div class="alert"><?= htmlspecialchars($message) ?></div><?php endif; ?>
+            <?php if ($message): ?><div class="alert alert-success"><?= htmlspecialchars($message) ?></div><?php endif; ?>
 
             <div class="admin-table-wrap">
                 <table class="admin-table">
@@ -132,38 +136,43 @@ $pageTitle = 'Orders Management';
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($orders as $order): ?>
-                        <tr>
-                            <td><?= htmlspecialchars($order['order_number']) ?></td>
-                            <td><?= htmlspecialchars($order['shipping_first_name'] . ' ' . $order['shipping_last_name']) ?></td>
-                            <td><?= formatPrice($order['total']) ?></td>
-                            <td>
-                                <form method="POST" class="admin-form-row-center">
-                        <!-- Security: CSRF token -->
-                        <?= csrfField() ?>
-                                    <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
-                                    <input type="hidden" name="update_status" value="1">
-                                    <select name="status" class="form-select admin-status-select" onchange="this.form.submit()">
-                                        <option value="pending" <?= $order['status'] === 'pending' ? 'selected' : '' ?>>Pending</option>
-                                        <option value="processing" <?= $order['status'] === 'processing' ? 'selected' : '' ?>>Processing</option>
-                                        <option value="shipped" <?= $order['status'] === 'shipped' ? 'selected' : '' ?>>Shipped</option>
-                                        <option value="delivered" <?= $order['status'] === 'delivered' ? 'selected' : '' ?>>Delivered</option>
-                                        <option value="cancelled" <?= $order['status'] === 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
-                                        <option value="refunded" <?= $order['status'] === 'refunded' ? 'selected' : '' ?>>Refunded</option>
-                                    </select>
-                                </form>
-                            </td>
-                            <td><span class="badge badge-<?= $order['payment_status'] === 'paid' ? 'success' : 'warning' ?>"><?= ucfirst($order['payment_status']) ?></span></td>
-                            <td><?= htmlspecialchars(paymentDisplayName((string)$order['payment_method'])) ?></td>
-                            <td><?= date('M j, Y', strtotime($order['created_at'])) ?></td>
-                            <td style="display: flex; gap: 0.5rem; align-items: center;">
-                                <a href="<?= BASE_URL ?>/admin/order/<?= $order['id'] ?>" class="btn btn-sm btn-outline">View</a>
-                                <a href="<?= BASE_URL ?>/invoice?order=<?= urlencode($order['order_number']) ?>" target="_blank" class="btn btn-sm btn-outline" style="color: var(--color-primary); border-color: var(--color-primary);" title="Download Invoice">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                </a>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
+                        <?php if (empty($orders)): ?>
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 2.5rem; color: #94a3b8;">No orders found.</td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($orders as $order): ?>
+                            <tr>
+                                <td><strong><?= htmlspecialchars($order['order_number']) ?></strong></td>
+                                <td><?= htmlspecialchars($order['shipping_first_name'] . ' ' . $order['shipping_last_name']) ?></td>
+                                <td><?= formatPrice($order['total']) ?></td>
+                                <td>
+                                    <form method="POST" class="admin-form-row-center">
+                                        <?= csrfField() ?>
+                                        <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
+                                        <input type="hidden" name="update_status" value="1">
+                                        <select name="status" class="form-select admin-status-select" onchange="this.form.submit()">
+                                            <option value="pending" <?= $order['status'] === 'pending' ? 'selected' : '' ?>>Pending</option>
+                                            <option value="processing" <?= $order['status'] === 'processing' ? 'selected' : '' ?>>Processing</option>
+                                            <option value="shipped" <?= $order['status'] === 'shipped' ? 'selected' : '' ?>>Shipped</option>
+                                            <option value="delivered" <?= $order['status'] === 'delivered' ? 'selected' : '' ?>>Delivered</option>
+                                            <option value="cancelled" <?= $order['status'] === 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
+                                            <option value="refunded" <?= $order['status'] === 'refunded' ? 'selected' : '' ?>>Refunded</option>
+                                        </select>
+                                    </form>
+                                </td>
+                                <td><span class="badge badge-<?= $order['payment_status'] === 'paid' ? 'success' : 'warning' ?>"><?= ucfirst($order['payment_status']) ?></span></td>
+                                <td><?= htmlspecialchars(paymentDisplayName((string)$order['payment_method'])) ?></td>
+                                <td><?= date('M j, Y', strtotime($order['created_at'])) ?></td>
+                                <td style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <a href="<?= BASE_URL ?>/admin/order/<?= $order['id'] ?>" class="btn btn-sm btn-outline">View</a>
+                                    <a href="<?= BASE_URL ?>/invoice?order=<?= urlencode($order['order_number']) ?>" target="_blank" class="btn btn-sm btn-outline" style="color: var(--color-primary); border-color: var(--color-primary);" title="Download Invoice">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    </a>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -172,5 +181,3 @@ $pageTitle = 'Orders Management';
     <script src="js/admin.js"></script>
 </body>
 </html>
-
-

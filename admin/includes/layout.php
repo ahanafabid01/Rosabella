@@ -12,6 +12,7 @@ if (!function_exists('adminIcon')) {
             'categories' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>',
             'deals' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41L11 3.83a2 2 0 0 0-1.41-.59H4a2 2 0 0 0-2 2v5.59a2 2 0 0 0 .59 1.41L12.17 22a2 2 0 0 0 2.83 0l5.59-5.59a2 2 0 0 0 0-2.83z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>',
             'orders' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>',
+            'order-create' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/><path d="M12 8v6M9 11h6"/></svg>',
             'reviews' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><polygon points="12 7 13.2 9.4 16 9.8 14 11.8 14.5 14.5 12 13.2 9.5 14.5 10 11.8 8 9.8 10.8 9.4 12 7"/></svg>',
             'users' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
             'coupons' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
@@ -25,21 +26,36 @@ if (!function_exists('adminIcon')) {
     }
 }
 
+if (!function_exists('resolveAdminImageSrc')) {
+    function resolveAdminImageSrc(?string $imagePath): string
+    {
+        $imagePath = trim((string)$imagePath);
+        if ($imagePath === '') {
+            return '';
+        }
+        if (preg_match('/^(https?:)?\/\//i', $imagePath) || strpos($imagePath, 'data:') === 0 || strpos($imagePath, '../') === 0 || strpos($imagePath, '/') === 0) {
+            return $imagePath;
+        }
+        return '../' . $imagePath;
+    }
+}
+
 if (!function_exists('renderAdminSidebar')) {
     function renderAdminSidebar(string $activePage): void
     {
         $base = BASE_URL;
         $items = [
-            'dashboard'  => ['href' => $base . '/admin/dashboard', 'label' => 'Dashboard'],
-            'products'   => ['href' => $base . '/admin/products',  'label' => 'Products'],
-            'categories' => ['href' => $base . '/admin/categories','label' => 'Categories'],
-            'deals'      => ['href' => $base . '/admin/deals',     'label' => 'Deals'],
-            'orders'     => ['href' => $base . '/admin/orders',    'label' => 'Orders'],
-            'reviews'    => ['href' => $base . '/admin/reviews',   'label' => 'Reviews'],
-            'users'      => ['href' => $base . '/admin/users',     'label' => 'Users'],
-            'coupons'    => ['href' => $base . '/admin/coupons',   'label' => 'Coupons'],
-            'hero'       => ['href' => $base . '/admin/hero',      'label' => 'Hero Banners'],
-            'settings'   => ['href' => $base . '/admin/settings',  'label' => 'Settings'],
+            'dashboard'    => ['href' => $base . '/admin/dashboard',   'label' => 'Dashboard'],
+            'products'     => ['href' => $base . '/admin/products',    'label' => 'Products'],
+            'categories'   => ['href' => $base . '/admin/categories',  'label' => 'Categories'],
+            'deals'        => ['href' => $base . '/admin/deals',       'label' => 'Deals'],
+            'orders'       => ['href' => $base . '/admin/orders',      'label' => 'Orders'],
+            'order-create' => ['href' => $base . '/admin/order-create','label' => 'Create Order'],
+            'reviews'      => ['href' => $base . '/admin/reviews',     'label' => 'Reviews'],
+            'users'        => ['href' => $base . '/admin/users',       'label' => 'Users'],
+            'coupons'      => ['href' => $base . '/admin/coupons',     'label' => 'Coupons'],
+            'hero'         => ['href' => $base . '/admin/hero',        'label' => 'Hero Banners'],
+            'settings'     => ['href' => $base . '/admin/settings',    'label' => 'Settings'],
         ];
         ?>
         <div class="admin-sidebar-backdrop" data-admin-sidebar-close></div>
