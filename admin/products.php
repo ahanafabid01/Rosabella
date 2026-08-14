@@ -1236,8 +1236,12 @@ $pageTitle = 'Products Management';
                             option.textContent = name;
                             colorSelector.appendChild(option);
                         });
+                        
                         if (uniqueActiveColors.includes(currentSelected)) {
                             colorSelector.value = currentSelected;
+                        } else if (uniqueActiveColors.length === 1) {
+                            // Single color product: auto-select the color automatically!
+                            colorSelector.value = uniqueActiveColors[0];
                         } else {
                             colorSelector.value = '';
                         }
