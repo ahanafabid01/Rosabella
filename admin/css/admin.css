@@ -1482,6 +1482,10 @@ body:has(.admin-layout) {
     color: #475569;
 }
 
+.oc-summary-row span {
+    white-space: nowrap;
+}
+
 .oc-summary-row.total-row {
     font-size: 1.1rem;
     font-weight: 700;

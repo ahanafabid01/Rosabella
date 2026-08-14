@@ -580,6 +580,32 @@ $pageTitle = 'Order Create';
         .customer-search-input::placeholder {
             color: #94a3b8;
         }
+        .oc-summary-row {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 12px !important;
+            padding: 0.65rem 0 !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+            font-size: 0.88rem !important;
+            color: #475569 !important;
+        }
+        .oc-summary-row > span,
+        .oc-summary-row > div:first-child {
+            flex-shrink: 0 !important;
+            white-space: nowrap !important;
+        }
+        .oc-summary-input {
+            width: 100px !important;
+            min-width: 100px !important;
+            max-width: 100px !important;
+            flex-shrink: 0 !important;
+            flex-grow: 0 !important;
+            text-align: right !important;
+            padding: 0.35rem 0.55rem !important;
+            font-size: 0.88rem !important;
+            box-sizing: border-box !important;
+        }
         @media (max-width: 768px) {
             .admin-content {
                 padding: 0.75rem 0.5rem !important;
@@ -617,12 +643,13 @@ $pageTitle = 'Order Create';
             }
             .oc-summary-row {
                 padding: 0.55rem 0 !important;
-                font-size: 0.86rem !important;
+                font-size: 0.84rem !important;
                 gap: 8px !important;
             }
             .oc-summary-input {
-                width: 85px !important;
-                max-width: 85px !important;
+                width: 90px !important;
+                min-width: 90px !important;
+                max-width: 90px !important;
                 padding: 0.35rem 0.45rem !important;
                 font-size: 0.85rem !important;
             }
