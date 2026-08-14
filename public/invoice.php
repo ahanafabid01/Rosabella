@@ -76,13 +76,13 @@ if ($orderNumber) {
 $paidAmount = 0;
 $dueAmount  = 0;
 if ($order) {
-    $dueAmount = (float)$order['total'];
-    if ($order['payment_method'] === 'cod') {
-        $paidAmount = 150;                              // COD advance
-        $dueAmount  = max(0, $order['total'] - 150);
-    } elseif ($order['payment_status'] === 'paid') {
+    $advance = floatval($order['advance_payment'] ?? 0);
+    if ($order['status'] === 'delivered' || $order['payment_status'] === 'paid') {
         $paidAmount = (float)$order['total'];
         $dueAmount  = 0;
+    } else {
+        $paidAmount = $advance;
+        $dueAmount  = max(0, (float)$order['total'] - $paidAmount);
     }
 }
 ?>

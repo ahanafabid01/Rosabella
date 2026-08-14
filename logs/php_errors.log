@@ -92,3 +92,10 @@ Stack trace:
 [14-Aug-2026 14:30:57 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\Rosabella\admin\order-create.php on line 121
 [14-Aug-2026 14:32:30 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\Rosabella\admin\order-create.php on line 121
 [14-Aug-2026 14:33:42 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\Rosabella\admin\order-create.php on line 121
+[14-Aug-2026 14:59:56 Europe/Berlin] PHP Warning:  Undefined array key "advance_payment" in C:\xampp\htdocs\Rosabella\admin\order-detail.php on line 356
+[14-Aug-2026 15:01:10 Europe/Berlin] PHP Warning:  Undefined array key "advance_payment" in C:\xampp\htdocs\Rosabella\admin\order-detail.php on line 356
+[14-Aug-2026 15:01:30 Europe/Berlin] PHP Warning:  Undefined array key "advance_payment" in C:\xampp\htdocs\Rosabella\admin\order-detail.php on line 356
+[14-Aug-2026 15:01:35 Europe/Berlin] PHP Warning:  Undefined array key "advance_payment" in C:\xampp\htdocs\Rosabella\admin\order-detail.php on line 356
+[14-Aug-2026 15:01:46 Europe/Berlin] PHP Warning:  Undefined array key "advance_payment" in C:\xampp\htdocs\Rosabella\admin\order-detail.php on line 356
+[14-Aug-2026 15:01:48 Europe/Berlin] PHP Warning:  Undefined array key "advance_payment" in C:\xampp\htdocs\Rosabella\admin\order-detail.php on line 356
+[14-Aug-2026 15:01:54 Europe/Berlin] PHP Warning:  Undefined array key "advance_payment" in C:\xampp\htdocs\Rosabella\admin\order-detail.php on line 356

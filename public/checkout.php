@@ -139,7 +139,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('Unable to generate order number.');
             }
 
-            $insertOrderStmt = $db->prepare("INSERT INTO orders (user_id, order_number, status, subtotal, discount, coupon_id, shipping_cost, tax, total, payment_method, payment_status, shipping_first_name, shipping_last_name, shipping_email, shipping_phone, shipping_address, shipping_city, shipping_upazila, shipping_postal_code, shipping_country, order_notes, payment_phone, payment_trx_id, delivery_method) VALUES (?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $advancePayment = 0.00;
+            if ($payment_method === 'cod') {
+                $advancePayment = 150.00;
+            } elseif (in_array($payment_method, ['bkash', 'nagad', 'rocket', 'card', 'bank'], true)) {
+                $advancePayment = (float)$total;
+            }
+
+            $insertOrderStmt = $db->prepare("INSERT INTO orders (user_id, order_number, status, subtotal, discount, coupon_id, shipping_cost, tax, advance_payment, total, payment_method, payment_status, shipping_first_name, shipping_last_name, shipping_email, shipping_phone, shipping_address, shipping_city, shipping_upazila, shipping_postal_code, shipping_country, order_notes, payment_phone, payment_trx_id, delivery_method) VALUES (?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $insertOrderStmt->execute([
                 $_SESSION['user_id'],
                 $orderNumber,
@@ -148,6 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $couponId,
                 $shippingCost,
                 $tax,
+                $advancePayment,
                 $total,
                 $payment_method,
                 $shipping_first_name,

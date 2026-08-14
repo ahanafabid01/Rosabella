@@ -317,12 +317,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // ── Insert Order Record ──────────────────────────────────────────
             $insertOrderStmt = $db->prepare("
                 INSERT INTO orders (
-                    user_id, order_number, status, subtotal, discount, coupon_id, shipping_cost, tax, total, 
+                    user_id, order_number, status, subtotal, discount, coupon_id, shipping_cost, tax, advance_payment, total, 
                     payment_method, payment_status, shipping_first_name, shipping_last_name, shipping_email, 
                     shipping_phone, shipping_address, shipping_city, shipping_upazila, shipping_postal_code, 
                     shipping_country, order_notes, notes, delivery_method, created_at
                 ) VALUES (
-                    ?, ?, ?, ?, ?, ?, ?, ?, ?, 
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
                     ?, ?, ?, ?, ?, 
                     ?, ?, ?, ?, ?, 
                     'Bangladesh', ?, ?, 'Courier', ?
@@ -340,6 +340,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $couponId,
                 $shippingCost,
                 $tax,
+                $advancePayment,
                 $grandTotal,
                 $paymentMethod,
                 $paymentStatus,
