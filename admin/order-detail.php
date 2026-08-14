@@ -204,7 +204,7 @@ $pageTitle = 'Order Detail';
 
     <main class="admin-content">
         <?php renderAdminTopbar($pageTitle ?? 'Admin Panel'); ?>
-        <div class="admin-detail-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div class="admin-detail-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
             <div>
                 <h1 class="admin-page-title" style="margin-bottom: 0.25rem !important;">Order #<?= htmlspecialchars($order['order_number']) ?></h1>
                 <div style="font-size: 0.875rem; color: var(--color-text-light);">
@@ -220,30 +220,98 @@ $pageTitle = 'Order Detail';
             </div>
         </div>
 
-        <?php if ($message): ?><div class="alert alert-success" style="margin-bottom: 1.5rem; border-radius: 8px;"><?= htmlspecialchars($message) ?></div><?php endif; ?>
-        <?php if ($error): ?><div class="alert alert-error" style="margin-bottom: 1.5rem; border-radius: 8px;"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+        <?php if ($message): ?><div class="alert alert-success" style="margin-bottom: 1.25rem; border-radius: 8px;"><?= htmlspecialchars($message) ?></div><?php endif; ?>
+        <?php if ($error): ?><div class="alert alert-error" style="margin-bottom: 1.25rem; border-radius: 8px;"><?= htmlspecialchars($error) ?></div><?php endif; ?>
 
         <div style="display: flex; flex-direction: column; gap: 1.5rem; min-width: 0; max-width: 100vw;">
             <style>
                 .order-detail-layout { display: flex; flex-direction: column; gap: 1.5rem; }
                 @media (min-width: 1024px) {
-                    .order-detail-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; align-items: start; }
+                    .order-detail-layout { display: grid; grid-template-columns: 1.8fr 1fr; gap: 1.5rem; align-items: start; }
                 }
-                .detail-section-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 1.25rem; color: var(--color-text); padding-bottom: 0.75rem; border-bottom: 1px solid var(--color-border); }
-                .info-block { margin-bottom: 1.25rem; }
-                .info-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-text-light); margin-bottom: 0.3rem; font-weight: 600; }
+                .detail-section-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 1rem; color: var(--color-text); padding-bottom: 0.65rem; border-bottom: 1px solid var(--color-border); }
+                .info-label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--color-text-light); margin-bottom: 0.25rem; font-weight: 700; }
                 .info-value { font-size: 0.95rem; color: var(--color-text); line-height: 1.5; }
                 .amount-edit-box { display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--color-border); }
+                .overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; align-items: start; }
             </style>
 
+            <!-- ── Unified Customer, Shipping & Payment Header Card (FIRST CARD) ── -->
+            <div class="admin-card" style="margin-bottom: 0; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                <h2 class="detail-section-title" style="margin-bottom: 1.15rem; display: flex; align-items: center; gap: 8px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    Customer & Payment Overview
+                </h2>
+                <div class="overview-grid">
+                    <!-- Customer Contact Info -->
+                    <div>
+                        <div class="info-label">Contact Person</div>
+                        <div class="info-value" style="display: flex; align-items: center; gap: 0.65rem; margin-top: 0.35rem; margin-bottom: 0.85rem;">
+                            <div style="width: 38px; height: 38px; border-radius: 50%; background: var(--color-primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.95rem;">
+                                <?= strtoupper(substr($order['shipping_first_name'] ?? 'U', 0, 1)) ?>
+                            </div>
+                            <div>
+                                <div style="font-weight: 700; font-size: 1.02rem; color: #1e293b;"><?= htmlspecialchars(trim(($order['shipping_first_name'] ?? '') . ' ' . ($order['shipping_last_name'] ?? ''))) ?></div>
+                                <div style="font-size: 0.82rem; color: #64748b; font-weight: 500;">Customer #<?= intval($order['user_id'] ?? 0) ?></div>
+                            </div>
+                        </div>
+                        <div class="info-label">Contact Details</div>
+                        <div class="info-value" style="font-size: 0.9rem;">
+                            <div style="margin-bottom: 0.25rem;"><a href="mailto:<?= htmlspecialchars($order['shipping_email'] ?: ($order['account_email'] ?? '')) ?>" style="color: var(--color-primary); text-decoration: none; font-weight: 600;"><?= htmlspecialchars($order['shipping_email'] ?: ($order['account_email'] ?? '-')) ?></a></div>
+                            <div><a href="tel:<?= htmlspecialchars($order['shipping_phone'] ?? '') ?>" style="color: #334155; text-decoration: none; font-weight: 700;"><?= htmlspecialchars($order['shipping_phone'] ?? '-') ?></a></div>
+                        </div>
+                    </div>
+
+                    <!-- Shipping Address -->
+                    <div>
+                        <div class="info-label">Shipping Address</div>
+                        <div class="info-value" style="background: #f8fafc; padding: 0.85rem 1rem; border-radius: 10px; border: 1px solid #e2e8f0; font-weight: 500; margin-top: 0.35rem; font-size: 0.92rem; line-height: 1.6;">
+                            <div style="font-weight: 700; color: #0f766e; margin-bottom: 0.2rem;">📍 <?= htmlspecialchars($order['shipping_address'] ?? '-') ?></div>
+                            <div style="color: #475569;"><?= htmlspecialchars($order['shipping_city'] ?? '-') ?>, <?= htmlspecialchars($order['shipping_postal_code'] ?? '-') ?></div>
+                            <div style="color: #64748b; font-weight: 600; font-size: 0.85rem; margin-top: 0.2rem;"><?= htmlspecialchars($order['shipping_country'] ?? 'Bangladesh') ?></div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Information -->
+                    <div>
+                        <div class="info-label">Payment Information</div>
+                        <div style="display: flex; flex-direction: column; gap: 0.65rem; margin-top: 0.35rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+                                <span style="color: #64748b; font-weight: 600;">Method:</span>
+                                <span style="font-weight: 700; color: #1e293b;"><?= htmlspecialchars(paymentDisplayName((string)($order['payment_method'] ?? ''))) ?></span>
+                            </div>
+                            <?php if (!empty($order['payment_phone'])): ?>
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+                                <span style="color: #64748b; font-weight: 600;">Mobile:</span>
+                                <span style="font-weight: 700; color: #1e293b;"><?= htmlspecialchars($order['payment_phone']) ?></span>
+                            </div>
+                            <?php endif; ?>
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+                                <span style="color: #64748b; font-weight: 600;">Status:</span>
+                                <span class="badge badge-<?= ($order['status'] === 'delivered' || $order['payment_status'] === 'paid') ? 'success' : 'warning' ?>" style="font-size: 0.76rem; padding: 0.25rem 0.6rem; font-weight: 700;">
+                                    <?= htmlspecialchars(($order['status'] === 'delivered' || $order['payment_status'] === 'paid') ? 'PAID' : strtoupper($order['payment_status'])) ?>
+                                </span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem;">
+                                <span style="color: #64748b; font-weight: 600;">Trx ID:</span>
+                                <span style="font-family: monospace; font-size: 0.85rem; background: #f1f5f9; padding: 0.25rem 0.5rem; border-radius: 6px; font-weight: 700; color: #334155;">
+                                    <?= htmlspecialchars(!empty($order['transaction_id']) ? $order['transaction_id'] : (!empty($order['payment_trx_id']) ? $order['payment_trx_id'] : 'N/A')) ?>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Grid Layout for Items/Summary & Status Controls ── -->
             <div class="order-detail-layout" style="min-width: 0; max-width: 100%;">
-                <!-- Left Column: Items & Summary -->
+                <!-- Left Column: Order Items & Summary -->
                 <div style="display: flex; flex-direction: column; gap: 1.5rem; min-width: 0;">
-                    <!-- Items -->
+                    <!-- Order Items Table -->
                     <div class="admin-card" style="margin-bottom: 0; overflow: hidden; min-width: 0;">
                         <h2 class="detail-section-title">Order Items</h2>
                         <div class="admin-table-wrap" style="border: none; overflow-x: auto; width: 100%;">
-                            <table class="admin-table" style="min-width: 600px; width: 100%;">
+                            <table class="admin-table" style="min-width: 580px; width: 100%;">
                                 <thead>
                                 <tr>
                                     <th style="padding-left: 0;">Product</th>
@@ -265,7 +333,7 @@ $pageTitle = 'Order Detail';
                                                     <div style="width: 48px; height: 48px; border-radius: 6px; background: #eee;"></div>
                                                 <?php endif; ?>
                                                 <div style="display: flex; flex-direction: column; gap: 0.2rem;">
-                                                    <span style="font-weight: 500; color: var(--color-text);"><?= htmlspecialchars($item['product_name']) ?></span>
+                                                    <span style="font-weight: 600; color: var(--color-text);"><?= htmlspecialchars($item['product_name']) ?></span>
                                                     <?php if (!empty($item['product_sku'])): ?>
                                                         <span style="font-size: 0.8rem; color: var(--color-text-light);">SKU: <?= htmlspecialchars($item['product_sku']) ?></span>
                                                     <?php endif; ?>
@@ -281,8 +349,8 @@ $pageTitle = 'Order Detail';
                                             </div>
                                         </td>
                                         <td><?= formatPrice($item['price']) ?></td>
-                                        <td style="text-align: center;">x<?= intval($item['quantity']) ?></td>
-                                        <td style="text-align: right; padding-right: 0; font-weight: 600;"><?= formatPrice($item['total']) ?></td>
+                                        <td style="text-align: center; font-weight: 600;">x<?= intval($item['quantity']) ?></td>
+                                        <td style="text-align: right; padding-right: 0; font-weight: 700;"><?= formatPrice($item['total']) ?></td>
                                     </tr>
                                 <?php endforeach; ?>
                                 </tbody>
@@ -294,36 +362,36 @@ $pageTitle = 'Order Detail';
                     <div class="admin-card" style="margin-bottom: 0;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                             <h2 class="detail-section-title" style="margin-bottom: 0; border-bottom: none; padding-bottom: 0;">Order Summary</h2>
-                            <button type="button" onclick="document.getElementById('edit-amounts-form').style.display = (document.getElementById('edit-amounts-form').style.display === 'block' ? 'none' : 'block');" class="btn btn-sm btn-outline" style="font-size: 0.82rem;">
+                            <button type="button" onclick="document.getElementById('edit-amounts-form').style.display = (document.getElementById('edit-amounts-form').style.display === 'block' ? 'none' : 'block');" class="btn btn-sm btn-outline" style="font-size: 0.82rem; font-weight: 600;">
                                 ✏️ Edit Amounts
                             </button>
                         </div>
                         <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                             <div style="display: flex; justify-content: space-between; color: var(--color-text-light);">
                                 <span>Subtotal</span>
-                                <span style="color: var(--color-text);"><?= formatPrice($order['subtotal']) ?></span>
+                                <span style="color: var(--color-text); font-weight: 600;"><?= formatPrice($order['subtotal']) ?></span>
                             </div>
                             <div style="display: flex; justify-content: space-between; color: var(--color-text-light);">
                                 <span>Discount</span>
-                                <span style="color: var(--color-text);"><?= formatPrice($order['discount']) ?></span>
+                                <span style="color: var(--color-text); font-weight: 600;"><?= formatPrice($order['discount']) ?></span>
                             </div>
                             <div style="display: flex; justify-content: space-between; color: var(--color-text-light);">
                                 <span>Shipping</span>
-                                <span style="color: var(--color-text);"><?= formatPrice($order['shipping_cost']) ?></span>
+                                <span style="color: var(--color-text); font-weight: 600;"><?= formatPrice($order['shipping_cost']) ?></span>
                             </div>
                             <div style="display: flex; justify-content: space-between; color: var(--color-text-light);">
                                 <span>Tax</span>
-                                <span style="color: var(--color-text);"><?= formatPrice($order['tax']) ?></span>
+                                <span style="color: var(--color-text); font-weight: 600;"><?= formatPrice($order['tax']) ?></span>
                             </div>
-                            <div style="display: flex; justify-content: space-between; font-size: 1.15rem; font-weight: 700; color: var(--color-text); padding-top: 0.75rem; border-top: 1px dashed var(--color-border); margin-top: 0.25rem;">
+                            <div style="display: flex; justify-content: space-between; font-size: 1.15rem; font-weight: 800; color: var(--color-text); padding-top: 0.75rem; border-top: 1px dashed var(--color-border); margin-top: 0.25rem;">
                                 <span>Total</span>
                                 <span><?= formatPrice($order['total']) ?></span>
                             </div>
-                            <div style="display: flex; justify-content: space-between; color: #0f766e; font-weight: 600; font-size: 0.95rem;">
+                            <div style="display: flex; justify-content: space-between; color: #0f766e; font-weight: 700; font-size: 0.95rem;">
                                 <span>Paid Amount</span>
                                 <span><?= formatPrice($paidAmount) ?></span>
                             </div>
-                            <div style="display: flex; justify-content: space-between; color: <?= $dueAmount > 0 ? '#ef4444' : '#10b981' ?>; font-weight: 700; font-size: 0.95rem;">
+                            <div style="display: flex; justify-content: space-between; color: <?= $dueAmount > 0 ? '#ef4444' : '#10b981' ?>; font-weight: 800; font-size: 0.95rem;">
                                 <span>Due Amount</span>
                                 <span><?= formatPrice($dueAmount) ?></span>
                             </div>
@@ -363,11 +431,21 @@ $pageTitle = 'Order Detail';
                             </form>
                         </div>
                     </div>
+
+                    <?php $orderNotes = !empty($order['order_notes']) ? $order['order_notes'] : (!empty($order['notes']) ? $order['notes'] : ''); ?>
+                    <?php if ($orderNotes): ?>
+                    <!-- Order Notes -->
+                    <div class="admin-card" style="margin-bottom: 0;">
+                        <h2 class="detail-section-title">Order Notes</h2>
+                        <div style="font-size: 0.95rem; line-height: 1.6; color: var(--color-text); background: var(--color-bg-secondary); padding: 1rem; border-radius: 8px; border: 1px solid var(--color-border);">
+                            <?= nl2br(htmlspecialchars($orderNotes)) ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                 </div>
 
-                <!-- Right Column: Customer, Payment, Status & Audit History -->
+                <!-- Right Column: Status & Audit History -->
                 <div style="display: flex; flex-direction: column; gap: 1.5rem; min-width: 0;">
-                    
                     <!-- Status Update Card -->
                     <div class="admin-card" style="margin-bottom: 0; background: #f8fafc; border-color: #e2e8f0;">
                         <h2 class="detail-section-title" style="border-bottom-color: rgba(0,0,0,0.05);">Order Status</h2>
@@ -418,77 +496,6 @@ $pageTitle = 'Order Detail';
                                 <?php endforeach; ?>
                             </div>
                         <?php endif; ?>
-                    </div>
-
-                    <!-- Customer Details -->
-                    <div class="admin-card" style="margin-bottom: 0;">
-                        <h2 class="detail-section-title">Customer Details</h2>
-                        <div class="info-block">
-                            <div class="info-label">Contact Person</div>
-                            <div class="info-value" style="display: flex; align-items: center; gap: 0.5rem;">
-                                <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--color-primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem;">
-                                    <?= strtoupper(substr($order['shipping_first_name'] ?? 'U', 0, 1)) ?>
-                                </div>
-                                <span style="font-weight: 500;"><?= htmlspecialchars(trim(($order['shipping_first_name'] ?? '') . ' ' . ($order['shipping_last_name'] ?? ''))) ?></span>
-                            </div>
-                        </div>
-
-                        <div class="info-block">
-                            <div class="info-label">Contact Info</div>
-                            <div class="info-value">
-                                <div style="margin-bottom: 0.2rem;"><a href="mailto:<?= htmlspecialchars($order['shipping_email'] ?: ($order['account_email'] ?? '')) ?>" style="color: var(--color-primary); text-decoration: none;"><?= htmlspecialchars($order['shipping_email'] ?: ($order['account_email'] ?? '-')) ?></a></div>
-                                <div><a href="tel:<?= htmlspecialchars($order['shipping_phone'] ?? '') ?>" style="color: var(--color-text); text-decoration: none;"><?= htmlspecialchars($order['shipping_phone'] ?? '-') ?></a></div>
-                            </div>
-                        </div>
-
-                        <div class="info-block" style="margin-bottom: 0;">
-                            <div class="info-label">Shipping Address</div>
-                            <div class="info-value">
-                                <?= htmlspecialchars($order['shipping_address'] ?? '-') ?><br>
-                                <?= htmlspecialchars($order['shipping_city'] ?? '-') ?>, <?= htmlspecialchars($order['shipping_postal_code'] ?? '-') ?><br>
-                                <?= htmlspecialchars($order['shipping_country'] ?? '-') ?>
-                            </div>
-                        </div>
-                    </div>
-
-                    <?php $orderNotes = !empty($order['order_notes']) ? $order['order_notes'] : (!empty($order['notes']) ? $order['notes'] : ''); ?>
-                    <?php if ($orderNotes): ?>
-                    <!-- Order Notes -->
-                    <div class="admin-card" style="margin-bottom: 0;">
-                        <h2 class="detail-section-title">Order Notes</h2>
-                        <div style="font-size: 0.95rem; line-height: 1.6; color: var(--color-text); background: var(--color-bg-secondary); padding: 1rem; border-radius: 8px; border: 1px solid var(--color-border);">
-                            <?= nl2br(htmlspecialchars($orderNotes)) ?>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-
-                    <!-- Payment Info -->
-                    <div class="admin-card" style="margin-bottom: 0;">
-                        <h2 class="detail-section-title">Payment Info</h2>
-                        <div class="info-block">
-                            <div class="info-label">Payment Method</div>
-                            <div class="info-value" style="font-weight: 500;"><?= htmlspecialchars(paymentDisplayName((string)($order['payment_method'] ?? ''))) ?></div>
-                        </div>
-                        <?php if (!empty($order['payment_phone'])): ?>
-                        <div class="info-block">
-                            <div class="info-label">Payment Mobile Number</div>
-                            <div class="info-value" style="font-weight: 500;"><?= htmlspecialchars($order['payment_phone']) ?></div>
-                        </div>
-                        <?php endif; ?>
-                        <div class="info-block">
-                            <div class="info-label">Payment Status</div>
-                            <div class="info-value">
-                                <span class="badge badge-<?= ($order['status'] === 'delivered' || $order['payment_status'] === 'paid') ? 'success' : 'warning' ?>" style="font-size: 0.75rem; padding: 0.35rem 0.65rem;">
-                                    <?= htmlspecialchars(($order['status'] === 'delivered' || $order['payment_status'] === 'paid') ? 'Paid' : ucfirst($order['payment_status'])) ?>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="info-block" style="margin-bottom: 0;">
-                            <div class="info-label">Transaction ID</div>
-                            <div class="info-value" style="font-family: monospace; font-size: 0.9rem; background: var(--color-bg-secondary); padding: 0.35rem 0.5rem; border-radius: 4px; display: inline-block;">
-                                <?= htmlspecialchars(!empty($order['transaction_id']) ? $order['transaction_id'] : (!empty($order['payment_trx_id']) ? $order['payment_trx_id'] : 'N/A')) ?>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
