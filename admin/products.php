@@ -557,6 +557,14 @@ $pageTitle = 'Products Management';
             <?php if ($error): ?><div class="alert alert-error"><?= htmlspecialchars($error) ?></div><?php endif; ?>
 
             <?php if ($action === 'list'): ?>
+                <?php
+                $activeFilterCount = 0;
+                if ($categoryFilter) $activeFilterCount++;
+                if ($statusFilter) $activeFilterCount++;
+                if ($stockFilter) $activeFilterCount++;
+                if ($badgeFilter) $activeFilterCount++;
+                if ($sort !== 'newest') $activeFilterCount++;
+                ?>
                 <style>
                     .prod-kpi-grid {
                         display: grid;
@@ -573,23 +581,57 @@ $pageTitle = 'Products Management';
                     }
                     .prod-filter-form {
                         display: flex;
-                        flex-wrap: wrap;
-                        gap: 10px;
+                        flex-direction: column;
+                        width: 100%;
+                    }
+                    .prod-filter-top-bar {
+                        display: flex;
                         align-items: center;
+                        gap: 10px;
                         width: 100%;
                     }
                     .prod-filter-search {
                         position: relative;
-                        flex: 2 1 200px;
-                        min-width: 170px;
+                        flex: 1 1 auto;
+                        min-width: 200px;
+                    }
+                    .filter-toggle-btn {
+                        display: inline-flex !important;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 6px;
+                        height: 38px;
+                        padding: 0 14px;
+                        font-size: 0.85rem;
+                        font-weight: 600;
+                        border-radius: 8px;
+                        white-space: nowrap;
+                        flex-shrink: 0;
+                        cursor: pointer;
+                    }
+                    .prod-filter-drawer {
+                        display: none;
+                        width: 100%;
+                        padding-top: 12px;
+                        border-top: 1px dashed #e2e8f0;
+                        margin-top: 10px;
+                        flex-wrap: wrap;
+                        gap: 10px;
+                        align-items: center;
+                    }
+                    .prod-filter-drawer.active {
+                        display: flex !important;
                     }
                     .prod-filter-select {
                         height: 38px;
                         font-size: 0.85rem;
-                        flex: 1 1 120px;
-                        min-width: 120px;
-                        width: auto !important;
+                        padding: 0 0.75rem;
                         border-radius: 8px;
+                        border: 1px solid #cbd5e1;
+                        background-color: #ffffff;
+                        color: #1e293b;
+                        flex: 1 1 130px;
+                        min-width: 125px;
                     }
                     .prod-filter-actions {
                         display: flex;
@@ -604,28 +646,33 @@ $pageTitle = 'Products Management';
                         }
                     }
                     @media (max-width: 768px) {
-                        .prod-filter-form {
+                        .prod-filter-drawer.active {
                             display: grid !important;
-                            grid-template-columns: repeat(2, 1fr) !important;
+                            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
                             gap: 8px !important;
-                        }
-                        .prod-filter-search {
-                            grid-column: span 2 !important;
-                            width: 100% !important;
                         }
                         .prod-filter-select {
                             width: 100% !important;
+                            max-width: 100% !important;
                             min-width: 0 !important;
                             flex: none !important;
+                            box-sizing: border-box !important;
+                            height: 38px !important;
+                            font-size: 0.82rem !important;
+                            padding: 0 8px !important;
                         }
                         .prod-filter-actions {
                             grid-column: span 2 !important;
                             margin-left: 0 !important;
                             width: 100% !important;
-                            justify-content: flex-end !important;
+                            display: flex !important;
+                            gap: 8px !important;
                         }
                         .prod-filter-actions button, .prod-filter-actions a {
                             flex: 1 !important;
+                            height: 38px !important;
+                            display: inline-flex !important;
+                            align-items: center !important;
                             justify-content: center !important;
                             text-align: center !important;
                         }
@@ -675,60 +722,70 @@ $pageTitle = 'Products Management';
                 <!-- Professional Multi-Filter Control Toolbar -->
                 <div class="prod-filter-card">
                     <form method="GET" action="<?= BASE_URL ?>/admin/products" class="prod-filter-form">
-                        <!-- Search Input -->
-                        <div class="prod-filter-search">
-                            <input type="text" name="search" class="form-input" placeholder="Search product, SKU, brand..." value="<?= htmlspecialchars($search) ?>" style="padding-left: 2.2rem; height: 38px; font-size: 0.85rem; width: 100%; border-radius: 8px;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%);"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <!-- Search Bar & Filter Toggle Button -->
+                        <div class="prod-filter-top-bar">
+                            <div class="prod-filter-search">
+                                <input type="text" name="search" class="form-input" placeholder="Search product, SKU, brand..." value="<?= htmlspecialchars($search) ?>" style="padding-left: 2.2rem; height: 38px; font-size: 0.85rem; width: 100%; border-radius: 8px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%);"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            </div>
+
+                            <button type="button" class="btn btn-outline filter-toggle-btn" onclick="document.getElementById('prod-filter-drawer').classList.toggle('active')" title="Toggle Filter Options">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                                <span>Filter<?= $activeFilterCount > 0 ? " ($activeFilterCount)" : "" ?></span>
+                            </button>
                         </div>
 
-                        <!-- Category Filter -->
-                        <select name="category" class="form-select prod-filter-select" onchange="this.form.submit()">
-                            <option value="">All Categories</option>
-                            <?php foreach ($categories as $cat): ?>
-                                <option value="<?= $cat['id'] ?>" <?= $categoryFilter === intval($cat['id']) ? 'selected' : '' ?>><?= htmlspecialchars($cat['name']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                        <!-- Filter Options Drawer -->
+                        <div id="prod-filter-drawer" class="prod-filter-drawer <?= ($activeFilterCount > 0) ? 'active' : '' ?>">
+                            <!-- Category Filter -->
+                            <select name="category" class="form-select prod-filter-select" onchange="this.form.submit()">
+                                <option value="">All Categories</option>
+                                <?php foreach ($categories as $cat): ?>
+                                    <option value="<?= $cat['id'] ?>" <?= $categoryFilter === intval($cat['id']) ? 'selected' : '' ?>><?= htmlspecialchars($cat['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
 
-                        <!-- Status Filter -->
-                        <select name="status" class="form-select prod-filter-select" onchange="this.form.submit()">
-                            <option value="">All Statuses</option>
-                            <option value="active" <?= $statusFilter === 'active' ? 'selected' : '' ?>>Active</option>
-                            <option value="inactive" <?= $statusFilter === 'inactive' ? 'selected' : '' ?>>Inactive</option>
-                            <option value="out_of_stock" <?= $statusFilter === 'out_of_stock' ? 'selected' : '' ?>>Out of Stock</option>
-                        </select>
+                            <!-- Status Filter -->
+                            <select name="status" class="form-select prod-filter-select" onchange="this.form.submit()">
+                                <option value="">All Statuses</option>
+                                <option value="active" <?= $statusFilter === 'active' ? 'selected' : '' ?>>Active</option>
+                                <option value="inactive" <?= $statusFilter === 'inactive' ? 'selected' : '' ?>>Inactive</option>
+                                <option value="out_of_stock" <?= $statusFilter === 'out_of_stock' ? 'selected' : '' ?>>Out of Stock</option>
+                            </select>
 
-                        <!-- Stock Filter -->
-                        <select name="stock" class="form-select prod-filter-select" onchange="this.form.submit()">
-                            <option value="">All Stock</option>
-                            <option value="in_stock" <?= $stockFilter === 'in_stock' ? 'selected' : '' ?>>In Stock (>5)</option>
-                            <option value="low_stock" <?= $stockFilter === 'low_stock' ? 'selected' : '' ?>>Low Stock (1-5)</option>
-                            <option value="out_of_stock" <?= $stockFilter === 'out_of_stock' ? 'selected' : '' ?>>Out of Stock (0)</option>
-                        </select>
+                            <!-- Stock Filter -->
+                            <select name="stock" class="form-select prod-filter-select" onchange="this.form.submit()">
+                                <option value="">All Stock</option>
+                                <option value="in_stock" <?= $stockFilter === 'in_stock' ? 'selected' : '' ?>>In Stock (>5)</option>
+                                <option value="low_stock" <?= $stockFilter === 'low_stock' ? 'selected' : '' ?>>Low Stock (1-5)</option>
+                                <option value="out_of_stock" <?= $stockFilter === 'out_of_stock' ? 'selected' : '' ?>>Out of Stock (0)</option>
+                            </select>
 
-                        <!-- Badge Filter -->
-                        <select name="badge" class="form-select prod-filter-select" onchange="this.form.submit()">
-                            <option value="">All Types</option>
-                            <option value="featured" <?= $badgeFilter === 'featured' ? 'selected' : '' ?>>Featured</option>
-                            <option value="on_sale" <?= $badgeFilter === 'on_sale' ? 'selected' : '' ?>>On Sale</option>
-                            <option value="new" <?= $badgeFilter === 'new' ? 'selected' : '' ?>>New Arrival</option>
-                            <option value="bestseller" <?= $badgeFilter === 'bestseller' ? 'selected' : '' ?>>Best Seller</option>
-                        </select>
+                            <!-- Badge Filter -->
+                            <select name="badge" class="form-select prod-filter-select" onchange="this.form.submit()">
+                                <option value="">All Types</option>
+                                <option value="featured" <?= $badgeFilter === 'featured' ? 'selected' : '' ?>>Featured</option>
+                                <option value="on_sale" <?= $badgeFilter === 'on_sale' ? 'selected' : '' ?>>On Sale</option>
+                                <option value="new" <?= $badgeFilter === 'new' ? 'selected' : '' ?>>New Arrival</option>
+                                <option value="bestseller" <?= $badgeFilter === 'bestseller' ? 'selected' : '' ?>>Best Seller</option>
+                            </select>
 
-                        <!-- Sort By -->
-                        <select name="sort" class="form-select prod-filter-select" onchange="this.form.submit()">
-                            <option value="newest" <?= $sort === 'newest' ? 'selected' : '' ?>>Sort: Newest</option>
-                            <option value="oldest" <?= $sort === 'oldest' ? 'selected' : '' ?>>Sort: Oldest</option>
-                            <option value="price_asc" <?= $sort === 'price_asc' ? 'selected' : '' ?>>Price: Low-High</option>
-                            <option value="price_desc" <?= $sort === 'price_desc' ? 'selected' : '' ?>>Price: High-Low</option>
-                            <option value="stock_asc" <?= $sort === 'stock_asc' ? 'selected' : '' ?>>Stock: Low-High</option>
-                            <option value="stock_desc" <?= $sort === 'stock_desc' ? 'selected' : '' ?>>Stock: High-Low</option>
-                        </select>
+                            <!-- Sort By -->
+                            <select name="sort" class="form-select prod-filter-select" onchange="this.form.submit()">
+                                <option value="newest" <?= $sort === 'newest' ? 'selected' : '' ?>>Sort: Newest</option>
+                                <option value="oldest" <?= $sort === 'oldest' ? 'selected' : '' ?>>Sort: Oldest</option>
+                                <option value="price_asc" <?= $sort === 'price_asc' ? 'selected' : '' ?>>Price: Low-High</option>
+                                <option value="price_desc" <?= $sort === 'price_desc' ? 'selected' : '' ?>>Price: High-Low</option>
+                                <option value="stock_asc" <?= $sort === 'stock_asc' ? 'selected' : '' ?>>Stock: Low-High</option>
+                                <option value="stock_desc" <?= $sort === 'stock_desc' ? 'selected' : '' ?>>Stock: High-Low</option>
+                            </select>
 
-                        <div class="prod-filter-actions">
-                            <button type="submit" class="btn btn-primary" style="height: 38px; font-size: 0.85rem; padding: 0 1rem; border-radius: 8px;">Filter</button>
-                            <?php if ($search || $categoryFilter || $statusFilter || $stockFilter || $badgeFilter || $sort !== 'newest'): ?>
-                                <a href="<?= BASE_URL ?>/admin/products" class="btn btn-secondary" style="height: 38px; font-size: 0.85rem; padding: 0 0.75rem; border-radius: 8px; display: inline-flex; align-items: center;">Clear</a>
-                            <?php endif; ?>
+                            <div class="prod-filter-actions">
+                                <button type="submit" class="btn btn-primary" style="height: 38px; font-size: 0.85rem; padding: 0 1rem; border-radius: 8px;">Filter</button>
+                                <?php if ($search || $categoryFilter || $statusFilter || $stockFilter || $badgeFilter || $sort !== 'newest'): ?>
+                                    <a href="<?= BASE_URL ?>/admin/products" class="btn btn-secondary" style="height: 38px; font-size: 0.85rem; padding: 0 0.75rem; border-radius: 8px; display: inline-flex; align-items: center;">Clear</a>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </form>
                 </div>
