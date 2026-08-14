@@ -163,34 +163,97 @@ if (!function_exists('renderAdminPagination')) {
         };
 
         ?>
-        <div class="admin-pagination-bar" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; padding: 1.25rem 1.5rem; background: #ffffff; border-top: 1px solid #f1f5f9; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; margin-top: -1px;">
+        <style>
+            .admin-pagination-bar {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 0.85rem;
+                padding: 1rem 1.25rem;
+                background: #ffffff;
+                border-top: 1px solid #f1f5f9;
+                border-bottom-left-radius: 12px;
+                border-bottom-right-radius: 12px;
+            }
+            .admin-pagination-info-wrap {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                font-size: 0.83rem;
+                color: #64748b;
+                flex-wrap: wrap;
+            }
+            .admin-pagination-sep {
+                color: #cbd5e1;
+            }
+            .admin-pagination-controls {
+                display: inline-flex;
+                align-items: center;
+                background: #f8fafc;
+                padding: 4px;
+                border-radius: 8px;
+                border: 1px solid #e2e8f0;
+                gap: 3px;
+            }
+            @media (max-width: 768px) {
+                .admin-pagination-bar {
+                    flex-direction: column !important;
+                    align-items: stretch !important;
+                    padding: 0.85rem 1rem !important;
+                    gap: 0.75rem !important;
+                }
+                .admin-pagination-info-wrap {
+                    justify-content: space-between !important;
+                    width: 100% !important;
+                    font-size: 0.8rem !important;
+                }
+                .admin-pagination-sep {
+                    display: none !important;
+                }
+                .admin-pagination-controls {
+                    width: 100% !important;
+                    justify-content: center !important;
+                    box-sizing: border-box !important;
+                }
+                .admin-pagination-controls a,
+                .admin-pagination-controls span {
+                    flex: 1 !important;
+                    text-align: center !important;
+                    justify-content: center !important;
+                    padding: 0.4rem 0.5rem !important;
+                }
+            }
+        </style>
+
+        <div class="admin-pagination-bar">
             <!-- Left Side: Entries Selector & Showing X to Y of Z entries -->
-            <div style="display: flex; align-items: center; gap: 12px; font-size: 0.85rem; color: #64748b; flex-wrap: wrap;">
+            <div class="admin-pagination-info-wrap">
                 <div style="display: flex; align-items: center; gap: 6px;">
                     <span>Show</span>
-                    <select onchange="location.href = this.value;" style="padding: 0.25rem 0.6rem; border: 1.5px solid #cbd5e1; border-radius: 6px; background: #fff; color: #334155; font-size: 0.85rem; font-weight: 600; cursor: pointer; outline: none;">
+                    <select onchange="location.href = this.value;" style="padding: 0.25rem 0.5rem; border: 1.5px solid #cbd5e1; border-radius: 6px; background: #fff; color: #334155; font-size: 0.82rem; font-weight: 600; cursor: pointer; outline: none;">
                         <?php foreach ([10, 15, 25, 50, 100] as $opt): ?>
                             <option value="<?= $buildUrl(1, $opt) ?>" <?= $perPage === $opt ? 'selected' : '' ?>><?= $opt ?></option>
                         <?php endforeach; ?>
                     </select>
                     <span>entries</span>
                 </div>
-                <span style="color: #cbd5e1;">|</span>
+                <span class="admin-pagination-sep">|</span>
                 <div>
-                    Showing <strong style="color: #0f172a;"><?= $startItem ?></strong> to <strong style="color: #0f172a;"><?= $endItem ?></strong> of <strong style="color: #0f172a;"><?= $totalItems ?></strong> entries
+                    Showing <strong style="color: #0f172a;"><?= $startItem ?></strong>-<?= $endItem ?> of <strong style="color: #0f172a;"><?= $totalItems ?></strong>
                 </div>
             </div>
 
             <!-- Right Side: Professional Button Pill Group -->
-            <div style="display: inline-flex; align-items: center; background: #f8fafc; padding: 4px; border-radius: 8px; border: 1px solid #e2e8f0; gap: 3px;">
+            <div class="admin-pagination-controls">
                 <!-- Previous Button -->
                 <?php if ($currentPage > 1): ?>
                     <a href="<?= $buildUrl($currentPage - 1) ?>" style="padding: 0.4rem 0.85rem; border-radius: 6px; background: transparent; color: #475569; font-weight: 600; font-size: 0.84rem; text-decoration: none; transition: all 0.15s ease;">
-                        Previous
+                        Prev
                     </a>
                 <?php else: ?>
                     <span style="padding: 0.4rem 0.85rem; border-radius: 6px; background: transparent; color: #cbd5e1; font-weight: 500; font-size: 0.84rem; cursor: not-allowed;">
-                        Previous
+                        Prev
                     </span>
                 <?php endif; ?>
 
