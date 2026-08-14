@@ -146,3 +146,95 @@ if (!function_exists('renderAdminTopbar')) {
         <?php
     }
 }
+
+if (!function_exists('renderAdminPagination')) {
+    function renderAdminPagination(int $currentPage, int $totalItems, int $perPage, string $baseUrl, array $queryParams = []): void
+    {
+        $totalPages = max(1, (int)ceil($totalItems / $perPage));
+        $startItem = $totalItems > 0 ? (($currentPage - 1) * $perPage) + 1 : 0;
+        $endItem = min($totalItems, $currentPage * $perPage);
+
+        $buildUrl = function($p, $pp = null) use ($baseUrl, $queryParams, $perPage) {
+            $params = array_merge($queryParams, [
+                'page' => $p,
+                'per_page' => $pp ?? $perPage
+            ]);
+            return htmlspecialchars($baseUrl . '?' . http_build_query($params));
+        };
+
+        ?>
+        <div class="admin-pagination-bar" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; padding: 1.25rem 1.5rem; background: #ffffff; border-top: 1px solid #f1f5f9; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; margin-top: -1px;">
+            <!-- Left Side: Entries Selector & Showing X to Y of Z entries -->
+            <div style="display: flex; align-items: center; gap: 12px; font-size: 0.85rem; color: #64748b; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span>Show</span>
+                    <select onchange="location.href = this.value;" style="padding: 0.25rem 0.6rem; border: 1.5px solid #cbd5e1; border-radius: 6px; background: #fff; color: #334155; font-size: 0.85rem; font-weight: 600; cursor: pointer; outline: none;">
+                        <?php foreach ([10, 15, 25, 50, 100] as $opt): ?>
+                            <option value="<?= $buildUrl(1, $opt) ?>" <?= $perPage === $opt ? 'selected' : '' ?>><?= $opt ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <span>entries</span>
+                </div>
+                <span style="color: #cbd5e1;">|</span>
+                <div>
+                    Showing <strong style="color: #0f172a;"><?= $startItem ?></strong> to <strong style="color: #0f172a;"><?= $endItem ?></strong> of <strong style="color: #0f172a;"><?= $totalItems ?></strong> entries
+                </div>
+            </div>
+
+            <!-- Right Side: Professional Button Pill Group -->
+            <div style="display: inline-flex; align-items: center; background: #f8fafc; padding: 4px; border-radius: 8px; border: 1px solid #e2e8f0; gap: 3px;">
+                <!-- Previous Button -->
+                <?php if ($currentPage > 1): ?>
+                    <a href="<?= $buildUrl($currentPage - 1) ?>" style="padding: 0.4rem 0.85rem; border-radius: 6px; background: transparent; color: #475569; font-weight: 600; font-size: 0.84rem; text-decoration: none; transition: all 0.15s ease;">
+                        Previous
+                    </a>
+                <?php else: ?>
+                    <span style="padding: 0.4rem 0.85rem; border-radius: 6px; background: transparent; color: #cbd5e1; font-weight: 500; font-size: 0.84rem; cursor: not-allowed;">
+                        Previous
+                    </span>
+                <?php endif; ?>
+
+                <!-- Page Numbers -->
+                <?php
+                $startPage = max(1, $currentPage - 2);
+                $endPage = min($totalPages, $currentPage + 2);
+
+                if ($startPage > 1) {
+                    echo '<a href="' . $buildUrl(1) . '" style="padding: 0.4rem 0.75rem; border-radius: 6px; background: transparent; color: #475569; font-weight: 600; font-size: 0.84rem; text-decoration: none;">1</a>';
+                    if ($startPage > 2) {
+                        echo '<span style="padding: 0.4rem 0.3rem; color: #94a3b8; font-size: 0.84rem;">...</span>';
+                    }
+                }
+
+                for ($i = $startPage; $i <= $endPage; $i++) {
+                    if ($i === $currentPage) {
+                        echo '<span style="padding: 0.4rem 0.85rem; border-radius: 6px; background: #0f766e; color: #ffffff; font-weight: 700; font-size: 0.84rem; box-shadow: 0 2px 6px rgba(15, 118, 110, 0.25);">' . $i . '</span>';
+                    } else {
+                        echo '<a href="' . $buildUrl($i) . '" style="padding: 0.4rem 0.75rem; border-radius: 6px; background: transparent; color: #475569; font-weight: 600; font-size: 0.84rem; text-decoration: none;">' . $i . '</a>';
+                    }
+                }
+
+                if ($endPage < $totalPages) {
+                    if ($endPage < $totalPages - 1) {
+                        echo '<span style="padding: 0.4rem 0.3rem; color: #94a3b8; font-size: 0.84rem;">...</span>';
+                    }
+                    echo '<a href="' . $buildUrl($totalPages) . '" style="padding: 0.4rem 0.75rem; border-radius: 6px; background: transparent; color: #475569; font-weight: 600; font-size: 0.84rem; text-decoration: none;">' . $totalPages . '</a>';
+                }
+                ?>
+
+                <!-- Next Button -->
+                <?php if ($currentPage < $totalPages): ?>
+                    <a href="<?= $buildUrl($currentPage + 1) ?>" style="padding: 0.4rem 0.85rem; border-radius: 6px; background: transparent; color: #475569; font-weight: 600; font-size: 0.84rem; text-decoration: none; transition: all 0.15s ease;">
+                        Next
+                    </a>
+                <?php else: ?>
+                    <span style="padding: 0.4rem 0.85rem; border-radius: 6px; background: transparent; color: #cbd5e1; font-weight: 500; font-size: 0.84rem; cursor: not-allowed;">
+                        Next
+                    </span>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php
+    }
+}
+

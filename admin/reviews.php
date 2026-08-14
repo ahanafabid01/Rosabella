@@ -15,7 +15,7 @@ if (!isLoggedIn() || !isAdmin()) {
 
 $db = getDB();
 
-// \u2500\u2500 Security: Verify CSRF on all admin POST requests \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── Security: Verify CSRF on all admin POST requests ─────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     requireCSRF();
 }
@@ -126,7 +126,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $message = 'Review deleted successfully.';
-            $forceListMode = true;
         } catch (Throwable $e) {
             if ($db->inTransaction()) {
                 $db->rollBack();
@@ -161,6 +160,19 @@ $imageCountSelect = $reviewImagesEnabled
     ? '(SELECT COUNT(*) FROM review_images ri WHERE ri.review_id = r.id) AS image_count'
     : '0 AS image_count';
 
+// Pagination Setup
+$perPage = max(1, min(100, intval($_GET['per_page'] ?? 15)));
+$page = max(1, intval($_GET['page'] ?? 1));
+
+$countStmt = $db->prepare("SELECT COUNT(*) FROM reviews r LEFT JOIN products p ON p.id = r.product_id LEFT JOIN users u ON u.id = r.user_id $whereSql");
+$countStmt->execute($params);
+$totalReviews = (int)$countStmt->fetchColumn();
+$totalPages = max(1, ceil($totalReviews / $perPage));
+if ($page > $totalPages) {
+    $page = $totalPages;
+}
+$offset = ($page - 1) * $perPage;
+
 $listStmt = $db->prepare("
     SELECT r.*, p.name AS product_name, u.first_name, u.last_name, u.email, $imageCountSelect
     FROM reviews r
@@ -168,6 +180,7 @@ $listStmt = $db->prepare("
     LEFT JOIN users u ON u.id = r.user_id
     $whereSql
     ORDER BY r.created_at DESC
+    LIMIT $perPage OFFSET $offset
 ");
 $listStmt->execute($params);
 $reviews = $listStmt->fetchAll();
@@ -192,7 +205,8 @@ $pageTitle = 'Reviews Management';
 
     <main class="admin-content">
         <?php renderAdminTopbar($pageTitle ?? 'Admin Panel'); ?>
-<div class="admin-header">
+
+        <div class="admin-header">
             <h1 class="admin-title">Reviews</h1>
             <form method="GET" class="admin-actions-row">
                 <input
@@ -231,7 +245,7 @@ $pageTitle = 'Reviews Management';
                 <tbody>
                 <?php if (empty($reviews)): ?>
                     <tr>
-                        <td colspan="9" class="admin-text-muted">No reviews found.</td>
+                        <td colspan="7" class="admin-text-muted" style="text-align: center; padding: 2rem;">No reviews found.</td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($reviews as $review): ?>
@@ -250,8 +264,7 @@ $pageTitle = 'Reviews Management';
                             <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: nowrap;">
                                 <a href="<?= BASE_URL ?>/admin/view-review?id=<?= intval($review['id']) ?>" class="btn btn-sm btn-outline" style="white-space: nowrap;">View</a>
                                 <form method="POST" onsubmit="return confirm('Delete this review permanently?');" style="margin: 0;">
-                        <!-- Security: CSRF token -->
-                        <?= csrfField() ?>
+                                    <?= csrfField() ?>
                                     <input type="hidden" name="action" value="delete_review">
                                     <input type="hidden" name="review_id" value="<?= intval($review['id']) ?>">
                                     <button type="submit" class="btn btn-sm btn-secondary" style="white-space: nowrap;">Delete</button>
@@ -264,10 +277,9 @@ $pageTitle = 'Reviews Management';
                 </tbody>
             </table>
         </div>
+        <?php renderAdminPagination($page, $totalReviews, $perPage, BASE_URL . '/admin/reviews', array_filter(['search' => $search, 'status' => $statusFilter])); ?>
     </main>
 </div>
 <script src="js/admin.js"></script>
 </body>
 </html>
-
-

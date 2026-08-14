@@ -103,7 +103,21 @@ if ($search) {
     $where = "WHERE code LIKE ?";
     $params[] = "%$search%";
 }
-$stmt = $db->prepare("SELECT * FROM coupons $where ORDER BY created_at DESC");
+
+// Pagination Setup
+$perPage = max(1, min(100, intval($_GET['per_page'] ?? 15)));
+$page = max(1, intval($_GET['page'] ?? 1));
+
+$countStmt = $db->prepare("SELECT COUNT(*) FROM coupons $where");
+$countStmt->execute($params);
+$totalCoupons = (int)$countStmt->fetchColumn();
+$totalPages = max(1, ceil($totalCoupons / $perPage));
+if ($page > $totalPages) {
+    $page = $totalPages;
+}
+$offset = ($page - 1) * $perPage;
+
+$stmt = $db->prepare("SELECT * FROM coupons $where ORDER BY created_at DESC LIMIT $perPage OFFSET $offset");
 $stmt->execute($params);
 $coupons = $stmt->fetchAll();
 
@@ -188,6 +202,7 @@ $pageTitle = 'Coupons Management';
                     </tbody>
                 </table>
             </div>
+            <?php renderAdminPagination($page, $totalCoupons, $perPage, BASE_URL . '/admin/coupons', array_filter(['search' => $search])); ?>
         <?php else: ?>
             <div class="admin-card">
                 <form method="POST">

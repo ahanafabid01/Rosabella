@@ -441,10 +441,25 @@ $search = $_GET['search'] ?? '';
 $where = '';
 $params = [];
 if ($search) {
-    $where = "WHERE name LIKE ?";
+    $where = "WHERE p.name LIKE ? OR p.sku LIKE ?";
+    $params[] = "%$search%";
     $params[] = "%$search%";
 }
-$stmt = $db->prepare("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id $where ORDER BY p.created_at DESC");
+
+// Pagination Setup
+$perPage = max(1, min(100, intval($_GET['per_page'] ?? 15)));
+$page = max(1, intval($_GET['page'] ?? 1));
+
+$countStmt = $db->prepare("SELECT COUNT(*) FROM products p $where");
+$countStmt->execute($params);
+$totalProducts = (int)$countStmt->fetchColumn();
+$totalPages = max(1, ceil($totalProducts / $perPage));
+if ($page > $totalPages) {
+    $page = $totalPages;
+}
+$offset = ($page - 1) * $perPage;
+
+$stmt = $db->prepare("SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id = c.id $where ORDER BY p.created_at DESC LIMIT $perPage OFFSET $offset");
 $stmt->execute($params);
 $products = $stmt->fetchAll();
 
@@ -527,6 +542,7 @@ $pageTitle = 'Products Management';
                         </tbody>
                     </table>
                 </div>
+                <?php renderAdminPagination($page, $totalProducts, $perPage, BASE_URL . '/admin/products', array_filter(['search' => $search])); ?>
             <?php else: ?>
                 <!-- Professional Two-Column Product Form -->
                 <form method="POST" enctype="multipart/form-data" class="admin-product-form-layout">

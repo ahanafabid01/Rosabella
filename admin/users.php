@@ -74,7 +74,20 @@ if ($roleFilter)   { $where[] = "role = ?";   $params[] = $roleFilter; }
 if ($statusFilter) { $where[] = "status = ?"; $params[] = $statusFilter; }
 $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
-$stmt = $db->prepare("SELECT id, first_name, last_name, email, role, status, created_at FROM users $whereSql ORDER BY created_at DESC");
+// Pagination Setup
+$perPage = max(1, min(100, intval($_GET['per_page'] ?? 15)));
+$page = max(1, intval($_GET['page'] ?? 1));
+
+$countStmt = $db->prepare("SELECT COUNT(*) FROM users $whereSql");
+$countStmt->execute($params);
+$totalUsers = (int)$countStmt->fetchColumn();
+$totalPages = max(1, ceil($totalUsers / $perPage));
+if ($page > $totalPages) {
+    $page = $totalPages;
+}
+$offset = ($page - 1) * $perPage;
+
+$stmt = $db->prepare("SELECT id, first_name, last_name, email, role, status, created_at FROM users $whereSql ORDER BY created_at DESC LIMIT $perPage OFFSET $offset");
 $stmt->execute($params);
 $users = $stmt->fetchAll();
 
@@ -284,6 +297,7 @@ $pageTitle = 'Users Management';
                     </tbody>
                 </table>
             </div>
+            <?php renderAdminPagination($page, $totalUsers, $perPage, BASE_URL . '/admin/users', array_filter(['search' => $search, 'role' => $roleFilter, 'status' => $statusFilter])); ?>
         </div>
     </main>
 </div>

@@ -76,7 +76,21 @@ if ($status) {
     $where = "WHERE status = ?";
     $params[] = $status;
 }
-$stmt = $db->prepare("SELECT o.*, u.email as user_email FROM orders o LEFT JOIN users u ON o.user_id = u.id $where ORDER BY o.created_at DESC");
+
+// Pagination Setup
+$perPage = max(1, min(100, intval($_GET['per_page'] ?? 15)));
+$page = max(1, intval($_GET['page'] ?? 1));
+
+$countStmt = $db->prepare("SELECT COUNT(*) FROM orders o $where");
+$countStmt->execute($params);
+$totalOrders = (int)$countStmt->fetchColumn();
+$totalPages = max(1, ceil($totalOrders / $perPage));
+if ($page > $totalPages) {
+    $page = $totalPages;
+}
+$offset = ($page - 1) * $perPage;
+
+$stmt = $db->prepare("SELECT o.*, u.email as user_email FROM orders o LEFT JOIN users u ON o.user_id = u.id $where ORDER BY o.created_at DESC LIMIT $perPage OFFSET $offset");
 $stmt->execute($params);
 $orders = $stmt->fetchAll();
 
@@ -175,6 +189,7 @@ $pageTitle = 'Orders Management';
                     </tbody>
                 </table>
             </div>
+            <?php renderAdminPagination($page, $totalOrders, $perPage, BASE_URL . '/admin/orders', array_filter(['status' => $status])); ?>
         </main>
     </div>
     <script src="js/admin.js"></script>

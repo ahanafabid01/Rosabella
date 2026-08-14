@@ -136,12 +136,27 @@ if ($search) {
     $where = "WHERE c.name LIKE ? OR c.slug LIKE ?";
     $params = ["%$search%", "%$search%"];
 }
+
+// Pagination Setup
+$perPage = max(1, min(100, intval($_GET['per_page'] ?? 15)));
+$page = max(1, intval($_GET['page'] ?? 1));
+
+$countStmt = $db->prepare("SELECT COUNT(*) FROM categories c $where");
+$countStmt->execute($params);
+$totalCategories = (int)$countStmt->fetchColumn();
+$totalPages = max(1, ceil($totalCategories / $perPage));
+if ($page > $totalPages) {
+    $page = $totalPages;
+}
+$offset = ($page - 1) * $perPage;
+
 $stmt = $db->prepare("
     SELECT c.*, p.name AS parent_name
     FROM categories c
     LEFT JOIN categories p ON p.id = c.parent_id
     $where
     ORDER BY c.sort_order ASC, c.name ASC
+    LIMIT $perPage OFFSET $offset
 ");
 $stmt->execute($params);
 $categories = $stmt->fetchAll();
@@ -218,6 +233,7 @@ $pageTitle = 'Categories Management';
                     </tbody>
                 </table>
             </div>
+            <?php renderAdminPagination($page, $totalCategories, $perPage, BASE_URL . '/admin/categories', array_filter(['search' => $search])); ?>
         <?php else: ?>
             <div class="admin-card" style="max-width: 800px; margin: 0 auto;">
                 <form method="POST" enctype="multipart/form-data">
