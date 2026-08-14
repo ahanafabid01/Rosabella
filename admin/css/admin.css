@@ -1079,3 +1079,22 @@ body:has(.admin-layout) {
     list-style: revert !important;
 }
 
+/* =============================================
+   Professional Placeholder Styling
+   ============================================= */
+.admin-content .form-input::placeholder,
+.admin-content .form-textarea::placeholder {
+    color: #94a3b8;
+    font-size: 0.875rem;
+    font-weight: 400;
+    opacity: 0.9;
+}
+
+.ql-editor.ql-blank::before {
+    color: #94a3b8 !important;
+    font-style: italic !important;
+    font-size: 0.875rem !important;
+    left: 15px !important;
+    right: 15px !important;
+}
+

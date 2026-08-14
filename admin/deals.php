@@ -15,7 +15,7 @@ if (!isLoggedIn() || !isAdmin()) {
 
 $db = getDB();
 
-// \u2500\u2500 Security: Verify CSRF on all admin POST requests \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── Security: Verify CSRF on all admin POST requests ─────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     requireCSRF();
 }
@@ -123,6 +123,16 @@ function toDateTimeLocalValue(?string $value): string
         return '';
     }
 
+    return date('Y-m-d\TH:i', $timestamp);
+}
+
+function resolveAdminDealImageSrc(?string $imagePath): string
+{
+    $imagePath = trim((string)$imagePath);
+    if ($imagePath === '') {
+        return '';
+    }
+
     if (preg_match('/^(https?:)?\/\//i', $imagePath) || strpos($imagePath, 'data:') === 0 || strpos($imagePath, '../') === 0 || strpos($imagePath, '/') === 0) {
         return $imagePath;
     }
@@ -214,8 +224,6 @@ if (!$dealsTableReady) {
     $error = 'Deals module is unavailable because the table could not be initialized.';
 }
 ensureDealsSettings($db);
-if ($dealsTableReady) {
-}
 
 if ($dealsTableReady && $action === 'delete' && $dealId > 0) {
     $existingStmt = $db->prepare("SELECT image_path FROM deals WHERE id = ?");
@@ -482,21 +490,21 @@ $pageTitle = 'Deals Management';
                     <div class="admin-two-col-grid">
                         <div class="form-group">
                             <label class="form-label">Section Title</label>
-                            <input type="text" name="home_deals_title" class="form-input" required value="<?= htmlspecialchars($sectionSettings['home_deals_title']) ?>">
+                            <input type="text" name="home_deals_title" class="form-input" required value="<?= htmlspecialchars($sectionSettings['home_deals_title']) ?>" placeholder="e.g., Deals of the Day">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Section Subtitle</label>
-                            <input type="text" name="home_deals_subtitle" class="form-input" value="<?= htmlspecialchars($sectionSettings['home_deals_subtitle']) ?>">
+                            <input type="text" name="home_deals_subtitle" class="form-input" value="<?= htmlspecialchars($sectionSettings['home_deals_subtitle']) ?>" placeholder="e.g., Don't miss out on our limited-time exclusive offers">
                         </div>
                     </div>
                     <div class="admin-two-col-grid">
                         <div class="form-group">
                             <label class="form-label">Button Label</label>
-                            <input type="text" name="home_deals_cta_label" class="form-input" value="<?= htmlspecialchars($sectionSettings['home_deals_cta_label']) ?>">
+                            <input type="text" name="home_deals_cta_label" class="form-input" value="<?= htmlspecialchars($sectionSettings['home_deals_cta_label']) ?>" placeholder="e.g., View All Deals">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Button URL</label>
-                            <input type="text" name="home_deals_cta_url" class="form-input" value="<?= htmlspecialchars($sectionSettings['home_deals_cta_url']) ?>">
+                            <input type="text" name="home_deals_cta_url" class="form-input" value="<?= htmlspecialchars($sectionSettings['home_deals_cta_url']) ?>" placeholder="e.g., sale or shop">
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary">Save Section Settings</button>
@@ -506,7 +514,7 @@ $pageTitle = 'Deals Management';
             <?php if ($dealsTableReady): ?>
                 <div class="admin-card">
                     <form method="GET" class="admin-form-row">
-                        <input type="text" class="form-input admin-input-max-320" name="search" placeholder="Search deals..." value="<?= htmlspecialchars($search) ?>">
+                        <input type="text" class="form-input admin-input-max-320" name="search" placeholder="Search deals by title or subtitle..." value="<?= htmlspecialchars($search) ?>">
                         <button type="submit" class="btn btn-secondary">Search</button>
                     </form>
                 </div>
@@ -594,12 +602,12 @@ $pageTitle = 'Deals Management';
                     <input type="hidden" name="save_deal" value="1">
                     <div class="form-group">
                         <label class="form-label">Deal Title *</label>
-                        <input type="text" name="title" class="form-input" required value="<?= htmlspecialchars($editingDeal['title'] ?? $_POST['title'] ?? '') ?>">
+                        <input type="text" name="title" class="form-input" required value="<?= htmlspecialchars($editingDeal['title'] ?? $_POST['title'] ?? '') ?>" placeholder="e.g., Midnight Flash Sale, Weekend Special">
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Subtitle</label>
-                        <input type="text" name="subtitle" class="form-input" value="<?= htmlspecialchars($editingDeal['subtitle'] ?? $_POST['subtitle'] ?? '') ?>">
+                        <input type="text" name="subtitle" class="form-input" value="<?= htmlspecialchars($editingDeal['subtitle'] ?? $_POST['subtitle'] ?? '') ?>" placeholder="e.g., Up to 50% off selected luxury items">
                     </div>
 
                     <div class="form-group">
@@ -639,7 +647,7 @@ $pageTitle = 'Deals Management';
                     <div class="admin-two-col-grid">
                         <div class="form-group">
                             <label class="form-label">Sort Order</label>
-                            <input type="number" name="sort_order" class="form-input" value="<?= htmlspecialchars((string)($editingDeal['sort_order'] ?? $_POST['sort_order'] ?? $nextSortOrder)) ?>">
+                            <input type="number" min="0" name="sort_order" class="form-input" value="<?= htmlspecialchars((string)($editingDeal['sort_order'] ?? $_POST['sort_order'] ?? $nextSortOrder)) ?>" placeholder="e.g., 0">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Upload Image <span class="admin-text-muted" style="font-weight:400;">(Optional)</span></label>
@@ -664,7 +672,7 @@ $pageTitle = 'Deals Management';
                             <div class="admin-two-col-grid">
                                 <div class="form-group">
                                     <label class="form-label">Badge Text</label>
-                                    <input type="text" name="badge_text" class="form-input" value="<?= htmlspecialchars($editingDeal['badge_text'] ?? $_POST['badge_text'] ?? '') ?>">
+                                    <input type="text" name="badge_text" class="form-input" value="<?= htmlspecialchars($editingDeal['badge_text'] ?? $_POST['badge_text'] ?? '') ?>" placeholder="e.g., Limited Time, Hot Deal, 50% OFF">
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Badge Style</label>
@@ -678,8 +686,6 @@ $pageTitle = 'Deals Management';
                                     </select>
                                 </div>
                             </div>
-
-
 
                             <div class="form-group">
                                 <label class="form-label">External Image URL <span class="admin-text-muted" style="font-weight:400;">(Optional - overrides upload)</span></label>
@@ -699,7 +705,7 @@ $pageTitle = 'Deals Management';
 
                             <div class="form-group">
                                 <label class="form-label">Image Position</label>
-                                <input type="text" name="image_position" class="form-input" value="<?= htmlspecialchars($editingDeal['image_position'] ?? $_POST['image_position'] ?? 'center center') ?>" placeholder="center top">
+                                <input type="text" name="image_position" class="form-input" value="<?= htmlspecialchars($editingDeal['image_position'] ?? $_POST['image_position'] ?? 'center center') ?>" placeholder="e.g., center center, center top">
                             </div>
 
                         </div>
@@ -717,5 +723,3 @@ $pageTitle = 'Deals Management';
 <script src="js/admin.js"></script>
 </body>
 </html>
-
-

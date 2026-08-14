@@ -16,7 +16,7 @@ if (!isLoggedIn() || !isAdmin()) {
 
 $db = getDB();
 
-// \u2500\u2500 Security: Verify CSRF on all admin POST requests \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── Security: Verify CSRF on all admin POST requests ─────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     requireCSRF();
 }
@@ -181,7 +181,7 @@ $pageTitle = 'Categories Management';
         <?php if ($action === 'list'): ?>
             <div class="admin-card">
                 <form method="GET" class="admin-form-row">
-                    <input type="text" class="form-input admin-input-max-320" name="search" placeholder="Search categories..." value="<?= htmlspecialchars($search) ?>">
+                    <input type="text" class="form-input admin-input-max-320" name="search" placeholder="Search categories by name or slug..." value="<?= htmlspecialchars($search) ?>">
                     <button type="submit" class="btn btn-secondary">Search</button>
                 </form>
             </div>
@@ -225,11 +225,11 @@ $pageTitle = 'Categories Management';
                         <?= csrfField() ?>
                     <div class="form-group">
                         <label class="form-label">Name *</label>
-                        <input type="text" name="name" class="form-input" required value="<?= htmlspecialchars($editingCategory['name'] ?? $_POST['name'] ?? '') ?>">
+                        <input type="text" name="name" class="form-input" required value="<?= htmlspecialchars($editingCategory['name'] ?? $_POST['name'] ?? '') ?>" placeholder="e.g., Women's Fashion, Luxury Flowers, Gift Sets">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Slug</label>
-                        <input type="text" name="slug" class="form-input" value="<?= htmlspecialchars($editingCategory['slug'] ?? $_POST['slug'] ?? '') ?>" placeholder="Auto-generated if empty">
+                        <input type="text" name="slug" class="form-input" value="<?= htmlspecialchars($editingCategory['slug'] ?? $_POST['slug'] ?? '') ?>" placeholder="e.g., womens-fashion (auto-generated if empty)">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Parent Category</label>
@@ -260,7 +260,7 @@ $pageTitle = 'Categories Management';
                     </div>
                     <div class="form-group">
                         <label class="form-label">Description</label>
-                        <textarea name="description" class="form-textarea"><?= htmlspecialchars($editingCategory['description'] ?? $_POST['description'] ?? '') ?></textarea>
+                        <textarea name="description" class="form-textarea" placeholder="Write a brief overview of this category for shoppers and search engines..."><?= htmlspecialchars($editingCategory['description'] ?? $_POST['description'] ?? '') ?></textarea>
                     </div>
                     <div class="admin-two-col-grid">
                         <div class="form-group">
@@ -272,7 +272,7 @@ $pageTitle = 'Categories Management';
                         </div>
                         <div class="form-group">
                             <label class="form-label">Sort Order</label>
-                            <input type="number" name="sort_order" class="form-input" value="<?= htmlspecialchars((string)($editingCategory['sort_order'] ?? $_POST['sort_order'] ?? $nextSortOrder)) ?>">
+                            <input type="number" min="0" name="sort_order" class="form-input" value="<?= htmlspecialchars((string)($editingCategory['sort_order'] ?? $_POST['sort_order'] ?? $nextSortOrder)) ?>" placeholder="e.g., 1">
                         </div>
                     </div>
                     
@@ -295,5 +295,3 @@ $pageTitle = 'Categories Management';
     <script src="js/admin.js"></script>
 </body>
 </html>
-
-

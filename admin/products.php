@@ -488,7 +488,7 @@ $pageTitle = 'Products Management';
                 <!-- Search -->
                 <div class="admin-card admin-card-gap-lg">
                     <form method="GET" class="admin-form-row-center">
-                        <input type="text" name="search" class="form-input admin-input-max-300" placeholder="Search products..." value="<?= htmlspecialchars($search) ?>">
+                        <input type="text" name="search" class="form-input admin-input-max-300" placeholder="Search products by title, SKU..." value="<?= htmlspecialchars($search) ?>">
                         <button type="submit" class="btn btn-secondary">Search</button>
                     </form>
                 </div>
@@ -539,20 +539,20 @@ $pageTitle = 'Products Management';
                             <h3 class="admin-section-heading">Basic Information</h3>
                             <div class="form-group">
                                 <label class="form-label">Product Name *</label>
-                                <input type="text" name="name" class="form-input" required value="<?= htmlspecialchars($product['name'] ?? '') ?>">
+                                <input type="text" name="name" class="form-input" required value="<?= htmlspecialchars($product['name'] ?? '') ?>" placeholder="e.g., Premium Floral Silk Evening Dress">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Brand</label>
-                                <input type="text" name="brand" class="form-input" value="<?= htmlspecialchars($product['brand'] ?? '') ?>" placeholder="e.g., Sony">
+                                <input type="text" name="brand" class="form-input" value="<?= htmlspecialchars($product['brand'] ?? '') ?>" placeholder="e.g., Rosabella Paris / Zara / Gucci">
                             </div>
                             <div class="admin-two-col-grid">
                                 <div class="form-group">
                                     <label class="form-label">SKU</label>
-                                    <input type="text" name="sku" class="form-input" value="<?= htmlspecialchars($product['sku'] ?? '') ?>" placeholder="e.g., 9455BA03">
+                                    <input type="text" name="sku" class="form-input" value="<?= htmlspecialchars($product['sku'] ?? '') ?>" placeholder="e.g., RSB-2026-DRS">
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Style</label>
-                                    <input type="text" name="style" class="form-input" value="<?= htmlspecialchars($product['style'] ?? '') ?>" placeholder="e.g., Sports Shoes">
+                                    <input type="text" name="style" class="form-input" value="<?= htmlspecialchars($product['style'] ?? '') ?>" placeholder="e.g., Evening Wear / Casual / Slim Fit">
                                 </div>
                             </div>
                             <div class="form-group">
@@ -562,11 +562,11 @@ $pageTitle = 'Products Management';
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Key Features (One per line)</label>
-                                <textarea name="key_features" class="form-textarea" rows="4" placeholder="Model: PlayStation 5 Slim..."><?= htmlspecialchars($product['key_features'] ?? '') ?></textarea>
+                                <textarea name="key_features" class="form-textarea" rows="4" placeholder="• 100% Premium handcrafted quality&#10;• Ultra-soft breathable luxury fabric&#10;• Elegant gift packaging included&#10;• Easy care & durable finish"><?= htmlspecialchars($product['key_features'] ?? '') ?></textarea>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Sizes (Comma separated)</label>
-                                <input type="text" name="sizes" class="form-input" value="<?= htmlspecialchars($product['sizes'] ?? '') ?>" placeholder="e.g., 39, 40, 41, 42, 43, 44">
+                                <input type="text" name="sizes" class="form-input" value="<?= htmlspecialchars($product['sizes'] ?? '') ?>" placeholder="e.g., XS, S, M, L, XL, XXL (or 38, 39, 40, 41, 42)">
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Color Variants</label>
@@ -586,12 +586,12 @@ $pageTitle = 'Products Management';
                                     }
                                 }
                                 ?>
-                                <input type="text" name="colors_input" id="color-variants-input" class="form-input" value="<?= htmlspecialchars($colorsString) ?>" placeholder="e.g., White:#ffffff, Crimson:#DC143C">
+                                <input type="text" name="colors_input" id="color-variants-input" class="form-input" value="<?= htmlspecialchars($colorsString) ?>" placeholder="e.g., Rose Gold:#B76E79, Midnight Black:#1E293B, Pure White:#FFFFFF">
                                 <p class="admin-upload-help" style="margin-top: 0.25rem;">Format: Name:HexCode, separated by commas.</p>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Other Variants (Comma separated)</label>
-                                <input type="text" name="variants" class="form-input" value="<?= htmlspecialchars($product['variants'] ?? '') ?>" placeholder="e.g., UK Edition, US Edition">
+                                <input type="text" name="variants" class="form-input" value="<?= htmlspecialchars($product['variants'] ?? '') ?>" placeholder="e.g., Standard Edition, Deluxe Gift Box, Velvet Bundle">
                             </div>
                         </div>
 
@@ -600,16 +600,16 @@ $pageTitle = 'Products Management';
                             <div class="admin-two-col-grid">
                                 <div class="form-group">
                                     <label class="form-label">Price *</label>
-                                    <input type="number" step="0.01" name="price" class="form-input" required value="<?= $product['price'] ?? '' ?>">
+                                    <input type="number" step="0.01" min="0" name="price" class="form-input" required value="<?= $product['price'] ?? '' ?>" placeholder="0.00">
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Sale Price</label>
-                                    <input type="number" step="0.01" name="sale_price" class="form-input" value="<?= $product['sale_price'] ?? '' ?>">
+                                    <input type="number" step="0.01" min="0" name="sale_price" class="form-input" value="<?= $product['sale_price'] ?? '' ?>" placeholder="0.00 (optional discount)">
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Stock Quantity *</label>
-                                <input type="number" name="stock_quantity" class="form-input" required value="<?= $product['stock_quantity'] ?? '0' ?>">
+                                <input type="number" min="0" name="stock_quantity" class="form-input" required value="<?= isset($product['stock_quantity']) ? htmlspecialchars((string)$product['stock_quantity']) : '' ?>" placeholder="e.g., 50">
                             </div>
                         </div>
 
@@ -775,6 +775,7 @@ $pageTitle = 'Products Management';
             if (editorEl) {
                 var quill = new Quill('#quill-editor', {
                     theme: 'snow',
+                    placeholder: 'Write a comprehensive, engaging product overview, material specs, care instructions, and styling details...',
                     modules: {
                         toolbar: [
                             ['bold', 'italic', 'underline', 'strike'],

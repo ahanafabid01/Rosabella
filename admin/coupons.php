@@ -15,7 +15,7 @@ if (!isLoggedIn() || !isAdmin()) {
 
 $db = getDB();
 
-// \u2500\u2500 Security: Verify CSRF on all admin POST requests \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── Security: Verify CSRF on all admin POST requests ─────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     requireCSRF();
 }
@@ -142,7 +142,7 @@ $pageTitle = 'Coupons Management';
         <?php if ($action === 'list'): ?>
             <div class="admin-card">
                 <form method="GET" class="admin-form-row">
-                    <input class="form-input admin-input-max-280" type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Search by code...">
+                    <input class="form-input admin-input-max-280" type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Search by coupon code...">
                     <button class="btn btn-secondary" type="submit">Search</button>
                 </form>
             </div>
@@ -195,7 +195,7 @@ $pageTitle = 'Coupons Management';
                         <?= csrfField() ?>
                     <div class="form-group">
                         <label class="form-label">Code *</label>
-                        <input type="text" name="code" class="form-input" required value="<?= htmlspecialchars($editingCoupon['code'] ?? $_POST['code'] ?? '') ?>">
+                        <input type="text" name="code" class="form-input" required value="<?= htmlspecialchars($editingCoupon['code'] ?? $_POST['code'] ?? '') ?>" placeholder="e.g., SUMMER20, ROSE10, WELCOME">
                     </div>
                     <div class="admin-two-col-grid">
                         <div class="form-group">
@@ -207,17 +207,17 @@ $pageTitle = 'Coupons Management';
                         </div>
                         <div class="form-group">
                             <label class="form-label">Value *</label>
-                            <input type="number" step="0.01" min="0" name="value" class="form-input" required value="<?= htmlspecialchars((string)($editingCoupon['value'] ?? $_POST['value'] ?? '')) ?>">
+                            <input type="number" step="0.01" min="0" name="value" class="form-input" required value="<?= htmlspecialchars((string)($editingCoupon['value'] ?? $_POST['value'] ?? '')) ?>" placeholder="e.g., 20">
                         </div>
                     </div>
                     <div class="admin-two-col-grid">
                         <div class="form-group">
                             <label class="form-label">Minimum Order Amount</label>
-                            <input type="number" step="0.01" min="0" name="min_order_amount" class="form-input" value="<?= htmlspecialchars((string)($editingCoupon['min_order_amount'] ?? $_POST['min_order_amount'] ?? 0)) ?>">
+                            <input type="number" step="0.01" min="0" name="min_order_amount" class="form-input" value="<?= htmlspecialchars((string)($editingCoupon['min_order_amount'] ?? $_POST['min_order_amount'] ?? '')) ?>" placeholder="0.00">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Max Uses (Per User)</label>
-                            <input type="number" min="0" name="max_uses" class="form-input" value="<?= htmlspecialchars((string)($editingCoupon['max_uses'] ?? $_POST['max_uses'] ?? '')) ?>">
+                            <input type="number" min="0" name="max_uses" class="form-input" value="<?= htmlspecialchars((string)($editingCoupon['max_uses'] ?? $_POST['max_uses'] ?? '')) ?>" placeholder="e.g., 1 (leave blank for unlimited)">
                         </div>
                     </div>
                     <div class="admin-two-col-grid">
@@ -249,5 +249,3 @@ $pageTitle = 'Coupons Management';
     <script src="js/admin.js"></script>
 </body>
 </html>
-
-
