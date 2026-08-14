@@ -154,16 +154,28 @@ function deleteManagedProductUpload(string $path): void
 
 // Handle actions
 $action = $_GET['action'] ?? 'list';
-$productId = $_GET['id'] ?? null;
+$productId = intval($_GET['id'] ?? 0);  // Always cast to int — prevents type-juggling attacks
 
-// Delete product
-if ($action === 'delete' && $productId) {
+// Delete product — requires a POST form with CSRF (GET-based delete is CSRF-vulnerable)
+if ($action === 'delete' && $productId > 0 && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireCSRF();
+    // Cascade: delete associated images from disk first
+    $imgStmt = $db->prepare("SELECT main_image, gallery_images FROM products WHERE id = ?");
+    $imgStmt->execute([$productId]);
+    $imgRow = $imgStmt->fetch();
+    if ($imgRow) {
+        if ($imgRow['main_image']) deleteManagedProductUpload($imgRow['main_image']);
+        foreach (parseGalleryImages($imgRow['gallery_images'] ?? null) as $gImg) {
+            deleteManagedProductUpload($gImg);
+        }
+    }
     $stmt = $db->prepare("DELETE FROM products WHERE id = ?");
     if ($stmt->execute([$productId])) {
         $message = 'Product deleted successfully';
         $action = 'list';
     }
 }
+
 
 // Save product (create/update)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -202,9 +214,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Existing colors from DB to retain existing images
     $existingColors = [];
-    if ($action === 'edit' && isset($_GET['id'])) {
+    if ($action === 'edit' && $productId > 0) {
         $existingStmt2 = $db->prepare("SELECT colors FROM products WHERE id = ?");
-        $existingStmt2->execute([intval($_GET['id'])]);
+        $existingStmt2->execute([$productId]);
         $existingProdColors = $existingStmt2->fetchColumn();
         if ($existingProdColors) {
             $existingColors = json_decode($existingProdColors, true) ?: [];
@@ -241,10 +253,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $is_featured = isset($_POST['is_featured']) ? 1 : 0;
     $is_new = isset($_POST['is_new']) ? 1 : 0;
     $is_bestseller = isset($_POST['is_bestseller']) ? 1 : 0;
-    $status = sanitize($_POST['status']);
+    // Allowlist-validate status — never trust raw POST input for enum columns
+    $statusRaw = sanitize($_POST['status'] ?? '');
+    $status = in_array($statusRaw, ['active', 'inactive', 'out_of_stock'], true) ? $statusRaw : 'active';
 
     $existingProduct = null;
-    if ($action === 'edit' && $productId) {
+    if ($action === 'edit' && $productId > 0) {
         $existingStmt = $db->prepare("SELECT main_image, gallery_images FROM products WHERE id = ?");
         $existingStmt->execute([$productId]);
         $existingProduct = $existingStmt->fetch();
@@ -874,9 +888,12 @@ $pageTitle = 'Products Management';
                                             <a href="?action=edit&id=<?= $p['id'] ?>" class="btn btn-sm btn-primary" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px;" title="Edit Product">
                                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                                             </a>
-                                            <a href="?action=delete&id=<?= $p['id'] ?>" class="btn btn-sm btn-secondary" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px;" onclick="return confirm('Are you sure you want to delete this product?')" title="Delete Product">
-                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                            </a>
+                                            <form method="POST" action="?action=delete&id=<?= $p['id'] ?>" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this product?')">
+                                                <?= csrfField() ?>
+                                                <button type="submit" class="btn btn-sm btn-secondary" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px;" title="Delete Product">
+                                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>

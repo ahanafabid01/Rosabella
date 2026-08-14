@@ -26,8 +26,9 @@ $error = '';
 $action = $_GET['action'] ?? 'list';
 $attrId = intval($_GET['id'] ?? 0);
 
-// Handle Delete Attribute
-if ($action === 'delete' && $attrId > 0) {
+// Handle Delete Attribute — requires POST to prevent CSRF via GET links
+if ($action === 'delete' && $attrId > 0 && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    requireCSRF();
     $stmt = $db->prepare("DELETE FROM global_attributes WHERE id = ?");
     if ($stmt->execute([$attrId])) {
         $message = 'Attribute deleted successfully.';
@@ -321,7 +322,10 @@ $pageTitle = 'Attributes Management';
                                     <td style="text-align: right;">
                                         <div class="admin-actions-row" style="justify-content: flex-end;">
                                             <a class="btn btn-sm btn-outline" href="?action=edit&id=<?= $attr['id'] ?>">Edit</a>
-                                            <a class="btn btn-sm btn-secondary" href="?action=delete&id=<?= $attr['id'] ?>" onclick="return confirm('Delete this attribute?');">Delete</a>
+                                            <form method="POST" action="?action=delete&id=<?= $attr['id'] ?>" style="display:inline;" onsubmit="return confirm('Delete this attribute?')">
+                                                <?= csrfField() ?>
+                                                <button type="submit" class="btn btn-sm btn-secondary">Delete</button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>
@@ -382,7 +386,10 @@ $pageTitle = 'Attributes Management';
 
                             <div class="attr-mobile-actions">
                                 <a class="btn btn-sm btn-outline" href="?action=edit&id=<?= $attr['id'] ?>">Edit</a>
-                                <a class="btn btn-sm btn-secondary" href="?action=delete&id=<?= $attr['id'] ?>" onclick="return confirm('Delete this attribute?');">Delete</a>
+                                <form method="POST" action="?action=delete&id=<?= $attr['id'] ?>" style="display:inline;" onsubmit="return confirm('Delete this attribute?')">
+                                    <?= csrfField() ?>
+                                    <button type="submit" class="btn btn-sm btn-secondary" style="flex:1;">Delete</button>
+                                </form>
                             </div>
                         </div>
                     <?php endforeach; ?>
