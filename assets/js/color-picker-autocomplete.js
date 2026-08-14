@@ -136,15 +136,17 @@
 
         container.style.position = 'relative';
         container.innerHTML = `
-            <div style="display: flex; gap: 8px; align-items: center; margin-top: 8px;">
+            <div style="display: flex; gap: 8px; align-items: center; margin-top: 6px;">
                 <div style="position: relative; flex: 1;">
-                    <input type="text" class="form-input color-search-input" placeholder="🔍 Search color (e.g. Rose Gold, Navy, Emerald)..." style="font-size: 0.85rem; padding-left: 32px;">
-                    <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); opacity: 0.5;">🎨</span>
+                    <input type="text" class="form-input color-search-input" placeholder="Search color (e.g. Rose Gold, Navy, Emerald)..." style="font-size: 0.85rem; padding-left: 32px;">
+                    <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #64748b; display: flex; align-items: center; pointer-events: none;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </span>
                     <div class="color-dropdown-menu" style="display: none; position: absolute; top: 100%; left: 0; right: 0; max-height: 220px; overflow-y: auto; background: #ffffff; border: 1.5px solid #0f766e; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 9999; margin-top: 4px; padding: 4px;"></div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 4px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 8px;">
-                    <input type="color" class="custom-hex-picker" value="#0f766e" style="width: 28px; height: 28px; border: none; background: none; cursor: pointer;">
-                    <span style="font-size: 0.75rem; font-weight: 700; color: #475569;">Custom</span>
+                <div style="display: flex; align-items: center; gap: 6px; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 3px 8px; height: 38px;">
+                    <input type="color" class="custom-hex-picker" value="#0f766e" style="width: 24px; height: 24px; border: none; background: none; cursor: pointer; padding: 0;">
+                    <span style="font-size: 0.76rem; font-weight: 700; color: #334155;">Custom</span>
                 </div>
             </div>
             <div class="color-swatches-tags-container" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;"></div>

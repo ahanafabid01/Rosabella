@@ -339,8 +339,9 @@ $pageTitle = 'Attributes Management';
                         
                         <!-- Color Swatch Search Autocomplete Container -->
                         <div id="color-swatch-picker-widget" style="margin-top: 10px; display: none; background: #f0fdf4; border: 1.5px solid #a7f3d0; border-radius: 10px; padding: 12px;">
-                            <label style="font-size: 0.82rem; font-weight: 700; color: #047857; display: flex; align-items: center; gap: 6px;">
-                                🎨 Search & Pick E-Commerce Colors (~150 Swatches)
+                            <label style="font-size: 0.82rem; font-weight: 700; color: #047857; display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.92 0 1.7-.72 1.7-1.65 0-.43-.17-.83-.44-1.14-.29-.33-.46-.77-.46-1.21 0-.93.75-1.7 1.68-1.7H16c3.31 0 6-2.69 6-6 0-4.97-4.48-9-10-9z"/></svg>
+                                Search & Pick E-Commerce Colors (~150 Swatches)
                             </label>
                         </div>
                     </div>

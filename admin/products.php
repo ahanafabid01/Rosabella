@@ -950,8 +950,9 @@ $pageTitle = 'Products Management';
                                 
                                 <!-- Color Swatch Search Autocomplete Container -->
                                 <div id="prod-color-swatch-picker-widget" style="margin-top: 10px; background: #f0fdf4; border: 1.5px solid #a7f3d0; border-radius: 10px; padding: 12px;">
-                                    <label style="font-size: 0.82rem; font-weight: 700; color: #047857; display: flex; align-items: center; gap: 6px;">
-                                        🎨 Search & Pick E-Commerce Colors (~150 Swatches)
+                                    <label style="font-size: 0.82rem; font-weight: 700; color: #047857; display: flex; align-items: center; gap: 6px; margin-bottom: 2px;">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.92 0 1.7-.72 1.7-1.65 0-.43-.17-.83-.44-1.14-.29-.33-.46-.77-.46-1.21 0-.93.75-1.7 1.68-1.7H16c3.31 0 6-2.69 6-6 0-4.97-4.48-9-10-9z"/></svg>
+                                        Search & Pick E-Commerce Colors (~150 Swatches)
                                     </label>
                                 </div>
                             </div>
@@ -1044,19 +1045,21 @@ $pageTitle = 'Products Management';
                                 <p class="admin-upload-help">Upload JPG, PNG, WEBP, or GIF (max 5 MB).</p>
                                 <input type="hidden" name="current_image" value="<?= htmlspecialchars($product['main_image'] ?? '') ?>">
                             </div>
-                            <?php if (!empty($parsedColors) && is_array($parsedColors)): ?>
-                                <div class="form-group" id="color-media-container">
-                                    <label class="form-label" style="border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 12px; font-weight: 600;">Color-Specific Media (Main & Gallery Images)</label>
-                                    <p class="admin-upload-help" style="margin-bottom: 15px;">Select a color from the dropdown below to upload its specific <strong>Main Product Image</strong> and <strong>Gallery Images</strong>.</p>
-                                    
-                                    <select id="color-upload-selector" class="form-select" style="margin-bottom: 1.5rem;">
-                                        <option value="">-- Select a color --</option>
+                            <div class="form-group" id="color-media-container" style="<?= empty($parsedColors) ? 'display:none;' : '' ?>">
+                                <label class="form-label" style="border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 12px; font-weight: 600;">Color-Specific Media (Main & Gallery Images)</label>
+                                <p class="admin-upload-help" style="margin-bottom: 15px;">Select a color from the dropdown below to upload its specific <strong>Main Product Image</strong> and <strong>Gallery Images</strong>.</p>
+                                
+                                <select id="color-upload-selector" class="form-select" style="margin-bottom: 1.5rem;">
+                                    <option value="">-- Select a color --</option>
+                                    <?php if (!empty($parsedColors)): ?>
                                         <?php foreach ($parsedColors as $colorName => $colorData): ?>
                                             <option value="<?= htmlspecialchars($colorName) ?>"><?= htmlspecialchars($colorName) ?></option>
                                         <?php endforeach; ?>
-                                    </select>
-                                    
-                                    <div id="dynamic-color-uploads">
+                                    <?php endif; ?>
+                                </select>
+                                
+                                <div id="dynamic-color-uploads">
+                                <?php if (!empty($parsedColors)): ?>
                                     <?php foreach ($parsedColors as $colorName => $colorData): ?>
                                         <div class="color-upload-group" data-color="<?= htmlspecialchars($colorName) ?>" style="display: none; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;">
                                             <label class="form-label" style="display:flex; align-items:center; gap:8px; margin-bottom: 1.2rem; font-size: 1.1rem;">Manage Images for 
@@ -1165,7 +1168,6 @@ $pageTitle = 'Products Management';
                     form.addEventListener('submit', function() {
                         var descriptionInput = document.getElementById('quill-description');
                         var html = quill.root.innerHTML;
-                        // Avoid saving empty tags if editor is blank
                         descriptionInput.value = (html === '<p><br></p>') ? '' : html;
                     });
                 }
@@ -1198,73 +1200,108 @@ $pageTitle = 'Products Management';
                     var globalMainImg = document.getElementById('global-main-image-container');
                     var globalGalleryImg = document.getElementById('global-gallery-image-container');
                     
-                    if (!val) {
-                        container.style.display = 'none';
+                    // Parse clean color names array
+                    var activeColorNames = val.split(',')
+                        .map(function(s) { return s.trim(); })
+                        .filter(Boolean)
+                        .map(function(s) { return s.includes(':') ? s.split(':')[0].trim() : s; });
+
+                    // Deduplicate active color names preserving order
+                    var uniqueActiveColors = [];
+                    activeColorNames.forEach(function(c) {
+                        if (c && !uniqueActiveColors.includes(c)) {
+                            uniqueActiveColors.push(c);
+                        }
+                    });
+
+                    if (uniqueActiveColors.length === 0) {
+                        if (container) container.style.display = 'none';
                         if (globalMainImg) globalMainImg.style.display = 'block';
                         if (globalGalleryImg) globalGalleryImg.style.display = 'block';
+                        if (colorSelector) colorSelector.innerHTML = '<option value="">-- Select a color --</option>';
                         return;
                     }
                     
-                    container.style.display = 'block';
+                    if (container) container.style.display = 'block';
                     if (globalMainImg) globalMainImg.style.display = 'none';
                     if (globalGalleryImg) globalGalleryImg.style.display = 'none';
                     
-                    var pairs = val.split(',');
-                    
-                    var existingBlocks = Array.from(dynamicUploads.querySelectorAll('.color-upload-group')).map(function(el) {
-                        return el.dataset.color;
-                    });
-                    
-                    pairs.forEach(function(p) {
-                        var parts = p.split(':');
-                        if (parts.length >= 2) {
-                            var name = parts[0].trim();
-                            var hex = parts[1].trim();
-                            if (name && hex) {
-                                if (!existingBlocks.includes(name)) {
-                                    existingBlocks.push(name);
-                                    
-                                    // Add to dropdown
-                                    if (colorSelector) {
-                                        var option = document.createElement('option');
-                                        option.value = name;
-                                        option.textContent = name;
-                                        colorSelector.appendChild(option);
-                                    }
-
-                                    // Create hidden block
-                                    var div = document.createElement('div');
-                                    div.className = 'color-upload-group';
-                                    div.dataset.color = name;
-                                    div.style = 'display: none; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;';
-                                    div.innerHTML = '<label class="form-label" style="display:flex; align-items:center; gap:8px; margin-bottom: 1.2rem; font-size: 1.1rem;">Manage Images for ' + 
-                                        '<span style="display:inline-block; width:16px; height:16px; border-radius:50%; background-color:' + hex + '; border:1px solid rgba(0,0,0,0.1);"></span>' + 
-                                        '<strong>' + name + '</strong></label>' +
-                                        '<div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #e2e8f0;">' +
-                                            '<label class="form-label" style="font-weight: 600; color: #334155;">Main Product Image</label>' +
-                                            '<input type="file" name="color_main_image[' + name + ']" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif">' +
-                                            '<p class="admin-upload-help" style="margin-top: 4px;">Upload the primary image shown for this color.</p>' +
-                                        '</div>' +
-                                        '<div>' +
-                                            '<label class="form-label" style="font-weight: 600; color: #334155;">Gallery Images</label>' +
-                                            '<input type="file" name="color_gallery[' + name + '][]" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif" multiple>' +
-                                            '<p class="admin-upload-help" style="margin-top: 4px;">Select multiple secondary thumbnail images for this color.</p>' +
-                                        '</div>';
-                                    dynamicUploads.appendChild(div);
-                                } else {
-                                    // Live update the background color as they continue typing valid hex codes
-                                    var existingBlock = dynamicUploads.querySelector('.color-upload-group[data-color="' + name.replace(/"/g, '\\"') + '"]');
-                                    if (existingBlock) {
-                                        var colorSpan = existingBlock.querySelector('span');
-                                        if (colorSpan) {
-                                            colorSpan.style.backgroundColor = hex;
-                                        }
-                                    }
-                                }
-                            }
+                    // 1. Rebuild Dropdown Options cleanly
+                    if (colorSelector) {
+                        var currentSelected = colorSelector.value;
+                        colorSelector.innerHTML = '<option value="">-- Select a color --</option>';
+                        uniqueActiveColors.forEach(function(name) {
+                            var option = document.createElement('option');
+                            option.value = name;
+                            option.textContent = name;
+                            colorSelector.appendChild(option);
+                        });
+                        if (uniqueActiveColors.includes(currentSelected)) {
+                            colorSelector.value = currentSelected;
+                        } else {
+                            colorSelector.value = '';
                         }
-                    });
+                    }
+                    
+                    // 2. Sync Color Upload Blocks
+                    if (dynamicUploads) {
+                        // Remove groups that are no longer in active colors
+                        Array.from(dynamicUploads.querySelectorAll('.color-upload-group')).forEach(function(group) {
+                            var colorName = group.dataset.color;
+                            if (!uniqueActiveColors.includes(colorName)) {
+                                group.remove();
+                            }
+                        });
+
+                        // Create groups for new active colors
+                        uniqueActiveColors.forEach(function(name) {
+                            var existing = dynamicUploads.querySelector('.color-upload-group[data-color="' + name.replace(/"/g, '\\"') + '"]');
+                            if (!existing) {
+                                var hex = '#000000';
+                                if (window.RosabellaColorDb && Array.isArray(window.RosabellaColorDb)) {
+                                    var matched = window.RosabellaColorDb.find(function(c) {
+                                        return c.name.toLowerCase() === name.toLowerCase();
+                                    });
+                                    if (matched) hex = matched.hex;
+                                }
+
+                                var div = document.createElement('div');
+                                div.className = 'color-upload-group';
+                                div.dataset.color = name;
+                                div.style.display = (colorSelector && colorSelector.value === name) ? 'block' : 'none';
+                                div.style.marginBottom = '20px';
+                                div.style.padding = '15px';
+                                div.style.background = '#f8f9fa';
+                                div.style.borderRadius = '6px';
+                                div.style.border = '1px solid #e9ecef';
+                                div.innerHTML = '<label class="form-label" style="display:flex; align-items:center; gap:8px; margin-bottom: 1.2rem; font-size: 1.1rem;">Manage Images for ' + 
+                                    '<span style="display:inline-block; width:16px; height:16px; border-radius:50%; background-color:' + hex + '; border:1px solid rgba(0,0,0,0.1);"></span>' + 
+                                    '<strong>' + name + '</strong></label>' +
+                                    '<div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #e2e8f0;">' +
+                                        '<label class="form-label" style="font-weight: 600; color: #334155;">Main Product Image</label>' +
+                                        '<input type="file" name="color_main_image[' + name + ']" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif">' +
+                                        '<p class="admin-upload-help" style="margin-top: 4px;">Upload the primary image shown for this color.</p>' +
+                                    '</div>' +
+                                    '<div>' +
+                                        '<label class="form-label" style="font-weight: 600; color: #334155;">Gallery Images</label>' +
+                                        '<input type="file" name="color_gallery[' + name + '][]" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif" multiple>' +
+                                        '<p class="admin-upload-help" style="margin-top: 4px;">Select multiple secondary thumbnail images for this color.</p>' +
+                                    '</div>';
+                                dynamicUploads.appendChild(div);
+                            }
+                        });
+                    }
+
+                    // Trigger change to update active visible block
+                    if (colorSelector) {
+                        colorSelector.dispatchEvent(new Event('change'));
+                    }
                 });
+                
+                // Trigger initial check if colors already entered
+                if (colorInput.value.trim()) {
+                    colorInput.dispatchEvent(new Event('input'));
+                }
             }
         });
 
