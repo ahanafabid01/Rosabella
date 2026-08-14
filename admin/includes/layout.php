@@ -169,8 +169,8 @@ if (!function_exists('renderAdminPagination')) {
                 align-items: center;
                 justify-content: space-between;
                 flex-wrap: wrap;
-                gap: 0.85rem;
-                padding: 1rem 1.25rem;
+                gap: 1rem;
+                padding: 1.25rem 1.5rem;
                 background: #ffffff;
                 border-top: 1px solid #f1f5f9;
                 border-bottom-left-radius: 12px;
@@ -179,49 +179,60 @@ if (!function_exists('renderAdminPagination')) {
             .admin-pagination-info-wrap {
                 display: flex;
                 align-items: center;
-                gap: 12px;
-                font-size: 0.83rem;
+                gap: 16px;
+                font-size: 0.85rem;
                 color: #64748b;
                 flex-wrap: wrap;
             }
-            .admin-pagination-sep {
-                color: #cbd5e1;
-            }
             .admin-pagination-controls {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .admin-pg-btn {
                 display: inline-flex;
                 align-items: center;
-                background: #f8fafc;
-                padding: 4px;
+                justify-content: center;
+                padding: 6px 14px;
                 border-radius: 8px;
-                border: 1px solid #e2e8f0;
-                gap: 3px;
+                background: #f1f5f9;
+                color: #334155;
+                font-weight: 600;
+                font-size: 0.85rem;
+                text-decoration: none;
+                transition: all 0.15s ease;
+                border: 1px solid transparent;
+            }
+            .admin-pg-btn:hover {
+                background: #e2e8f0;
+                color: #0f172a;
+            }
+            .admin-pg-btn.active {
+                background: var(--color-primary, #0f766e);
+                color: #ffffff;
+                font-weight: 700;
+                box-shadow: 0 2px 6px rgba(15, 118, 110, 0.25);
+            }
+            .admin-pg-btn.disabled {
+                background: #f8fafc;
+                color: #cbd5e1;
+                cursor: not-allowed;
             }
             @media (max-width: 768px) {
                 .admin-pagination-bar {
                     flex-direction: column !important;
-                    align-items: stretch !important;
-                    padding: 0.85rem 1rem !important;
-                    gap: 0.75rem !important;
+                    align-items: flex-start !important;
+                    padding: 1rem !important;
+                    gap: 0.85rem !important;
                 }
                 .admin-pagination-info-wrap {
-                    justify-content: space-between !important;
                     width: 100% !important;
-                    font-size: 0.8rem !important;
-                }
-                .admin-pagination-sep {
-                    display: none !important;
+                    gap: 10px !important;
                 }
                 .admin-pagination-controls {
                     width: 100% !important;
-                    justify-content: center !important;
-                    box-sizing: border-box !important;
-                }
-                .admin-pagination-controls a,
-                .admin-pagination-controls span {
-                    flex: 1 !important;
-                    text-align: center !important;
-                    justify-content: center !important;
-                    padding: 0.4rem 0.5rem !important;
+                    overflow-x: auto;
+                    padding-bottom: 2px;
                 }
             }
         </style>
@@ -231,30 +242,25 @@ if (!function_exists('renderAdminPagination')) {
             <div class="admin-pagination-info-wrap">
                 <div style="display: flex; align-items: center; gap: 6px;">
                     <span>Show</span>
-                    <select onchange="location.href = this.value;" style="padding: 0.25rem 0.5rem; border: 1.5px solid #cbd5e1; border-radius: 6px; background: #fff; color: #334155; font-size: 0.82rem; font-weight: 600; cursor: pointer; outline: none;">
+                    <select onchange="location.href = this.value;" style="padding: 4px 10px; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #fff; color: #334155; font-size: 0.85rem; font-weight: 600; cursor: pointer; outline: none;">
                         <?php foreach ([10, 15, 25, 50, 100] as $opt): ?>
                             <option value="<?= $buildUrl(1, $opt) ?>" <?= $perPage === $opt ? 'selected' : '' ?>><?= $opt ?></option>
                         <?php endforeach; ?>
                     </select>
                     <span>entries</span>
                 </div>
-                <span class="admin-pagination-sep">|</span>
                 <div>
-                    Showing <strong style="color: #0f172a;"><?= $startItem ?></strong>-<?= $endItem ?> of <strong style="color: #0f172a;"><?= $totalItems ?></strong>
+                    Showing <strong style="color: #0f172a;"><?= $startItem ?></strong> to <strong style="color: #0f172a;"><?= $endItem ?></strong> of <strong style="color: #0f172a;"><?= $totalItems ?></strong> entries
                 </div>
             </div>
 
-            <!-- Right Side: Professional Button Pill Group -->
+            <!-- Right Side: Individual Floating Rounded Buttons -->
             <div class="admin-pagination-controls">
                 <!-- Previous Button -->
                 <?php if ($currentPage > 1): ?>
-                    <a href="<?= $buildUrl($currentPage - 1) ?>" style="padding: 0.4rem 0.85rem; border-radius: 6px; background: transparent; color: #475569; font-weight: 600; font-size: 0.84rem; text-decoration: none; transition: all 0.15s ease;">
-                        Prev
-                    </a>
+                    <a href="<?= $buildUrl($currentPage - 1) ?>" class="admin-pg-btn">Previous</a>
                 <?php else: ?>
-                    <span style="padding: 0.4rem 0.85rem; border-radius: 6px; background: transparent; color: #cbd5e1; font-weight: 500; font-size: 0.84rem; cursor: not-allowed;">
-                        Prev
-                    </span>
+                    <span class="admin-pg-btn disabled">Previous</span>
                 <?php endif; ?>
 
                 <!-- Page Numbers -->
@@ -263,37 +269,33 @@ if (!function_exists('renderAdminPagination')) {
                 $endPage = min($totalPages, $currentPage + 2);
 
                 if ($startPage > 1) {
-                    echo '<a href="' . $buildUrl(1) . '" style="padding: 0.4rem 0.75rem; border-radius: 6px; background: transparent; color: #475569; font-weight: 600; font-size: 0.84rem; text-decoration: none;">1</a>';
+                    echo '<a href="' . $buildUrl(1) . '" class="admin-pg-btn">1</a>';
                     if ($startPage > 2) {
-                        echo '<span style="padding: 0.4rem 0.3rem; color: #94a3b8; font-size: 0.84rem;">...</span>';
+                        echo '<span style="padding: 0 4px; color: #94a3b8; font-size: 0.85rem;">...</span>';
                     }
                 }
 
                 for ($i = $startPage; $i <= $endPage; $i++) {
                     if ($i === $currentPage) {
-                        echo '<span style="padding: 0.4rem 0.85rem; border-radius: 6px; background: #0f766e; color: #ffffff; font-weight: 700; font-size: 0.84rem; box-shadow: 0 2px 6px rgba(15, 118, 110, 0.25);">' . $i . '</span>';
+                        echo '<span class="admin-pg-btn active">' . $i . '</span>';
                     } else {
-                        echo '<a href="' . $buildUrl($i) . '" style="padding: 0.4rem 0.75rem; border-radius: 6px; background: transparent; color: #475569; font-weight: 600; font-size: 0.84rem; text-decoration: none;">' . $i . '</a>';
+                        echo '<a href="' . $buildUrl($i) . '" class="admin-pg-btn">' . $i . '</a>';
                     }
                 }
 
                 if ($endPage < $totalPages) {
                     if ($endPage < $totalPages - 1) {
-                        echo '<span style="padding: 0.4rem 0.3rem; color: #94a3b8; font-size: 0.84rem;">...</span>';
+                        echo '<span style="padding: 0 4px; color: #94a3b8; font-size: 0.85rem;">...</span>';
                     }
-                    echo '<a href="' . $buildUrl($totalPages) . '" style="padding: 0.4rem 0.75rem; border-radius: 6px; background: transparent; color: #475569; font-weight: 600; font-size: 0.84rem; text-decoration: none;">' . $totalPages . '</a>';
+                    echo '<a href="' . $buildUrl($totalPages) . '" class="admin-pg-btn">' . $totalPages . '</a>';
                 }
                 ?>
 
                 <!-- Next Button -->
                 <?php if ($currentPage < $totalPages): ?>
-                    <a href="<?= $buildUrl($currentPage + 1) ?>" style="padding: 0.4rem 0.85rem; border-radius: 6px; background: transparent; color: #475569; font-weight: 600; font-size: 0.84rem; text-decoration: none; transition: all 0.15s ease;">
-                        Next
-                    </a>
+                    <a href="<?= $buildUrl($currentPage + 1) ?>" class="admin-pg-btn">Next</a>
                 <?php else: ?>
-                    <span style="padding: 0.4rem 0.85rem; border-radius: 6px; background: transparent; color: #cbd5e1; font-weight: 500; font-size: 0.84rem; cursor: not-allowed;">
-                        Next
-                    </span>
+                    <span class="admin-pg-btn disabled">Next</span>
                 <?php endif; ?>
             </div>
         </div>
