@@ -865,7 +865,7 @@ $pageTitle = 'Order Create';
                             </div>
                             <div class="oc-form-group">
                                 <label class="oc-label">Payment Method</label>
-                                <select name="payment_method" class="oc-select oc-highlight-border">
+                                <select name="payment_method" class="oc-select">
                                     <option value="Cash on Delivery">Cash on Delivery</option>
                                     <option value="bKash">bKash</option>
                                     <option value="Nagad">Nagad</option>
