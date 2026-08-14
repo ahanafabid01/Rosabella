@@ -11,6 +11,12 @@
  * @return string Theme key (default_theme, clothing_brand)
  */
 function getHomepageTheme() {
+    if (!empty($_GET['theme_preview'])) {
+        $allowed = ['default_theme', 'clothing_brand'];
+        if (in_array($_GET['theme_preview'], $allowed)) {
+            return $_GET['theme_preview'];
+        }
+    }
     return getSetting('homepage_theme') ?: 'default_theme';
 }
 
