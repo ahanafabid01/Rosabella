@@ -82,6 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $showOnHome,
                     $categoryId
                 ]);
+                $savedCatId = $categoryId;
                 $message = 'Category updated successfully.';
             } else {
                 $stmt = $db->prepare("
@@ -98,17 +99,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $sortOrder,
                     $showOnHome
                 ]);
+                $savedCatId = intval($db->lastInsertId());
                 $message = 'Category created successfully.';
             }
+
+            // Save Category Master Attributes mapping
+            if ($savedCatId > 0) {
+                $db->prepare("DELETE FROM category_attribute_mapping WHERE category_id = ?")->execute([$savedCatId]);
+                if (!empty($_POST['master_attributes']) && is_array($_POST['master_attributes'])) {
+                    $stmtMap = $db->prepare("INSERT IGNORE INTO category_attribute_mapping (attribute_id, category_id) VALUES (?, ?)");
+                    foreach ($_POST['master_attributes'] as $mAttrId) {
+                        $mIdClean = intval($mAttrId);
+                        if ($mIdClean > 0) {
+                            $stmtMap->execute([$mIdClean, $savedCatId]);
+                        }
+                    }
+                }
+            }
+
             $action = 'list';
             $categoryId = 0;
         } catch (Throwable $e) {
-            $error = 'Unable to save category. Ensure slug is unique.';
+            $error = 'Unable to save category: ' . $e->getMessage();
         }
     }
 }
 
 $editingCategory = null;
+$assignedMasterIds = [];
+$allMasterAttributes = $db->query("SELECT * FROM global_attributes WHERE apply_to_all = 0 ORDER BY sort_order ASC, attribute_name ASC")->fetchAll();
+
 if ($action === 'edit' && $categoryId > 0) {
     $stmt = $db->prepare("SELECT * FROM categories WHERE id = ?");
     $stmt->execute([$categoryId]);
@@ -116,6 +136,10 @@ if ($action === 'edit' && $categoryId > 0) {
     if (!$editingCategory) {
         $error = 'Category not found.';
         $action = 'list';
+    } else {
+        $stmtMap = $db->prepare("SELECT attribute_id FROM category_attribute_mapping WHERE category_id = ?");
+        $stmtMap->execute([$editingCategory['id']]);
+        $assignedMasterIds = $stmtMap->fetchAll(PDO::FETCH_COLUMN);
     }
 }
 
@@ -160,6 +184,10 @@ $stmt = $db->prepare("
 ");
 $stmt->execute($params);
 $categories = $stmt->fetchAll();
+
+// Fetch attribute summaries for list view
+$stmtAttrSummary = $db->query("SELECT category_id, GROUP_CONCAT(attribute_name SEPARATOR ', ') as attr_summary FROM category_attributes GROUP BY category_id");
+$attrSummaries = $stmtAttrSummary->fetchAll(PDO::FETCH_KEY_PAIR);
 
 $pageTitle = 'Categories Management';
 ?>
@@ -208,6 +236,7 @@ $pageTitle = 'Categories Management';
                         <th>Name</th>
                         <th>Slug</th>
                         <th>Parent</th>
+                        <th>Configured Attributes</th>
                         <th>Status</th>
                         <th>Sort</th>
                         <th>Actions</th>
@@ -215,11 +244,19 @@ $pageTitle = 'Categories Management';
                     </thead>
                     <tbody>
                     <?php foreach ($categories as $cat): ?>
+                        <?php $catAttrs = $attrSummaries[$cat['id']] ?? ''; ?>
                         <tr>
                             <td><?= intval($cat['id']) ?></td>
-                            <td><?= htmlspecialchars($cat['name']) ?></td>
+                            <td><strong><?= htmlspecialchars($cat['name']) ?></strong></td>
                             <td><?= htmlspecialchars($cat['slug']) ?></td>
                             <td><?= htmlspecialchars($cat['parent_name'] ?? '-') ?></td>
+                            <td>
+                                <?php if ($catAttrs): ?>
+                                    <span class="badge badge-info" style="font-size: 0.75rem; font-weight: 600;">🏷️ <?= htmlspecialchars($catAttrs) ?></span>
+                                <?php else: ?>
+                                    <span style="font-size: 0.75rem; color: #94a3b8;">None</span>
+                                <?php endif; ?>
+                            </td>
                             <td><span class="badge badge-<?= $cat['status'] === 'active' ? 'success' : 'warning' ?>"><?= htmlspecialchars(ucfirst($cat['status'])) ?></span></td>
                             <td><?= intval($cat['sort_order']) ?></td>
                             <td>
@@ -235,7 +272,7 @@ $pageTitle = 'Categories Management';
             </div>
             <?php renderAdminPagination($page, $totalCategories, $perPage, BASE_URL . '/admin/categories', array_filter(['search' => $search])); ?>
         <?php else: ?>
-            <div class="admin-card" style="max-width: 800px; margin: 0 auto;">
+            <div class="admin-card" style="max-width: 860px; margin: 0 auto;">
                 <form method="POST" enctype="multipart/form-data">
                         <!-- Security: CSRF token -->
                         <?= csrfField() ?>
@@ -278,6 +315,43 @@ $pageTitle = 'Categories Management';
                         <label class="form-label">Description</label>
                         <textarea name="description" class="form-textarea" placeholder="Write a brief overview of this category for shoppers and search engines..."><?= htmlspecialchars($editingCategory['description'] ?? $_POST['description'] ?? '') ?></textarea>
                     </div>
+
+                    <!-- Category Attributes (Sizes, Colors, Variants) Section -->
+                    <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 10px;">
+                            <div>
+                                <h3 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                                    Assign Master Attributes (Sizes, Colors, Variants)
+                                </h3>
+                                <p style="margin: 3px 0 0; font-size: 0.78rem; color: #64748b;">
+                                    Select Master Attributes to apply to this Category. Or manage global attributes on the <a href="attributes.php" target="_blank" style="color: #0f766e; font-weight: 700;">Attributes Page</a>.
+                                </p>
+                            </div>
+                            <a href="attributes.php?action=add" class="btn btn-sm btn-outline" style="font-size: 0.8rem;">
+                                + Create Master Attribute
+                            </a>
+                        </div>
+
+                        <!-- Checkbox list of Master Attributes -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; max-height: 200px; overflow-y: auto; padding: 10px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px;">
+                            <?php if (empty($allMasterAttributes)): ?>
+                                <div style="font-size: 0.8rem; color: #94a3b8; padding: 6px;">No master attributes created yet. Global attributes (apply_to_all) will automatically apply.</div>
+                            <?php else: ?>
+                                <?php foreach ($allMasterAttributes as $mAttr): ?>
+                                    <?php $isChecked = in_array(intval($mAttr['id']), $assignedMasterIds, true); ?>
+                                    <label style="display: flex; align-items: flex-start; gap: 6px; font-size: 0.82rem; font-weight: 600; color: #334155; cursor: pointer; padding: 6px; border-radius: 6px; background: #f8fafc; border: 1px solid #f1f5f9;">
+                                        <input type="checkbox" name="master_attributes[]" value="<?= $mAttr['id'] ?>" <?= $isChecked ? 'checked' : '' ?> style="width: 16px; height: 16px; margin-top: 2px;">
+                                        <div>
+                                            <div><?= htmlspecialchars($mAttr['attribute_name']) ?></div>
+                                            <div style="font-size: 0.72rem; color: #64748b; font-weight: normal;"><?= htmlspecialchars(substr($mAttr['attribute_values'], 0, 35)) ?><?= strlen($mAttr['attribute_values']) > 35 ? '...' : '' ?></div>
+                                        </div>
+                                    </label>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
                     <div class="admin-two-col-grid">
                         <div class="form-group">
                             <label class="form-label">Status</label>
@@ -308,6 +382,48 @@ $pageTitle = 'Categories Management';
         <?php endif; ?>
     </main>
 </div>
-    <script src="js/admin.js"></script>
+<script src="js/admin.js"></script>
+<script>
+function addAttrRow(name = '', type = 'variant', values = '') {
+    const container = document.getElementById('cat-attributes-list');
+    if (!container) return;
+    const rowId = 'attr-row-' + Date.now() + '-' + Math.floor(Math.random()*1000);
+    const div = document.createElement('div');
+    div.id = rowId;
+    div.style = "display: grid; grid-template-columns: 1.5fr 1fr 3fr auto; gap: 8px; align-items: center; background: #ffffff; padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1;";
+    div.innerHTML = `
+        <div>
+            <label style="display:block; font-size: 0.72rem; font-weight:700; color:#475569; margin-bottom:2px;">Attribute Name</label>
+            <input type="text" name="attr_name[]" class="form-input" value="${name}" placeholder="e.g., Sizes, Colors, Storage" required style="padding: 4px 8px; font-size: 0.82rem;">
+        </div>
+        <div>
+            <label style="display:block; font-size: 0.72rem; font-weight:700; color:#475569; margin-bottom:2px;">Type</label>
+            <select name="attr_type[]" class="form-select" style="padding: 4px 8px; font-size: 0.82rem;">
+                <option value="size" ${type === 'size' ? 'selected' : ''}>Size</option>
+                <option value="color" ${type === 'color' ? 'selected' : ''}>Color</option>
+                <option value="variant" ${type === 'variant' ? 'selected' : ''}>Variant</option>
+            </select>
+        </div>
+        <div>
+            <label style="display:block; font-size: 0.72rem; font-weight:700; color:#475569; margin-bottom:2px;">Allowed Values (Comma Separated)</label>
+            <input type="text" name="attr_values[]" class="form-input" value="${values}" placeholder="e.g., S, M, L, XL or Red, Blue, Black" required style="padding: 4px 8px; font-size: 0.82rem;">
+        </div>
+        <div style="padding-top: 14px;">
+            <button type="button" class="btn btn-sm btn-secondary" onclick="document.getElementById('${rowId}').remove()" style="color: #ef4444; padding: 6px 10px;" title="Remove Attribute">✕</button>
+        </div>
+    `;
+    container.appendChild(div);
+}
+
+// Initial populate existing attributes
+document.addEventListener('DOMContentLoaded', () => {
+    const existing = <?= json_encode($existingAttributes ?? []) ?>;
+    if (existing && existing.length > 0) {
+        existing.forEach(a => {
+            addAttrRow(a.attribute_name, a.attribute_type, a.attribute_values);
+        });
+    }
+});
+</script>
 </body>
 </html>

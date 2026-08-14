@@ -537,6 +537,7 @@ $pageTitle = 'Products Management';
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="css/admin.css">
     <link href="css/quill.snow.css" rel="stylesheet">
+    <script src="../assets/js/color-picker-autocomplete.js"></script>
 </head>
 <body>
     <div class="admin-layout">
@@ -944,8 +945,15 @@ $pageTitle = 'Products Management';
                                     }
                                 }
                                 ?>
-                                <input type="text" name="colors_input" id="color-variants-input" class="form-input" value="<?= htmlspecialchars($colorsString) ?>" placeholder="e.g., Rose Gold:#B76E79, Midnight Black:#1E293B, Pure White:#FFFFFF">
-                                <p class="admin-upload-help" style="margin-top: 0.25rem;">Format: Name:HexCode, separated by commas.</p>
+                                <input type="text" name="colors_input" id="color-variants-input" class="form-input" value="<?= htmlspecialchars($colorsString) ?>" placeholder="e.g., Red, Crimson Red, Navy Blue, Rose Gold, Black, White">
+                                <p class="admin-upload-help" style="margin-top: 0.25rem;">Enter comma-separated color names. Use the search picker below to select standard colors with live swatches!</p>
+                                
+                                <!-- Color Swatch Search Autocomplete Container -->
+                                <div id="prod-color-swatch-picker-widget" style="margin-top: 10px; background: #f0fdf4; border: 1.5px solid #a7f3d0; border-radius: 10px; padding: 12px;">
+                                    <label style="font-size: 0.82rem; font-weight: 700; color: #047857; display: flex; align-items: center; gap: 6px;">
+                                        🎨 Search & Pick E-Commerce Colors (~150 Swatches)
+                                    </label>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Other Variants (Comma separated)</label>
@@ -984,12 +992,20 @@ $pageTitle = 'Products Management';
                             <h3 class="admin-section-heading">Status & Organization</h3>
                             <div class="form-group">
                                 <label class="form-label">Category</label>
-                                <select name="category_id" class="form-select">
+                                <select name="category_id" id="product_category_id" class="form-select" onchange="fetchCategoryAttributes(this.value)">
                                     <option value="">Select category</option>
                                     <?php foreach ($categories as $cat): ?>
                                     <option value="<?= $cat['id'] ?>" <?= ($product['category_id'] ?? '') == $cat['id'] ? 'selected' : '' ?>><?= htmlspecialchars($cat['name']) ?></option>
                                     <?php endforeach; ?>
                                 </select>
+
+                                <!-- Dynamic Category Attributes Section -->
+                                <div id="category-attributes-box" style="display: none; background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 10px; padding: 12px; margin-top: 12px;">
+                                    <h4 style="margin: 0 0 6px; font-size: 0.82rem; font-weight: 700; color: #166534; display: flex; align-items: center; gap: 4px;">
+                                        🏷️ Category Quick Options
+                                    </h4>
+                                    <div id="category-attributes-pills" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Status</label>
@@ -1251,8 +1267,84 @@ $pageTitle = 'Products Management';
                 });
             }
         });
+
+        // Category Attributes Fetcher & Dynamic Option Applicator
+        function fetchCategoryAttributes(catId) {
+            const box = document.getElementById('category-attributes-box');
+            const pillsDiv = document.getElementById('category-attributes-pills');
+            if (!catId || !box || !pillsDiv) {
+                if (box) box.style.display = 'none';
+                return;
+            }
+
+            fetch('<?= BASE_URL ?>/api/category_attributes.php?category_id=' + catId)
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.success || !data.attributes || data.attributes.length === 0) {
+                        box.style.display = 'none';
+                        return;
+                    }
+
+                    box.style.display = 'block';
+                    pillsDiv.innerHTML = '';
+
+                    data.attributes.forEach(attr => {
+                        const groupDiv = document.createElement('div');
+                        groupDiv.style = "margin-bottom: 6px;";
+                        let pillsHtml = `<div style="font-size: 0.76rem; font-weight: 700; color: #15803d; margin-bottom: 4px;">${attr.name} (${attr.type}):</div><div style="display: flex; flex-wrap: wrap; gap: 4px;">`;
+                        
+                        attr.values.forEach(val => {
+                            const escVal = val.replace(/'/g, "\\'");
+                            pillsHtml += `<button type="button" class="btn btn-sm" onclick="applyAttrToProduct('${attr.type}', '${escVal}')" style="font-size: 0.72rem; padding: 2px 7px; background: #ffffff; border: 1px solid #86efac; color: #166534; border-radius: 4px; cursor: pointer; transition: all 0.15s ease;">+ ${val}</button>`;
+                        });
+                        
+                        pillsHtml += `</div>`;
+                        groupDiv.innerHTML = pillsHtml;
+                        pillsDiv.appendChild(groupDiv);
+                    });
+                })
+                .catch(err => {
+                    if (box) box.style.display = 'none';
+                });
+        }
+
+        function applyAttrToProduct(type, value) {
+            let targetSelector = 'input[name="variants"]';
+            if (type === 'size') {
+                targetSelector = 'input[name="sizes"]';
+            } else if (type === 'color') {
+                targetSelector = '#color-variants-input, input[name="colors_input"]';
+            }
+
+            const input = document.querySelector(targetSelector);
+            if (input) {
+                let current = input.value.split(',').map(s => s.trim()).filter(Boolean);
+                if (!current.includes(value)) {
+                    current.push(value);
+                    input.value = current.join(', ');
+                    input.dispatchEvent(new Event('input'));
+                    // Flash feedback outline on the target input box
+                    input.style.transition = 'border-color 0.2s ease, box-shadow 0.2s ease';
+                    input.style.borderColor = '#10b981';
+                    input.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.2)';
+                    setTimeout(() => {
+                        input.style.borderColor = '';
+                        input.style.boxShadow = '';
+                    }, 800);
+                }
+            }
+        }
+
+        // On initial page load, trigger category attributes & init color search picker
+        document.addEventListener('DOMContentLoaded', () => {
+            const catSelect = document.getElementById('product_category_id');
+            if (catSelect && catSelect.value) {
+                fetchCategoryAttributes(catSelect.value);
+            }
+            if (window.initColorSearchPicker) {
+                window.initColorSearchPicker('prod-color-swatch-picker-widget', 'color-variants-input');
+            }
+        });
     </script>
 </body>
 </html>
-
-
