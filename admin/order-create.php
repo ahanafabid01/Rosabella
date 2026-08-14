@@ -697,11 +697,13 @@ $pageTitle = 'Order Create';
 
                 <!-- Search Customer by Phone/Name -->
                 <div class="customer-search-box">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2.2" style="flex-shrink: 0;">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                    <input type="text" id="top-customer-search" class="customer-search-input" placeholder="Search Customer / User by Phone Number (e.g. 017...) or Name to auto-fill..." autocomplete="off">
+                    <div class="customer-search-input-wrap" style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; width: 100%;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2.2" style="flex-shrink: 0;">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" id="top-customer-search" class="customer-search-input" placeholder="Search Customer / User by Phone or Name to auto-fill..." autocomplete="off">
+                    </div>
                     <button type="button" id="btn-top-search" class="btn btn-primary btn-sm" style="padding: 0.4rem 1rem; border-radius: 6px; font-size: 0.85rem;">
                         Search Customer
                     </button>
