@@ -172,6 +172,12 @@ $custStatusCounts = $custStatusCountStmt->fetchAll(PDO::FETCH_KEY_PAIR);
 // ── Filter Orders ─────────────────────────────────────────────────────────────
 $statusFilter = sanitize($_GET['status'] ?? '');
 $search       = sanitize($_GET['search'] ?? '');
+$sortBy       = sanitize($_GET['sort'] ?? 'newest');
+
+$activeFilterCount = 0;
+if ($statusFilter !== '') $activeFilterCount++;
+if ($search !== '') $activeFilterCount++;
+if ($sortBy !== 'newest') $activeFilterCount++;
 
 $whereParts = ["(o.user_id = ?" . ($custPhone !== '' ? " OR o.shipping_phone = ?" : "") . ")"];
 $queryParams = [$customerId];
@@ -195,6 +201,16 @@ if ($search !== '') {
 
 $whereSql = 'WHERE ' . implode(' AND ', $whereParts);
 
+// Sorting
+$orderSql = 'o.created_at DESC';
+if ($sortBy === 'oldest') {
+    $orderSql = 'o.created_at ASC';
+} elseif ($sortBy === 'amount_desc') {
+    $orderSql = 'o.total DESC';
+} elseif ($sortBy === 'amount_asc') {
+    $orderSql = 'o.total ASC';
+}
+
 // Pagination
 $perPage = max(1, min(50, intval($_GET['per_page'] ?? 15)));
 $page    = max(1, intval($_GET['page'] ?? 1));
@@ -211,7 +227,7 @@ $ordersStmt = $db->prepare("
     SELECT o.* 
     FROM orders o 
     $whereSql 
-    ORDER BY o.created_at DESC 
+    ORDER BY $orderSql 
     LIMIT $perPage OFFSET $offset
 ");
 $ordersStmt->execute($queryParams);
@@ -376,18 +392,80 @@ $pageTitle = 'Order History - ' . $customerFullName;
             box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.15);
         }
 
-        /* ── Search Bar ── */
-        .as-search-card {
+        /* ── Executive Multi-Filter Card ── */
+        .as-filter-card {
             background: #ffffff;
             border: 1px solid #e2e8f0;
             border-radius: 10px;
             padding: 10px 14px;
             margin-bottom: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .as-filter-form {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 8px;
+        }
+        .as-filter-row {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            gap: 8px;
+            width: 100%;
             flex-wrap: wrap;
-            gap: 10px;
+        }
+        .as-filter-search-wrap {
+            position: relative;
+            flex: 1 1 240px;
+            min-width: 180px;
+        }
+        .as-filter-search-wrap input {
+            width: 100%;
+            height: 36px;
+            padding: 0 10px 0 2.2rem;
+            border-radius: 7px;
+            border: 1px solid #cbd5e1;
+            font-size: 0.82rem;
+            color: #334155;
+            background: #ffffff;
+            outline: none;
+            transition: all 0.15s ease;
+        }
+        .as-filter-search-wrap input:focus {
+            border-color: #0f766e;
+            box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+        }
+        .as-filter-search-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: #94a3b8;
+        }
+        .as-filter-select {
+            height: 36px;
+            font-size: 0.82rem;
+            font-weight: 400;
+            padding: 0 0.65rem;
+            border-radius: 7px;
+            border: 1px solid #cbd5e1;
+            background-color: #ffffff;
+            color: #334155;
+            flex: 0 1 150px;
+            min-width: 130px;
+        }
+        .as-filter-controls-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .as-filter-btns {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: auto;
         }
 
         /* ── Mobile Order Cards ── */
@@ -550,30 +628,38 @@ $pageTitle = 'Order History - ' . $customerFullName;
                 font-size: 0.68rem !important;
             }
 
-            .as-search-card {
+            /* Compact Mobile Filter Toolbar */
+            .as-filter-card {
+                padding: 10px 12px !important;
+            }
+            .as-filter-row {
                 flex-direction: column !important;
                 align-items: stretch !important;
                 gap: 8px !important;
-                padding: 10px 12px !important;
             }
-            .as-search-form {
-                flex-direction: column !important;
+            .as-filter-search-wrap {
                 width: 100% !important;
-                gap: 6px !important;
+                flex: 1 1 100% !important;
             }
-            .as-search-form .form-input,
-            .as-search-form .form-select {
-                width: 100% !important;
-                max-width: 100% !important;
-                height: 36px !important;
-            }
-            .as-search-btns {
+            .as-filter-controls-row {
                 display: grid !important;
                 grid-template-columns: 1fr 1fr !important;
                 gap: 6px !important;
                 width: 100% !important;
             }
-            .as-search-btns .btn {
+            .as-filter-select {
+                width: 100% !important;
+                flex: 1 1 100% !important;
+                min-width: 0 !important;
+            }
+            .as-filter-btns {
+                display: grid !important;
+                grid-template-columns: <?= ($activeFilterCount > 0) ? '1fr 1fr' : '1fr' ?> !important;
+                gap: 6px !important;
+                width: 100% !important;
+                margin-left: 0 !important;
+            }
+            .as-filter-btns .btn {
                 width: 100% !important;
                 height: 36px !important;
                 justify-content: center !important;
@@ -738,7 +824,7 @@ $pageTitle = 'Order History - ' . $customerFullName;
                 ];
                 foreach ($statPills as $pKey => $pCfg):
                     $isActive = ($pKey === 'all' && empty($statusFilter)) || ($statusFilter === $pKey);
-                    $url = BASE_URL . '/admin/customer-orders?id=' . $customerId . ($pKey !== 'all' ? '&status=' . urlencode($pKey) : '') . ($search ? '&search=' . urlencode($search) : '');
+                    $url = BASE_URL . '/admin/customer-orders?id=' . $customerId . ($pKey !== 'all' ? '&status=' . urlencode($pKey) : '') . ($search ? '&search=' . urlencode($search) : '') . ($sortBy !== 'newest' ? '&sort=' . urlencode($sortBy) : '');
                 ?>
                     <a href="<?= $url ?>" class="as-status-pill-card <?= $isActive ? 'active-pill' : '' ?>">
                         <div>
@@ -749,23 +835,42 @@ $pageTitle = 'Order History - ' . $customerFullName;
                 <?php endforeach; ?>
             </div>
 
-            <!-- Orders Search Toolbar -->
-            <div class="as-search-card">
-                <h2 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin: 0;">Orders (<?= number_format($totalFilteredOrders) ?>)</h2>
-                <form method="GET" action="<?= BASE_URL ?>/admin/customer-orders" class="admin-actions-row as-search-form" style="margin: 0; gap: 8px;">
+            <!-- ── Executive Multi-Filter Toolbar ── -->
+            <div class="as-filter-card">
+                <form method="GET" action="<?= BASE_URL ?>/admin/customer-orders" class="as-filter-form">
                     <input type="hidden" name="id" value="<?= $customerId ?>">
-                    <input type="text" name="search" class="form-input admin-input-max-280" placeholder="Search order #, recipient..." value="<?= htmlspecialchars($search) ?>">
-                    <select name="status" class="form-select" onchange="this.form.submit()">
-                        <option value="">All Statuses</option>
-                        <?php foreach ($statusMap as $sKey => $sVal): ?>
-                            <option value="<?= $sKey ?>" <?= $statusFilter === $sKey ? 'selected' : '' ?>><?= htmlspecialchars($sVal['label']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                    <div class="as-search-btns">
-                        <button type="submit" class="btn btn-secondary">Search</button>
-                        <?php if ($search || $statusFilter): ?>
-                            <a href="<?= BASE_URL ?>/admin/customer-orders?id=<?= $customerId ?>" class="btn btn-secondary">Clear</a>
-                        <?php endif; ?>
+                    <div class="as-filter-row">
+                        <!-- Search Field with embedded icon -->
+                        <div class="as-filter-search-wrap">
+                            <svg class="as-filter-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input type="text" name="search" placeholder="Search order #, recipient, phone..." value="<?= htmlspecialchars($search) ?>">
+                        </div>
+
+                        <div class="as-filter-controls-row">
+                            <!-- Status Selector -->
+                            <select name="status" class="as-filter-select form-select" onchange="this.form.submit()">
+                                <option value="">All Statuses</option>
+                                <?php foreach ($statusMap as $sKey => $sVal): ?>
+                                    <option value="<?= $sKey ?>" <?= $statusFilter === $sKey ? 'selected' : '' ?>><?= htmlspecialchars($sVal['label']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+
+                            <!-- Sort Selector -->
+                            <select name="sort" class="as-filter-select form-select" onchange="this.form.submit()">
+                                <option value="newest" <?= $sortBy === 'newest' ? 'selected' : '' ?>>Sort: Newest</option>
+                                <option value="oldest" <?= $sortBy === 'oldest' ? 'selected' : '' ?>>Sort: Oldest</option>
+                                <option value="amount_desc" <?= $sortBy === 'amount_desc' ? 'selected' : '' ?>>Sort: Highest Tk</option>
+                                <option value="amount_asc" <?= $sortBy === 'amount_asc' ? 'selected' : '' ?>>Sort: Lowest Tk</option>
+                            </select>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="as-filter-btns">
+                            <button type="submit" class="btn btn-primary" style="height: 36px; font-size: 0.82rem; padding: 0 14px; border-radius: 7px;">Filter</button>
+                            <?php if ($activeFilterCount > 0): ?>
+                                <a href="<?= BASE_URL ?>/admin/customer-orders?id=<?= $customerId ?>" class="btn btn-secondary" style="height: 36px; font-size: 0.82rem; padding: 0 10px; border-radius: 7px; display: inline-flex; align-items: center;">Clear</a>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -982,7 +1087,7 @@ $pageTitle = 'Order History - ' . $customerFullName;
             </div>
 
             <!-- Standard Pagination -->
-            <?php renderAdminPagination($page, $totalFilteredOrders, $perPage, BASE_URL . '/admin/customer-orders', array_filter(['id' => $customerId, 'search' => $search, 'status' => $statusFilter])); ?>
+            <?php renderAdminPagination($page, $totalFilteredOrders, $perPage, BASE_URL . '/admin/customer-orders', array_filter(['id' => $customerId, 'search' => $search, 'status' => $statusFilter, 'sort' => $sortBy])); ?>
 
         </main>
     </div>
