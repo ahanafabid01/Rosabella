@@ -485,12 +485,15 @@ $pageTitle = 'Admin Settings';
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 0.75rem;
+            min-width: 0;
         }
 
         .as-diag-label {
             font-size: 0.75rem;
             font-weight: 500;
             color: #64748b;
+            flex-shrink: 0;
         }
 
         .as-diag-val {
@@ -498,6 +501,17 @@ $pageTitle = 'Admin Settings';
             font-weight: 600;
             color: #0f172a;
             font-family: var(--admin-font);
+            text-align: right;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+
+        /* ── Tools Grid ── */
+        .as-tools-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         /* ── Theme Color Search & Presets ── */
@@ -611,16 +625,27 @@ $pageTitle = 'Admin Settings';
         @media (max-width: 860px) {
             .as-layout-grid {
                 grid-template-columns: 1fr;
+                gap: 1rem;
             }
             .as-nav-card {
                 position: static;
+                display: flex;
                 flex-direction: row;
                 overflow-x: auto;
                 padding: 0.4rem;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                gap: 0.35rem;
+            }
+            .as-nav-card::-webkit-scrollbar {
+                display: none;
             }
             .as-nav-item {
                 white-space: nowrap;
-                padding: 0.5rem 0.75rem;
+                padding: 0.55rem 0.85rem;
+                font-size: 0.8rem;
+                flex-shrink: 0;
+                border-radius: 8px;
             }
             .as-row {
                 grid-template-columns: 1fr;
@@ -628,6 +653,27 @@ $pageTitle = 'Admin Settings';
             }
             .as-diag-grid {
                 grid-template-columns: 1fr;
+            }
+            .as-tools-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 540px) {
+            .as-diag-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.25rem;
+            }
+            .as-diag-val {
+                text-align: left;
+            }
+            .as-color-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .as-color-search-box {
+                width: 100%;
             }
         }
     </style>
@@ -1344,7 +1390,7 @@ $pageTitle = 'Admin Settings';
                             </div>
                         </div>
 
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                        <div class="as-tools-grid">
                             <!-- Cache Purge Card -->
                             <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem;">
                                 <h4 style="margin: 0 0 4px; font-size: 0.88rem; font-weight: 600; color: #0f172a;">Purge Temporary Cache</h4>
