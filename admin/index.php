@@ -254,11 +254,12 @@ $recentOrders = $db->query("
     LIMIT 6
 ")->fetchAll(PDO::FETCH_ASSOC);
 
+$lowStockThreshold = max(1, (int)(getSetting('low_stock_threshold') ?: 5));
 $lowStockProducts = $db->query("
     SELECT p.*, c.name as category_name 
     FROM products p 
     LEFT JOIN categories c ON p.category_id = c.id 
-    WHERE p.stock_quantity <= 10 AND p.status = 'active' 
+    WHERE p.stock_quantity <= $lowStockThreshold AND p.status = 'active' 
     ORDER BY p.stock_quantity ASC 
     LIMIT 6
 ")->fetchAll();

@@ -24,8 +24,9 @@ $db = getDB();
 if (!function_exists('generateUniqueOrderNumber')) {
     function generateUniqueOrderNumber(PDO $db): string
     {
+        $prefix = getSetting('order_id_prefix') ?: 'ORD-';
         do {
-            $candidate = 'ORD-' . date('Ymd') . '-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 4));
+            $candidate = $prefix . date('Ymd') . '-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 4));
             $stmt = $db->prepare("SELECT COUNT(*) FROM orders WHERE order_number = ?");
             $stmt->execute([$candidate]);
             $exists = ((int)$stmt->fetchColumn()) > 0;

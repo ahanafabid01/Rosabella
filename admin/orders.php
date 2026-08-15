@@ -131,10 +131,11 @@ foreach ($cntRes as $stKey => $stCount) {
 }
 
 // Get orders with filters
-$statusFilter = sanitize($_GET['status'] ?? '');
-$search       = sanitize($_GET['search'] ?? '');
-$whereParts   = [];
-$params       = [];
+$defaultStatus = (string)(getSetting('default_order_status_view') ?: 'all');
+$statusFilter  = isset($_GET['status']) ? sanitize($_GET['status']) : ($defaultStatus !== 'all' ? $defaultStatus : '');
+$search        = sanitize($_GET['search'] ?? '');
+$whereParts    = [];
+$params        = [];
 
 if ($statusFilter) {
     $whereParts[] = "o.status = ?";
