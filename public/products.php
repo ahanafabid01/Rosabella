@@ -116,10 +116,10 @@ $categories = $stmt->fetchAll();
     <!-- Products Section -->
     <section class="section catalog-page">
         <div class="container">
-            <div class="products-layout filters-hidden">
+            <div class="products-layout">
 
                 <!-- Sidebar Filters -->
-                <aside class="sidebar-desktop" style="display: none;">
+                <aside class="sidebar-desktop">
                     <div style="background: var(--color-bg); border-radius: var(--radius-lg); padding: 1.5rem; border: 1px solid var(--color-border); box-shadow: 0 4px 12px -2px rgba(0,0,0,0.03); position: sticky; top: 2rem; height: 100%;">
                         <!-- Mobile Close Button -->
                         <div class="mobile-close-btn" style="display: none; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--color-border-light);">
@@ -267,7 +267,7 @@ $categories = $stmt->fetchAll();
                             </div>
                             <button onclick="toggleSidebarFilters()" class="btn btn-outline btn-sm" id="toggle-filters-btn" style="display: flex; align-items: center; gap: 0.4rem; border-color: var(--color-border-dark); padding: 0.45rem 0.65rem;" title="Toggle Filters">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-                                <span>Show Filters</span>
+                                <span>Hide Filters</span>
                             </button>
                         </div>
                         
@@ -277,8 +277,8 @@ $categories = $stmt->fetchAll();
                                 const layout = document.querySelector('.products-layout');
                                 const btnSpan = document.querySelector('#toggle-filters-btn span');
                                 
-                                if (window.innerWidth <= 768) {
-                                    // Mobile behavior: toggle off-canvas
+                                if (window.innerWidth < 1024) {
+                                    // Mobile & Tablet behavior: toggle off-canvas
                                     sidebar.classList.toggle('mobile-open');
                                     
                                     let overlay = document.querySelector('.sidebar-overlay');
@@ -299,17 +299,12 @@ $categories = $stmt->fetchAll();
                                         document.body.style.overflow = '';
                                     }
                                 } else {
-                                    // Desktop behavior: toggle grid columns
-                                    if (sidebar.style.display === 'none' || sidebar.style.display === '') {
-                                        sidebar.style.display = 'block';
-                                        layout.style.gridTemplateColumns = '';
-                                        layout.classList.remove('filters-hidden');
-                                        btnSpan.textContent = 'Hide Filters';
+                                    // Desktop behavior: toggle grid columns via CSS class
+                                    layout.classList.toggle('filters-hidden');
+                                    if (layout.classList.contains('filters-hidden')) {
+                                        if (btnSpan) btnSpan.textContent = 'Show Filters';
                                     } else {
-                                        sidebar.style.display = 'none';
-                                        layout.style.gridTemplateColumns = '1fr';
-                                        layout.classList.add('filters-hidden');
-                                        btnSpan.textContent = 'Show Filters';
+                                        if (btnSpan) btnSpan.textContent = 'Hide Filters';
                                     }
                                 }
                             }
@@ -330,7 +325,7 @@ $categories = $stmt->fetchAll();
                                 backdrop-filter: blur(2px);
                             }
                             
-                            @media (max-width: 768px) {
+                            @media (max-width: 1023px) {
                                 .sort-filter-wrapper {
                                     width: 100%;
                                     justify-content: space-between !important;
