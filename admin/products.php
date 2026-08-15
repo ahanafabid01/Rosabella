@@ -696,37 +696,37 @@ $pageTitle = 'Products Management';
 
                 <!-- Top Metric Cards (2 Columns per row on Mobile) -->
                 <div class="prod-kpi-grid">
-                    <a href="<?= BASE_URL ?>/admin/products" style="text-decoration: none; background: #ffffff; border: 1.5px solid <?= (!$statusFilter && !$stockFilter && !$badgeFilter) ? 'var(--color-primary)' : '#e2e8f0' ?>; border-radius: 12px; padding: 0.85rem 1rem; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between;">
+                    <a href="<?= BASE_URL ?>/admin/products" style="text-decoration: none; background: #ffffff; border: 1px solid <?= (!$statusFilter && !$stockFilter && !$badgeFilter) ? 'var(--color-primary)' : '#e2e8f0' ?>; border-radius: 10px; padding: 0.75rem 0.9rem; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between;">
                         <div>
-                            <div style="font-size: 1.35rem; font-weight: 800; color: #1e293b; line-height: 1;"><?= number_format($statTotal) ?></div>
-                            <div style="font-size: 0.78rem; font-weight: 600; color: #64748b; margin-top: 4px;">Total Products</div>
+                            <div style="font-size: 1.18rem; font-weight: 600; color: #0f172a; line-height: 1.2;"><?= number_format($statTotal) ?></div>
+                            <div style="font-size: 0.74rem; font-weight: 450; color: #64748b; margin-top: 3px;">Total Products</div>
                         </div>
-                        <div style="width: 36px; height: 36px; border-radius: 8px; background: #f1f5f9; color: #475569; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <div style="width: 36px; height: 36px; border-radius: 8px; background: #f8fafc; color: #475569; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                         </div>
                     </a>
-                    <a href="<?= BASE_URL ?>/admin/products?status=active" style="text-decoration: none; background: #ffffff; border: 1.5px solid <?= $statusFilter === 'active' ? '#10b981' : '#e2e8f0' ?>; border-radius: 12px; padding: 0.85rem 1rem; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between;">
+                    <a href="<?= BASE_URL ?>/admin/products?status=active" style="text-decoration: none; background: #ffffff; border: 1px solid <?= $statusFilter === 'active' ? '#10b981' : '#e2e8f0' ?>; border-radius: 10px; padding: 0.75rem 0.9rem; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between;">
                         <div>
-                            <div style="font-size: 1.35rem; font-weight: 800; color: #10b981; line-height: 1;"><?= number_format($statActive) ?></div>
-                            <div style="font-size: 0.78rem; font-weight: 600; color: #64748b; margin-top: 4px;">Active Products</div>
+                            <div style="font-size: 1.18rem; font-weight: 600; color: #0f172a; line-height: 1.2;"><?= number_format($statActive) ?></div>
+                            <div style="font-size: 0.74rem; font-weight: 450; color: #64748b; margin-top: 3px;">Active Products</div>
                         </div>
                         <div style="width: 36px; height: 36px; border-radius: 8px; background: #ecfdf5; color: #10b981; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                         </div>
                     </a>
-                    <a href="<?= BASE_URL ?>/admin/products?stock=low_stock" style="text-decoration: none; background: #ffffff; border: 1.5px solid <?= ($stockFilter === 'low_stock' || $stockFilter === 'out_of_stock') ? '#ef4444' : '#e2e8f0' ?>; border-radius: 12px; padding: 0.85rem 1rem; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between;">
+                    <a href="<?= BASE_URL ?>/admin/products?stock=low_stock" style="text-decoration: none; background: #ffffff; border: 1px solid <?= ($stockFilter === 'low_stock' || $stockFilter === 'out_of_stock') ? '#ef4444' : '#e2e8f0' ?>; border-radius: 10px; padding: 0.75rem 0.9rem; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between;">
                         <div>
-                            <div style="font-size: 1.35rem; font-weight: 800; color: #ef4444; line-height: 1;"><?= number_format($statLowStock) ?></div>
-                            <div style="font-size: 0.78rem; font-weight: 600; color: #64748b; margin-top: 4px;">Low & Out of Stock</div>
+                            <div style="font-size: 1.18rem; font-weight: 600; color: #0f172a; line-height: 1.2;"><?= number_format($statLowStock) ?></div>
+                            <div style="font-size: 0.74rem; font-weight: 450; color: #64748b; margin-top: 3px;">Low & Out of Stock</div>
                         </div>
                         <div style="width: 36px; height: 36px; border-radius: 8px; background: #fef2f2; color: #ef4444; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                         </div>
                     </a>
-                    <a href="<?= BASE_URL ?>/admin/products?badge=featured" style="text-decoration: none; background: #ffffff; border: 1.5px solid <?= ($badgeFilter === 'featured' || $badgeFilter === 'on_sale') ? '#0f766e' : '#e2e8f0' ?>; border-radius: 12px; padding: 0.85rem 1rem; box-shadow: 0 2px 6px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between;">
+                    <a href="<?= BASE_URL ?>/admin/products?badge=featured" style="text-decoration: none; background: #ffffff; border: 1px solid <?= ($badgeFilter === 'featured' || $badgeFilter === 'on_sale') ? '#0f766e' : '#e2e8f0' ?>; border-radius: 10px; padding: 0.75rem 0.9rem; box-shadow: 0 1px 3px rgba(0,0,0,0.02); display: flex; align-items: center; justify-content: space-between;">
                         <div>
-                            <div style="font-size: 1.35rem; font-weight: 800; color: #0f766e; line-height: 1;"><?= number_format($statDiscount) ?></div>
-                            <div style="font-size: 0.78rem; font-weight: 600; color: #64748b; margin-top: 4px;">Featured & Sale</div>
+                            <div style="font-size: 1.18rem; font-weight: 600; color: #0f172a; line-height: 1.2;"><?= number_format($statDiscount) ?></div>
+                            <div style="font-size: 0.74rem; font-weight: 450; color: #64748b; margin-top: 3px;">Featured & Sale</div>
                         </div>
                         <div style="width: 36px; height: 36px; border-radius: 8px; background: #f0fdfa; color: #0f766e; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>

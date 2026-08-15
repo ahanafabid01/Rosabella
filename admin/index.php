@@ -381,17 +381,17 @@ $lowStockProducts = $db->query("
             margin-bottom: 0.35rem;
         }
         .dash-kpi-label {
-            font-size: 0.7rem;
-            font-weight: 700;
+            font-size: 0.72rem;
+            font-weight: 450;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.04em;
             color: #64748b;
             margin-top: 2px;
         }
         .dash-kpi-bubble {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -399,22 +399,22 @@ $lowStockProducts = $db->query("
             transition: transform 0.2s ease;
         }
         .dash-kpi-card:hover .dash-kpi-bubble {
-            transform: scale(1.06);
+            transform: scale(1.04);
         }
-        .dash-kpi-bubble svg { width: 17px; height: 17px; }
-        .dash-kpi-bubble.teal   { background: #ccfbf1; color: #0f766e; }
-        .dash-kpi-bubble.blue   { background: #dbeafe; color: #1d4ed8; }
-        .dash-kpi-bubble.emerald{ background: #d1fae5; color: #047857; }
-        .dash-kpi-bubble.amber  { background: #fef3c7; color: #b45309; }
-        .dash-kpi-bubble.purple { background: #f3e8ff; color: #7c3aed; }
-        .dash-kpi-bubble.indigo { background: #e0e7ff; color: #4338ca; }
+        .dash-kpi-bubble svg { width: 16px; height: 16px; }
+        .dash-kpi-bubble.teal   { background: #f0fdfa; color: #0f766e; }
+        .dash-kpi-bubble.blue   { background: #eff6ff; color: #1d4ed8; }
+        .dash-kpi-bubble.emerald{ background: #ecfdf5; color: #047857; }
+        .dash-kpi-bubble.amber  { background: #fffbeb; color: #b45309; }
+        .dash-kpi-bubble.purple { background: #f5f3ff; color: #7c3aed; }
+        .dash-kpi-bubble.indigo { background: #eef2ff; color: #4338ca; }
 
         .dash-kpi-val {
-            font-size: clamp(1.2rem, 2vw, 1.45rem);
-            font-weight: 800;
+            font-size: clamp(1.15rem, 1.8vw, 1.35rem);
+            font-weight: 600;
             color: #0f172a;
-            line-height: 1.15;
-            letter-spacing: -0.02em;
+            line-height: 1.2;
+            letter-spacing: -0.01em;
             margin-bottom: 0.35rem;
             word-break: break-word;
         }
@@ -424,9 +424,9 @@ $lowStockProducts = $db->query("
             display: inline-flex;
             align-items: center;
             gap: 0.3rem;
-            font-size: 0.7rem;
-            font-weight: 600;
-            padding: 2px 7px;
+            font-size: 0.72rem;
+            font-weight: 450;
+            padding: 2px 6px;
             border-radius: 5px;
             width: fit-content;
         }
@@ -448,28 +448,28 @@ $lowStockProducts = $db->query("
             align-items: center;
             justify-content: center;
             gap: 0.45rem;
-            padding: 0.65rem 0.9rem;
-            border-radius: 11px;
-            font-size: 0.8rem;
-            font-weight: 700;
+            padding: 0.55rem 0.85rem;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 500;
             text-decoration: none;
             border: 1.5px solid transparent;
             transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-            min-height: 42px;
+            min-height: 38px;
             box-sizing: border-box;
             white-space: nowrap;
         }
-        .dash-action-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+        .dash-action-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
         .dash-action-btn.btn-main {
             background: var(--color-primary, #0f766e);
             color: #ffffff;
             border-color: var(--color-primary, #0f766e);
-            box-shadow: 0 2px 6px rgba(15, 118, 110, 0.25);
+            box-shadow: 0 2px 6px rgba(15, 118, 110, 0.18);
         }
         .dash-action-btn.btn-main:hover {
             background: #0d655e;
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(15, 118, 110, 0.35);
+            box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25);
         }
         .dash-action-btn.btn-sub {
             background: #ffffff;
@@ -489,7 +489,7 @@ $lowStockProducts = $db->query("
             padding: 1px 6px;
             border-radius: 10px;
             font-size: 0.68rem;
-            font-weight: 800;
+            font-weight: 600;
         }
 
         /* ── Charts Grid ── */
@@ -591,24 +591,26 @@ $lowStockProducts = $db->query("
             pointer-events: none;
             line-height: 1;
         }
-        .dash-pipeline-center-num {
-            font-size: 1.45rem;
-            font-weight: 800;
+        .dash-pipeline-center-num,
+        .dash-pipeline-center-val {
+            font-size: 1.35rem;
+            font-weight: 600;
             color: #0f172a;
+            line-height: 1.1;
             letter-spacing: -0.02em;
         }
         .dash-pipeline-center-sub {
             font-size: 0.65rem;
-            font-weight: 700;
-            color: #94a3b8;
+            font-weight: 500;
+            color: #64748b;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-top: 3px;
+            letter-spacing: 0.04em;
+            margin-top: 2px;
         }
         .dash-pipeline-list {
             display: flex;
             flex-direction: column;
-            gap: 0.4rem;
+            gap: 0.35rem;
             padding-top: 0.5rem;
             border-top: 1px solid #f1f5f9;
         }
@@ -628,12 +630,12 @@ $lowStockProducts = $db->query("
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            font-weight: 600;
+            font-weight: 450;
             color: #334155;
         }
         .dash-pipeline-dot {
-            width: 9px;
-            height: 9px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             flex-shrink: 0;
         }

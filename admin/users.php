@@ -167,9 +167,11 @@ $pageTitle = 'Users Management';
 
         /* avatar circle */
         .u-avatar {
-            width: 32px; height: 32px; border-radius: 50%;
-            background: linear-gradient(135deg, var(--color-primary,#0f766e), #0d9488);
-            color: #fff; font-size: .72rem; font-weight: 700;
+            width: 32px; height: 32px; border-radius: 7px;
+            background: #f0fdfa;
+            color: #0f766e;
+            border: 1px solid #ccfbf1;
+            font-size: .75rem; font-weight: 600;
             display: inline-flex; align-items: center; justify-content: center;
             flex-shrink: 0; margin-right: .55rem;
         }

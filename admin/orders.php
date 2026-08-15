@@ -206,10 +206,10 @@ $pageTitle = 'Orders Management';
                 foreach ($statCards as $stKey => $stCfg):
                     $isSel = ($statusFilter === $stKey);
                 ?>
-                    <a href="?status=<?= $isSel ? '' : $stKey ?>" style="text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1rem; background: #ffffff; border: 1.5px solid <?= $isSel ? $stCfg['color'] : '#e2e8f0' ?>; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); transition: all 0.15s ease;">
+                    <a href="?status=<?= $isSel ? '' : $stKey ?>" style="text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 0.9rem; background: #ffffff; border: 1px solid <?= $isSel ? $stCfg['color'] : '#e2e8f0' ?>; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); transition: all 0.15s ease;">
                         <div>
-                            <div style="font-size: 1.2rem; font-weight: 800; color: <?= $stCfg['color'] ?>; line-height: 1;"><?= $counts[$stKey] ?? 0 ?></div>
-                            <div style="font-size: 0.76rem; font-weight: 600; color: #64748b; margin-top: 4px;"><?= htmlspecialchars($stCfg['title']) ?></div>
+                            <div style="font-size: 1.15rem; font-weight: 600; color: <?= $stCfg['color'] ?>; line-height: 1.2;"><?= $counts[$stKey] ?? 0 ?></div>
+                            <div style="font-size: 0.74rem; font-weight: 450; color: #64748b; margin-top: 3px;"><?= htmlspecialchars($stCfg['title']) ?></div>
                         </div>
                     </a>
                 <?php endforeach; ?>
