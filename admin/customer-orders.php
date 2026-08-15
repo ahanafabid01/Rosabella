@@ -66,60 +66,6 @@ $statusMap = [
     'fake'         => ['label' => 'Fake Order',        'badge' => 'dark-red',  'color' => '#991b1b'],
 ];
 
-// ── Handle Order Status Quick Update ──────────────────────────────────────────
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_order_status'])) {
-    requireCSRF();
-    $orderId = intval($_POST['order_id'] ?? 0);
-    $newStatus = sanitize($_POST['status'] ?? 'pending');
-
-    if ($orderId > 0 && isset($statusMap[$newStatus])) {
-        $oldStatusStmt = $db->prepare("SELECT status, total FROM orders WHERE id = ?");
-        $oldStatusStmt->execute([$orderId]);
-        $oldRow = $oldStatusStmt->fetch();
-        $oldStatus = $oldRow['status'] ?? '';
-        $orderTotal = floatval($oldRow['total'] ?? 0);
-
-        if ($newStatus === 'delivered') {
-            $upd = $db->prepare("UPDATE orders SET status = ?, payment_status = 'paid', advance_payment = ? WHERE id = ?");
-            $upd->execute([$newStatus, $orderTotal, $orderId]);
-        } else {
-            $upd = $db->prepare("UPDATE orders SET status = ? WHERE id = ?");
-            $upd->execute([$newStatus, $orderId]);
-        }
-
-        // Status audit log
-        $changedBy = htmlspecialchars($_SESSION['user_name'] ?? 'Admin');
-        try {
-            $histStmt = $db->prepare("INSERT INTO order_status_history (order_id, status, note, changed_by) VALUES (?, ?, ?, ?)");
-            $histStmt->execute([$orderId, $newStatus, 'Status updated from Customer Order History', $changedBy]);
-        } catch (Throwable $e) {}
-
-        // Stock Sync Logic
-        if ($oldStatus && $oldStatus !== $newStatus) {
-            $isOldInactive = in_array($oldStatus, ['cancelled', 'refunded', 'fake'], true);
-            $isNewInactive = in_array($newStatus, ['cancelled', 'refunded', 'fake'], true);
-            
-            if (!$isOldInactive && $isNewInactive) {
-                $itemsStmt = $db->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = ?");
-                $itemsStmt->execute([$orderId]);
-                $restockStmt = $db->prepare("UPDATE products SET stock_quantity = stock_quantity + ? WHERE id = ?");
-                foreach ($itemsStmt->fetchAll() as $item) {
-                    $restockStmt->execute([$item['quantity'], $item['product_id']]);
-                }
-            } elseif ($isOldInactive && !$isNewInactive) {
-                $itemsStmt = $db->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = ?");
-                $itemsStmt->execute([$orderId]);
-                $destockStmt = $db->prepare("UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ?");
-                foreach ($itemsStmt->fetchAll() as $item) {
-                    $destockStmt->execute([$item['quantity'], $item['product_id']]);
-                }
-            }
-        }
-
-        $message = 'Order status updated successfully to ' . htmlspecialchars($statusMap[$newStatus]['label']) . '.';
-    }
-}
-
 // ── Customer Lifetime Summary Metrics ─────────────────────────────────────────
 $custPhone = trim($customer['phone'] ?? '');
 
@@ -963,18 +909,11 @@ $pageTitle = 'Order History - ' . $customerFullName;
                                     </span>
                                 </td>
 
-                                <!-- Order Status Dropdown (Live Status Updater) -->
+                                <!-- Order Status (Read-Only) -->
                                 <td style="text-align: center;">
-                                    <form method="POST" class="admin-form-row-center" style="margin: 0; display: inline-block;">
-                                        <?= csrfField() ?>
-                                        <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
-                                        <input type="hidden" name="update_order_status" value="1">
-                                        <select name="status" class="form-select admin-status-select" style="font-weight: 600; font-size: 0.80rem; padding: 0.25rem 0.5rem; border-radius: 6px;" onchange="this.form.submit()">
-                                            <?php foreach ($statusMap as $sKey => $sVal): ?>
-                                                <option value="<?= $sKey ?>" <?= $order['status'] === $sKey ? 'selected' : '' ?>><?= htmlspecialchars($sVal['label']) ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </form>
+                                    <span class="badge badge-<?= $stBadge ?>" style="font-weight: 600; font-size: 0.76rem; padding: 3px 9px;">
+                                        <?= htmlspecialchars($stLabel) ?>
+                                    </span>
                                 </td>
 
                                 <!-- Gateway -->
@@ -1066,18 +1005,11 @@ $pageTitle = 'Order History - ' . $customerFullName;
                         </div>
 
                         <div class="as-order-m-actions">
-                            <form method="POST" style="flex: 1; margin: 0;">
-                                <?= csrfField() ?>
-                                <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
-                                <input type="hidden" name="update_order_status" value="1">
-                                <select name="status" class="form-select admin-status-select" style="width: 100%; height: 32px; font-weight: 600; font-size: 0.76rem; padding: 0 6px; border-radius: 6px;" onchange="this.form.submit()">
-                                    <?php foreach ($statusMap as $sKey => $sVal): ?>
-                                        <option value="<?= $sKey ?>" <?= $order['status'] === $sKey ? 'selected' : '' ?>><?= htmlspecialchars($sVal['label']) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </form>
-                            <a href="<?= BASE_URL ?>/admin/order/<?= $order['id'] ?>" class="btn btn-sm btn-outline" style="height: 32px; padding: 0 10px; font-size: 0.76rem; border-radius: 6px; display: inline-flex; align-items: center;">View</a>
-                            <a href="<?= BASE_URL ?>/invoice?order=<?= urlencode($order['order_number']) ?>" target="_blank" class="btn btn-sm btn-outline" style="height: 32px; width: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; color: #0f766e; border-color: #0f766e; border-radius: 6px;" title="Invoice">
+                            <a href="<?= BASE_URL ?>/admin/order/<?= $order['id'] ?>" class="btn btn-sm btn-outline" style="flex: 1; height: 32px; font-size: 0.76rem; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 5px;">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                <span>View Details</span>
+                            </a>
+                            <a href="<?= BASE_URL ?>/invoice?order=<?= urlencode($order['order_number']) ?>" target="_blank" class="btn btn-sm btn-outline" style="height: 32px; width: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; color: #0f766e; border-color: #0f766e; border-radius: 6px;" title="Print / Download Invoice">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                             </a>
                         </div>
