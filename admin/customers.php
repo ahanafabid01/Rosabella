@@ -22,19 +22,31 @@ $error = '';
 if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     $search       = sanitize($_GET['search'] ?? '');
     $statusFilter = sanitize($_GET['status'] ?? '');
+    $orderFilter  = sanitize($_GET['order_filter'] ?? '');
     
     $where = ["u.role = 'customer'"];
     $params = [];
-    if ($search) {
+    if ($search !== '') {
         $where[] = "(u.first_name LIKE ? OR u.last_name LIKE ? OR u.email LIKE ? OR u.phone LIKE ? OR u.city LIKE ?)";
         $term = "%$search%";
         $params = array_merge($params, [$term, $term, $term, $term, $term]);
     }
-    if ($statusFilter) {
+    if ($statusFilter !== '') {
         $where[] = "u.status = ?";
         $params[] = $statusFilter;
     }
+    
+    $having = [];
+    if ($orderFilter === 'with_orders') {
+        $having[] = "COUNT(o.id) > 0";
+    } elseif ($orderFilter === 'repeat') {
+        $having[] = "COUNT(o.id) >= 2";
+    } elseif ($orderFilter === 'no_orders') {
+        $having[] = "COUNT(o.id) = 0";
+    }
+
     $whereSql = implode(' AND ', $where);
+    $havingSql = !empty($having) ? 'HAVING ' . implode(' AND ', $having) : '';
 
     $sql = "
         SELECT u.id, u.first_name, u.last_name, u.email, u.phone, u.city, u.upazila, u.address, u.status, u.created_at,
@@ -45,6 +57,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
         LEFT JOIN orders o ON o.user_id = u.id
         WHERE $whereSql
         GROUP BY u.id
+        $havingSql
         ORDER BY u.created_at DESC
     ";
     $stmt = $db->prepare($sql);
@@ -225,6 +238,12 @@ if ($orderFilter === 'with_orders') {
 $whereSql = implode(' AND ', $where);
 $havingSql = !empty($having) ? 'HAVING ' . implode(' AND ', $having) : '';
 
+// Active filter counter for badge
+$activeFilterCount = 0;
+if ($statusFilter !== '') $activeFilterCount++;
+if ($orderFilter !== '') $activeFilterCount++;
+if ($sortBy !== 'newest') $activeFilterCount++;
+
 // Sorting Map
 $sortSql = match ($sortBy) {
     'oldest'      => 'u.created_at ASC',
@@ -280,7 +299,7 @@ function getInitials(string $first, string $last): string {
     return strtoupper(($f . $l) ?: 'C');
 }
 
-$pageTitle = 'Customers Intelligence';
+$pageTitle = 'Customers Management';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -294,84 +313,148 @@ $pageTitle = 'Customers Intelligence';
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="css/admin.css">
     <style>
+        /* ── KPI Metric Cards Grid (Matching Products Page) ── */
         .cust-kpi-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 1rem;
-            margin-bottom: 1.25rem;
+            margin-bottom: 1.5rem;
         }
         .cust-kpi-card {
             background: #ffffff;
             border: 1.5px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 1.15rem 1.25rem;
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-            transition: all 0.2s ease;
+            text-decoration: none;
+            transition: all 0.15s ease;
         }
         .cust-kpi-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(15,23,42,0.05);
             border-color: #cbd5e1;
         }
-        .cust-kpi-info { display: flex; flex-direction: column; gap: 0.25rem; }
-        .cust-kpi-label { font-size: 0.74rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; }
-        .cust-kpi-val { font-size: 1.45rem; font-weight: 800; color: #0f172a; line-height: 1.15; }
-        .cust-kpi-sub { font-size: 0.72rem; color: #94a3b8; font-weight: 600; }
+        .cust-kpi-card.active-border {
+            border-color: var(--color-primary, #0f766e) !important;
+        }
+        .cust-kpi-val {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #1e293b;
+            line-height: 1;
+        }
+        .cust-kpi-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #64748b;
+            margin-top: 4px;
+        }
         .cust-kpi-icon {
-            width: 42px;
-            height: 42px;
-            border-radius: 11px;
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
         }
-        .cust-kpi-icon.teal   { background: #ccfbf1; color: #0f766e; }
-        .cust-kpi-icon.blue   { background: #dbeafe; color: #1d4ed8; }
-        .cust-kpi-icon.purple { background: #f3e8ff; color: #7e22ce; }
-        .cust-kpi-icon.amber  { background: #fef3c7; color: #b45309; }
-        .cust-kpi-icon svg    { width: 20px; height: 20px; }
+        .cust-kpi-icon.teal   { background: #f0fdfa; color: #0f766e; }
+        .cust-kpi-icon.blue   { background: #eff6ff; color: #2563eb; }
+        .cust-kpi-icon.purple { background: #f5f3ff; color: #7c3aed; }
+        .cust-kpi-icon.amber  { background: #fffbeb; color: #d97706; }
+        .cust-kpi-icon svg    { width: 18px; height: 18px; }
 
+        /* ── Multi-Filter Toolbar (Exact match to Products Page) ── */
+        .cust-filter-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .cust-filter-form {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        .cust-filter-top-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+        .cust-filter-search {
+            position: relative;
+            flex: 1 1 auto;
+            min-width: 200px;
+        }
+        .filter-toggle-btn {
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            height: 38px;
+            padding: 0 14px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 8px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        .cust-filter-drawer {
+            display: none;
+            width: 100%;
+            padding-top: 12px;
+            border-top: 1px dashed #e2e8f0;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        .cust-filter-drawer.active {
+            display: flex !important;
+        }
+        .cust-filter-select {
+            height: 38px;
+            font-size: 0.85rem;
+            padding: 0 0.75rem;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background-color: #ffffff;
+            color: #1e293b;
+            flex: 1 1 130px;
+            min-width: 125px;
+        }
+        .cust-filter-actions {
+            display: flex;
+            gap: 6px;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        /* ── Customer Initials Avatar ── */
         .cust-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 9px;
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
             background: linear-gradient(135deg, #0f766e, #14b8a6);
             color: #ffffff;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             font-weight: 800;
-            font-size: 0.8rem;
+            font-size: 0.82rem;
             flex-shrink: 0;
             letter-spacing: 0.5px;
             box-shadow: 0 2px 5px rgba(15, 118, 110, 0.2);
         }
 
-        .cust-filter-bar {
-            background: #ffffff;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 1rem 1.25rem;
-            margin-bottom: 1.25rem;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.85rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-        }
-        .cust-filter-inputs {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 0.65rem;
-            flex: 1;
-        }
-
+        /* ── Modals ── */
         .cust-modal-backdrop {
             position: fixed;
             inset: 0;
@@ -399,13 +482,43 @@ $pageTitle = 'Customers Intelligence';
             to   { transform: scale(1); opacity: 1; }
         }
 
-        @media (max-width: 1024px) {
-            .cust-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+        @media (max-width: 900px) {
+            .cust-kpi-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.75rem !important;
+            }
         }
-        @media (max-width: 640px) {
-            .cust-kpi-grid { grid-template-columns: 1fr; }
-            .cust-filter-bar { flex-direction: column; align-items: stretch; }
-            .cust-filter-inputs { flex-direction: column; align-items: stretch; }
+        @media (max-width: 768px) {
+            .cust-filter-drawer.active {
+                display: grid !important;
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                gap: 8px !important;
+            }
+            .cust-filter-select {
+                width: 100% !important;
+                max-width: 100% !important;
+                min-width: 0 !important;
+                flex: none !important;
+                box-sizing: border-box !important;
+                height: 38px !important;
+                font-size: 0.82rem !important;
+                padding: 0 8px !important;
+            }
+            .cust-filter-actions {
+                grid-column: span 2 !important;
+                margin-left: 0 !important;
+                width: 100% !important;
+                display: flex !important;
+                gap: 8px !important;
+            }
+            .cust-filter-actions button, .cust-filter-actions a {
+                flex: 1 !important;
+                height: 38px !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                text-align: center !important;
+            }
         }
     </style>
 </head>
@@ -418,84 +531,105 @@ $pageTitle = 'Customers Intelligence';
         <main class="admin-content">
             <?php renderAdminTopbar($pageTitle); ?>
 
-            <div style="padding-top: 0.25rem;">
-                
-                <!-- Alerts -->
-                <?php if ($message): ?>
-                <div class="alert alert-success" style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    <span><?= htmlspecialchars($message) ?></span>
+            <!-- ── Page Header ── -->
+            <div class="admin-header">
+                <div>
+                    <h1 class="admin-title">Customers</h1>
+                    <p class="text-muted" style="margin: 0.25rem 0 0 0; font-size: 0.85rem;">Manage registered shoppers, analyze customer lifetime values, and monitor orders.</p>
                 </div>
-                <?php endif; ?>
-                <?php if ($error): ?>
-                <div class="alert alert-danger" style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                    <span><?= htmlspecialchars($error) ?></span>
+                <div class="admin-actions-row">
+                    <a href="?<?= http_build_query(array_merge($_GET, ['export' => 'csv'])) ?>" class="btn btn-outline" style="height: 38px; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.85rem; border-radius: 8px;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <span>Export CSV</span>
+                    </a>
+                    <button type="button" class="btn btn-primary" onclick="openAddCustomerModal()" style="height: 38px; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.85rem; border-radius: 8px;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        <span>Add Customer</span>
+                    </button>
                 </div>
-                <?php endif; ?>
+            </div>
 
-                <!-- ── 1. KPI Summary Cards ── -->
-                <div class="cust-kpi-grid">
-                    <!-- Total Customers -->
-                    <div class="cust-kpi-card">
-                        <div class="cust-kpi-info">
-                            <span class="cust-kpi-label">Registered Shoppers</span>
-                            <div class="cust-kpi-val"><?= number_format($totalCustomers) ?></div>
-                            <span class="cust-kpi-sub">Total Customer Accounts</span>
-                        </div>
-                        <div class="cust-kpi-icon teal">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                        </div>
+            <!-- Alerts -->
+            <?php if ($message): ?>
+            <div class="alert alert-success" style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span><?= htmlspecialchars($message) ?></span>
+            </div>
+            <?php endif; ?>
+            <?php if ($error): ?>
+            <div class="alert alert-danger" style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span><?= htmlspecialchars($error) ?></span>
+            </div>
+            <?php endif; ?>
+
+            <!-- ── 1. Top Metric Cards (Matching Products KPI Grid) ── -->
+            <div class="cust-kpi-grid">
+                <!-- All Shoppers -->
+                <a href="<?= BASE_URL ?>/admin/customers" class="cust-kpi-card <?= (!$statusFilter && !$orderFilter) ? 'active-border' : '' ?>">
+                    <div>
+                        <div class="cust-kpi-val"><?= number_format($totalCustomers) ?></div>
+                        <div class="cust-kpi-label">Total Shoppers</div>
                     </div>
-
-                    <!-- Active Buyers -->
-                    <div class="cust-kpi-card">
-                        <div class="cust-kpi-info">
-                            <span class="cust-kpi-label">Active Buyers</span>
-                            <div class="cust-kpi-val"><?= number_format($activeCustomers) ?></div>
-                            <span class="cust-kpi-sub"><?= $totalCustomers > 0 ? round(($activeCustomers / $totalCustomers) * 100, 1) : 0 ?>% Conversion Rate</span>
-                        </div>
-                        <div class="cust-kpi-icon blue">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-                        </div>
+                    <div class="cust-kpi-icon teal">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     </div>
+                </a>
 
-                    <!-- Total Customer LTV -->
-                    <div class="cust-kpi-card">
-                        <div class="cust-kpi-info">
-                            <span class="cust-kpi-label">Total Customer LTV</span>
-                            <div class="cust-kpi-val"><?= formatPrice($totalCustomerLTV) ?></div>
-                            <span class="cust-kpi-sub">Net Paid Order Spend</span>
-                        </div>
-                        <div class="cust-kpi-icon purple">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                        </div>
+                <!-- Active Buyers -->
+                <a href="<?= BASE_URL ?>/admin/customers?order_filter=with_orders" class="cust-kpi-card <?= $orderFilter === 'with_orders' ? 'active-border' : '' ?>">
+                    <div>
+                        <div class="cust-kpi-val" style="color: #2563eb;"><?= number_format($activeCustomers) ?></div>
+                        <div class="cust-kpi-label">Active Buyers (<?= $totalCustomers > 0 ? round(($activeCustomers / $totalCustomers) * 100, 0) : 0 ?>%)</div>
                     </div>
+                    <div class="cust-kpi-icon blue">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                    </div>
+                </a>
 
-                    <!-- Repeat Customers -->
-                    <div class="cust-kpi-card">
-                        <div class="cust-kpi-info">
-                            <span class="cust-kpi-label">Repeat Buyers</span>
-                            <div class="cust-kpi-val"><?= number_format($repeatCustomers) ?></div>
-                            <span class="cust-kpi-sub"><?= $activeCustomers > 0 ? round(($repeatCustomers / $activeCustomers) * 100, 1) : 0 ?>% of Active Shoppers</span>
-                        </div>
-                        <div class="cust-kpi-icon amber">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-                        </div>
+                <!-- Total Customer LTV -->
+                <div class="cust-kpi-card">
+                    <div>
+                        <div class="cust-kpi-val" style="color: #7c3aed;"><?= formatPrice($totalCustomerLTV) ?></div>
+                        <div class="cust-kpi-label">Total Customer LTV</div>
+                    </div>
+                    <div class="cust-kpi-icon purple">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                     </div>
                 </div>
 
-                <!-- ── 2. Filter & Actions Toolbar ── -->
-                <div class="cust-filter-bar">
-                    <form method="GET" class="cust-filter-inputs">
-                        <!-- Search Box -->
-                        <div style="position: relative; min-width: 220px; flex: 1;">
-                            <input type="text" name="search" class="form-input" style="padding-left: 32px; font-size: 0.82rem;" placeholder="Search customer name, email, phone, city..." value="<?= htmlspecialchars($search) ?>">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); pointer-events: none;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <!-- Repeat Shoppers -->
+                <a href="<?= BASE_URL ?>/admin/customers?order_filter=repeat" class="cust-kpi-card <?= $orderFilter === 'repeat' ? 'active-border' : '' ?>">
+                    <div>
+                        <div class="cust-kpi-val" style="color: #d97706;"><?= number_format($repeatCustomers) ?></div>
+                        <div class="cust-kpi-label">Repeat Shoppers (2+)</div>
+                    </div>
+                    <div class="cust-kpi-icon amber">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                    </div>
+                </a>
+            </div>
+
+            <!-- ── 2. Professional Filter Toolbar (Matching Products Page) ── -->
+            <div class="cust-filter-card">
+                <form method="GET" action="<?= BASE_URL ?>/admin/customers" class="cust-filter-form">
+                    <!-- Search Bar & Filter Toggle Button -->
+                    <div class="cust-filter-top-bar">
+                        <div class="cust-filter-search">
+                            <input type="text" name="search" class="form-input" placeholder="Search customer name, email, phone, city..." value="<?= htmlspecialchars($search) ?>" style="padding-left: 2.2rem; height: 38px; font-size: 0.85rem; width: 100%; border-radius: 8px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); pointer-events: none;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                         </div>
 
+                        <button type="button" class="btn btn-outline filter-toggle-btn" onclick="document.getElementById('cust-filter-drawer').classList.toggle('active')" title="Toggle Filter Options">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                            <span>Filter<?= $activeFilterCount > 0 ? " ($activeFilterCount)" : "" ?></span>
+                        </button>
+                    </div>
+
+                    <!-- Filter Options Drawer -->
+                    <div id="cust-filter-drawer" class="cust-filter-drawer <?= ($activeFilterCount > 0) ? 'active' : '' ?>">
                         <!-- Status Filter -->
-                        <select name="status" class="form-select" style="font-size: 0.82rem; min-width: 130px;" onchange="this.form.submit()">
+                        <select name="status" class="form-select cust-filter-select" onchange="this.form.submit()">
                             <option value="">All Statuses</option>
                             <option value="active" <?= $statusFilter === 'active' ? 'selected' : '' ?>>Active</option>
                             <option value="inactive" <?= $statusFilter === 'inactive' ? 'selected' : '' ?>>Inactive</option>
@@ -503,205 +637,167 @@ $pageTitle = 'Customers Intelligence';
                         </select>
 
                         <!-- Order Activity Filter -->
-                        <select name="order_filter" class="form-select" style="font-size: 0.82rem; min-width: 140px;" onchange="this.form.submit()">
-                            <option value="">All Customers</option>
+                        <select name="order_filter" class="form-select cust-filter-select" onchange="this.form.submit()">
+                            <option value="">All Order Activity</option>
                             <option value="with_orders" <?= $orderFilter === 'with_orders' ? 'selected' : '' ?>>With Orders (1+)</option>
                             <option value="repeat" <?= $orderFilter === 'repeat' ? 'selected' : '' ?>>Repeat Buyers (2+)</option>
                             <option value="no_orders" <?= $orderFilter === 'no_orders' ? 'selected' : '' ?>>No Orders Placed</option>
                         </select>
 
                         <!-- Sort By -->
-                        <select name="sort" class="form-select" style="font-size: 0.82rem; min-width: 140px;" onchange="this.form.submit()">
-                            <option value="newest" <?= $sortBy === 'newest' ? 'selected' : '' ?>>Newest Joined</option>
-                            <option value="ltv_desc" <?= $sortBy === 'ltv_desc' ? 'selected' : '' ?>>Highest Spend (LTV)</option>
-                            <option value="orders_desc" <?= $sortBy === 'orders_desc' ? 'selected' : '' ?>>Most Orders</option>
-                            <option value="name_asc" <?= $sortBy === 'name_asc' ? 'selected' : '' ?>>Name (A-Z)</option>
-                            <option value="oldest" <?= $sortBy === 'oldest' ? 'selected' : '' ?>>Oldest Joined</option>
+                        <select name="sort" class="form-select cust-filter-select" onchange="this.form.submit()">
+                            <option value="newest" <?= $sortBy === 'newest' ? 'selected' : '' ?>>Sort: Newest Joined</option>
+                            <option value="ltv_desc" <?= $sortBy === 'ltv_desc' ? 'selected' : '' ?>>Sort: Highest Spend (LTV)</option>
+                            <option value="orders_desc" <?= $sortBy === 'orders_desc' ? 'selected' : '' ?>>Sort: Most Orders</option>
+                            <option value="name_asc" <?= $sortBy === 'name_asc' ? 'selected' : '' ?>>Sort: Name (A-Z)</option>
+                            <option value="oldest" <?= $sortBy === 'oldest' ? 'selected' : '' ?>>Sort: Oldest Joined</option>
                         </select>
 
-                        <button type="submit" class="btn btn-secondary" style="font-size: 0.82rem; padding: 0.45rem 0.85rem;">Filter</button>
-                        <?php if ($search || $statusFilter || $orderFilter || $sortBy !== 'newest'): ?>
-                        <a href="<?= BASE_URL ?>/admin/customers" class="btn btn-outline" style="font-size: 0.82rem; padding: 0.45rem 0.85rem;" title="Reset filters">Reset</a>
-                        <?php endif; ?>
-                    </form>
-
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <!-- Export CSV -->
-                        <a href="?<?= http_build_query(array_merge($_GET, ['export' => 'csv'])) ?>" class="btn btn-outline" style="font-size: 0.82rem; padding: 0.5rem 0.85rem; display: inline-flex; align-items: center; gap: 5px;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                            <span>Export CSV</span>
-                        </a>
-
-                        <!-- Add Customer Modal Trigger -->
-                        <button type="button" class="btn btn-primary" onclick="openAddCustomerModal()" style="font-size: 0.82rem; padding: 0.5rem 0.95rem; display: inline-flex; align-items: center; gap: 5px;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                            <span>Add Customer</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- ── 3. Customers Data Table ── -->
-                <div class="admin-card">
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
-                        <h3 class="admin-section-heading" style="margin: 0; font-size: 1.05rem;">
-                            Customer Directory <span style="font-size: 0.76rem; color: #64748b; font-weight: 600; margin-left: 6px;">(Showing <?= count($customers) ?> of <?= $totalFiltered ?>)</span>
-                        </h3>
-                    </div>
-
-                    <div class="admin-table-wrap">
-                        <table class="admin-table">
-                            <thead>
-                                <tr>
-                                    <th>Customer</th>
-                                    <th>Contact & Location</th>
-                                    <th style="text-align: center;">Orders</th>
-                                    <th style="text-align: right;">Total Spend (LTV)</th>
-                                    <th style="text-align: center;">Status</th>
-                                    <th>Joined Date</th>
-                                    <th style="text-align: right;">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php if (empty($customers)): ?>
-                                    <tr>
-                                        <td colspan="7" style="text-align: center; color: #94a3b8; padding: 3rem 1rem;">
-                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.8" style="display: block; margin: 0 auto 8px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                                            No customers found matching your search and filter criteria.
-                                        </td>
-                                    </tr>
-                                <?php else: ?>
-                                    <?php foreach ($customers as $c): 
-                                        $initials = getInitials($c['first_name'], $c['last_name']);
-                                        $fullName = trim($c['first_name'] . ' ' . $c['last_name']);
-                                        $ordersCnt = (int)$c['total_orders'];
-                                        $spent = (float)$c['total_spent'];
-                                        $st = $c['status'];
-                                    ?>
-                                    <tr>
-                                        <!-- Customer Name & Email -->
-                                        <td>
-                                            <div style="display: flex; align-items: center; gap: 10px;">
-                                                <div class="cust-avatar"><?= $initials ?></div>
-                                                <div style="display: flex; flex-direction: column; gap: 2px;">
-                                                    <div style="font-weight: 700; color: #0f172a; font-size: 0.86rem;"><?= htmlspecialchars($fullName) ?></div>
-                                                    <div style="font-size: 0.74rem; color: #64748b;"><?= htmlspecialchars($c['email']) ?></div>
-                                                </div>
-                                            </div>
-                                        </td>
-
-                                        <!-- Contact & Location -->
-                                        <td>
-                                            <div style="display: flex; flex-direction: column; gap: 2px;">
-                                                <?php if (!empty($c['phone'])): ?>
-                                                    <div style="font-size: 0.8rem; font-weight: 600; color: #334155; display: inline-flex; align-items: center; gap: 4px;">
-                                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                                                        <a href="tel:<?= htmlspecialchars($c['phone']) ?>" style="color: inherit; text-decoration: none;"><?= htmlspecialchars($c['phone']) ?></a>
-                                                    </div>
-                                                <?php else: ?>
-                                                    <span style="font-size: 0.74rem; color: #94a3b8;">No phone added</span>
-                                                <?php endif; ?>
-                                                
-                                                <div style="font-size: 0.72rem; color: #64748b; display: inline-flex; align-items: center; gap: 4px;">
-                                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                                                    <span><?= htmlspecialchars(implode(', ', array_filter([$c['upazila'], $c['city']]))) ?: 'Bangladesh' ?></span>
-                                                </div>
-                                            </div>
-                                        </td>
-
-                                        <!-- Orders Count -->
-                                        <td style="text-align: center;">
-                                            <?php if ($ordersCnt > 0): ?>
-                                                <span class="badge badge-info" style="font-weight: 700; padding: 3px 8px; font-size: 0.74rem;">
-                                                    <?= $ordersCnt ?> <?= $ordersCnt === 1 ? 'Order' : 'Orders' ?>
-                                                </span>
-                                            <?php else: ?>
-                                                <span style="color: #94a3b8; font-size: 0.76rem;">0 Orders</span>
-                                            <?php endif; ?>
-                                        </td>
-
-                                        <!-- Lifetime Value -->
-                                        <td style="text-align: right; font-weight: 800; color: #0f766e; font-size: 0.88rem;">
-                                            <?= formatPrice($spent) ?>
-                                        </td>
-
-                                        <!-- Live Status Dropdown -->
-                                        <td style="text-align: center;">
-                                            <form method="POST" style="margin: 0; display: inline-block;">
-                                                <?= csrfField() ?>
-                                                <input type="hidden" name="action" value="update_status">
-                                                <input type="hidden" name="customer_id" value="<?= $c['id'] ?>">
-                                                <select name="status" class="form-select admin-status-select" style="font-weight: 700; font-size: 0.74rem; padding: 0.25rem 0.5rem; border-radius: 6px;" onchange="this.form.submit()">
-                                                    <option value="active" <?= $st === 'active' ? 'selected' : '' ?>>Active</option>
-                                                    <option value="inactive" <?= $st === 'inactive' ? 'selected' : '' ?>>Inactive</option>
-                                                    <option value="banned" <?= $st === 'banned' ? 'selected' : '' ?>>Banned</option>
-                                                </select>
-                                            </form>
-                                        </td>
-
-                                        <!-- Joined Date -->
-                                        <td>
-                                            <span style="font-size: 0.76rem; color: #64748b; font-weight: 500;">
-                                                <?= date('M j, Y', strtotime($c['created_at'])) ?>
-                                            </span>
-                                        </td>
-
-                                        <!-- Actions -->
-                                        <td style="text-align: right;">
-                                            <div style="display: inline-flex; align-items: center; gap: 5px;">
-                                                <!-- Create Order for Customer -->
-                                                <a href="<?= BASE_URL ?>/admin/order-create?phone=<?= urlencode($c['phone'] ?? '') ?>&name=<?= urlencode($fullName) ?>&city=<?= urlencode($c['city'] ?? '') ?>" class="btn btn-sm btn-outline" style="width: 28px; height: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px;" title="Create Order for Customer">
-                                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/><path d="M12 8v6M9 11h6"/></svg>
-                                                </a>
-
-                                                <!-- Edit Customer Trigger -->
-                                                <button type="button" class="btn btn-sm btn-outline" style="width: 28px; height: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px;" onclick="openEditCustomerModal(<?= htmlspecialchars(json_encode($c)) ?>)" title="Edit Customer">
-                                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                                                </button>
-
-                                                <!-- Delete / Ban Customer -->
-                                                <form method="POST" style="margin: 0; display: inline-block;" onsubmit="return confirm('Are you sure you want to delete or deactivate this customer?');">
-                                                    <?= csrfField() ?>
-                                                    <input type="hidden" name="action" value="delete_customer">
-                                                    <input type="hidden" name="customer_id" value="<?= $c['id'] ?>">
-                                                    <button type="submit" class="btn btn-sm btn-outline" style="width: 28px; height: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; color: #ef4444; border-color: #fca5a5;" title="Delete / Deactivate Customer">
-                                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Pagination Bar -->
-                    <?php if ($totalPages > 1): ?>
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #f1f5f9; flex-wrap: wrap; gap: 0.75rem;">
-                        <span style="font-size: 0.78rem; color: #64748b;">
-                            Showing page <strong><?= $page ?></strong> of <strong><?= $totalPages ?></strong> (<?= $totalFiltered ?> customers)
-                        </span>
-                        <div style="display: inline-flex; gap: 4px;">
-                            <?php if ($page > 1): ?>
-                                <a href="?<?= http_build_query(array_merge($_GET, ['page' => $page - 1])) ?>" class="btn btn-sm btn-outline">&laquo; Prev</a>
-                            <?php endif; ?>
-
-                            <?php for ($p = max(1, $page - 2); $p <= min($totalPages, $page + 2); $p++): ?>
-                                <a href="?<?= http_build_query(array_merge($_GET, ['page' => $p])) ?>" class="btn btn-sm <?= $p === $page ? 'btn-primary' : 'btn-outline' ?>" style="min-width: 32px; text-align: center;">
-                                    <?= $p ?>
-                                </a>
-                            <?php endfor; ?>
-
-                            <?php if ($page < $totalPages): ?>
-                                <a href="?<?= http_build_query(array_merge($_GET, ['page' => $page + 1])) ?>" class="btn btn-sm btn-outline">Next &raquo;</a>
+                        <div class="cust-filter-actions">
+                            <button type="submit" class="btn btn-primary" style="height: 38px; font-size: 0.85rem; padding: 0 1rem; border-radius: 8px;">Filter</button>
+                            <?php if ($search || $statusFilter || $orderFilter || $sortBy !== 'newest'): ?>
+                                <a href="<?= BASE_URL ?>/admin/customers" class="btn btn-secondary" style="height: 38px; font-size: 0.85rem; padding: 0 0.75rem; border-radius: 8px; display: inline-flex; align-items: center;">Clear</a>
                             <?php endif; ?>
                         </div>
                     </div>
-                    <?php endif; ?>
-                </div>
-
+                </form>
             </div>
+
+            <!-- ── 3. Customers Data Table ── -->
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">ID</th>
+                            <th style="min-width: 220px;">Customer</th>
+                            <th>Contact & Location</th>
+                            <th style="text-align: center;">Orders</th>
+                            <th style="text-align: right;">Total Spend (LTV)</th>
+                            <th style="text-align: center;">Status</th>
+                            <th>Joined Date</th>
+                            <th style="text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($customers)): ?>
+                            <tr>
+                                <td colspan="8" style="text-align: center; color: #94a3b8; padding: 3rem 1rem;">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.8" style="display: block; margin: 0 auto 8px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                                    No customers found matching the selected filters.
+                                </td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($customers as $c): 
+                                $initials = getInitials($c['first_name'], $c['last_name']);
+                                $fullName = trim($c['first_name'] . ' ' . $c['last_name']);
+                                $ordersCnt = (int)$c['total_orders'];
+                                $spent = (float)$c['total_spent'];
+                                $st = $c['status'];
+                            ?>
+                            <tr>
+                                <td style="font-weight: 600; color: #64748b;">#<?= $c['id'] ?></td>
+                                
+                                <!-- Customer Name & Email -->
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 12px;">
+                                        <div class="cust-avatar"><?= $initials ?></div>
+                                        <div style="display: flex; flex-direction: column; gap: 2px;">
+                                            <div style="font-weight: 700; color: #0f172a; font-size: 0.92rem; line-height: 1.25;"><?= htmlspecialchars($fullName) ?></div>
+                                            <div style="font-size: 0.78rem; color: #64748b;"><?= htmlspecialchars($c['email']) ?></div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Contact & Location -->
+                                <td>
+                                    <div style="display: flex; flex-direction: column; gap: 2px;">
+                                        <?php if (!empty($c['phone'])): ?>
+                                            <div style="font-size: 0.82rem; font-weight: 600; color: #334155; display: inline-flex; align-items: center; gap: 5px;">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                                <a href="tel:<?= htmlspecialchars($c['phone']) ?>" style="color: inherit; text-decoration: none;"><?= htmlspecialchars($c['phone']) ?></a>
+                                            </div>
+                                        <?php else: ?>
+                                            <span style="font-size: 0.76rem; color: #94a3b8;">No phone added</span>
+                                        <?php endif; ?>
+                                        
+                                        <div style="font-size: 0.75rem; color: #64748b; display: inline-flex; align-items: center; gap: 4px;">
+                                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                            <span><?= htmlspecialchars(implode(', ', array_filter([$c['upazila'], $c['city']]))) ?: 'Bangladesh' ?></span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Orders Count -->
+                                <td style="text-align: center;">
+                                    <?php if ($ordersCnt > 0): ?>
+                                        <span class="badge badge-info" style="font-weight: 700; padding: 3px 8px; font-size: 0.78rem;">
+                                            <?= $ordersCnt ?> <?= $ordersCnt === 1 ? 'Order' : 'Orders' ?>
+                                        </span>
+                                    <?php else: ?>
+                                        <span style="color: #94a3b8; font-size: 0.78rem;">0 Orders</span>
+                                    <?php endif; ?>
+                                </td>
+
+                                <!-- Lifetime Value -->
+                                <td style="text-align: right; font-weight: 800; color: #0f766e; font-size: 0.93rem;">
+                                    <?= formatPrice($spent) ?>
+                                </td>
+
+                                <!-- Live Status Dropdown -->
+                                <td style="text-align: center;">
+                                    <form method="POST" style="margin: 0; display: inline-block;">
+                                        <?= csrfField() ?>
+                                        <input type="hidden" name="action" value="update_status">
+                                        <input type="hidden" name="customer_id" value="<?= $c['id'] ?>">
+                                        <select name="status" class="form-select admin-status-select" style="font-weight: 700; font-size: 0.78rem; padding: 0.25rem 0.6rem; border-radius: 6px;" onchange="this.form.submit()">
+                                            <option value="active" <?= $st === 'active' ? 'selected' : '' ?>>Active</option>
+                                            <option value="inactive" <?= $st === 'inactive' ? 'selected' : '' ?>>Inactive</option>
+                                            <option value="banned" <?= $st === 'banned' ? 'selected' : '' ?>>Banned</option>
+                                        </select>
+                                    </form>
+                                </td>
+
+                                <!-- Joined Date -->
+                                <td>
+                                    <span style="font-size: 0.78rem; color: #64748b; font-weight: 500;">
+                                        <?= date('M j, Y', strtotime($c['created_at'])) ?>
+                                    </span>
+                                </td>
+
+                                <!-- Actions -->
+                                <td style="text-align: right;">
+                                    <div class="admin-actions-row" style="justify-content: flex-end; gap: 6px;">
+                                        <!-- Create Order for Customer -->
+                                        <a href="<?= BASE_URL ?>/admin/order-create?phone=<?= urlencode($c['phone'] ?? '') ?>&name=<?= urlencode($fullName) ?>&city=<?= urlencode($c['city'] ?? '') ?>" class="btn btn-sm btn-outline" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px;" title="Create Order for Customer">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/><path d="M12 8v6M9 11h6"/></svg>
+                                        </a>
+
+                                        <!-- Edit Customer Trigger -->
+                                        <button type="button" class="btn btn-sm btn-primary" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px;" onclick="openEditCustomerModal(<?= htmlspecialchars(json_encode($c)) ?>)" title="Edit Customer">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                        </button>
+
+                                        <!-- Delete / Ban Customer -->
+                                        <form method="POST" style="margin: 0; display: inline-block;" onsubmit="return confirm('Are you sure you want to delete or deactivate this customer?');">
+                                            <?= csrfField() ?>
+                                            <input type="hidden" name="action" value="delete_customer">
+                                            <input type="hidden" name="customer_id" value="<?= $c['id'] ?>">
+                                            <button type="submit" class="btn btn-sm btn-secondary" style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; color: #ef4444;" title="Delete / Deactivate Customer">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Standard Admin Pagination -->
+            <?php renderAdminPagination($page, $totalFiltered, $perPage, BASE_URL . '/admin/customers', array_filter(['search' => $search, 'status' => $statusFilter, 'order_filter' => $orderFilter, 'sort' => $sortBy])); ?>
+
         </main>
     </div>
 
