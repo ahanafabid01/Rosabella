@@ -272,6 +272,9 @@ $lowStockProducts = $db->query("
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Executive Dashboard — Rosabella</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="css/admin.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -288,15 +291,15 @@ $lowStockProducts = $db->query("
             gap: 1.25rem;
             flex-wrap: wrap;
             background: #ffffff;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 1.2rem 1.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
             margin-bottom: 1.25rem;
-            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
         }
         .dash-hero-title {
-            font-size: 1.35rem;
-            font-weight: 800;
+            font-size: 1.3rem;
+            font-weight: 600;
             color: #0f172a;
             margin: 0 0 0.2rem;
             letter-spacing: -0.02em;
@@ -305,9 +308,10 @@ $lowStockProducts = $db->query("
             gap: 0.5rem;
         }
         .dash-hero-sub {
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             color: #64748b;
             margin: 0;
+            font-weight: 400;
         }
         .dash-hero-badges {
             display: flex;

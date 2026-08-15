@@ -13,7 +13,7 @@ if (!isLoggedIn() || !isAdmin()) {
 
 $db = getDB();
 
-// \u2500\u2500 Security: Verify CSRF on all admin POST requests \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ── Security: Verify CSRF on all admin POST requests ─────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     requireCSRF();
 }
@@ -127,6 +127,9 @@ $pageTitle = 'Hero Banners';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $pageTitle ?> - Admin Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="css/admin.css">
 </head>
@@ -142,7 +145,7 @@ $pageTitle = 'Hero Banners';
                 </h1>
                 <?php if ($action === 'list'): ?>
                     <a href="?action=add" class="btn btn-primary">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                         </svg>
@@ -150,7 +153,7 @@ $pageTitle = 'Hero Banners';
                     </a>
                 <?php else: ?>
                     <a href="<?= BASE_URL ?>/admin/hero" class="btn btn-outline">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="19" y1="12" x2="5" y2="12"></line>
                             <polyline points="12 19 5 12 12 5"></polyline>
                         </svg>
@@ -178,7 +181,7 @@ $pageTitle = 'Hero Banners';
                             </thead>
                             <tbody>
                                 <?php if (empty($slides)): ?>
-                                    <tr><td colspan="6" style="text-align: center; padding: 2rem;">No banners found. Add one to get started!</td></tr>
+                                    <tr><td colspan="6" style="text-align: center; padding: 2rem; color: #94a3b8;">No banners found. Add one to get started!</td></tr>
                                 <?php else: ?>
                                     <?php foreach ($slides as $slide): ?>
                                     <tr>
@@ -276,4 +279,3 @@ $pageTitle = 'Hero Banners';
     <script src="js/admin.js"></script>
 </body>
 </html>
-
