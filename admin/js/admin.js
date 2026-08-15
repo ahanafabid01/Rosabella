@@ -1,76 +1,88 @@
-﻿document.addEventListener('DOMContentLoaded', () => {
-    const sidebar = document.querySelector('.admin-sidebar');
-    const backdrop = document.querySelector('.admin-sidebar-backdrop');
-    const toggleButtons = document.querySelectorAll('[data-admin-sidebar-toggle]');
-    const closeTriggers = document.querySelectorAll('[data-admin-sidebar-close]');
-    const navLinks = document.querySelectorAll('.admin-nav a');
-    const mobileQuery = window.matchMedia('(max-width: 1024px)');
+(function() {
+    'use strict';
+    if (window.__adminJsInitialized) return;
+    window.__adminJsInitialized = true;
 
-    if (!sidebar || !backdrop) {
-        return;
-    }
+    document.addEventListener('DOMContentLoaded', () => {
+        const sidebar = document.querySelector('.admin-sidebar');
+        const backdrop = document.querySelector('.admin-sidebar-backdrop');
+        const toggleButtons = document.querySelectorAll('[data-admin-sidebar-toggle]');
+        const closeTriggers = document.querySelectorAll('[data-admin-sidebar-close]');
+        const navLinks = document.querySelectorAll('.admin-nav a');
+        const mobileQuery = window.matchMedia('(max-width: 1024px)');
 
-    const openSidebar = () => {
-        sidebar.classList.add('open');
-        backdrop.classList.add('active');
-        document.body.classList.add('admin-sidebar-open');
-    };
-
-    const closeSidebar = () => {
-        sidebar.classList.remove('open');
-        backdrop.classList.remove('active');
-        document.body.classList.remove('admin-sidebar-open');
-    };
-
-    toggleButtons.forEach((button) => {
-        button.addEventListener('click', () => {
-            if (sidebar.classList.contains('open')) {
-                closeSidebar();
-            } else {
-                openSidebar();
-            }
-        });
-    });
-
-    closeTriggers.forEach((trigger) => {
-        trigger.addEventListener('click', closeSidebar);
-    });
-
-    navLinks.forEach((link) => {
-        link.addEventListener('click', () => {
-            if (mobileQuery.matches) {
-                closeSidebar();
-            }
-        });
-    });
-
-    document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') {
-            closeSidebar();
+        if (!sidebar || !backdrop) {
+            return;
         }
-    });
 
-    window.addEventListener('resize', () => {
-        if (!mobileQuery.matches) {
-            closeSidebar();
-        }
-    });
+        const openSidebar = () => {
+            sidebar.classList.add('open');
+            backdrop.classList.add('active');
+            document.body.classList.add('admin-sidebar-open');
+        };
 
-    // Auto-hide alerts after 1.5 seconds
-    const alerts = document.querySelectorAll('.alert');
-    if (alerts.length > 0) {
-        setTimeout(() => {
-            alerts.forEach(alert => {
-                alert.style.transition = 'opacity 0.4s ease';
-                alert.style.opacity = '0';
-                setTimeout(() => alert.remove(), 400);
+        const closeSidebar = () => {
+            sidebar.classList.remove('open');
+            backdrop.classList.remove('active');
+            document.body.classList.remove('admin-sidebar-open');
+        };
+
+        toggleButtons.forEach((button) => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (sidebar.classList.contains('open')) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
             });
-        }, 1500);
+        });
 
-        // Prevent form resubmission warning on page refresh
-        if (window.history.replaceState) {
-            window.history.replaceState(null, null, window.location.href);
+        closeTriggers.forEach((trigger) => {
+            trigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                closeSidebar();
+            });
+        });
+
+        navLinks.forEach((link) => {
+            link.addEventListener('click', () => {
+                if (mobileQuery.matches) {
+                    closeSidebar();
+                }
+            });
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closeSidebar();
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (!mobileQuery.matches) {
+                closeSidebar();
+            }
+        });
+
+        // Auto-hide alerts after 1.5 seconds
+        const alerts = document.querySelectorAll('.alert');
+        if (alerts.length > 0) {
+            setTimeout(() => {
+                alerts.forEach(alert => {
+                    alert.style.transition = 'opacity 0.4s ease';
+                    alert.style.opacity = '0';
+                    setTimeout(() => alert.remove(), 400);
+                });
+            }, 1500);
+
+            // Prevent form resubmission warning on page refresh
+            if (window.history.replaceState) {
+                window.history.replaceState(null, null, window.location.href);
+            }
         }
-    }
-});
+    });
+})();
+
 

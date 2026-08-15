@@ -399,5 +399,7 @@ function npBuildUrl(array $merge): string {
         </div><!-- /np-wrap -->
     </div><!-- /admin-content -->
 </div>
+<script src="<?= BASE_URL ?>/admin/js/admin.js"></script>
 </body>
 </html>
+

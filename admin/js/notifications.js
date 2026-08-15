@@ -6,6 +6,9 @@
 (function () {
     'use strict';
 
+    if (window.__notificationsJsInitialized) return;
+    window.__notificationsJsInitialized = true;
+
     // ── Config ──────────────────────────────────────────────────────────────
     const POLL_INTERVAL_MS = 60_000; // 60 seconds
     const API_URL = (window.ROSABELLA_BASE_URL || '') + '/api/admin_notifications.php';
@@ -27,18 +30,20 @@
     let isOpen = false;
 
     // ── DOM Refs (lazy init after DOMContentLoaded) ──────────────────────────
-    let bell, badge, panel, list, loadingEl, markAllBtn, refreshBtn, lastUpdatedEl, tabs;
+    let bell, badge, panel, backdrop, list, loadingEl, markAllBtn, refreshBtn, closeMobileBtn, lastUpdatedEl, tabs;
 
     function initRefs() {
-        bell          = document.getElementById('notifBellBtn');
-        badge         = document.getElementById('notifBadge');
-        panel         = document.getElementById('notifPanel');
-        list          = document.getElementById('notifList');
-        loadingEl     = document.getElementById('notifLoading');
-        markAllBtn    = document.getElementById('notifMarkAllBtn');
-        refreshBtn    = document.getElementById('notifRefreshBtn');
-        lastUpdatedEl = document.getElementById('notifLastUpdated');
-        tabs          = document.querySelectorAll('#notifTabs .notif-tab');
+        bell           = document.getElementById('notifBellBtn');
+        badge          = document.getElementById('notifBadge');
+        panel          = document.getElementById('notifPanel');
+        backdrop       = document.getElementById('notifBackdrop');
+        list           = document.getElementById('notifList');
+        loadingEl      = document.getElementById('notifLoading');
+        markAllBtn     = document.getElementById('notifMarkAllBtn');
+        refreshBtn     = document.getElementById('notifRefreshBtn');
+        closeMobileBtn = document.getElementById('notifCloseMobileBtn');
+        lastUpdatedEl  = document.getElementById('notifLastUpdated');
+        tabs           = document.querySelectorAll('#notifTabs .notif-tab');
     }
 
     // ── Time-ago helper ──────────────────────────────────────────────────────
@@ -60,11 +65,12 @@
 
     // ── Unread count (ignores server "all" count — uses local read set) ──────
     function countUnread() {
-        return allNotifications.filter(n => !readIds.has(n.id)).length;
+        return allNotifications.filter(n => !readIds.has(String(n.id))).length;
     }
 
     // ── Update badge ─────────────────────────────────────────────────────────
     function updateBadge() {
+        if (!badge) return;
         const n = countUnread();
         if (n > 0) {
             badge.textContent = n > 99 ? '99+' : n;
@@ -76,6 +82,7 @@
 
     // ── Render items ─────────────────────────────────────────────────────────
     function renderList() {
+        if (!list) return;
         const filtered = activeFilter === 'all'
             ? allNotifications
             : allNotifications.filter(n => n.type === activeFilter);
@@ -95,7 +102,7 @@
         }
 
         filtered.forEach(n => {
-            const isRead = readIds.has(n.id);
+            const isRead = readIds.has(String(n.id)) || Number(n.is_read) === 1;
             const a = document.createElement('a');
             a.href = n.url || '#';
             a.className = 'notif-item' + (isRead ? ' notif-read' : '');
@@ -109,14 +116,14 @@
                     <div class="notif-title">${escHtml(n.title)}</div>
                     <div class="notif-body">${escHtml(n.body)}</div>
                     <div class="notif-meta">
-                        ${n.time ? `<span class="notif-time">${timeAgo(n.time)}</span>` : ''}
+                        ${n.created_at || n.time ? `<span class="notif-time">${timeAgo(n.created_at || n.time)}</span>` : ''}
                         <span class="notif-priority-pill ${n.priority}">${n.priority}</span>
                     </div>
                 </div>
                 ${n.count > 1 ? `<span class="notif-count-chip">${n.count}</span>` : ''}`;
 
             a.addEventListener('click', () => {
-                readIds.add(n.id);
+                readIds.add(String(n.id));
                 saveRead();
                 updateBadge();
             });
@@ -127,7 +134,7 @@
 
     // ── Fetch from API ───────────────────────────────────────────────────────
     async function fetchNotifications(showSpinner = false) {
-        if (showSpinner && loadingEl) {
+        if (showSpinner && loadingEl && list) {
             list.innerHTML = '';
             const spinner = document.createElement('div');
             spinner.className = 'notif-loading';
@@ -159,17 +166,21 @@
         }
     }
 
-    // ── Open / Close panel (use CSS class, NOT hidden attr — avoids display:flex override) ──
+    // ── Open / Close panel ───────────────────────────────────────────────────
     function openPanel() {
+        if (!panel || !bell) return;
         isOpen = true;
         panel.classList.add('notif-panel--open');
+        if (backdrop) backdrop.classList.add('active');
         bell.setAttribute('aria-expanded', 'true');
         renderList();
     }
 
     function closePanel() {
+        if (!panel || !bell) return;
         isOpen = false;
         panel.classList.remove('notif-panel--open');
+        if (backdrop) backdrop.classList.remove('active');
         bell.setAttribute('aria-expanded', 'false');
     }
 
@@ -184,26 +195,46 @@
         })[c]);
     }
 
-    // ── Bootstrap ────────────────────────────────────────────────────────────
-    document.addEventListener('DOMContentLoaded', () => {
+    function init() {
         initRefs();
-        if (!bell || !panel) return; // Not on an admin page with topbar
+        if (!bell || !panel) return;
 
         // Initial fetch
         fetchNotifications(true);
 
         // Start polling
-        pollTimer = setInterval(() => fetchNotifications(false), POLL_INTERVAL_MS);
+        if (!pollTimer) {
+            pollTimer = setInterval(() => fetchNotifications(false), POLL_INTERVAL_MS);
+        }
 
-        // Bell click
+        // Bell click / touch
         bell.addEventListener('click', (e) => {
+            e.preventDefault();
             e.stopPropagation();
             togglePanel();
         });
 
+        // Close on backdrop click
+        if (backdrop) {
+            backdrop.addEventListener('click', (e) => {
+                e.preventDefault();
+                closePanel();
+            });
+        }
+
+        // Close button inside mobile header
+        if (closeMobileBtn) {
+            closeMobileBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                closePanel();
+            });
+        }
+
         // Tab filter
         tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
+            tab.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 tabs.forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
                 activeFilter = tab.dataset.filter;
@@ -213,17 +244,26 @@
 
         // Mark all read
         if (markAllBtn) {
-            markAllBtn.addEventListener('click', () => {
-                allNotifications.forEach(n => readIds.add(n.id));
+            markAllBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                allNotifications.forEach(n => readIds.add(String(n.id)));
                 saveRead();
                 updateBadge();
                 renderList();
+
+                try {
+                    const fd = new FormData();
+                    fd.append('action', 'mark_all_read');
+                    await fetch(API_URL, { method: 'POST', body: fd, credentials: 'same-origin' });
+                } catch (_) {}
             });
         }
 
         // Refresh
         if (refreshBtn) {
             refreshBtn.addEventListener('click', (e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 fetchNotifications(true);
             });
@@ -240,5 +280,13 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && isOpen) closePanel();
         });
-    });
+    }
+
+    // ── Bootstrap ────────────────────────────────────────────────────────────
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
 })();
+

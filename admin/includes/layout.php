@@ -134,6 +134,7 @@ if (!function_exists('renderAdminTopbar')) {
                 <!-- ===== Notification Bell ===== -->
                 <div class="notif-wrapper" id="notifWrapper">
                     <button class="admin-topbar-icon notif-bell-btn" id="notifBellBtn"
+                            type="button"
                             aria-label="Notifications" aria-expanded="false" aria-haspopup="true">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
@@ -141,6 +142,8 @@ if (!function_exists('renderAdminTopbar')) {
                         </svg>
                         <span class="notif-badge" id="notifBadge" hidden>0</span>
                     </button>
+
+                    <div class="notif-backdrop" id="notifBackdrop" data-notif-close></div>
 
                     <div class="notif-panel" id="notifPanel" role="dialog" aria-label="Notifications">
                         <div class="notif-panel-header">
@@ -152,6 +155,9 @@ if (!function_exists('renderAdminTopbar')) {
                                 <button class="notif-mark-all-btn" id="notifMarkAllBtn" title="Mark all as read">&#10003; All read</button>
                                 <button class="notif-refresh-btn" id="notifRefreshBtn" title="Refresh">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                                </button>
+                                <button class="notif-close-mobile-btn" id="notifCloseMobileBtn" type="button" aria-label="Close notifications">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                                 </button>
                             </div>
                         </div>
@@ -170,7 +176,7 @@ if (!function_exists('renderAdminTopbar')) {
                         </div>
                         <div class="notif-panel-footer">
                             <span class="notif-last-updated" id="notifLastUpdated"></span>
-                            <a href="<?= BASE_URL ?>/admin/orders" class="notif-footer-link">View all orders &rarr;</a>
+                            <a href="<?= BASE_URL ?>/admin/notifications" class="notif-footer-link">Notification Centre &rarr;</a>
                         </div>
                     </div>
                 </div>
@@ -193,18 +199,20 @@ if (!function_exists('renderAdminTopbar')) {
     }
 }
 
-// Inject notification JS once per page (guard against multiple topbar calls)
-if (!function_exists('renderNotificationScript')) {
-    function renderNotificationScript(): void {
+// Inject admin layout & notification scripts once per page
+if (!function_exists('renderAdminScripts')) {
+    function renderAdminScripts(): void {
         static $injected = false;
         if ($injected) return;
         $injected = true;
         $base = htmlspecialchars(BASE_URL, ENT_QUOTES);
         echo "<script>window.ROSABELLA_BASE_URL = '{$base}';</script>\n";
+        echo '<script src="' . $base . '/admin/js/admin.js" defer></script>' . "\n";
         echo '<script src="' . $base . '/admin/js/notifications.js" defer></script>' . "\n";
     }
 }
-renderNotificationScript();
+renderAdminScripts();
+
 
 
 if (!function_exists('renderAdminPagination')) {
