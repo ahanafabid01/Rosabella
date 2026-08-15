@@ -169,14 +169,6 @@ try {
                         </div>
                         <?php endif; ?>
                     </div>
-                    <?php if ($isClothingBrandTheme && !empty($heroMain)): ?>
-                    <?php $brandHeroLink = !empty($heroMain[0]['link_url']) ? cleanUrl($heroMain[0]['link_url']) : BASE_URL . '/shop'; ?>
-                    <div class="clothing-brand-hero-copy">
-                        <p>New season / 2026</p>
-                        <h1><?= htmlspecialchars($heroMain[0]['title'] ?? 'Modern essentials, made to last.') ?></h1>
-                        <a href="<?= htmlspecialchars($brandHeroLink) ?>">Shop the collection <span aria-hidden="true">→</span></a>
-                    </div>
-                    <?php endif; ?>
                 </div>
                 <?php endif; ?>
 

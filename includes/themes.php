@@ -625,54 +625,9 @@ function getThemeCSS($theme = null) {
             }
 
             .theme-clothing-brand .clothing-brand-hero .hero-slide::after {
-                background: linear-gradient(90deg, rgba(0, 0, 0, 0.22) 0%, rgba(0, 0, 0, 0) 55%);
-                content: "";
-                inset: 0;
-                position: absolute;
-                pointer-events: none;
+                display: none;
             }
 
-            .clothing-brand-hero-copy {
-                bottom: clamp(2rem, 7vw, 6.5rem);
-                color: #fffefd;
-                left: max(1.5rem, calc((100vw - 1360px) / 2 + 1.5rem));
-                max-width: min(580px, 80vw);
-                position: absolute;
-                z-index: 4;
-                text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
-            }
-
-            .clothing-brand-hero-copy p {
-                color: inherit;
-                font-size: 0.7rem;
-                font-weight: 800;
-                letter-spacing: 0.16em;
-                margin: 0 0 1rem;
-                text-transform: uppercase;
-                text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-            }
-
-            .clothing-brand-hero-copy h1 {
-                color: inherit !important;
-                font-size: clamp(2.5rem, 5.5vw, 5.5rem) !important;
-                font-weight: 600 !important;
-                letter-spacing: -0.07em !important;
-                line-height: 0.98;
-                margin: 0 0 1.75rem;
-                text-shadow: 0 3px 16px rgba(0, 0, 0, 0.45);
-            }
-
-            .clothing-brand-hero-copy a {
-                border-bottom: 1px solid currentColor;
-                color: inherit;
-                display: inline-flex;
-                font-size: 0.72rem;
-                font-weight: 800;
-                gap: 0.75rem;
-                letter-spacing: 0.12em;
-                padding-bottom: 0.45rem;
-                text-transform: uppercase;
-            }
 
             /* ═══════════════════════════════════════════════
                CLOTHING BRAND: EDITORIAL CATEGORY GRID
