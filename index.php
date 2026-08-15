@@ -31,7 +31,7 @@ $themeConfig = getThemeConfig($currentTheme);
 $isClothingBrandTheme = $currentTheme === 'clothing_brand';
 
 // Theme-specific data loading
-$categoryCount = ($currentTheme === 'clothing_brand') ? 4 : 12;
+$categoryCount = ($currentTheme === 'clothing_brand') ? 8 : 12;
 
 // Get featured products
 $stmt = $db->query("SELECT p.*, c.name as category_name 
@@ -277,30 +277,80 @@ try {
 
     <!-- Categories Section -->
     <?php if ($isClothingBrandTheme): ?>
-    <section class="section clothing-brand-categories" style="padding-top: 1rem; padding-bottom: 2rem;">
+    <section class="section clothing-brand-categories">
         <div class="container">
-            <div class="section-header clothing-brand-section-header">
-                <p class="clothing-brand-eyebrow">Shop by style</p>
-                <h2 class="section-title">Explore Our Collections</h2>
-                <p class="section-subtitle">Designed for every part of your wardrobe.</p>
+            <?php if (!empty($categories)): ?>
+            <?php
+            // Resolve category images
+            $catData = [];
+            foreach ($categories as $cat) {
+                $img = !empty($cat['image'])
+                    ? (str_starts_with($cat['image'], 'http') ? $cat['image'] : BASE_URL . '/' . ltrim($cat['image'], '/'))
+                    : 'https://placehold.co/800x1000/1c1917/ffffff?text=' . urlencode($cat['name']);
+                $catData[] = array_merge($cat, ['resolved_image' => $img]);
+            }
+            $catCount     = count($catData);
+            $herocat      = $catData[0];
+            // Secondary: show 3 cats + "view all" tile if 6+, else show up to 4 cats directly
+            $showViewTile = $catCount > 5;
+            $secondaryCats = array_slice($catData, 1, $showViewTile ? 3 : 4);
+            $hasHeaderLink = $catCount > 5;
+            ?>
+
+            <!-- Section Header -->
+            <div class="cb-cat-header">
+                <div>
+                    <p class="clothing-brand-eyebrow">Shop by Style</p>
+                    <h2 class="cb-cat-title">Explore Our Collections</h2>
+                </div>
+                <?php if ($hasHeaderLink): ?>
+                <a href="<?= BASE_URL ?>/shop" class="cb-cat-view-all">
+                    View all
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </a>
+                <?php endif; ?>
             </div>
-            <div class="category-showcase-grid">
-                <?php foreach ($categories as $category): ?>
-                    <?php
-                    if (!empty($category['image'])) {
-                        $catImage = str_starts_with($category['image'], 'http')
-                            ? $category['image']
-                            : BASE_URL . '/' . ltrim($category['image'], '/');
-                    } else {
-                        $catImage = 'https://placehold.co/800x1000/1f2937/ffffff?text=' . urlencode($category['name']);
-                    }
-                    ?>
-                    <a href="<?= BASE_URL ?>/category/<?= urlencode($category['slug']) ?>" class="category-showcase-card">
-                        <img src="<?= htmlspecialchars($catImage) ?>" alt="<?= htmlspecialchars($category['name']) ?>" loading="lazy" width="600" height="750">
-                        <span class="category-showcase-label"><?= htmlspecialchars($category['name']) ?></span>
+
+            <!-- Editorial Mosaic Grid -->
+            <div class="cb-cat-grid">
+
+                <!-- Hero Card — always stretches full height of secondary panel -->
+                <a href="<?= BASE_URL ?>/category/<?= urlencode($herocat['slug']) ?>" class="cb-cat-card cb-cat-hero">
+                    <img src="<?= htmlspecialchars($herocat['resolved_image']) ?>"
+                         alt="<?= htmlspecialchars($herocat['name']) ?>"
+                         loading="eager" width="800" height="1060">
+                    <div class="cb-cat-overlay">
+                        <span class="cb-cat-name"><?= htmlspecialchars($herocat['name']) ?></span>
+                        <span class="cb-cat-cta">Shop now <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+                    </div>
+                </a>
+
+                <!-- 2×2 Secondary Grid -->
+                <div class="cb-cat-secondary">
+                    <?php foreach ($secondaryCats as $rc): ?>
+                    <a href="<?= BASE_URL ?>/category/<?= urlencode($rc['slug']) ?>" class="cb-cat-card cb-cat-small">
+                        <img src="<?= htmlspecialchars($rc['resolved_image']) ?>"
+                             alt="<?= htmlspecialchars($rc['name']) ?>"
+                             loading="lazy" width="400" height="480">
+                        <div class="cb-cat-overlay">
+                            <span class="cb-cat-name"><?= htmlspecialchars($rc['name']) ?></span>
+                            <span class="cb-cat-cta">Shop <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+                        </div>
                     </a>
-                <?php endforeach; ?>
+                    <?php endforeach; ?>
+
+                    <?php if ($showViewTile): ?>
+                    <!-- "View All" tile fills the 4th slot to complete 2×2 -->
+                    <a href="<?= BASE_URL ?>/shop" class="cb-cat-more-tile">
+                        <span class="cb-cat-more-count">+<?= $catCount - 4 ?></span>
+                        <span class="cb-cat-more-label">More<br>Collections</span>
+                        <svg class="cb-cat-more-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                    </a>
+                    <?php endif; ?>
+                </div>
+
             </div>
+            <?php endif; ?>
         </div>
     </section>
 

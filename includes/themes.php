@@ -681,29 +681,203 @@ function getThemeCSS($theme = null) {
                 text-transform: uppercase;
             }
 
+            /* ═══════════════════════════════════════════════
+               CLOTHING BRAND: EDITORIAL CATEGORY GRID
+            ═══════════════════════════════════════════════ */
             .theme-clothing-brand .clothing-brand-categories {
-                background: #fffefd;
+                background: #f9f7f4;
+                padding: 3rem 0 4rem;
             }
 
-            .theme-clothing-brand .category-showcase-grid {
-                gap: 1px;
-                margin: 3rem 0 0;
+            /* Header row */
+            .theme-clothing-brand .cb-cat-header {
+                display: flex;
+                align-items: flex-end;
+                justify-content: space-between;
+                gap: 1.5rem;
+                margin-bottom: 2rem;
             }
 
-            .theme-clothing-brand .category-showcase-card {
-                border-radius: 0;
-                height: clamp(300px, 29vw, 460px);
+            .theme-clothing-brand .cb-cat-title {
+                font-size: clamp(1.6rem, 3vw, 2.8rem);
+                font-weight: 700;
+                letter-spacing: -0.04em;
+                line-height: 1;
+                color: #1c1917;
+                margin: 0.25rem 0 0;
             }
 
-            .theme-clothing-brand .category-showcase-card:hover { transform: none; }
-            .theme-clothing-brand .category-showcase-card img { transition: transform 500ms ease; }
-            .theme-clothing-brand .category-showcase-card:hover img { transform: scale(1.045); }
-            .theme-clothing-brand .category-showcase-label {
-                font-size: clamp(1.1rem, 1.8vw, 1.6rem);
-                font-weight: 600;
-                letter-spacing: -0.03em;
-                padding: 2rem;
-                text-align: left;
+            .theme-clothing-brand .cb-cat-view-all {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.45rem;
+                font-size: 0.7rem;
+                font-weight: 800;
+                letter-spacing: 0.14em;
+                text-transform: uppercase;
+                color: #1c1917;
+                text-decoration: none;
+                border-bottom: 1.5px solid #1c1917;
+                padding-bottom: 2px;
+                white-space: nowrap;
+                flex-shrink: 0;
+                transition: opacity 0.2s;
+            }
+            .theme-clothing-brand .cb-cat-view-all:hover { opacity: 0.5; }
+
+            /* ── Outer mosaic: hero | 2×2 secondary ── */
+            .theme-clothing-brand .cb-cat-grid {
+                display: grid;
+                grid-template-columns: 2fr 3fr;  /* hero narrower, secondary wider */
+                gap: 6px;
+                align-items: stretch;             /* KEY: hero stretches to match secondary */
+            }
+
+            /* ── Secondary 2×2 box ── */
+            .theme-clothing-brand .cb-cat-secondary {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: 1fr 1fr;    /* strict 2 rows */
+                gap: 6px;
+            }
+
+            /* ── Card base ── */
+            .theme-clothing-brand .cb-cat-card {
+                position: relative;
+                display: block;
+                overflow: hidden;
+                text-decoration: none;
+                background: #111;
+                color: #fff;
+            }
+
+            /* Image fills card — absolutely positioned so it always covers */
+            .theme-clothing-brand .cb-cat-card > img {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+                transition: transform 700ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                            opacity 500ms ease;
+            }
+
+            .theme-clothing-brand .cb-cat-card:hover > img {
+                transform: scale(1.07);
+                opacity: 0.88;
+            }
+
+            /* Gradient overlay */
+            .theme-clothing-brand .cb-cat-overlay {
+                position: absolute;
+                bottom: 0; left: 0; right: 0;
+                background: linear-gradient(
+                    0deg,
+                    rgba(0,0,0,0.75) 0%,
+                    rgba(0,0,0,0.3) 55%,
+                    transparent 100%
+                );
+                padding: 2.5rem 1.5rem 1.4rem;
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+                pointer-events: none;
+            }
+
+            .theme-clothing-brand .cb-cat-name {
+                font-size: clamp(0.85rem, 1.4vw, 1.25rem);
+                font-weight: 700;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+                line-height: 1;
+            }
+
+            .theme-clothing-brand .cb-cat-cta {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.35rem;
+                font-size: 0.65rem;
+                font-weight: 700;
+                letter-spacing: 0.14em;
+                text-transform: uppercase;
+                opacity: 0;
+                transform: translateY(8px);
+                transition: opacity 0.3s ease, transform 0.3s ease;
+            }
+
+            .theme-clothing-brand .cb-cat-card:hover .cb-cat-cta {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            /* ── HERO: no aspect-ratio — let it stretch via CSS grid ── */
+            .theme-clothing-brand .cb-cat-hero {
+                /* height is 100% of grid row which = secondary panel height */
+                min-height: 420px;
+            }
+
+            .theme-clothing-brand .cb-cat-hero .cb-cat-overlay {
+                padding: 5rem 2rem 2rem;
+            }
+
+            .theme-clothing-brand .cb-cat-hero .cb-cat-name {
+                font-size: clamp(1.1rem, 2vw, 1.9rem);
+            }
+
+            /* ── Small cards: aspect-ratio defines grid height ── */
+            .theme-clothing-brand .cb-cat-small {
+                aspect-ratio: 4 / 3;  /* drives secondary panel total height */
+            }
+
+            .theme-clothing-brand .cb-cat-small .cb-cat-name {
+                font-size: clamp(0.75rem, 1vw, 1rem);
+            }
+
+            .theme-clothing-brand .cb-cat-small .cb-cat-overlay {
+                padding: 2rem 1.1rem 1rem;
+            }
+
+            /* ── "View All" tile (4th slot) ── */
+            .theme-clothing-brand .cb-cat-more-tile {
+                aspect-ratio: 4 / 3;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                background: #1c1917;
+                color: #fff;
+                text-decoration: none;
+                transition: background 0.3s ease;
+            }
+            .theme-clothing-brand .cb-cat-more-tile:hover { background: #2d2926; }
+
+            .theme-clothing-brand .cb-cat-more-count {
+                font-size: clamp(1.5rem, 2.5vw, 2.4rem);
+                font-weight: 800;
+                letter-spacing: -0.04em;
+                line-height: 1;
+            }
+
+            .theme-clothing-brand .cb-cat-more-label {
+                font-size: 0.65rem;
+                font-weight: 700;
+                letter-spacing: 0.14em;
+                text-transform: uppercase;
+                text-align: center;
+                opacity: 0.75;
+            }
+
+            .theme-clothing-brand .cb-cat-more-arrow {
+                opacity: 0;
+                transform: translateX(-4px);
+                transition: opacity 0.3s, transform 0.3s;
+            }
+
+            .theme-clothing-brand .cb-cat-more-tile:hover .cb-cat-more-arrow {
+                opacity: 1;
+                transform: translateX(0);
             }
 
             .theme-clothing-brand .clothing-brand-new-arrivals {
@@ -1033,15 +1207,44 @@ function getThemeCSS($theme = null) {
                     font-size: 1.5rem;
                 }
                 
-                .category-showcase-grid {
-                    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-                    gap: 0.75rem !important;
+                /* Category Grid – Mobile: stack hero top, 2x2 below */
+                .theme-clothing-brand .cb-cat-header {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 0.5rem;
+                    margin-bottom: 1.25rem;
                 }
-                
-                .category-showcase-card {
-                    height: 160px;
+
+                .theme-clothing-brand .cb-cat-grid {
+                    grid-template-columns: 1fr;   /* stack hero above secondary */
+                    gap: 4px;
                 }
-                
+
+                .theme-clothing-brand .cb-cat-hero {
+                    aspect-ratio: 16 / 9;         /* wide banner on mobile */
+                    min-height: unset;
+                }
+
+                .theme-clothing-brand .cb-cat-secondary {
+                    grid-template-columns: 1fr 1fr;
+                    grid-template-rows: auto;
+                    gap: 4px;
+                }
+
+                .theme-clothing-brand .cb-cat-small,
+                .theme-clothing-brand .cb-cat-more-tile {
+                    aspect-ratio: 4 / 3;
+                }
+
+                .theme-clothing-brand .cb-cat-name { font-size: 0.72rem; }
+
+                .theme-clothing-brand .cb-cat-overlay,
+                .theme-clothing-brand .cb-cat-hero .cb-cat-overlay {
+                    padding: 1.5rem 0.875rem 0.875rem;
+                }
+
+                .theme-clothing-brand .cb-cat-cta { display: none; }
+
                 /* Strict 2-column Product Grid on Mobile */
                 .products-grid,
                 .theme-clothing-brand .products-grid,
@@ -1116,13 +1319,17 @@ function getThemeCSS($theme = null) {
             }
             
             @media (max-width: 480px) {
-                .category-showcase-grid {
-                    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-                    gap: 0.5rem !important;
+                .theme-clothing-brand .cb-cat-title {
+                    font-size: 1.25rem;
                 }
-                
-                .category-showcase-card {
-                    height: 130px;
+
+                .theme-clothing-brand .cb-cat-hero {
+                    aspect-ratio: 16 / 7;  /* very short banner on tiny screens */
+                }
+
+                .theme-clothing-brand .cb-cat-small,
+                .theme-clothing-brand .cb-cat-more-tile {
+                    aspect-ratio: 3 / 2;
                 }
 
                 .promo-banner-text {
