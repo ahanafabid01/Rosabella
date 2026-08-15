@@ -14,11 +14,12 @@ if (!function_exists('adminIcon')) {
             'deals' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41L11 3.83a2 2 0 0 0-1.41-.59H4a2 2 0 0 0-2 2v5.59a2 2 0 0 0 .59 1.41L12.17 22a2 2 0 0 0 2.83 0l5.59-5.59a2 2 0 0 0 0-2.83z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>',
             'orders' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>',
             'order-create' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/><path d="M12 8v6M9 11h6"/></svg>',
-            'reviews' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><polygon points="12 7 13.2 9.4 16 9.8 14 11.8 14.5 14.5 12 13.2 9.5 14.5 10 11.8 8 9.8 10.8 9.4 12 7"/></svg>',
-            'users' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
-            'coupons' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
-            'settings' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
-            'hero' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
+            'reviews'       => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><polygon points="12 7 13.2 9.4 16 9.8 14 11.8 14.5 14.5 12 13.2 9.5 14.5 10 11.8 8 9.8 10.8 9.4 12 7"/></svg>',
+            'notifications' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>',
+            'users'         => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+            'coupons'       => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+            'settings'      => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+            'hero'          => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
             'back' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>',
             'logout' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>',
         ];
@@ -46,18 +47,19 @@ if (!function_exists('renderAdminSidebar')) {
     {
         $base = BASE_URL;
         $items = [
-            'dashboard'    => ['href' => $base . '/admin/dashboard',   'label' => 'Dashboard'],
-            'products'     => ['href' => $base . '/admin/products',    'label' => 'Products'],
-            'categories'   => ['href' => $base . '/admin/categories',  'label' => 'Categories'],
-            'attributes'   => ['href' => $base . '/admin/attributes.php', 'label' => 'Attributes'],
-            'deals'        => ['href' => $base . '/admin/deals',       'label' => 'Deals'],
-            'orders'       => ['href' => $base . '/admin/orders',      'label' => 'Orders'],
-            'order-create' => ['href' => $base . '/admin/order-create','label' => 'Create Order'],
-            'reviews'      => ['href' => $base . '/admin/reviews',     'label' => 'Reviews'],
-            'users'        => ['href' => $base . '/admin/users',       'label' => 'Users'],
-            'coupons'      => ['href' => $base . '/admin/coupons',     'label' => 'Coupons'],
-            'hero'         => ['href' => $base . '/admin/hero',        'label' => 'Hero Banners'],
-            'settings'     => ['href' => $base . '/admin/settings',    'label' => 'Settings'],
+            'dashboard'     => ['href' => $base . '/admin/dashboard',       'label' => 'Dashboard'],
+            'products'      => ['href' => $base . '/admin/products',         'label' => 'Products'],
+            'categories'    => ['href' => $base . '/admin/categories',       'label' => 'Categories'],
+            'attributes'    => ['href' => $base . '/admin/attributes.php',   'label' => 'Attributes'],
+            'deals'         => ['href' => $base . '/admin/deals',            'label' => 'Deals'],
+            'orders'        => ['href' => $base . '/admin/orders',           'label' => 'Orders'],
+            'order-create'  => ['href' => $base . '/admin/order-create',     'label' => 'Create Order'],
+            'reviews'       => ['href' => $base . '/admin/reviews',          'label' => 'Reviews'],
+            'notifications' => ['href' => $base . '/admin/notifications',    'label' => 'Notifications'],
+            'users'         => ['href' => $base . '/admin/users',            'label' => 'Users'],
+            'coupons'       => ['href' => $base . '/admin/coupons',          'label' => 'Coupons'],
+            'hero'          => ['href' => $base . '/admin/hero',             'label' => 'Hero Banners'],
+            'settings'      => ['href' => $base . '/admin/settings',         'label' => 'Settings'],
         ];
         ?>
         <div class="admin-sidebar-backdrop" data-admin-sidebar-close></div>
@@ -76,10 +78,20 @@ if (!function_exists('renderAdminSidebar')) {
             </div>
             <div class="admin-nav-divider" style="margin-bottom: 1.5rem;"></div>
             <nav class="admin-nav">
+                <?php
+                // Fetch unread count for sidebar badge
+                try {
+                    $db = getDB();
+                    $sidebarUnread = (int)$db->query("SELECT COUNT(*) FROM admin_notifications WHERE is_read = 0")->fetchColumn();
+                } catch (Throwable $e) { $sidebarUnread = 0; }
+                ?>
                 <?php foreach ($items as $key => $item): ?>
                     <a href="<?= htmlspecialchars($item['href']) ?>" class="<?= $activePage === $key ? 'active' : '' ?>">
                         <?= adminIcon($key) ?>
                         <span><?= htmlspecialchars($item['label']) ?></span>
+                        <?php if ($key === 'notifications' && $sidebarUnread > 0): ?>
+                            <span class="sidebar-notif-badge"><?= $sidebarUnread > 99 ? '99+' : $sidebarUnread ?></span>
+                        <?php endif; ?>
                     </a>
                 <?php endforeach; ?>
                 <div class="admin-nav-divider"></div>
@@ -119,18 +131,50 @@ if (!function_exists('renderAdminTopbar')) {
                 </div>
             </div>
             <div class="admin-topbar-right">
-                <button class="admin-topbar-icon" aria-label="Notifications">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                    </svg>
-                </button>
-                <button class="admin-topbar-icon" aria-label="Messages">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                        <polyline points="22,6 12,13 2,6"></polyline>
-                    </svg>
-                </button>
+                <!-- ===== Notification Bell ===== -->
+                <div class="notif-wrapper" id="notifWrapper">
+                    <button class="admin-topbar-icon notif-bell-btn" id="notifBellBtn"
+                            aria-label="Notifications" aria-expanded="false" aria-haspopup="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
+                        <span class="notif-badge" id="notifBadge" hidden>0</span>
+                    </button>
+
+                    <div class="notif-panel" id="notifPanel" role="dialog" aria-label="Notifications">
+                        <div class="notif-panel-header">
+                            <span class="notif-panel-title">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                                Notifications
+                            </span>
+                            <div class="notif-header-actions">
+                                <button class="notif-mark-all-btn" id="notifMarkAllBtn" title="Mark all as read">&#10003; All read</button>
+                                <button class="notif-refresh-btn" id="notifRefreshBtn" title="Refresh">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="notif-tabs" role="tablist" id="notifTabs">
+                            <button class="notif-tab active" data-filter="all" role="tab">All</button>
+                            <button class="notif-tab" data-filter="order" role="tab">Orders</button>
+                            <button class="notif-tab" data-filter="stock" role="tab">Stock</button>
+                            <button class="notif-tab" data-filter="review" role="tab">Reviews</button>
+                            <button class="notif-tab" data-filter="user" role="tab">Users</button>
+                        </div>
+                        <div class="notif-list" id="notifList" role="list">
+                            <div class="notif-loading" id="notifLoading">
+                                <span class="notif-spinner"></span>
+                                <span>Loading&hellip;</span>
+                            </div>
+                        </div>
+                        <div class="notif-panel-footer">
+                            <span class="notif-last-updated" id="notifLastUpdated"></span>
+                            <a href="<?= BASE_URL ?>/admin/orders" class="notif-footer-link">View all orders &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- ===== End Notification Bell ===== -->
                 <div class="admin-topbar-profile-pill">
                     <div class="admin-topbar-avatar"><?= $initials ?></div>
                     <span class="admin-topbar-name"><?= $userName ?></span>
@@ -148,6 +192,20 @@ if (!function_exists('renderAdminTopbar')) {
         <?php
     }
 }
+
+// Inject notification JS once per page (guard against multiple topbar calls)
+if (!function_exists('renderNotificationScript')) {
+    function renderNotificationScript(): void {
+        static $injected = false;
+        if ($injected) return;
+        $injected = true;
+        $base = htmlspecialchars(BASE_URL, ENT_QUOTES);
+        echo "<script>window.ROSABELLA_BASE_URL = '{$base}';</script>\n";
+        echo '<script src="' . $base . '/admin/js/notifications.js" defer></script>' . "\n";
+    }
+}
+renderNotificationScript();
+
 
 if (!function_exists('renderAdminPagination')) {
     function renderAdminPagination(int $currentPage, int $totalItems, int $perPage, string $baseUrl, array $queryParams = []): void
