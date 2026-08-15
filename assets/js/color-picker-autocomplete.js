@@ -262,4 +262,6 @@
         targetTextarea.addEventListener('input', renderTagsFromTextarea);
         renderTagsFromTextarea();
     };
+
+    window.ROSABELLA_COLOR_DATABASE = ROSABELLA_COLOR_DATABASE;
 })(window);

@@ -1462,16 +1462,149 @@ function markAvatarForRemoval() {
     }
 }
 
-/* ─── Color Search & Live Theme Preview Logic ─── */
+/* ─── 120+ Curated Color Database & Live Theme Customizer ─── */
+const ROSABELLA_THEME_COLORS = [
+    // Monochrome & Basics
+    { name: "Slate Gray", hex: "#708090" },
+    { name: "Light Slate", hex: "#f1f5f9" },
+    { name: "Cool Gray", hex: "#e2e8f0" },
+    { name: "Ice White", hex: "#f8fafc" },
+    { name: "Pure White", hex: "#FFFFFF" },
+    { name: "Off White", hex: "#FAF9F6" },
+    { name: "Snow White", hex: "#FFFAFA" },
+    { name: "Ivory", hex: "#FFFFF0" },
+    { name: "Cream", hex: "#FFFDD0" },
+    { name: "Warm Alabaster", hex: "#F2F0EB" },
+    { name: "Jet Black", hex: "#0A0A0A" },
+    { name: "Midnight Black", hex: "#121212" },
+    { name: "Matte Black", hex: "#222222" },
+    { name: "Charcoal", hex: "#36454F" },
+    { name: "Dark Charcoal", hex: "#212529" },
+    { name: "Slate 900", hex: "#0f172a" },
+    { name: "Slate 800", hex: "#1e293b" },
+    { name: "Slate 700", hex: "#334155" },
+    { name: "Gray", hex: "#808080" },
+    { name: "Dark Gray", hex: "#555555" },
+    { name: "Light Gray", hex: "#D3D3D3" },
+    { name: "Silver", hex: "#C0C0C0" },
+    { name: "Metallic Silver", hex: "#AAA9AD" },
+    { name: "Space Gray", hex: "#4B4B4D" },
+    { name: "Pebble Gray", hex: "#8B8C7A" },
+    { name: "Ash Gray", hex: "#B2BEB5" },
+
+    // Teals & Emeralds
+    { name: "Deep Teal", hex: "#0f766e" },
+    { name: "Teal", hex: "#008080" },
+    { name: "Light Teal", hex: "#0d9488" },
+    { name: "Teal 50", hex: "#f0fdfa" },
+    { name: "Teal 100", hex: "#ccfbf1" },
+    { name: "Emerald Green", hex: "#50C878" },
+    { name: "Emerald Dark", hex: "#047857" },
+    { name: "Emerald Light", hex: "#10b981" },
+    { name: "Mint Green", hex: "#98FF98" },
+    { name: "Seafoam Green", hex: "#9FE2BF" },
+    { name: "Turquoise", hex: "#40E0D0" },
+    { name: "Jade Green", hex: "#00A86B" },
+    { name: "Sage Green", hex: "#9DC183" },
+    { name: "Forest Green", hex: "#228B22" },
+    { name: "Dark Green", hex: "#006400" },
+    { name: "Olive Green", hex: "#808000" },
+    { name: "Lime Green", hex: "#32CD32" },
+    { name: "Pistachio Green", hex: "#93C572" },
+    { name: "Army Green", hex: "#4B5320" },
+
+    // Blues
+    { name: "Navy Blue", hex: "#000080" },
+    { name: "Midnight Blue", hex: "#191970" },
+    { name: "Royal Blue", hex: "#4169E1" },
+    { name: "Sky Blue", hex: "#87CEEB" },
+    { name: "Baby Blue", hex: "#89CFF0" },
+    { name: "Denim Blue", hex: "#1560BD" },
+    { name: "Steel Blue", hex: "#4682B4" },
+    { name: "Ocean Blue", hex: "#006994" },
+    { name: "Sapphire Blue", hex: "#0F52BA" },
+    { name: "Cobalt Blue", hex: "#0047AB" },
+    { name: "Electric Blue", hex: "#7DF9FF" },
+    { name: "Powder Blue", hex: "#B0E0E6" },
+    { name: "Cyan", hex: "#00FFFF" },
+    { name: "Aquamarine", hex: "#7FFFD4" },
+    { name: "Sierra Blue", hex: "#9BB5CE" },
+    { name: "Pacific Blue", hex: "#284A5C" },
+    { name: "Ice Blue", hex: "#D4F1F4" },
+
+    // Purples & Indigos
+    { name: "Indigo", hex: "#4B0082" },
+    { name: "Royal Purple", hex: "#7851A9" },
+    { name: "Lavender", hex: "#E6E6FA" },
+    { name: "Lavender Mist", hex: "#F5F3FF" },
+    { name: "Violet", hex: "#8F00FF" },
+    { name: "Plum", hex: "#8E4585" },
+    { name: "Mauve", hex: "#E0B0FF" },
+    { name: "Lilac", hex: "#C8A2C8" },
+    { name: "Deep Amethyst", hex: "#9966CC" },
+    { name: "Grape", hex: "#6F2DA8" },
+
+    // Reds & Pinks
+    { name: "Red", hex: "#FF0000" },
+    { name: "Crimson Red", hex: "#DC143C" },
+    { name: "Scarlet", hex: "#FF2400" },
+    { name: "Burgundy", hex: "#800020" },
+    { name: "Wine Red", hex: "#722F37" },
+    { name: "Maroon", hex: "#800000" },
+    { name: "Cherry Red", hex: "#D2042D" },
+    { name: "Ruby Red", hex: "#9B111E" },
+    { name: "Pink", hex: "#FFC0CB" },
+    { name: "Rose Pink", hex: "#FF66CC" },
+    { name: "Baby Pink", hex: "#F4C2C2" },
+    { name: "Hot Pink", hex: "#FF69B4" },
+    { name: "Blush Pink", hex: "#DE5D83" },
+    { name: "Magenta", hex: "#FF00FF" },
+    { name: "Coral Pink", hex: "#F88379" },
+    { name: "Dusty Rose", hex: "#DCAE96" },
+    { name: "Rose Gold", hex: "#B76E79" },
+    { name: "Fuchsia", hex: "#FF00FF" },
+    { name: "Salmon", hex: "#FA8072" },
+
+    // Earth Tones & Yellows
+    { name: "Gold", hex: "#FFD700" },
+    { name: "Metallic Gold", hex: "#D4AF37" },
+    { name: "Champagne", hex: "#F7E7CE" },
+    { name: "Yellow", hex: "#FFFF00" },
+    { name: "Mustard Yellow", hex: "#FFDB58" },
+    { name: "Lemon Yellow", hex: "#FFF700" },
+    { name: "Amber", hex: "#FFBF00" },
+    { name: "Orange", hex: "#FFA500" },
+    { name: "Burnt Orange", hex: "#CC5500" },
+    { name: "Coral", hex: "#FF7F50" },
+    { name: "Peach", hex: "#FFDAB9" },
+    { name: "Tangerine", hex: "#F28500" },
+    { name: "Rust", hex: "#B7410E" },
+    { name: "Terracotta", hex: "#E2725B" },
+    { name: "Bronze", hex: "#CD7F32" },
+    { name: "Copper", hex: "#B87333" },
+    { name: "Mocha Brown", hex: "#3B2F2F" },
+    { name: "Chocolate Brown", hex: "#7B3F00" },
+    { name: "Coffee Brown", hex: "#4A2C2A" },
+    { name: "Caramel", hex: "#AF6E4D" },
+    { name: "Beige", hex: "#F5F5DC" },
+    { name: "Sand", hex: "#C2B280" },
+    { name: "Khaki", hex: "#C3B091" },
+    { name: "Tan", hex: "#D2B48C" }
+];
+
 function syncColorInput(target, hexVal) {
     if (!hexVal) return;
     if (!hexVal.startsWith('#')) hexVal = '#' + hexVal;
     
-    // Update inputs
+    // Update color picker swatch
     const picker = document.getElementById('picker_' + target);
-    const hexInput = document.getElementById('hex_' + target);
     if (picker && /^#[0-9A-F]{6}$/i.test(hexVal)) picker.value = hexVal;
-    if (hexInput && hexInput.value.toUpperCase() !== hexVal.toUpperCase()) hexInput.value = hexVal;
+
+    // Update hex text box
+    const hexInput = document.getElementById('hex_' + target);
+    if (hexInput && hexInput.value.toUpperCase() !== hexVal.toUpperCase()) {
+        hexInput.value = hexVal;
+    }
 
     updateLiveThemePreview();
 }
@@ -1480,6 +1613,19 @@ function applyThemePreset(sidebarBg, contentBg, primaryColor) {
     syncColorInput('sidebar_bg', sidebarBg);
     syncColorInput('content_bg', contentBg);
     syncColorInput('primary_color', primaryColor);
+
+    // Update search field texts with matched preset names
+    const matchName = (hex) => {
+        const found = ROSABELLA_THEME_COLORS.find(c => c.hex.toLowerCase() === hex.toLowerCase());
+        return found ? `${found.name} (${found.hex})` : hex;
+    };
+    
+    const sInput = document.querySelector('.color-search-field[data-target="sidebar_bg"]');
+    const cInput = document.querySelector('.color-search-field[data-target="content_bg"]');
+    const pInput = document.querySelector('.color-search-field[data-target="primary_color"]');
+    if (sInput) sInput.value = matchName(sidebarBg);
+    if (cInput) cInput.value = matchName(contentBg);
+    if (pInput) pInput.value = matchName(primaryColor);
 }
 
 function updateLiveThemePreview() {
@@ -1497,30 +1643,31 @@ function updateLiveThemePreview() {
     if (content) content.style.backgroundColor = contentBg;
 }
 
-// Initialize 120+ Curated Color Search Autocomplete
+// Attach Search Autocomplete to all 3 color search boxes
 document.addEventListener('DOMContentLoaded', () => {
-    // Check if color database exists
-    const colorDB = window.ROSABELLA_COLOR_DATABASE || [];
+    const colorDB = (typeof ROSABELLA_COLOR_DATABASE !== 'undefined' && ROSABELLA_COLOR_DATABASE.length) 
+        ? ROSABELLA_COLOR_DATABASE 
+        : ROSABELLA_THEME_COLORS;
 
     document.querySelectorAll('.color-search-field').forEach(input => {
         const target = input.dataset.target;
         const dropdown = input.parentElement.querySelector('.as-color-dropdown');
         if (!dropdown) return;
 
-        input.addEventListener('input', () => {
-            const query = input.value.trim().toLowerCase();
+        function renderMatches(query) {
+            let matches = [];
             if (!query) {
-                dropdown.style.display = 'none';
-                return;
+                // Show top recommended colors if search is empty
+                matches = colorDB.slice(0, 18);
+            } else {
+                matches = colorDB.filter(c => 
+                    c.name.toLowerCase().includes(query) || 
+                    c.hex.toLowerCase().includes(query)
+                );
             }
 
-            const matches = colorDB.filter(c => 
-                c.name.toLowerCase().includes(query) || 
-                c.hex.toLowerCase().includes(query)
-            );
-
             if (matches.length === 0) {
-                dropdown.innerHTML = `<div style="padding: 10px; font-size: 0.78rem; color: #94a3b8; text-align: center;">No matching standard color. Enter custom hex.</div>`;
+                dropdown.innerHTML = `<div style="padding: 10px 14px; font-size: 0.78rem; color: #94a3b8; text-align: center;">No matching standard color. You can enter a custom Hex code directly.</div>`;
             } else {
                 dropdown.innerHTML = matches.map(c => `
                     <div class="as-color-item" data-hex="${c.hex}" data-name="${c.name}">
@@ -1535,13 +1682,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 dropdown.querySelectorAll('.as-color-item').forEach(item => {
                     item.addEventListener('click', () => {
                         const hex = item.dataset.hex;
+                        const name = item.dataset.name;
                         syncColorInput(target, hex);
-                        input.value = item.dataset.name + ' (' + hex + ')';
+                        input.value = name + ' (' + hex + ')';
                         dropdown.style.display = 'none';
                     });
                 });
             }
             dropdown.style.display = 'block';
+        }
+
+        input.addEventListener('input', () => {
+            renderMatches(input.value.trim().toLowerCase());
+        });
+
+        input.addEventListener('focus', () => {
+            renderMatches(input.value.trim().toLowerCase());
         });
 
         document.addEventListener('click', (e) => {
@@ -1550,8 +1706,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // Populate initial search box labels with friendly names if matching hex
+    const setInitialName = (target, hexId) => {
+        const hex = document.getElementById(hexId)?.value;
+        if (!hex) return;
+        const found = colorDB.find(c => c.hex.toLowerCase() === hex.toLowerCase());
+        const sInput = document.querySelector(`.color-search-field[data-target="${target}"]`);
+        if (sInput && found) {
+            sInput.value = `${found.name} (${found.hex})`;
+        }
+    };
+
+    setInitialName('sidebar_bg', 'hex_sidebar_bg');
+    setInitialName('content_bg', 'hex_content_bg');
+    setInitialName('primary_color', 'hex_primary_color');
 });
 </script>
-<script src="../assets/js/color-picker-autocomplete.js"></script>
 </body>
 </html>
