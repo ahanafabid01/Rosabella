@@ -211,6 +211,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_clear_cache'])
     $message = "System cache and execution buffers purged successfully ($clearedItems objects/caches refreshed).";
 }
 
+// ── 4. Handle Custom Theme Palette Creation & Deletion ─────────────────────────
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_save_custom_palette'])) {
+    $activeTab = 'theme';
+    $paletteName = trim(sanitize($_POST['custom_palette_name'] ?? ''));
+    if (empty($paletteName)) {
+        $paletteName = 'My Custom Palette ' . date('M d');
+    }
+
+    $paletteData = [
+        'id'   => 'custom_' . time() . '_' . substr(bin2hex(random_bytes(4)), 0, 6),
+        'name' => $paletteName,
+        'sbg'  => sanitize($_POST['custom_sbg'] ?? '#f1f5f9'),
+        'stxt' => sanitize($_POST['custom_stxt'] ?? '#1e293b'),
+        'shov' => sanitize($_POST['custom_shov'] ?? '#ffffff'),
+        'sact' => sanitize($_POST['custom_sact'] ?? '#e6fcf5'),
+        'cbg'  => sanitize($_POST['custom_cbg'] ?? '#f8fafc'),
+        'ctxt' => sanitize($_POST['custom_ctxt'] ?? '#0f172a'),
+        'pri'  => sanitize($_POST['custom_pri'] ?? '#0f766e'),
+    ];
+
+    $existingJson = getSettingVal($allSettings ?? [], 'admin_custom_theme_palettes', '[]');
+    $savedPalettes = json_decode($existingJson, true);
+    if (!is_array($savedPalettes)) {
+        $savedPalettes = [];
+    }
+
+    $savedPalettes[] = $paletteData;
+    saveAdminSetting($db, 'admin_custom_theme_palettes', json_encode($savedPalettes), 'text');
+    $allSettings['admin_custom_theme_palettes'] = json_encode($savedPalettes);
+    $message = "Custom palette '{$paletteName}' created and saved successfully!";
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_delete_custom_palette'])) {
+    $activeTab = 'theme';
+    $paletteId = sanitize($_POST['palette_id'] ?? '');
+
+    $existingJson = getSettingVal($allSettings ?? [], 'admin_custom_theme_palettes', '[]');
+    $savedPalettes = json_decode($existingJson, true);
+    if (!is_array($savedPalettes)) {
+        $savedPalettes = [];
+    }
+
+    $filtered = array_values(array_filter($savedPalettes, fn($p) => ($p['id'] ?? '') !== $paletteId));
+    saveAdminSetting($db, 'admin_custom_theme_palettes', json_encode($filtered), 'text');
+    $allSettings['admin_custom_theme_palettes'] = json_encode($filtered);
+    $message = 'Custom palette removed successfully.';
+}
+
 // Fetch current admin user info
 $adminStmt = $db->prepare("SELECT first_name, last_name, email, avatar, role, created_at FROM users WHERE id = ?");
 $adminStmt->execute([(int)$_SESSION['user_id']]);
@@ -614,12 +662,54 @@ $pageTitle = 'Admin Settings';
             border-radius: 20px;
             letter-spacing: 0.02em;
             box-shadow: 0 2px 4px rgba(15, 118, 110, 0.25);
+            z-index: 2;
         }
 
         .as-preset-card.active-preset .as-preset-badge {
             display: inline-flex;
             align-items: center;
             gap: 3px;
+        }
+
+        .as-preset-delete-btn {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: #fee2e2;
+            color: #ef4444;
+            border: 1px solid #fca5a5;
+            border-radius: 6px;
+            width: 22px;
+            height: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 0;
+            transition: all 0.15s ease;
+            z-index: 4;
+            opacity: 0.85;
+        }
+
+        .as-preset-delete-btn:hover {
+            background: #ef4444;
+            color: #ffffff;
+            border-color: #dc2626;
+            transform: scale(1.1);
+            opacity: 1;
+        }
+
+        .as-preset-card.active-preset .as-preset-delete-btn {
+            right: auto;
+            left: 6px;
+        }
+
+        .as-custom-creator-card {
+            background: linear-gradient(135deg, #f0fdfa 0%, #f8fafc 100%);
+            border: 1.5px dashed #0d9488;
+            border-radius: 12px;
+            padding: 1.15rem;
+            margin-top: 1.5rem;
         }
 
         .as-preset-preview {
@@ -1341,6 +1431,106 @@ $pageTitle = 'Admin Settings';
                                 </div>
                             </div>
 
+                            <!-- Create Custom Color Palette Section -->
+                            <div class="as-custom-creator-card">
+                                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.65rem;">
+                                    <div>
+                                        <h4 style="margin: 0; font-size: 0.90rem; font-weight: 700; color: #0f766e; display: flex; align-items: center; gap: 6px;">
+                                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M2 12h20"/></svg>
+                                            Create Custom Color Palette
+                                        </h4>
+                                        <p style="margin: 2px 0 0; font-size: 0.76rem; color: #475569;">Save your configured background, text, hover, and highlight colors as a reusable 1-click theme palette.</p>
+                                    </div>
+                                    <button type="button" class="btn btn-secondary" onclick="toggleCustomPaletteForm()" id="btnToggleCustomPalette" style="height: 32px; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 5px;">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                        <span>Save Current as Custom Palette</span>
+                                    </button>
+                                </div>
+
+                                <div id="customPaletteFormWrapper" style="display: none; margin-top: 0.85rem; padding-top: 0.85rem; border-top: 1px dashed #cbd5e1;">
+                                    <form method="POST" id="saveCustomPaletteForm" style="margin: 0;">
+                                        <?= csrfField() ?>
+                                        <input type="hidden" name="action_save_custom_palette" value="1">
+                                        <input type="hidden" name="custom_sbg" id="cp_sbg">
+                                        <input type="hidden" name="custom_stxt" id="cp_stxt">
+                                        <input type="hidden" name="custom_shov" id="cp_shov">
+                                        <input type="hidden" name="custom_sact" id="cp_sact">
+                                        <input type="hidden" name="custom_cbg" id="cp_cbg">
+                                        <input type="hidden" name="custom_ctxt" id="cp_ctxt">
+                                        <input type="hidden" name="custom_pri" id="cp_pri">
+
+                                        <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                                            <div style="flex: 1; min-width: 220px;">
+                                                <label style="font-size: 0.78rem; font-weight: 600; color: #0f172a; margin-bottom: 4px; display: block;">Custom Palette Name</label>
+                                                <input type="text" name="custom_palette_name" id="custom_palette_name_input" class="as-input" placeholder="e.g. Sapphire Executive, Rosabella Boutique, Dark Velvet..." required style="height: 38px;">
+                                            </div>
+                                            <div style="display: flex; gap: 0.5rem; align-items: flex-end; margin-top: auto;">
+                                                <button type="submit" class="btn btn-primary" onclick="prepareCustomPaletteSave()" style="height: 38px; font-size: 0.82rem; padding: 0 1.25rem;">
+                                                    Save Palette
+                                                </button>
+                                                <button type="button" class="btn btn-secondary" onclick="toggleCustomPaletteForm()" style="height: 38px; font-size: 0.82rem;">
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <?php
+                            $customPalettesJson = getSettingVal($allSettings, 'admin_custom_theme_palettes', '[]');
+                            $customPalettes = json_decode($customPalettesJson, true) ?: [];
+                            if (!empty($customPalettes)):
+                            ?>
+                            <!-- Saved Custom Palettes Section -->
+                            <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid #f1f5f9;">
+                                <h4 style="margin: 0 0 0.75rem; font-size: 0.875rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                    Your Saved Custom Palettes (<?= count($customPalettes) ?>)
+                                </h4>
+                                <div class="as-theme-preset-grid">
+                                    <?php foreach ($customPalettes as $cp): ?>
+                                    <div class="as-preset-card" 
+                                         id="preset_<?= htmlspecialchars($cp['id']) ?>" 
+                                         data-sbg="<?= htmlspecialchars($cp['sbg']) ?>" 
+                                         data-stxt="<?= htmlspecialchars($cp['stxt']) ?>" 
+                                         data-shov="<?= htmlspecialchars($cp['shov']) ?>" 
+                                         data-sact="<?= htmlspecialchars($cp['sact']) ?>" 
+                                         data-cbg="<?= htmlspecialchars($cp['cbg']) ?>" 
+                                         data-ctxt="<?= htmlspecialchars($cp['ctxt']) ?>" 
+                                         data-pri="<?= htmlspecialchars($cp['pri']) ?>" 
+                                         onclick="applyThemePreset('<?= htmlspecialchars($cp['sbg']) ?>', '<?= htmlspecialchars($cp['stxt']) ?>', '<?= htmlspecialchars($cp['shov']) ?>', '<?= htmlspecialchars($cp['sact']) ?>', '<?= htmlspecialchars($cp['cbg']) ?>', '<?= htmlspecialchars($cp['ctxt']) ?>', '<?= htmlspecialchars($cp['pri']) ?>', 'preset_<?= htmlspecialchars($cp['id']) ?>')">
+                                        
+                                        <span class="as-preset-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Active</span>
+
+                                        <form method="POST" style="margin: 0;" onsubmit="return confirm('Delete this custom palette permanently?');" onclick="event.stopPropagation();">
+                                            <?= csrfField() ?>
+                                            <input type="hidden" name="action_delete_custom_palette" value="1">
+                                            <input type="hidden" name="palette_id" value="<?= htmlspecialchars($cp['id']) ?>">
+                                            <button type="submit" class="as-preset-delete-btn" title="Delete custom palette">
+                                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                            </button>
+                                        </form>
+
+                                        <div class="as-preset-preview">
+                                            <div class="as-preset-sidebar" style="background: <?= htmlspecialchars($cp['sbg']) ?>;">
+                                                <div style="background: <?= htmlspecialchars($cp['sact']) ?>; border-left: 2px solid <?= htmlspecialchars($cp['pri']) ?>; border-radius: 2px; padding: 2px 4px; width: 85%;">
+                                                    <div class="as-preset-sidebar-text-bar" style="background: <?= htmlspecialchars($cp['pri']) ?>; width: 100%;"></div>
+                                                </div>
+                                            </div>
+                                            <div class="as-preset-content" style="background: <?= htmlspecialchars($cp['cbg']) ?>;">
+                                                <div class="as-preset-content-text-bar" style="background: <?= htmlspecialchars($cp['ctxt']) ?>;"></div>
+                                                <div class="as-preset-accent" style="background: <?= htmlspecialchars($cp['pri']) ?>;"></div>
+                                            </div>
+                                        </div>
+                                        <div style="font-size: 0.80rem; font-weight: 600; color: #0f172a; padding-right: 20px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;"><?= htmlspecialchars($cp['name']) ?></div>
+                                        <div style="font-size: 0.70rem; color: #64748b;"><?= htmlspecialchars($cp['sbg']) ?> &bull; <?= htmlspecialchars($cp['cbg']) ?></div>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                            <?php endif; ?>
+
                             <!-- One-Click Preset Palettes -->
                             <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid #f1f5f9;">
                                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
@@ -1879,6 +2069,27 @@ function applyThemePreset(sidebarBg, sidebarText, sidebarHoverBg, sidebarActiveB
     if (pInput) pInput.value = matchName(primaryColor);
 
     checkActivePreset();
+}
+
+function toggleCustomPaletteForm() {
+    const wrap = document.getElementById('customPaletteFormWrapper');
+    if (!wrap) return;
+    if (wrap.style.display === 'none' || wrap.style.display === '') {
+        wrap.style.display = 'block';
+        document.getElementById('custom_palette_name_input')?.focus();
+    } else {
+        wrap.style.display = 'none';
+    }
+}
+
+function prepareCustomPaletteSave() {
+    document.getElementById('cp_sbg').value = document.getElementById('hex_sidebar_bg')?.value || '#f1f5f9';
+    document.getElementById('cp_stxt').value = document.getElementById('hex_sidebar_text')?.value || '#1e293b';
+    document.getElementById('cp_shov').value = document.getElementById('hex_sidebar_hover_bg')?.value || '#ffffff';
+    document.getElementById('cp_sact').value = document.getElementById('hex_sidebar_active_bg')?.value || '#e6fcf5';
+    document.getElementById('cp_cbg').value = document.getElementById('hex_content_bg')?.value || '#f8fafc';
+    document.getElementById('cp_ctxt').value = document.getElementById('hex_content_text')?.value || '#0f172a';
+    document.getElementById('cp_pri').value = document.getElementById('hex_primary_color')?.value || '#0f766e';
 }
 
 function updateLiveThemePreview() {
