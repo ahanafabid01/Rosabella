@@ -68,6 +68,7 @@ $lowStockProducts = $db->query("
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 0.75rem;
             transition: all 0.2s ease;
         }
         .dash-kpi-card:hover {
@@ -94,7 +95,52 @@ $lowStockProducts = $db->query("
         @media (max-width: 900px) {
             .dash-kpi-grid {
                 grid-template-columns: repeat(2, 1fr) !important;
-                gap: 0.85rem !important;
+                gap: 0.75rem !important;
+                margin-bottom: 1.25rem !important;
+            }
+            .dash-kpi-card {
+                padding: 0.95rem 1.05rem !important;
+                border-radius: 12px !important;
+            }
+            .dash-kpi-card > div:first-child > div:nth-child(2) {
+                font-size: 1.25rem !important;
+            }
+            .dash-quick-actions {
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px !important;
+                margin-bottom: 1.25rem !important;
+            }
+            .dash-quick-actions .btn {
+                width: 100% !important;
+                justify-content: center !important;
+                padding: 0.55rem 0.65rem !important;
+                font-size: 0.78rem !important;
+                box-sizing: border-box !important;
+                white-space: nowrap !important;
+            }
+        }
+        @media (max-width: 480px) {
+            .dash-kpi-card {
+                padding: 0.85rem 0.9rem !important;
+            }
+            .dash-kpi-card > div:first-child > div:first-child {
+                font-size: 0.68rem !important;
+            }
+            .dash-kpi-card > div:first-child > div:nth-child(2) {
+                font-size: 1.15rem !important;
+            }
+            .dash-kpi-card > div:first-child > div:nth-child(3) {
+                font-size: 0.68rem !important;
+            }
+            .dash-kpi-card > div:last-child {
+                width: 36px !important;
+                height: 36px !important;
+                border-radius: 8px !important;
+            }
+            .dash-kpi-card > div:last-child svg {
+                width: 18px !important;
+                height: 18px !important;
             }
         }
     </style>
