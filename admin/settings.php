@@ -571,41 +571,81 @@ $pageTitle = 'Admin Settings';
 
         .as-theme-preset-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
-            gap: 0.75rem;
+            grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+            gap: 0.85rem;
             margin-top: 0.85rem;
         }
 
         .as-preset-card {
+            position: relative;
             background: #ffffff;
             border: 1.5px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 0.75rem;
+            border-radius: 12px;
+            padding: 0.85rem 0.85rem 0.75rem;
             cursor: pointer;
-            transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex;
             flex-direction: column;
-            gap: 0.45rem;
+            gap: 0.5rem;
         }
 
         .as-preset-card:hover {
             border-color: #0f766e;
             transform: translateY(-2px);
-            box-shadow: 0 6px 14px rgba(15, 118, 110, 0.08);
+            box-shadow: 0 8px 16px rgba(15, 118, 110, 0.09);
+        }
+
+        .as-preset-card.active-preset {
+            border-color: #0f766e !important;
+            background: #f0fdfa !important;
+            box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.18), 0 8px 18px rgba(15, 118, 110, 0.1) !important;
+        }
+
+        .as-preset-badge {
+            display: none;
+            position: absolute;
+            top: 7px;
+            right: 8px;
+            background: #0f766e;
+            color: #ffffff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 20px;
+            letter-spacing: 0.02em;
+            box-shadow: 0 2px 4px rgba(15, 118, 110, 0.25);
+        }
+
+        .as-preset-card.active-preset .as-preset-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
         }
 
         .as-preset-preview {
             display: flex;
-            height: 40px;
-            border-radius: 6px;
+            height: 44px;
+            border-radius: 7px;
             overflow: hidden;
             border: 1px solid #cbd5e1;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.04);
         }
 
         .as-preset-sidebar {
-            width: 32%;
+            width: 38%;
             height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             border-right: 1px solid rgba(0,0,0,0.08);
+            padding: 2px;
+        }
+
+        .as-preset-sidebar-text-bar {
+            width: 60%;
+            height: 4px;
+            border-radius: 2px;
+            opacity: 0.85;
         }
 
         .as-preset-content {
@@ -613,13 +653,23 @@ $pageTitle = 'Admin Settings';
             height: 100%;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
+            padding: 0 8px;
+        }
+
+        .as-preset-content-text-bar {
+            width: 45%;
+            height: 4px;
+            border-radius: 2px;
+            opacity: 0.85;
         }
 
         .as-preset-accent {
             width: 14px;
             height: 14px;
             border-radius: 3px;
+            flex-shrink: 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
         }
 
         @media (max-width: 860px) {
@@ -1161,15 +1211,15 @@ $pageTitle = 'Admin Settings';
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/><line x1="9" y1="21" x2="15" y2="21"/></svg>
                                         Admin Interface Theme & Color Customizer
                                     </h3>
-                                    <div class="as-card-sub">Customize the sidebar and content canvas background colors with live search across 120+ curated hex shades.</div>
+                                    <div class="as-card-sub">Customize background, font, hover, and active highlight colors for the sidebar and main content canvas with live search across 120+ curated hex shades.</div>
                                 </div>
                             </div>
 
-                            <!-- Sidebar Background Color -->
+                            <!-- 1. Sidebar Background Color -->
                             <div class="as-row">
                                 <div class="as-row-info">
                                     <h4>Sidebar Background</h4>
-                                    <p>Background color of the fixed admin navigation sidebar. Live updates instantly on selection.</p>
+                                    <p>Background color of the fixed admin navigation sidebar.</p>
                                 </div>
                                 <div class="as-input-wrap">
                                     <div class="as-color-row">
@@ -1183,7 +1233,61 @@ $pageTitle = 'Admin Settings';
                                 </div>
                             </div>
 
-                            <!-- Content Canvas Background Color -->
+                            <!-- 2. Sidebar Font / Text Color -->
+                            <div class="as-row">
+                                <div class="as-row-info">
+                                    <h4>Sidebar Font / Text Color</h4>
+                                    <p>Text, labels, and icons color across the navigation sidebar.</p>
+                                </div>
+                                <div class="as-input-wrap">
+                                    <div class="as-color-row">
+                                        <input type="color" id="picker_sidebar_text" value="<?= htmlspecialchars(getSettingVal($allSettings, 'admin_sidebar_text', '#1e293b')) ?>" class="as-color-swatch-picker" onchange="syncColorInput('sidebar_text', this.value)">
+                                        <input type="text" id="hex_sidebar_text" name="settings[admin_sidebar_text]" class="as-input" style="max-width: 105px; font-family: monospace; font-weight: 600;" value="<?= htmlspecialchars(getSettingVal($allSettings, 'admin_sidebar_text', '#1e293b')) ?>" oninput="syncColorInput('sidebar_text', this.value)">
+                                        <div class="as-color-search-box">
+                                            <input type="text" class="as-input color-search-field" data-target="sidebar_text" placeholder="Search 120+ colors (e.g. Dark Charcoal, White, Silver)...">
+                                            <div class="as-color-dropdown"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 3. Sidebar Nav Item Hover Background -->
+                            <div class="as-row">
+                                <div class="as-row-info">
+                                    <h4>Sidebar Hover Background</h4>
+                                    <p>Background card color when hovering over navigation links and dropdown headers.</p>
+                                </div>
+                                <div class="as-input-wrap">
+                                    <div class="as-color-row">
+                                        <input type="color" id="picker_sidebar_hover_bg" value="<?= htmlspecialchars(getSettingVal($allSettings, 'admin_sidebar_hover_bg', '#ffffff')) ?>" class="as-color-swatch-picker" onchange="syncColorInput('sidebar_hover_bg', this.value)">
+                                        <input type="text" id="hex_sidebar_hover_bg" name="settings[admin_sidebar_hover_bg]" class="as-input" style="max-width: 105px; font-family: monospace; font-weight: 600;" value="<?= htmlspecialchars(getSettingVal($allSettings, 'admin_sidebar_hover_bg', '#ffffff')) ?>" oninput="syncColorInput('sidebar_hover_bg', this.value)">
+                                        <div class="as-color-search-box">
+                                            <input type="text" class="as-input color-search-field" data-target="sidebar_hover_bg" placeholder="Search 120+ colors (e.g. Pure White, Slate 800, Ice)...">
+                                            <div class="as-color-dropdown"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 4. Sidebar Nav Active / Highlight Background -->
+                            <div class="as-row">
+                                <div class="as-row-info">
+                                    <h4>Sidebar Active Highlight Background</h4>
+                                    <p>Background pill color for the currently active page in sidebar navigation.</p>
+                                </div>
+                                <div class="as-input-wrap">
+                                    <div class="as-color-row">
+                                        <input type="color" id="picker_sidebar_active_bg" value="<?= htmlspecialchars(getSettingVal($allSettings, 'admin_sidebar_active_bg', '#e6fcf5')) ?>" class="as-color-swatch-picker" onchange="syncColorInput('sidebar_active_bg', this.value)">
+                                        <input type="text" id="hex_sidebar_active_bg" name="settings[admin_sidebar_active_bg]" class="as-input" style="max-width: 105px; font-family: monospace; font-weight: 600;" value="<?= htmlspecialchars(getSettingVal($allSettings, 'admin_sidebar_active_bg', '#e6fcf5')) ?>" oninput="syncColorInput('sidebar_active_bg', this.value)">
+                                        <div class="as-color-search-box">
+                                            <input type="text" class="as-input color-search-field" data-target="sidebar_active_bg" placeholder="Search 120+ colors (e.g. Teal 100, Sky Blue, Dark Slate)...">
+                                            <div class="as-color-dropdown"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 5. Content Canvas Background Color -->
                             <div class="as-row">
                                 <div class="as-row-info">
                                     <h4>Content Canvas Background</h4>
@@ -1201,7 +1305,25 @@ $pageTitle = 'Admin Settings';
                                 </div>
                             </div>
 
-                            <!-- Primary Brand Accent Color -->
+                            <!-- 6. Content Area Font / Text Color -->
+                            <div class="as-row">
+                                <div class="as-row-info">
+                                    <h4>Content Area Font / Text Color</h4>
+                                    <p>Primary typography font color for headings, card text, data tables, and metrics.</p>
+                                </div>
+                                <div class="as-input-wrap">
+                                    <div class="as-color-row">
+                                        <input type="color" id="picker_content_text" value="<?= htmlspecialchars(getSettingVal($allSettings, 'admin_content_text', '#0f172a')) ?>" class="as-color-swatch-picker" onchange="syncColorInput('content_text', this.value)">
+                                        <input type="text" id="hex_content_text" name="settings[admin_content_text]" class="as-input" style="max-width: 105px; font-family: monospace; font-weight: 600;" value="<?= htmlspecialchars(getSettingVal($allSettings, 'admin_content_text', '#0f172a')) ?>" oninput="syncColorInput('content_text', this.value)">
+                                        <div class="as-color-search-box">
+                                            <input type="text" class="as-input color-search-field" data-target="content_text" placeholder="Search 120+ colors (e.g. Charcoal, Jet Black, Gray)...">
+                                            <div class="as-color-dropdown"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 7. Primary Brand Accent Color -->
                             <div class="as-row">
                                 <div class="as-row-info">
                                     <h4>Primary Accent Color</h4>
@@ -1223,97 +1345,153 @@ $pageTitle = 'Admin Settings';
                             <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid #f1f5f9;">
                                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
                                     <h4 style="margin: 0; font-size: 0.875rem; font-weight: 700; color: #0f172a;">One-Click Executive Preset Palettes</h4>
-                                    <button type="button" class="btn btn-secondary" onclick="applyThemePreset('#f1f5f9', '#f8fafc', '#0f766e')" style="height: 30px; font-size: 0.75rem; padding: 0 10px;">
+                                    <button type="button" class="btn btn-secondary" onclick="applyThemePreset('#f1f5f9', '#1e293b', '#ffffff', '#e6fcf5', '#f8fafc', '#0f172a', '#0f766e', 'preset_slate')" style="height: 30px; font-size: 0.75rem; padding: 0 10px;">
                                         Reset to Default
                                     </button>
                                 </div>
                                 <div class="as-theme-preset-grid">
-                                    <div class="as-preset-card" onclick="applyThemePreset('#f1f5f9', '#f8fafc', '#0f766e')">
+                                    <!-- 1. Executive Slate -->
+                                    <div class="as-preset-card" id="preset_slate" data-sbg="#f1f5f9" data-stxt="#1e293b" data-shov="#ffffff" data-sact="#e6fcf5" data-cbg="#f8fafc" data-ctxt="#0f172a" data-pri="#0f766e" onclick="applyThemePreset('#f1f5f9', '#1e293b', '#ffffff', '#e6fcf5', '#f8fafc', '#0f172a', '#0f766e', 'preset_slate')">
+                                        <span class="as-preset-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Active</span>
                                         <div class="as-preset-preview">
-                                            <div class="as-preset-sidebar" style="background: #f1f5f9;"></div>
+                                            <div class="as-preset-sidebar" style="background: #f1f5f9;">
+                                                <div style="background: #e6fcf5; border-left: 2px solid #0f766e; border-radius: 2px; padding: 2px 4px; width: 85%;">
+                                                    <div class="as-preset-sidebar-text-bar" style="background: #0f766e; width: 100%;"></div>
+                                                </div>
+                                            </div>
                                             <div class="as-preset-content" style="background: #f8fafc;">
+                                                <div class="as-preset-content-text-bar" style="background: #0f172a;"></div>
                                                 <div class="as-preset-accent" style="background: #0f766e;"></div>
                                             </div>
                                         </div>
                                         <div style="font-size: 0.80rem; font-weight: 600; color: #0f172a;">Executive Slate (Default)</div>
-                                        <div style="font-size: 0.70rem; color: #64748b;">#f1f5f9 &bull; #f8fafc</div>
+                                        <div style="font-size: 0.70rem; color: #64748b;">Slate #f1f5f9 &bull; Canvas #f8fafc</div>
                                     </div>
 
-                                    <div class="as-preset-card" onclick="applyThemePreset('#ffffff', '#fafaf9', '#0f766e')">
+                                    <!-- 2. Pure Minimal White -->
+                                    <div class="as-preset-card" id="preset_white" data-sbg="#ffffff" data-stxt="#334155" data-shov="#f8fafc" data-sact="#f0fdfa" data-cbg="#fafaf9" data-ctxt="#1e293b" data-pri="#0f766e" onclick="applyThemePreset('#ffffff', '#334155', '#f8fafc', '#f0fdfa', '#fafaf9', '#1e293b', '#0f766e', 'preset_white')">
+                                        <span class="as-preset-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Active</span>
                                         <div class="as-preset-preview">
-                                            <div class="as-preset-sidebar" style="background: #ffffff;"></div>
+                                            <div class="as-preset-sidebar" style="background: #ffffff;">
+                                                <div style="background: #f0fdfa; border-left: 2px solid #0f766e; border-radius: 2px; padding: 2px 4px; width: 85%;">
+                                                    <div class="as-preset-sidebar-text-bar" style="background: #0f766e; width: 100%;"></div>
+                                                </div>
+                                            </div>
                                             <div class="as-preset-content" style="background: #fafaf9;">
+                                                <div class="as-preset-content-text-bar" style="background: #1e293b;"></div>
                                                 <div class="as-preset-accent" style="background: #0f766e;"></div>
                                             </div>
                                         </div>
                                         <div style="font-size: 0.80rem; font-weight: 600; color: #0f172a;">Pure Minimal White</div>
-                                        <div style="font-size: 0.70rem; color: #64748b;">#ffffff &bull; #fafaf9</div>
+                                        <div style="font-size: 0.70rem; color: #64748b;">White #ffffff &bull; Canvas #fafaf9</div>
                                     </div>
 
-                                    <div class="as-preset-card" onclick="applyThemePreset('#e2e8f0', '#f1f5f9', '#2563eb')">
+                                    <!-- 3. Cool Gray Studio -->
+                                    <div class="as-preset-card" id="preset_cool" data-sbg="#e2e8f0" data-stxt="#1e293b" data-shov="#ffffff" data-sact="#dbeafe" data-cbg="#f1f5f9" data-ctxt="#0f172a" data-pri="#2563eb" onclick="applyThemePreset('#e2e8f0', '#1e293b', '#ffffff', '#dbeafe', '#f1f5f9', '#0f172a', '#2563eb', 'preset_cool')">
+                                        <span class="as-preset-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Active</span>
                                         <div class="as-preset-preview">
-                                            <div class="as-preset-sidebar" style="background: #e2e8f0;"></div>
+                                            <div class="as-preset-sidebar" style="background: #e2e8f0;">
+                                                <div style="background: #dbeafe; border-left: 2px solid #2563eb; border-radius: 2px; padding: 2px 4px; width: 85%;">
+                                                    <div class="as-preset-sidebar-text-bar" style="background: #2563eb; width: 100%;"></div>
+                                                </div>
+                                            </div>
                                             <div class="as-preset-content" style="background: #f1f5f9;">
+                                                <div class="as-preset-content-text-bar" style="background: #0f172a;"></div>
                                                 <div class="as-preset-accent" style="background: #2563eb;"></div>
                                             </div>
                                         </div>
                                         <div style="font-size: 0.80rem; font-weight: 600; color: #0f172a;">Cool Gray Studio</div>
-                                        <div style="font-size: 0.70rem; color: #64748b;">#e2e8f0 &bull; #f1f5f9</div>
+                                        <div style="font-size: 0.70rem; color: #64748b;">Gray #e2e8f0 &bull; Canvas #f1f5f9</div>
                                     </div>
 
-                                    <div class="as-preset-card" onclick="applyThemePreset('#0f172a', '#f8fafc', '#0d9488')">
+                                    <!-- 4. Dark Executive Slate -->
+                                    <div class="as-preset-card" id="preset_dark" data-sbg="#0f172a" data-stxt="#f1f5f9" data-shov="#1e293b" data-sact="#134e4a" data-cbg="#f8fafc" data-ctxt="#0f172a" data-pri="#0d9488" onclick="applyThemePreset('#0f172a', '#f1f5f9', '#1e293b', '#134e4a', '#f8fafc', '#0f172a', '#0d9488', 'preset_dark')">
+                                        <span class="as-preset-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Active</span>
                                         <div class="as-preset-preview">
-                                            <div class="as-preset-sidebar" style="background: #0f172a;"></div>
+                                            <div class="as-preset-sidebar" style="background: #0f172a;">
+                                                <div style="background: #134e4a; border-left: 2px solid #0d9488; border-radius: 2px; padding: 2px 4px; width: 85%;">
+                                                    <div class="as-preset-sidebar-text-bar" style="background: #5eead4; width: 100%;"></div>
+                                                </div>
+                                            </div>
                                             <div class="as-preset-content" style="background: #f8fafc;">
+                                                <div class="as-preset-content-text-bar" style="background: #0f172a;"></div>
                                                 <div class="as-preset-accent" style="background: #0d9488;"></div>
                                             </div>
                                         </div>
                                         <div style="font-size: 0.80rem; font-weight: 600; color: #0f172a;">Dark Executive Slate</div>
-                                        <div style="font-size: 0.70rem; color: #64748b;">#0f172a &bull; #f8fafc</div>
+                                        <div style="font-size: 0.70rem; color: #64748b;">Dark #0f172a &bull; Canvas #f8fafc</div>
                                     </div>
 
-                                    <div class="as-preset-card" onclick="applyThemePreset('#1e293b', '#0f172a', '#6366f1')">
+                                    <!-- 5. Midnight Azure (Full Dark) -->
+                                    <div class="as-preset-card" id="preset_midnight" data-sbg="#1e293b" data-stxt="#f8fafc" data-shov="#334155" data-sact="#312e81" data-cbg="#0f172a" data-ctxt="#f1f5f9" data-pri="#6366f1" onclick="applyThemePreset('#1e293b', '#f8fafc', '#334155', '#312e81', '#0f172a', '#f1f5f9', '#6366f1', 'preset_midnight')">
+                                        <span class="as-preset-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Active</span>
                                         <div class="as-preset-preview">
-                                            <div class="as-preset-sidebar" style="background: #1e293b;"></div>
+                                            <div class="as-preset-sidebar" style="background: #1e293b;">
+                                                <div style="background: #312e81; border-left: 2px solid #6366f1; border-radius: 2px; padding: 2px 4px; width: 85%;">
+                                                    <div class="as-preset-sidebar-text-bar" style="background: #a5b4fc; width: 100%;"></div>
+                                                </div>
+                                            </div>
                                             <div class="as-preset-content" style="background: #0f172a;">
+                                                <div class="as-preset-content-text-bar" style="background: #f1f5f9;"></div>
                                                 <div class="as-preset-accent" style="background: #6366f1;"></div>
                                             </div>
                                         </div>
-                                        <div style="font-size: 0.80rem; font-weight: 600; color: #0f172a;">Midnight Azure</div>
-                                        <div style="font-size: 0.70rem; color: #64748b;">#1e293b &bull; #0f172a</div>
+                                        <div style="font-size: 0.80rem; font-weight: 600; color: #0f172a;">Midnight Azure (Dark)</div>
+                                        <div style="font-size: 0.70rem; color: #64748b;">Midnight #1e293b &bull; Canvas #0f172a</div>
                                     </div>
 
-                                    <div class="as-preset-card" onclick="applyThemePreset('#faf9f6', '#fefdfb', '#d97706')">
+                                    <!-- 6. Soft Warm Cream -->
+                                    <div class="as-preset-card" id="preset_cream" data-sbg="#faf9f6" data-stxt="#451a03" data-shov="#ffffff" data-sact="#fef3c7" data-cbg="#fefdfb" data-ctxt="#292524" data-pri="#d97706" onclick="applyThemePreset('#faf9f6', '#451a03', '#ffffff', '#fef3c7', '#fefdfb', '#292524', '#d97706', 'preset_cream')">
+                                        <span class="as-preset-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Active</span>
                                         <div class="as-preset-preview">
-                                            <div class="as-preset-sidebar" style="background: #faf9f6;"></div>
+                                            <div class="as-preset-sidebar" style="background: #faf9f6;">
+                                                <div style="background: #fef3c7; border-left: 2px solid #d97706; border-radius: 2px; padding: 2px 4px; width: 85%;">
+                                                    <div class="as-preset-sidebar-text-bar" style="background: #d97706; width: 100%;"></div>
+                                                </div>
+                                            </div>
                                             <div class="as-preset-content" style="background: #fefdfb;">
+                                                <div class="as-preset-content-text-bar" style="background: #292524;"></div>
                                                 <div class="as-preset-accent" style="background: #d97706;"></div>
                                             </div>
                                         </div>
                                         <div style="font-size: 0.80rem; font-weight: 600; color: #0f172a;">Soft Warm Cream</div>
-                                        <div style="font-size: 0.70rem; color: #64748b;">#faf9f6 &bull; #fefdfb</div>
+                                        <div style="font-size: 0.70rem; color: #64748b;">Cream #faf9f6 &bull; Canvas #fefdfb</div>
                                     </div>
 
-                                    <div class="as-preset-card" onclick="applyThemePreset('#f0fdfa', '#f8fafc', '#059669')">
+                                    <!-- 7. Emerald Mint -->
+                                    <div class="as-preset-card" id="preset_emerald" data-sbg="#f0fdfa" data-stxt="#064e3b" data-shov="#ffffff" data-sact="#d1fae5" data-cbg="#f8fafc" data-ctxt="#0f172a" data-pri="#059669" onclick="applyThemePreset('#f0fdfa', '#064e3b', '#ffffff', '#d1fae5', '#f8fafc', '#0f172a', '#059669', 'preset_emerald')">
+                                        <span class="as-preset-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Active</span>
                                         <div class="as-preset-preview">
-                                            <div class="as-preset-sidebar" style="background: #f0fdfa;"></div>
+                                            <div class="as-preset-sidebar" style="background: #f0fdfa;">
+                                                <div style="background: #d1fae5; border-left: 2px solid #059669; border-radius: 2px; padding: 2px 4px; width: 85%;">
+                                                    <div class="as-preset-sidebar-text-bar" style="background: #059669; width: 100%;"></div>
+                                                </div>
+                                            </div>
                                             <div class="as-preset-content" style="background: #f8fafc;">
+                                                <div class="as-preset-content-text-bar" style="background: #0f172a;"></div>
                                                 <div class="as-preset-accent" style="background: #059669;"></div>
                                             </div>
                                         </div>
                                         <div style="font-size: 0.80rem; font-weight: 600; color: #0f172a;">Emerald Mint</div>
-                                        <div style="font-size: 0.70rem; color: #64748b;">#f0fdfa &bull; #f8fafc</div>
+                                        <div style="font-size: 0.70rem; color: #64748b;">Mint #f0fdfa &bull; Canvas #f8fafc</div>
                                     </div>
 
-                                    <div class="as-preset-card" onclick="applyThemePreset('#eef2f6', '#f8fafc', '#0284c7')">
+                                    <!-- 8. Nordic Frost -->
+                                    <div class="as-preset-card" id="preset_nordic" data-sbg="#eef2f6" data-stxt="#0c4a6e" data-shov="#ffffff" data-sact="#e0f2fe" data-cbg="#f8fafc" data-ctxt="#0f172a" data-pri="#0284c7" onclick="applyThemePreset('#eef2f6', '#0c4a6e', '#ffffff', '#e0f2fe', '#f8fafc', '#0f172a', '#0284c7', 'preset_nordic')">
+                                        <span class="as-preset-badge"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Active</span>
                                         <div class="as-preset-preview">
-                                            <div class="as-preset-sidebar" style="background: #eef2f6;"></div>
+                                            <div class="as-preset-sidebar" style="background: #eef2f6;">
+                                                <div style="background: #e0f2fe; border-left: 2px solid #0284c7; border-radius: 2px; padding: 2px 4px; width: 85%;">
+                                                    <div class="as-preset-sidebar-text-bar" style="background: #0284c7; width: 100%;"></div>
+                                                </div>
+                                            </div>
                                             <div class="as-preset-content" style="background: #f8fafc;">
+                                                <div class="as-preset-content-text-bar" style="background: #0f172a;"></div>
                                                 <div class="as-preset-accent" style="background: #0284c7;"></div>
                                             </div>
                                         </div>
                                         <div style="font-size: 0.80rem; font-weight: 600; color: #0f172a;">Nordic Frost</div>
-                                        <div style="font-size: 0.70rem; color: #64748b;">#eef2f6 &bull; #f8fafc</div>
+                                        <div style="font-size: 0.70rem; color: #64748b;">Ice #eef2f6 &bull; Canvas #f8fafc</div>
                                     </div>
                                 </div>
                             </div>
@@ -1669,9 +1847,13 @@ function syncColorInput(target, hexVal) {
     updateLiveThemePreview();
 }
 
-function applyThemePreset(sidebarBg, contentBg, primaryColor) {
+function applyThemePreset(sidebarBg, sidebarText, sidebarHoverBg, sidebarActiveBg, contentBg, contentText, primaryColor, presetId) {
     syncColorInput('sidebar_bg', sidebarBg);
+    syncColorInput('sidebar_text', sidebarText);
+    syncColorInput('sidebar_hover_bg', sidebarHoverBg);
+    syncColorInput('sidebar_active_bg', sidebarActiveBg);
     syncColorInput('content_bg', contentBg);
+    syncColorInput('content_text', contentText);
     syncColorInput('primary_color', primaryColor);
 
     // Update search field texts with matched preset names
@@ -1681,29 +1863,86 @@ function applyThemePreset(sidebarBg, contentBg, primaryColor) {
     };
     
     const sInput = document.querySelector('.color-search-field[data-target="sidebar_bg"]');
+    const stInput = document.querySelector('.color-search-field[data-target="sidebar_text"]');
+    const shInput = document.querySelector('.color-search-field[data-target="sidebar_hover_bg"]');
+    const saInput = document.querySelector('.color-search-field[data-target="sidebar_active_bg"]');
     const cInput = document.querySelector('.color-search-field[data-target="content_bg"]');
+    const ctInput = document.querySelector('.color-search-field[data-target="content_text"]');
     const pInput = document.querySelector('.color-search-field[data-target="primary_color"]');
+
     if (sInput) sInput.value = matchName(sidebarBg);
+    if (stInput) stInput.value = matchName(sidebarText);
+    if (shInput) shInput.value = matchName(sidebarHoverBg);
+    if (saInput) saInput.value = matchName(sidebarActiveBg);
     if (cInput) cInput.value = matchName(contentBg);
+    if (ctInput) ctInput.value = matchName(contentText);
     if (pInput) pInput.value = matchName(primaryColor);
+
+    checkActivePreset();
 }
 
 function updateLiveThemePreview() {
     const sidebarBg = document.getElementById('hex_sidebar_bg')?.value || '#f1f5f9';
+    const sidebarText = document.getElementById('hex_sidebar_text')?.value || '#1e293b';
+    const sidebarHoverBg = document.getElementById('hex_sidebar_hover_bg')?.value || '#ffffff';
+    const sidebarActiveBg = document.getElementById('hex_sidebar_active_bg')?.value || '#e6fcf5';
     const contentBg = document.getElementById('hex_content_bg')?.value || '#f8fafc';
+    const contentText = document.getElementById('hex_content_text')?.value || '#0f172a';
     const primaryColor = document.getElementById('hex_primary_color')?.value || '#0f766e';
 
     document.documentElement.style.setProperty('--admin-sidebar-bg', sidebarBg);
+    document.documentElement.style.setProperty('--admin-sidebar-text', sidebarText);
+    document.documentElement.style.setProperty('--admin-sidebar-hover-bg', sidebarHoverBg);
+    document.documentElement.style.setProperty('--admin-sidebar-active-bg', sidebarActiveBg);
     document.documentElement.style.setProperty('--admin-content-bg', contentBg);
+    document.documentElement.style.setProperty('--admin-content-text', contentText);
     document.documentElement.style.setProperty('--admin-theme-primary', primaryColor);
 
     const sidebar = document.querySelector('.admin-sidebar');
     const content = document.querySelector('.admin-content');
-    if (sidebar) sidebar.style.backgroundColor = sidebarBg;
-    if (content) content.style.backgroundColor = contentBg;
+    if (sidebar) {
+        sidebar.style.backgroundColor = sidebarBg;
+        sidebar.style.color = sidebarText;
+    }
+    if (content) {
+        content.style.backgroundColor = contentBg;
+        content.style.color = contentText;
+    }
+
+    checkActivePreset();
 }
 
-// Attach Search Autocomplete to all 3 color search boxes
+function checkActivePreset() {
+    const sBg = document.getElementById('hex_sidebar_bg')?.value.toLowerCase() || '';
+    const sTxt = document.getElementById('hex_sidebar_text')?.value.toLowerCase() || '';
+    const sHov = document.getElementById('hex_sidebar_hover_bg')?.value.toLowerCase() || '';
+    const sAct = document.getElementById('hex_sidebar_active_bg')?.value.toLowerCase() || '';
+    const cBg = document.getElementById('hex_content_bg')?.value.toLowerCase() || '';
+    const cTxt = document.getElementById('hex_content_text')?.value.toLowerCase() || '';
+    const pri = document.getElementById('hex_primary_color')?.value.toLowerCase() || '';
+
+    document.querySelectorAll('.as-preset-card').forEach(card => {
+        const cSBg = (card.dataset.sbg || '').toLowerCase();
+        const cSTxt = (card.dataset.stxt || '').toLowerCase();
+        const cSHov = (card.dataset.shov || '').toLowerCase();
+        const cSAct = (card.dataset.sact || '').toLowerCase();
+        const cCBg = (card.dataset.cbg || '').toLowerCase();
+        const cCTxt = (card.dataset.ctxt || '').toLowerCase();
+        const cPri = (card.dataset.pri || '').toLowerCase();
+
+        const matchBg = sBg === cSBg && cBg === cCBg && pri === cPri;
+        const matchTxt = (!cSTxt || sTxt === cSTxt) && (!cCTxt || cTxt === cCTxt);
+        const matchStates = (!cSHov || sHov === cSHov) && (!cSAct || sAct === cSAct);
+
+        if (matchBg && matchTxt && matchStates) {
+            card.classList.add('active-preset');
+        } else {
+            card.classList.remove('active-preset');
+        }
+    });
+}
+
+// Attach Search Autocomplete to all 7 color search boxes
 document.addEventListener('DOMContentLoaded', () => {
     const colorDB = (typeof ROSABELLA_COLOR_DATABASE !== 'undefined' && ROSABELLA_COLOR_DATABASE.length) 
         ? ROSABELLA_COLOR_DATABASE 
@@ -1779,8 +2018,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     setInitialName('sidebar_bg', 'hex_sidebar_bg');
+    setInitialName('sidebar_text', 'hex_sidebar_text');
+    setInitialName('sidebar_hover_bg', 'hex_sidebar_hover_bg');
+    setInitialName('sidebar_active_bg', 'hex_sidebar_active_bg');
     setInitialName('content_bg', 'hex_content_bg');
+    setInitialName('content_text', 'hex_content_text');
     setInitialName('primary_color', 'hex_primary_color');
+
+    // Run active preset indicator on initial load
+    checkActivePreset();
 });
 </script>
 </body>

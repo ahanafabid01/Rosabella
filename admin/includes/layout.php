@@ -59,17 +59,85 @@ if (!function_exists('renderAdminSidebar')) {
 
         // Fetch custom theme colors
         $adminSidebarBg = getSetting('admin_sidebar_bg') ?: '#f1f5f9';
+        $adminSidebarText = getSetting('admin_sidebar_text') ?: '#1e293b';
+        $adminSidebarHoverBg = getSetting('admin_sidebar_hover_bg') ?: '#ffffff';
+        $adminSidebarActiveBg = getSetting('admin_sidebar_active_bg') ?: '#e6fcf5';
         $adminContentBg = getSetting('admin_content_bg') ?: '#f8fafc';
+        $adminContentText = getSetting('admin_content_text') ?: '#0f172a';
         $adminPrimaryColor = getSetting('admin_primary_color') ?: '#0f766e';
         ?>
         <style id="rosabella-admin-theme-vars">
             :root {
                 --admin-sidebar-bg: <?= htmlspecialchars($adminSidebarBg) ?>;
+                --admin-sidebar-text: <?= htmlspecialchars($adminSidebarText) ?>;
+                --admin-sidebar-hover-bg: <?= htmlspecialchars($adminSidebarHoverBg) ?>;
+                --admin-sidebar-active-bg: <?= htmlspecialchars($adminSidebarActiveBg) ?>;
                 --admin-content-bg: <?= htmlspecialchars($adminContentBg) ?>;
+                --admin-content-text: <?= htmlspecialchars($adminContentText) ?>;
                 --admin-theme-primary: <?= htmlspecialchars($adminPrimaryColor) ?>;
             }
-            .admin-sidebar { background: var(--admin-sidebar-bg) !important; }
-            .admin-content { background: var(--admin-content-bg) !important; }
+            .admin-sidebar {
+                background: var(--admin-sidebar-bg) !important;
+                color: var(--admin-sidebar-text) !important;
+            }
+            .admin-sidebar .admin-nav-section-title {
+                color: var(--admin-sidebar-text);
+                opacity: 0.65;
+            }
+            .admin-sidebar .admin-nav-group-btn:not(:hover):not(.active-group),
+            .admin-sidebar .admin-nav-link:not(:hover):not(.active),
+            .admin-sidebar .admin-nav-sublink:not(:hover):not(.active) {
+                color: var(--admin-sidebar-text);
+            }
+            .admin-sidebar .admin-nav-link:hover,
+            .admin-sidebar .admin-nav-group-btn:hover {
+                background: var(--admin-sidebar-hover-bg, #ffffff);
+                color: var(--admin-theme-primary) !important;
+            }
+            .admin-sidebar .admin-nav-sublink:hover {
+                background: var(--admin-sidebar-hover-bg, #ffffff);
+                color: var(--admin-theme-primary) !important;
+            }
+            .admin-sidebar .admin-nav-link:hover svg,
+            .admin-sidebar .admin-nav-group-btn:hover svg {
+                color: var(--admin-theme-primary) !important;
+            }
+            .admin-sidebar .admin-nav-sublink:hover .admin-nav-sub-dot {
+                background-color: var(--admin-theme-primary) !important;
+            }
+            /* Top-level active single link (e.g. Dashboard) */
+            .admin-sidebar .admin-nav-link.active {
+                background: var(--admin-sidebar-active-bg, #e6fcf5) !important;
+                color: var(--admin-theme-primary) !important;
+                box-shadow: inset 3px 0 0 var(--admin-theme-primary), 0 1px 3px rgba(0,0,0,0.04) !important;
+            }
+            .admin-sidebar .admin-nav-link.active svg {
+                color: var(--admin-theme-primary) !important;
+            }
+            /* Parent accordion header when a child is active */
+            .admin-sidebar .admin-nav-group-btn.active-group {
+                color: var(--admin-theme-primary) !important;
+                font-weight: 600;
+            }
+            .admin-sidebar .admin-nav-group-btn.active-group svg,
+            .admin-sidebar .admin-nav-group.open > .admin-nav-group-btn .admin-nav-chevron {
+                color: var(--admin-theme-primary) !important;
+            }
+            /* Sublink inside accordion dropdown when active */
+            .admin-sidebar .admin-nav-sublink.active {
+                background: var(--admin-sidebar-active-bg, #e6fcf5) !important;
+                color: var(--admin-theme-primary) !important;
+                font-weight: 600;
+                box-shadow: none !important;
+            }
+            .admin-sidebar .admin-nav-sublink.active .admin-nav-sub-dot {
+                background-color: var(--admin-theme-primary) !important;
+                transform: scale(1.4);
+            }
+            .admin-content {
+                background: var(--admin-content-bg) !important;
+                color: var(--admin-content-text) !important;
+            }
         </style>
         <?php
 
