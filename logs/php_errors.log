@@ -109,3 +109,80 @@ Stack trace:
 [15-Aug-2026 07:28:47 Europe/Berlin] PHP Warning:  Undefined array key "category_id" in C:\xampp\htdocs\Rosabella\admin\products.php on line 184
 [15-Aug-2026 07:28:47 Europe/Berlin] PHP Warning:  Undefined array key "price" in C:\xampp\htdocs\Rosabella\admin\products.php on line 185
 [15-Aug-2026 07:28:47 Europe/Berlin] PHP Warning:  Undefined array key "stock_quantity" in C:\xampp\htdocs\Rosabella\admin\products.php on line 187
+[15-Aug-2026 10:40:21 Europe/Berlin] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.title' in 'field list' in C:\xampp\htdocs\Rosabella\admin\customer-orders.php:161
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\admin\customer-orders.php(161): PDO->prepare('\n        SELECT...')
+#1 {main}
+  thrown in C:\xampp\htdocs\Rosabella\admin\customer-orders.php on line 161
+[15-Aug-2026 10:40:42 Europe/Berlin] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.title' in 'field list' in C:\xampp\htdocs\Rosabella\admin\customer-orders.php:161
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\admin\customer-orders.php(161): PDO->prepare('\n        SELECT...')
+#1 {main}
+  thrown in C:\xampp\htdocs\Rosabella\admin\customer-orders.php on line 161
+[15-Aug-2026 10:42:18 Europe/Berlin] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.title' in 'field list' in C:\xampp\htdocs\Rosabella\admin\customer-orders.php:161
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\admin\customer-orders.php(161): PDO->prepare('\n        SELECT...')
+#1 C:\xampp\htdocs\Rosabella\scratch\test_customer_orders.php(8): require('C:\\xampp\\htdocs...')
+#2 {main}
+  thrown in C:\xampp\htdocs\Rosabella\admin\customer-orders.php on line 161
+[15-Aug-2026 10:42:32 Europe/Berlin] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.title' in 'field list' in C:\xampp\htdocs\Rosabella\admin\customer-orders.php:161
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\admin\customer-orders.php(161): PDO->prepare('\n        SELECT...')
+#1 C:\xampp\htdocs\Rosabella\scratch\test_customer_orders.php(8): require('C:\\xampp\\htdocs...')
+#2 {main}
+  thrown in C:\xampp\htdocs\Rosabella\admin\customer-orders.php on line 161
+[15-Aug-2026 10:43:10 Europe/Berlin] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.title' in 'field list' in C:\xampp\htdocs\Rosabella\admin\customer-orders.php:161
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\admin\customer-orders.php(161): PDO->prepare('\n        SELECT...')
+#1 C:\xampp\htdocs\Rosabella\scratch\test_customer_orders.php(8): require('C:\\xampp\\htdocs...')
+#2 {main}
+  thrown in C:\xampp\htdocs\Rosabella\admin\customer-orders.php on line 161
+[15-Aug-2026 10:46:05 Europe/Berlin] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.title' in 'field list' in C:\xampp\htdocs\Rosabella\admin\customer-orders.php:161
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\admin\customer-orders.php(161): PDO->prepare('\n        SELECT...')
+#1 C:\xampp\htdocs\Rosabella\scratch\test_customer_orders.php(17): require('C:\\xampp\\htdocs...')
+#2 {main}
+  thrown in C:\xampp\htdocs\Rosabella\admin\customer-orders.php on line 161
+[15-Aug-2026 10:46:09 Europe/Berlin] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.title' in 'field list' in C:\xampp\htdocs\Rosabella\admin\customer-orders.php:161
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\admin\customer-orders.php(161): PDO->prepare('\n        SELECT...')
+#1 {main}
+  thrown in C:\xampp\htdocs\Rosabella\admin\customer-orders.php on line 161
+[15-Aug-2026 10:46:12 Europe/Berlin] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.title' in 'field list' in C:\xampp\htdocs\Rosabella\admin\customer-orders.php:161
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\admin\customer-orders.php(161): PDO->prepare('\n        SELECT...')
+#1 {main}
+  thrown in C:\xampp\htdocs\Rosabella\admin\customer-orders.php on line 161
+[15-Aug-2026 10:46:21 Europe/Berlin] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.title' in 'field list' in C:\xampp\htdocs\Rosabella\admin\customer-orders.php:161
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\admin\customer-orders.php(161): PDO->prepare('\n        SELECT...')
+#1 {main}
+  thrown in C:\xampp\htdocs\Rosabella\admin\customer-orders.php on line 161
+[15-Aug-2026 10:46:44 Europe/Berlin] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.title' in 'field list' in C:\xampp\htdocs\Rosabella\admin\customer-orders.php:161
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\admin\customer-orders.php(161): PDO->prepare('\n        SELECT...')
+#1 C:\xampp\htdocs\Rosabella\scratch\test_customer_orders.php(8): require('C:\\xampp\\htdocs...')
+#2 {main}
+  thrown in C:\xampp\htdocs\Rosabella\admin\customer-orders.php on line 161
+[15-Aug-2026 10:47:27 Europe/Berlin] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.title' in 'field list' in C:\xampp\htdocs\Rosabella\admin\customer-orders.php:161
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\admin\customer-orders.php(161): PDO->prepare('\n        SELECT...')
+#1 C:\xampp\htdocs\Rosabella\scratch\render_test.php(10): require('C:\\xampp\\htdocs...')
+#2 {main}
+  thrown in C:\xampp\htdocs\Rosabella\admin\customer-orders.php on line 161
+[15-Aug-2026 10:48:23 Europe/Berlin] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.title' in 'field list' in C:\xampp\htdocs\Rosabella\admin\customer-orders.php:161
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\admin\customer-orders.php(161): PDO->prepare('\n        SELECT...')
+#1 C:\xampp\htdocs\Rosabella\scratch\render_test.php(8): require('C:\\xampp\\htdocs...')
+#2 {main}
+  thrown in C:\xampp\htdocs\Rosabella\admin\customer-orders.php on line 161
+[15-Aug-2026 10:49:08 Europe/Berlin] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.title' in 'field list' in C:\xampp\htdocs\Rosabella\scratch\trace_error.php:74
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\scratch\trace_error.php(74): PDO->prepare('\n        SELECT...')
+#1 {main}
+  thrown in C:\xampp\htdocs\Rosabella\scratch\trace_error.php on line 74
+[15-Aug-2026 10:50:17 Europe/Berlin] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'p.title' in 'field list' in C:\xampp\htdocs\Rosabella\scratch\trace_error.php:74
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\scratch\trace_error.php(74): PDO->prepare('\n        SELECT...')
+#1 {main}
+  thrown in C:\xampp\htdocs\Rosabella\scratch\trace_error.php on line 74

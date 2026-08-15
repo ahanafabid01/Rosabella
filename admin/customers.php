@@ -816,11 +816,11 @@ $pageTitle = 'Customers';
                                 <!-- Orders Count -->
                                 <td style="text-align: center;">
                                     <?php if ($ordersCnt > 0): ?>
-                                        <span class="badge badge-info" style="font-weight: 500; padding: 2px 7px; font-size: 0.75rem;">
-                                            <?= $ordersCnt ?> <?= $ordersCnt === 1 ? 'Order' : 'Orders' ?>
-                                        </span>
+                                        <a href="<?= BASE_URL ?>/admin/customer-orders?id=<?= $c['id'] ?>" class="badge badge-info" style="font-weight: 500; padding: 3px 8px; font-size: 0.75rem; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" title="View Order History">
+                                            <span><?= $ordersCnt ?> <?= $ordersCnt === 1 ? 'Order' : 'Orders' ?></span>
+                                        </a>
                                     <?php else: ?>
-                                        <span style="color: #94a3b8; font-size: 0.76rem;">0 Orders</span>
+                                        <a href="<?= BASE_URL ?>/admin/customer-orders?id=<?= $c['id'] ?>" style="color: #94a3b8; font-size: 0.76rem; text-decoration: none;" title="View Order History">0 Orders</a>
                                     <?php endif; ?>
                                 </td>
 
@@ -853,9 +853,9 @@ $pageTitle = 'Customers';
                                 <!-- Actions -->
                                 <td style="text-align: right;">
                                     <div class="admin-actions-row" style="justify-content: flex-end; gap: 5px;">
-                                        <!-- Create Order for Customer -->
-                                        <a href="<?= BASE_URL ?>/admin/order-create?phone=<?= urlencode($c['phone'] ?? '') ?>&name=<?= urlencode($fullName) ?>&city=<?= urlencode($c['city'] ?? '') ?>" class="btn btn-sm btn-outline" style="width: 30px; height: 30px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px;" title="Create Order for Customer">
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/><path d="M12 8v6M9 11h6"/></svg>
+                                        <!-- View Customer Order History -->
+                                        <a href="<?= BASE_URL ?>/admin/customer-orders?id=<?= $c['id'] ?>" class="btn btn-sm btn-outline" style="width: 30px; height: 30px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; color: #0f766e; border-color: #0f766e;" title="View Customer Order History">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
                                         </a>
 
                                         <!-- Edit Customer Trigger -->

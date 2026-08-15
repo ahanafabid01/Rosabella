@@ -36,6 +36,7 @@ RewriteRule ^hero/?$                    hero.php            [L,QSA]
 RewriteRule ^website-settings/?$         website_settings.php [L,QSA]
 RewriteRule ^website_settings/?$         website_settings.php [L,QSA]
 RewriteRule ^settings/?$                settings.php        [L,QSA]
-RewriteRule ^notifications/?$           notifications.php    [L,QSA]
 RewriteRule ^customers/?$               customers.php       [L,QSA]
+RewriteRule ^customer-orders/?$         customer-orders.php [L,QSA]
+RewriteRule ^customer-orders/([0-9]+)/?$ customer-orders.php?id=$1 [L,QSA]
 
