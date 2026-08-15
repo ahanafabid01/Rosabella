@@ -5,10 +5,11 @@
 $pageTitle = 'Login';
 require_once __DIR__ . '/../config/database.php';
 
-$error = '';
+$error   = '';
 $success = '';
 $redirect = sanitize($_GET['redirect'] ?? $_POST['redirect'] ?? '');
 // Whitelist allowed redirect paths to prevent open redirect attacks
+$allowedRedirects = ['checkout', 'cart', 'account'];
 $redirectPath = in_array($redirect, $allowedRedirects, true) ? $redirect : 'account';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -34,6 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($user && password_verify($password, $user['password'])) {
                 // ── 3. Session Fixation Fix ───────────────────────────────
+                // Save old session ID BEFORE regenerating — guest cart is stored under old ID
                 $oldSessionId = session_id();
                 session_regenerate_id(true);
 
@@ -43,10 +45,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['admin_ip']  = $_SERVER['REMOTE_ADDR'] ?? '';
                 $_SESSION['admin_last_activity'] = time();
 
-                // Merge guest cart using the OLD session ID
+                // Merge guest cart using the OLD session ID (before regeneration)
                 $stmt = $db->prepare("UPDATE cart SET user_id = ? WHERE session_id = ?");
                 $stmt->execute([$user['id'], $oldSessionId]);
 
+                // Redirect to intended page or admin/account
                 if ($user['role'] === 'admin') {
                     redirect('admin/');
                 } else {
@@ -84,19 +87,19 @@ require_once __DIR__ . '/../includes/header.php';
                 <div style="text-align: left; margin-bottom: 2rem;">
                     <h1 style="font-size: 1.5rem; font-weight: 500; color: var(--color-text); margin-bottom: 0.5rem;">Account Login</h1>
                 </div>
-                
+
                 <?php if ($error): ?>
                     <div style="background: rgba(220, 53, 69, 0.1); border: 1px solid var(--color-danger); color: var(--color-danger); padding: 0.75rem 1rem; border-radius: var(--radius-md); margin-bottom: 1rem; font-size: 0.875rem;">
                         <?= htmlspecialchars($error) ?>
                     </div>
                 <?php endif; ?>
-                
+
                 <?php if ($success): ?>
                     <div style="background: rgba(40, 167, 69, 0.1); border: 1px solid var(--color-success); color: var(--color-success); padding: 0.75rem 1rem; border-radius: var(--radius-md); margin-bottom: 1rem; font-size: 0.875rem;">
                         <?= htmlspecialchars($success) ?>
                     </div>
                 <?php endif; ?>
-                
+
                 <form method="POST" action="">
                     <!-- Security: CSRF token -->
                     <?= csrfField() ?>
@@ -109,7 +112,7 @@ require_once __DIR__ . '/../includes/header.php';
                         <label class="form-label" for="email" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0.25rem; display: block;">Email Address</label>
                         <input type="text" id="email" name="email" class="form-input" placeholder="Enter your Email Address" required style="border-radius: 4px;">
                     </div>
-                        
+
                     <div class="form-group">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
                             <label class="form-label" for="password" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 0;">Password</label>
@@ -117,12 +120,12 @@ require_once __DIR__ . '/../includes/header.php';
                         </div>
                         <input type="password" id="password" name="password" class="form-input" placeholder="Password" required style="border-radius: 4px;">
                     </div>
-                    
+
                     <button type="submit" class="btn" style="width: 100%; background-color: var(--color-primary); color: #fff; border-radius: 4px; padding: 0.875rem; font-weight: 600; font-size: 0.95rem; border: none; margin-top: 0.5rem; cursor: pointer;">
                         Login
                     </button>
                 </form>
-                
+
                 <div style="text-align: center; margin-top: 2rem;">
                     <div style="position: relative; text-align: center; margin-bottom: 1.5rem;">
                         <span style="background: #fff; padding: 0 10px; color: var(--color-text-light); font-size: 0.9rem; position: relative; z-index: 1;">Don't have an account?</span>

@@ -186,3 +186,115 @@ Stack trace:
 #0 C:\xampp\htdocs\Rosabella\scratch\trace_error.php(74): PDO->prepare('\n        SELECT...')
 #1 {main}
   thrown in C:\xampp\htdocs\Rosabella\scratch\trace_error.php on line 74
+[15-Aug-2026 14:24:42 Europe/Berlin] PHP Warning:  Undefined variable $allowedRedirects in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:24:42 Europe/Berlin] PHP Fatal error:  Uncaught TypeError: in_array(): Argument #2 ($haystack) must be of type array, null given in C:\xampp\htdocs\Rosabella\public\login.php:12
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\public\login.php(12): in_array('', NULL, true)
+#1 C:\xampp\htdocs\Rosabella\includes\router.php(15): require('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\Rosabella\index.php(7): dispatchCleanRoute()
+#3 {main}
+  thrown in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:24:54 Europe/Berlin] PHP Warning:  Undefined variable $allowedRedirects in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:24:54 Europe/Berlin] PHP Fatal error:  Uncaught TypeError: in_array(): Argument #2 ($haystack) must be of type array, null given in C:\xampp\htdocs\Rosabella\public\login.php:12
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\public\login.php(12): in_array('', NULL, true)
+#1 C:\xampp\htdocs\Rosabella\includes\router.php(15): require('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\Rosabella\index.php(7): dispatchCleanRoute()
+#3 {main}
+  thrown in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:24:56 Europe/Berlin] PHP Warning:  Undefined variable $allowedRedirects in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:24:56 Europe/Berlin] PHP Fatal error:  Uncaught TypeError: in_array(): Argument #2 ($haystack) must be of type array, null given in C:\xampp\htdocs\Rosabella\public\login.php:12
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\public\login.php(12): in_array('', NULL, true)
+#1 C:\xampp\htdocs\Rosabella\includes\router.php(15): require('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\Rosabella\index.php(7): dispatchCleanRoute()
+#3 {main}
+  thrown in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:24:57 Europe/Berlin] PHP Warning:  Undefined variable $allowedRedirects in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:24:57 Europe/Berlin] PHP Fatal error:  Uncaught TypeError: in_array(): Argument #2 ($haystack) must be of type array, null given in C:\xampp\htdocs\Rosabella\public\login.php:12
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\public\login.php(12): in_array('', NULL, true)
+#1 C:\xampp\htdocs\Rosabella\includes\router.php(15): require('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\Rosabella\index.php(7): dispatchCleanRoute()
+#3 {main}
+  thrown in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:24:57 Europe/Berlin] PHP Warning:  Undefined variable $allowedRedirects in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:24:57 Europe/Berlin] PHP Fatal error:  Uncaught TypeError: in_array(): Argument #2 ($haystack) must be of type array, null given in C:\xampp\htdocs\Rosabella\public\login.php:12
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\public\login.php(12): in_array('', NULL, true)
+#1 C:\xampp\htdocs\Rosabella\includes\router.php(15): require('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\Rosabella\index.php(7): dispatchCleanRoute()
+#3 {main}
+  thrown in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:24:57 Europe/Berlin] PHP Warning:  Undefined variable $allowedRedirects in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:24:57 Europe/Berlin] PHP Fatal error:  Uncaught TypeError: in_array(): Argument #2 ($haystack) must be of type array, null given in C:\xampp\htdocs\Rosabella\public\login.php:12
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\public\login.php(12): in_array('', NULL, true)
+#1 C:\xampp\htdocs\Rosabella\includes\router.php(15): require('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\Rosabella\index.php(7): dispatchCleanRoute()
+#3 {main}
+  thrown in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:25:02 Europe/Berlin] PHP Warning:  Undefined variable $allowedRedirects in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:25:02 Europe/Berlin] PHP Fatal error:  Uncaught TypeError: in_array(): Argument #2 ($haystack) must be of type array, null given in C:\xampp\htdocs\Rosabella\public\login.php:12
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\public\login.php(12): in_array('', NULL, true)
+#1 C:\xampp\htdocs\Rosabella\includes\router.php(15): require('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\Rosabella\index.php(7): dispatchCleanRoute()
+#3 {main}
+  thrown in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:25:03 Europe/Berlin] PHP Warning:  Undefined variable $allowedRedirects in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:25:03 Europe/Berlin] PHP Fatal error:  Uncaught TypeError: in_array(): Argument #2 ($haystack) must be of type array, null given in C:\xampp\htdocs\Rosabella\public\login.php:12
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\public\login.php(12): in_array('', NULL, true)
+#1 C:\xampp\htdocs\Rosabella\includes\router.php(15): require('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\Rosabella\index.php(7): dispatchCleanRoute()
+#3 {main}
+  thrown in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:25:03 Europe/Berlin] PHP Warning:  Undefined variable $allowedRedirects in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:25:03 Europe/Berlin] PHP Fatal error:  Uncaught TypeError: in_array(): Argument #2 ($haystack) must be of type array, null given in C:\xampp\htdocs\Rosabella\public\login.php:12
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\public\login.php(12): in_array('', NULL, true)
+#1 C:\xampp\htdocs\Rosabella\includes\router.php(15): require('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\Rosabella\index.php(7): dispatchCleanRoute()
+#3 {main}
+  thrown in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:25:03 Europe/Berlin] PHP Warning:  Undefined variable $allowedRedirects in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:25:03 Europe/Berlin] PHP Fatal error:  Uncaught TypeError: in_array(): Argument #2 ($haystack) must be of type array, null given in C:\xampp\htdocs\Rosabella\public\login.php:12
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\public\login.php(12): in_array('', NULL, true)
+#1 C:\xampp\htdocs\Rosabella\includes\router.php(15): require('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\Rosabella\index.php(7): dispatchCleanRoute()
+#3 {main}
+  thrown in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:25:14 Europe/Berlin] PHP Warning:  Undefined variable $allowedRedirects in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:25:14 Europe/Berlin] PHP Fatal error:  Uncaught TypeError: in_array(): Argument #2 ($haystack) must be of type array, null given in C:\xampp\htdocs\Rosabella\public\login.php:12
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\public\login.php(12): in_array('', NULL, true)
+#1 C:\xampp\htdocs\Rosabella\includes\router.php(15): require('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\Rosabella\index.php(7): dispatchCleanRoute()
+#3 {main}
+  thrown in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:25:14 Europe/Berlin] PHP Warning:  Undefined variable $allowedRedirects in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:25:14 Europe/Berlin] PHP Fatal error:  Uncaught TypeError: in_array(): Argument #2 ($haystack) must be of type array, null given in C:\xampp\htdocs\Rosabella\public\login.php:12
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\public\login.php(12): in_array('', NULL, true)
+#1 C:\xampp\htdocs\Rosabella\includes\router.php(15): require('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\Rosabella\index.php(7): dispatchCleanRoute()
+#3 {main}
+  thrown in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:25:25 Europe/Berlin] PHP Warning:  Undefined variable $allowedRedirects in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:25:25 Europe/Berlin] PHP Fatal error:  Uncaught TypeError: in_array(): Argument #2 ($haystack) must be of type array, null given in C:\xampp\htdocs\Rosabella\public\login.php:12
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\public\login.php(12): in_array('', NULL, true)
+#1 C:\xampp\htdocs\Rosabella\includes\router.php(15): require('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\Rosabella\index.php(7): dispatchCleanRoute()
+#3 {main}
+  thrown in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:25:55 Europe/Berlin] PHP Warning:  Undefined variable $allowedRedirects in C:\xampp\htdocs\Rosabella\public\login.php on line 12
+[15-Aug-2026 14:25:55 Europe/Berlin] PHP Fatal error:  Uncaught TypeError: in_array(): Argument #2 ($haystack) must be of type array, null given in C:\xampp\htdocs\Rosabella\public\login.php:12
+Stack trace:
+#0 C:\xampp\htdocs\Rosabella\public\login.php(12): in_array('', NULL, true)
+#1 C:\xampp\htdocs\Rosabella\includes\router.php(15): require('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\Rosabella\index.php(7): dispatchCleanRoute()
+#3 {main}
+  thrown in C:\xampp\htdocs\Rosabella\public\login.php on line 12
