@@ -108,7 +108,7 @@ $onHoldCount     = (int)($statusRows['on_hold'] ?? 0);
 $fulfillmentRate = $totalOrders > 0 ? round(($deliveredCount / $totalOrders) * 100, 1) : 0;
 
 // ── 2. Time-Series Chart Data ────────────────────────────────────────────────
-// Last 14 Days Daily Data
+// Last 14 Days Daily Data Map
 $dailyRows = $db->query("
     SELECT DATE(created_at) as o_date,
            COUNT(*) as o_count,
@@ -122,27 +122,40 @@ $dailyRows = $db->query("
 $dailyMap = [];
 foreach ($dailyRows as $r) {
     $dailyMap[$r['o_date']] = [
-        'count'   => (int)$r['o_count'],
-        'paid'    => (float)$r['o_paid'],
-        'total'   => (float)$r['o_total']
+        'count' => (int)$r['o_count'],
+        'paid'  => (float)$r['o_paid'],
+        'total' => (float)$r['o_total']
     ];
 }
 
-$dailyLabels  = [];
-$dailyRevenue = [];
-$dailyOrders  = [];
+// 7 Days
+$sevenDaysLabels  = [];
+$sevenDaysRevenue = [];
+$sevenDaysOrders  = [];
+for ($i = 6; $i >= 0; $i--) {
+    $dStr = date('Y-m-d', strtotime("-$i days"));
+    $sevenDaysLabels[]  = date('D, M j', strtotime($dStr));
+    $sevenDaysRevenue[] = $dailyMap[$dStr]['paid'] ?? ($dailyMap[$dStr]['total'] ?? 0);
+    $sevenDaysOrders[]  = $dailyMap[$dStr]['count'] ?? 0;
+}
+
+// 14 Days
+$fourteenDaysLabels  = [];
+$fourteenDaysRevenue = [];
+$fourteenDaysOrders  = [];
 for ($i = 13; $i >= 0; $i--) {
-    $dateStr = date('Y-m-d', strtotime("-$i days"));
-    $dailyLabels[]  = date('M j', strtotime($dateStr));
-    $dailyRevenue[] = $dailyMap[$dateStr]['paid'] ?? ($dailyMap[$dateStr]['total'] ?? 0);
-    $dailyOrders[]  = $dailyMap[$dateStr]['count'] ?? 0;
+    $dStr = date('Y-m-d', strtotime("-$i days"));
+    $fourteenDaysLabels[]  = date('M j', strtotime($dStr));
+    $fourteenDaysRevenue[] = $dailyMap[$dStr]['paid'] ?? ($dailyMap[$dStr]['total'] ?? 0);
+    $fourteenDaysOrders[]  = $dailyMap[$dStr]['count'] ?? 0;
 }
 
 // Monthly Data (Last 6 Months)
 $monthlyRows = $db->query("
     SELECT DATE_FORMAT(created_at, '%Y-%m') as o_month,
            COUNT(*) as o_count,
-           SUM(CASE WHEN payment_status = 'paid' THEN total ELSE 0 END) as o_paid
+           SUM(CASE WHEN payment_status = 'paid' THEN total ELSE 0 END) as o_paid,
+           SUM(total) as o_total
     FROM orders
     WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
     GROUP BY DATE_FORMAT(created_at, '%Y-%m')
@@ -153,7 +166,8 @@ $monthlyMap = [];
 foreach ($monthlyRows as $r) {
     $monthlyMap[$r['o_month']] = [
         'count' => (int)$r['o_count'],
-        'paid'  => (float)$r['o_paid']
+        'paid'  => (float)$r['o_paid'],
+        'total' => (float)$r['o_total']
     ];
 }
 
@@ -163,20 +177,27 @@ $monthlyOrders  = [];
 for ($i = 5; $i >= 0; $i--) {
     $mStr = date('Y-m', strtotime("-$i months"));
     $monthlyLabels[]  = date('M Y', strtotime($mStr . '-01'));
-    $monthlyRevenue[] = $monthlyMap[$mStr]['paid'] ?? 0;
+    $monthlyRevenue[] = $monthlyMap[$mStr]['paid'] ?? ($monthlyMap[$mStr]['total'] ?? 0);
     $monthlyOrders[]  = $monthlyMap[$mStr]['count'] ?? 0;
 }
 
-// Status Doughnut Data
-$doughnutLabels = ['Delivered', 'Processing', 'Pending', 'Cancelled', 'Other'];
-$doughnutData   = [
-    $deliveredCount,
-    $processingCount,
-    $pendingCount,
-    $cancelledCount,
-    $returnedCount + $onHoldCount
+// Status Pipeline Breakdown
+$pipelineItems = [
+    ['key' => 'delivered',  'label' => 'Delivered',  'count' => $deliveredCount,  'color' => '#10b981'],
+    ['key' => 'processing', 'label' => 'Processing', 'count' => $processingCount, 'color' => '#3b82f6'],
+    ['key' => 'pending',    'label' => 'Pending',    'count' => $pendingCount,    'color' => '#f59e0b'],
+    ['key' => 'cancelled',  'label' => 'Cancelled',  'count' => $cancelledCount,  'color' => '#ef4444'],
 ];
-$doughnutColors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
+if ($returnedCount > 0) {
+    $pipelineItems[] = ['key' => 'returned', 'label' => 'Returned', 'count' => $returnedCount, 'color' => '#8b5cf6'];
+}
+if ($onHoldCount > 0) {
+    $pipelineItems[] = ['key' => 'on_hold', 'label' => 'On Hold', 'count' => $onHoldCount, 'color' => '#64748b'];
+}
+
+$doughnutLabels = array_column($pipelineItems, 'label');
+$doughnutData   = array_column($pipelineItems, 'count');
+$doughnutColors = array_column($pipelineItems, 'color');
 
 // ── 3. Payment Methods Breakdown (Normalized & Merged) ─────────────────────────
 $paymentRows = $db->query("
@@ -474,9 +495,11 @@ $lowStockProducts = $db->query("
         /* ── Charts Grid ── */
         .dash-charts-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr;
+            grid-template-columns: 1.8fr 1.2fr;
             gap: 1.25rem;
             margin-bottom: 1.25rem;
+            min-width: 0;
+            width: 100%;
         }
         .dash-chart-card {
             background: #ffffff;
@@ -486,6 +509,10 @@ $lowStockProducts = $db->query("
             box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
             display: flex;
             flex-direction: column;
+            min-width: 0;
+            width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
         }
         .dash-chart-header {
             display: flex;
@@ -507,7 +534,7 @@ $lowStockProducts = $db->query("
         .dash-chart-pills {
             display: flex;
             align-items: center;
-            gap: 0.35rem;
+            gap: 0.25rem;
             background: #f8fafc;
             padding: 3px;
             border: 1px solid #e2e8f0;
@@ -517,12 +544,13 @@ $lowStockProducts = $db->query("
             background: none;
             border: none;
             cursor: pointer;
-            padding: 4px 9px;
+            padding: 4px 8px;
             border-radius: 6px;
             font-size: 0.72rem;
             font-weight: 700;
             color: #64748b;
             transition: all 0.15s ease;
+            white-space: nowrap;
         }
         .dash-chart-pill.active {
             background: #ffffff;
@@ -531,9 +559,100 @@ $lowStockProducts = $db->query("
         }
         .dash-canvas-container {
             position: relative;
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            height: 290px;
+            box-sizing: border-box;
+        }
+
+        /* ── Order Status Pipeline Redesign ── */
+        .dash-pipeline-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            height: 100%;
+            justify-content: space-between;
+        }
+        .dash-pipeline-chart-box {
+            position: relative;
             width: 100%;
-            height: 280px;
-            flex: 1;
+            height: 165px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .dash-pipeline-center-badge {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none;
+            line-height: 1;
+        }
+        .dash-pipeline-center-num {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+        }
+        .dash-pipeline-center-sub {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 3px;
+        }
+        .dash-pipeline-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid #f1f5f9;
+        }
+        .dash-pipeline-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            padding: 0.2rem 0.35rem;
+            border-radius: 6px;
+            transition: background 0.15s ease;
+        }
+        .dash-pipeline-row:hover {
+            background: #f8fafc;
+        }
+        .dash-pipeline-row-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            color: #334155;
+        }
+        .dash-pipeline-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .dash-pipeline-row-right {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+        .dash-pipeline-count {
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .dash-pipeline-pill {
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            background: #f1f5f9;
+            color: #475569;
         }
 
         /* ── Payment Distribution Card ── */
@@ -816,8 +935,9 @@ $lowStockProducts = $db->query("
                                 Sales & Orders Performance
                             </h3>
                             <div class="dash-chart-pills">
-                                <button type="button" class="dash-chart-pill active" id="btnChartDaily">Daily (14d)</button>
-                                <button type="button" class="dash-chart-pill" id="btnChartMonthly">Monthly</button>
+                                <button type="button" class="dash-chart-pill" id="btnChart7d">7 Days</button>
+                                <button type="button" class="dash-chart-pill active" id="btnChart14d">14 Days</button>
+                                <button type="button" class="dash-chart-pill" id="btnChartMonthly">6 Months</button>
                             </div>
                         </div>
                         <div class="dash-canvas-container">
@@ -832,10 +952,34 @@ $lowStockProducts = $db->query("
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
                                 Order Status Pipeline
                             </h3>
-                            <span style="font-size: 0.72rem; color: #64748b; font-weight: 700;"><?= $totalOrders ?> Total</span>
+                            <span style="font-size: 0.72rem; color: #64748b; font-weight: 700; background: #f1f5f9; padding: 2px 7px; border-radius: 5px;"><?= $totalOrders ?> Total Orders</span>
                         </div>
-                        <div class="dash-canvas-container">
-                            <canvas id="statusChart"></canvas>
+                        
+                        <div class="dash-pipeline-layout">
+                            <div class="dash-pipeline-chart-box">
+                                <canvas id="statusChart"></canvas>
+                                <div class="dash-pipeline-center-badge">
+                                    <div class="dash-pipeline-center-num"><?= $totalOrders ?></div>
+                                    <div class="dash-pipeline-center-sub">Orders</div>
+                                </div>
+                            </div>
+                            
+                            <div class="dash-pipeline-list">
+                                <?php foreach ($pipelineItems as $st): 
+                                    $pct = $totalOrders > 0 ? round(($st['count'] / $totalOrders) * 100, 1) : 0;
+                                ?>
+                                <div class="dash-pipeline-row">
+                                    <div class="dash-pipeline-row-left">
+                                        <span class="dash-pipeline-dot" style="background: <?= $st['color'] ?>;"></span>
+                                        <span><?= htmlspecialchars($st['label']) ?></span>
+                                    </div>
+                                    <div class="dash-pipeline-row-right">
+                                        <span class="dash-pipeline-count"><?= $st['count'] ?></span>
+                                        <span class="dash-pipeline-pill"><?= $pct ?>%</span>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1053,10 +1197,16 @@ $lowStockProducts = $db->query("
         if (typeof Chart === 'undefined') return;
 
         // ── Data Packages ──────────────────────────────────────
-        const dailyData = {
-            labels: <?= json_encode($dailyLabels) ?>,
-            revenue: <?= json_encode($dailyRevenue) ?>,
-            orders: <?= json_encode($dailyOrders) ?>
+        const sevenDaysData = {
+            labels: <?= json_encode($sevenDaysLabels) ?>,
+            revenue: <?= json_encode($sevenDaysRevenue) ?>,
+            orders: <?= json_encode($sevenDaysOrders) ?>
+        };
+
+        const fourteenDaysData = {
+            labels: <?= json_encode($fourteenDaysLabels) ?>,
+            revenue: <?= json_encode($fourteenDaysRevenue) ?>,
+            orders: <?= json_encode($fourteenDaysOrders) ?>
         };
 
         const monthlyData = {
@@ -1065,17 +1215,17 @@ $lowStockProducts = $db->query("
             orders: <?= json_encode($monthlyOrders) ?>
         };
 
-        // ── Chart 1: Sales Area Chart ──────────────────────────
+        // ── Chart 1: Sales & Orders Performance Area Chart ──────
         const ctxSales = document.getElementById('salesChart');
         if (ctxSales) {
             const chartSales = new Chart(ctxSales, {
                 type: 'line',
                 data: {
-                    labels: dailyData.labels,
+                    labels: fourteenDaysData.labels,
                     datasets: [
                         {
                             label: 'Revenue (Tk)',
-                            data: dailyData.revenue,
+                            data: fourteenDaysData.revenue,
                             borderColor: '#0f766e',
                             backgroundColor: 'rgba(15, 118, 110, 0.08)',
                             borderWidth: 2.5,
@@ -1083,21 +1233,21 @@ $lowStockProducts = $db->query("
                             tension: 0.35,
                             pointBackgroundColor: '#0f766e',
                             pointHoverRadius: 6,
-                            pointRadius: 3,
+                            pointRadius: 3.5,
                             yAxisID: 'y'
                         },
                         {
                             label: 'Orders',
-                            data: dailyData.orders,
+                            data: fourteenDaysData.orders,
                             borderColor: '#3b82f6',
-                            backgroundColor: 'rgba(59, 130, 246, 0.04)',
+                            backgroundColor: 'transparent',
                             borderWidth: 2,
                             borderDash: [4, 4],
                             fill: false,
                             tension: 0.35,
                             pointBackgroundColor: '#3b82f6',
                             pointHoverRadius: 5,
-                            pointRadius: 2.5,
+                            pointRadius: 3,
                             yAxisID: 'y1'
                         }
                     ]
@@ -1116,8 +1266,10 @@ $lowStockProducts = $db->query("
                             align: 'end',
                             labels: {
                                 boxWidth: 12,
-                                font: { size: 11, weight: '600' },
-                                color: '#475569'
+                                font: { size: 11, weight: '700' },
+                                color: '#475569',
+                                usePointStyle: true,
+                                pointStyle: 'circle'
                             }
                         },
                         tooltip: {
@@ -1125,12 +1277,13 @@ $lowStockProducts = $db->query("
                             padding: 10,
                             titleFont: { size: 12, weight: '700' },
                             bodyFont: { size: 11 },
+                            cornerRadius: 8,
                             callbacks: {
                                 label: function(context) {
                                     if (context.dataset.label.includes('Revenue')) {
-                                        return ' Revenue: Tk ' + Number(context.parsed.y).toLocaleString();
+                                        return ' Net Revenue: Tk ' + Number(context.parsed.y).toLocaleString();
                                     }
-                                    return ' Orders: ' + context.parsed.y;
+                                    return ' Orders Placed: ' + context.parsed.y;
                                 }
                             }
                         }
@@ -1138,7 +1291,13 @@ $lowStockProducts = $db->query("
                     scales: {
                         x: {
                             grid: { display: false },
-                            ticks: { font: { size: 10 }, color: '#94a3b8' }
+                            ticks: {
+                                font: { size: 10, weight: '600' },
+                                color: '#94a3b8',
+                                maxTicksLimit: 7,
+                                maxRotation: 0,
+                                autoSkip: true
+                            }
                         },
                         y: {
                             type: 'linear',
@@ -1166,32 +1325,26 @@ $lowStockProducts = $db->query("
                 }
             });
 
-            // Toggle daily / monthly
-            const btnDaily   = document.getElementById('btnChartDaily');
+            // Toggle handlers
+            const btn7d      = document.getElementById('btnChart7d');
+            const btn14d     = document.getElementById('btnChart14d');
             const btnMonthly = document.getElementById('btnChartMonthly');
 
-            if (btnDaily && btnMonthly) {
-                btnDaily.addEventListener('click', () => {
-                    btnDaily.classList.add('active');
-                    btnMonthly.classList.remove('active');
-                    chartSales.data.labels = dailyData.labels;
-                    chartSales.data.datasets[0].data = dailyData.revenue;
-                    chartSales.data.datasets[1].data = dailyData.orders;
-                    chartSales.update();
-                });
-
-                btnMonthly.addEventListener('click', () => {
-                    btnMonthly.classList.add('active');
-                    btnDaily.classList.remove('active');
-                    chartSales.data.labels = monthlyData.labels;
-                    chartSales.data.datasets[0].data = monthlyData.revenue;
-                    chartSales.data.datasets[1].data = monthlyData.orders;
-                    chartSales.update();
-                });
+            function setRange(activeBtn, dataObj) {
+                [btn7d, btn14d, btnMonthly].forEach(b => b && b.classList.remove('active'));
+                if (activeBtn) activeBtn.classList.add('active');
+                chartSales.data.labels = dataObj.labels;
+                chartSales.data.datasets[0].data = dataObj.revenue;
+                chartSales.data.datasets[1].data = dataObj.orders;
+                chartSales.update();
             }
+
+            if (btn7d)      btn7d.addEventListener('click', () => setRange(btn7d, sevenDaysData));
+            if (btn14d)     btn14d.addEventListener('click', () => setRange(btn14d, fourteenDaysData));
+            if (btnMonthly) btnMonthly.addEventListener('click', () => setRange(btnMonthly, monthlyData));
         }
 
-        // ── Chart 2: Order Status Doughnut Chart ───────────────
+        // ── Chart 2: Order Status Pipeline Doughnut ──────────────
         const ctxStatus = document.getElementById('statusChart');
         if (ctxStatus) {
             new Chart(ctxStatus, {
@@ -1201,34 +1354,27 @@ $lowStockProducts = $db->query("
                     datasets: [{
                         data: <?= json_encode($doughnutData) ?>,
                         backgroundColor: <?= json_encode($doughnutColors) ?>,
-                        borderWidth: 2,
+                        borderWidth: 2.5,
                         borderColor: '#ffffff',
-                        hoverOffset: 6
+                        hoverOffset: 4
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '72%',
+                    cutout: '74%',
                     plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                boxWidth: 10,
-                                font: { size: 10, weight: '600' },
-                                color: '#475569',
-                                padding: 12
-                            }
-                        },
+                        legend: { display: false },
                         tooltip: {
                             backgroundColor: '#0f172a',
                             padding: 8,
+                            cornerRadius: 6,
                             callbacks: {
                                 label: function(context) {
                                     const val = context.parsed;
                                     const total = context.dataset.data.reduce((a,b) => a + b, 0);
-                                    const pct = total > 0 ? Math.round((val / total) * 100) : 0;
-                                    return ` ${context.label}: ${val} (${pct}%)`;
+                                    const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
+                                    return ` ${context.label}: ${val} orders (${pct}%)`;
                                 }
                             }
                         }
