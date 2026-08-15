@@ -486,6 +486,114 @@ $pageTitle = 'Admin Settings';
             font-family: var(--admin-font);
         }
 
+        /* ── Theme Color Search & Presets ── */
+        .as-color-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            position: relative;
+        }
+
+        .as-color-swatch-picker {
+            width: 38px;
+            height: 38px;
+            padding: 2px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #ffffff;
+            flex-shrink: 0;
+        }
+
+        .as-color-search-box {
+            position: relative;
+            flex: 1;
+            min-width: 220px;
+        }
+
+        .as-color-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15);
+            max-height: 220px;
+            overflow-y: auto;
+            z-index: 1050;
+            display: none;
+            margin-top: 4px;
+        }
+
+        .as-color-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 7px 12px;
+            cursor: pointer;
+            transition: background 0.12s ease;
+        }
+
+        .as-color-item:hover {
+            background: #f0fdf4;
+        }
+
+        .as-theme-preset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+            gap: 0.75rem;
+            margin-top: 0.85rem;
+        }
+
+        .as-preset-card {
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+
+        .as-preset-card:hover {
+            border-color: #0f766e;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(15, 118, 110, 0.08);
+        }
+
+        .as-preset-preview {
+            display: flex;
+            height: 40px;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid #cbd5e1;
+        }
+
+        .as-preset-sidebar {
+            width: 32%;
+            height: 100%;
+            border-right: 1px solid rgba(0,0,0,0.08);
+        }
+
+        .as-preset-content {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .as-preset-accent {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+        }
+
         @media (max-width: 860px) {
             .as-layout-grid {
                 grid-template-columns: 1fr;
@@ -563,6 +671,10 @@ $pageTitle = 'Admin Settings';
                 <button type="button" class="as-nav-item <?= $activeTab === 'profile' ? 'active' : '' ?>" onclick="switchAdminTab('profile', this)">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     <span>Admin Profile & Password</span>
+                </button>
+                <button type="button" class="as-nav-item <?= $activeTab === 'theme' ? 'active' : '' ?>" onclick="switchAdminTab('theme', this)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/><line x1="9" y1="21" x2="15" y2="21"/></svg>
+                    <span>Admin Theme & Colors</span>
                 </button>
                 <button type="button" class="as-nav-item <?= $activeTab === 'maintenance' ? 'active' : '' ?>" onclick="switchAdminTab('maintenance', this)">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
@@ -975,7 +1087,188 @@ $pageTitle = 'Admin Settings';
                     </form>
                 </div>
 
-                <!-- ── TAB 5: Maintenance & System Tools ── -->
+                <!-- ── TAB 5: Admin Theme & Appearance ── -->
+                <div id="tab-theme" class="as-tab-panel <?= $activeTab === 'theme' ? 'active' : '' ?>">
+                    <form method="POST" id="adminThemeForm">
+                        <?= csrfField() ?>
+                        <input type="hidden" name="save_admin_settings" value="1">
+                        <input type="hidden" name="active_tab" value="theme">
+
+                        <div class="as-section-card">
+                            <div class="as-card-header">
+                                <div>
+                                    <h3 class="as-card-title">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/><line x1="9" y1="21" x2="15" y2="21"/></svg>
+                                        Admin Interface Theme & Color Customizer
+                                    </h3>
+                                    <div class="as-card-sub">Customize the sidebar and content canvas background colors with live search across 120+ curated hex shades.</div>
+                                </div>
+                            </div>
+
+                            <!-- Sidebar Background Color -->
+                            <div class="as-row">
+                                <div class="as-row-info">
+                                    <h4>Sidebar Background</h4>
+                                    <p>Background color of the fixed admin navigation sidebar. Live updates instantly on selection.</p>
+                                </div>
+                                <div class="as-input-wrap">
+                                    <div class="as-color-row">
+                                        <input type="color" id="picker_sidebar_bg" value="<?= htmlspecialchars(getSettingVal($allSettings, 'admin_sidebar_bg', '#f1f5f9')) ?>" class="as-color-swatch-picker" onchange="syncColorInput('sidebar_bg', this.value)">
+                                        <input type="text" id="hex_sidebar_bg" name="settings[admin_sidebar_bg]" class="as-input" style="max-width: 105px; font-family: monospace; font-weight: 600;" value="<?= htmlspecialchars(getSettingVal($allSettings, 'admin_sidebar_bg', '#f1f5f9')) ?>" oninput="syncColorInput('sidebar_bg', this.value)">
+                                        <div class="as-color-search-box">
+                                            <input type="text" class="as-input color-search-field" data-target="sidebar_bg" placeholder="Search 120+ colors (e.g. Slate, Black, Cream, Navy)...">
+                                            <div class="as-color-dropdown"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Content Canvas Background Color -->
+                            <div class="as-row">
+                                <div class="as-row-info">
+                                    <h4>Content Canvas Background</h4>
+                                    <p>Background canvas color for tables, cards, dashboard charts, and main panels.</p>
+                                </div>
+                                <div class="as-input-wrap">
+                                    <div class="as-color-row">
+                                        <input type="color" id="picker_content_bg" value="<?= htmlspecialchars(getSettingVal($allSettings, 'admin_content_bg', '#f8fafc')) ?>" class="as-color-swatch-picker" onchange="syncColorInput('content_bg', this.value)">
+                                        <input type="text" id="hex_content_bg" name="settings[admin_content_bg]" class="as-input" style="max-width: 105px; font-family: monospace; font-weight: 600;" value="<?= htmlspecialchars(getSettingVal($allSettings, 'admin_content_bg', '#f8fafc')) ?>" oninput="syncColorInput('content_bg', this.value)">
+                                        <div class="as-color-search-box">
+                                            <input type="text" class="as-input color-search-field" data-target="content_bg" placeholder="Search 120+ colors (e.g. Ice, Off White, Gray, Snow)...">
+                                            <div class="as-color-dropdown"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Primary Brand Accent Color -->
+                            <div class="as-row">
+                                <div class="as-row-info">
+                                    <h4>Primary Accent Color</h4>
+                                    <p>Accent highlight color used for active navigation pills, primary action buttons, and icons.</p>
+                                </div>
+                                <div class="as-input-wrap">
+                                    <div class="as-color-row">
+                                        <input type="color" id="picker_primary_color" value="<?= htmlspecialchars(getSettingVal($allSettings, 'admin_primary_color', '#0f766e')) ?>" class="as-color-swatch-picker" onchange="syncColorInput('primary_color', this.value)">
+                                        <input type="text" id="hex_primary_color" name="settings[admin_primary_color]" class="as-input" style="max-width: 105px; font-family: monospace; font-weight: 600;" value="<?= htmlspecialchars(getSettingVal($allSettings, 'admin_primary_color', '#0f766e')) ?>" oninput="syncColorInput('primary_color', this.value)">
+                                        <div class="as-color-search-box">
+                                            <input type="text" class="as-input color-search-field" data-target="primary_color" placeholder="Search 120+ colors (e.g. Teal, Emerald, Blue, Rose)...">
+                                            <div class="as-color-dropdown"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- One-Click Preset Palettes -->
+                            <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid #f1f5f9;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+                                    <h4 style="margin: 0; font-size: 0.875rem; font-weight: 700; color: #0f172a;">One-Click Executive Preset Palettes</h4>
+                                    <button type="button" class="btn btn-secondary" onclick="applyThemePreset('#f1f5f9', '#f8fafc', '#0f766e')" style="height: 30px; font-size: 0.75rem; padding: 0 10px;">
+                                        Reset to Default
+                                    </button>
+                                </div>
+                                <div class="as-theme-preset-grid">
+                                    <div class="as-preset-card" onclick="applyThemePreset('#f1f5f9', '#f8fafc', '#0f766e')">
+                                        <div class="as-preset-preview">
+                                            <div class="as-preset-sidebar" style="background: #f1f5f9;"></div>
+                                            <div class="as-preset-content" style="background: #f8fafc;">
+                                                <div class="as-preset-accent" style="background: #0f766e;"></div>
+                                            </div>
+                                        </div>
+                                        <div style="font-size: 0.80rem; font-weight: 600; color: #0f172a;">Executive Slate (Default)</div>
+                                        <div style="font-size: 0.70rem; color: #64748b;">#f1f5f9 &bull; #f8fafc</div>
+                                    </div>
+
+                                    <div class="as-preset-card" onclick="applyThemePreset('#ffffff', '#fafaf9', '#0f766e')">
+                                        <div class="as-preset-preview">
+                                            <div class="as-preset-sidebar" style="background: #ffffff;"></div>
+                                            <div class="as-preset-content" style="background: #fafaf9;">
+                                                <div class="as-preset-accent" style="background: #0f766e;"></div>
+                                            </div>
+                                        </div>
+                                        <div style="font-size: 0.80rem; font-weight: 600; color: #0f172a;">Pure Minimal White</div>
+                                        <div style="font-size: 0.70rem; color: #64748b;">#ffffff &bull; #fafaf9</div>
+                                    </div>
+
+                                    <div class="as-preset-card" onclick="applyThemePreset('#e2e8f0', '#f1f5f9', '#2563eb')">
+                                        <div class="as-preset-preview">
+                                            <div class="as-preset-sidebar" style="background: #e2e8f0;"></div>
+                                            <div class="as-preset-content" style="background: #f1f5f9;">
+                                                <div class="as-preset-accent" style="background: #2563eb;"></div>
+                                            </div>
+                                        </div>
+                                        <div style="font-size: 0.80rem; font-weight: 600; color: #0f172a;">Cool Gray Studio</div>
+                                        <div style="font-size: 0.70rem; color: #64748b;">#e2e8f0 &bull; #f1f5f9</div>
+                                    </div>
+
+                                    <div class="as-preset-card" onclick="applyThemePreset('#0f172a', '#f8fafc', '#0d9488')">
+                                        <div class="as-preset-preview">
+                                            <div class="as-preset-sidebar" style="background: #0f172a;"></div>
+                                            <div class="as-preset-content" style="background: #f8fafc;">
+                                                <div class="as-preset-accent" style="background: #0d9488;"></div>
+                                            </div>
+                                        </div>
+                                        <div style="font-size: 0.80rem; font-weight: 600; color: #0f172a;">Dark Executive Slate</div>
+                                        <div style="font-size: 0.70rem; color: #64748b;">#0f172a &bull; #f8fafc</div>
+                                    </div>
+
+                                    <div class="as-preset-card" onclick="applyThemePreset('#1e293b', '#0f172a', '#6366f1')">
+                                        <div class="as-preset-preview">
+                                            <div class="as-preset-sidebar" style="background: #1e293b;"></div>
+                                            <div class="as-preset-content" style="background: #0f172a;">
+                                                <div class="as-preset-accent" style="background: #6366f1;"></div>
+                                            </div>
+                                        </div>
+                                        <div style="font-size: 0.80rem; font-weight: 600; color: #0f172a;">Midnight Azure</div>
+                                        <div style="font-size: 0.70rem; color: #64748b;">#1e293b &bull; #0f172a</div>
+                                    </div>
+
+                                    <div class="as-preset-card" onclick="applyThemePreset('#faf9f6', '#fefdfb', '#d97706')">
+                                        <div class="as-preset-preview">
+                                            <div class="as-preset-sidebar" style="background: #faf9f6;"></div>
+                                            <div class="as-preset-content" style="background: #fefdfb;">
+                                                <div class="as-preset-accent" style="background: #d97706;"></div>
+                                            </div>
+                                        </div>
+                                        <div style="font-size: 0.80rem; font-weight: 600; color: #0f172a;">Soft Warm Cream</div>
+                                        <div style="font-size: 0.70rem; color: #64748b;">#faf9f6 &bull; #fefdfb</div>
+                                    </div>
+
+                                    <div class="as-preset-card" onclick="applyThemePreset('#f0fdfa', '#f8fafc', '#059669')">
+                                        <div class="as-preset-preview">
+                                            <div class="as-preset-sidebar" style="background: #f0fdfa;"></div>
+                                            <div class="as-preset-content" style="background: #f8fafc;">
+                                                <div class="as-preset-accent" style="background: #059669;"></div>
+                                            </div>
+                                        </div>
+                                        <div style="font-size: 0.80rem; font-weight: 600; color: #0f172a;">Emerald Mint</div>
+                                        <div style="font-size: 0.70rem; color: #64748b;">#f0fdfa &bull; #f8fafc</div>
+                                    </div>
+
+                                    <div class="as-preset-card" onclick="applyThemePreset('#eef2f6', '#f8fafc', '#0284c7')">
+                                        <div class="as-preset-preview">
+                                            <div class="as-preset-sidebar" style="background: #eef2f6;"></div>
+                                            <div class="as-preset-content" style="background: #f8fafc;">
+                                                <div class="as-preset-accent" style="background: #0284c7;"></div>
+                                            </div>
+                                        </div>
+                                        <div style="font-size: 0.80rem; font-weight: 600; color: #0f172a;">Nordic Frost</div>
+                                        <div style="font-size: 0.70rem; color: #64748b;">#eef2f6 &bull; #f8fafc</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="as-actions-bar">
+                                <button type="submit" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 6px;">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                    <span>Save Theme Settings</span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- ── TAB 6: Maintenance & System Tools ── -->
                 <div id="tab-maintenance" class="as-tab-panel <?= $activeTab === 'maintenance' ? 'active' : '' ?>">
                     <!-- Maintenance Mode Toggle Form -->
                     <form method="POST" style="margin-bottom: 1.25rem;">
@@ -1168,6 +1461,97 @@ function markAvatarForRemoval() {
         removeBtn.style.display = 'none';
     }
 }
+
+/* ─── Color Search & Live Theme Preview Logic ─── */
+function syncColorInput(target, hexVal) {
+    if (!hexVal) return;
+    if (!hexVal.startsWith('#')) hexVal = '#' + hexVal;
+    
+    // Update inputs
+    const picker = document.getElementById('picker_' + target);
+    const hexInput = document.getElementById('hex_' + target);
+    if (picker && /^#[0-9A-F]{6}$/i.test(hexVal)) picker.value = hexVal;
+    if (hexInput && hexInput.value.toUpperCase() !== hexVal.toUpperCase()) hexInput.value = hexVal;
+
+    updateLiveThemePreview();
+}
+
+function applyThemePreset(sidebarBg, contentBg, primaryColor) {
+    syncColorInput('sidebar_bg', sidebarBg);
+    syncColorInput('content_bg', contentBg);
+    syncColorInput('primary_color', primaryColor);
+}
+
+function updateLiveThemePreview() {
+    const sidebarBg = document.getElementById('hex_sidebar_bg')?.value || '#f1f5f9';
+    const contentBg = document.getElementById('hex_content_bg')?.value || '#f8fafc';
+    const primaryColor = document.getElementById('hex_primary_color')?.value || '#0f766e';
+
+    document.documentElement.style.setProperty('--admin-sidebar-bg', sidebarBg);
+    document.documentElement.style.setProperty('--admin-content-bg', contentBg);
+    document.documentElement.style.setProperty('--admin-theme-primary', primaryColor);
+
+    const sidebar = document.querySelector('.admin-sidebar');
+    const content = document.querySelector('.admin-content');
+    if (sidebar) sidebar.style.backgroundColor = sidebarBg;
+    if (content) content.style.backgroundColor = contentBg;
+}
+
+// Initialize 120+ Curated Color Search Autocomplete
+document.addEventListener('DOMContentLoaded', () => {
+    // Check if color database exists
+    const colorDB = window.ROSABELLA_COLOR_DATABASE || [];
+
+    document.querySelectorAll('.color-search-field').forEach(input => {
+        const target = input.dataset.target;
+        const dropdown = input.parentElement.querySelector('.as-color-dropdown');
+        if (!dropdown) return;
+
+        input.addEventListener('input', () => {
+            const query = input.value.trim().toLowerCase();
+            if (!query) {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            const matches = colorDB.filter(c => 
+                c.name.toLowerCase().includes(query) || 
+                c.hex.toLowerCase().includes(query)
+            );
+
+            if (matches.length === 0) {
+                dropdown.innerHTML = `<div style="padding: 10px; font-size: 0.78rem; color: #94a3b8; text-align: center;">No matching standard color. Enter custom hex.</div>`;
+            } else {
+                dropdown.innerHTML = matches.map(c => `
+                    <div class="as-color-item" data-hex="${c.hex}" data-name="${c.name}">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="as-color-item-swatch" style="background-color: ${c.hex};"></span>
+                            <span style="font-size: 0.8125rem; font-weight: 600; color: #0f172a;">${c.name}</span>
+                        </div>
+                        <span style="font-size: 0.72rem; font-family: monospace; font-weight: 700; color: #0f766e; background: #f0fdfa; padding: 2px 6px; border-radius: 4px; border: 1px solid #ccfbf1;">${c.hex}</span>
+                    </div>
+                `).join('');
+
+                dropdown.querySelectorAll('.as-color-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        const hex = item.dataset.hex;
+                        syncColorInput(target, hex);
+                        input.value = item.dataset.name + ' (' + hex + ')';
+                        dropdown.style.display = 'none';
+                    });
+                });
+            }
+            dropdown.style.display = 'block';
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!input.parentElement.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+    });
+});
 </script>
+<script src="../assets/js/color-picker-autocomplete.js"></script>
 </body>
 </html>

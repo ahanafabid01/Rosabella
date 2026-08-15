@@ -57,6 +57,22 @@ if (!function_exists('renderAdminSidebar')) {
             $sidebarUnread = 0; 
         }
 
+        // Fetch custom theme colors
+        $adminSidebarBg = getSetting('admin_sidebar_bg') ?: '#f1f5f9';
+        $adminContentBg = getSetting('admin_content_bg') ?: '#f8fafc';
+        $adminPrimaryColor = getSetting('admin_primary_color') ?: '#0f766e';
+        ?>
+        <style id="rosabella-admin-theme-vars">
+            :root {
+                --admin-sidebar-bg: <?= htmlspecialchars($adminSidebarBg) ?>;
+                --admin-content-bg: <?= htmlspecialchars($adminContentBg) ?>;
+                --admin-theme-primary: <?= htmlspecialchars($adminPrimaryColor) ?>;
+            }
+            .admin-sidebar { background: var(--admin-sidebar-bg) !important; }
+            .admin-content { background: var(--admin-content-bg) !important; }
+        </style>
+        <?php
+
         $navSections = [
             [
                 'section' => 'OVERVIEW',
