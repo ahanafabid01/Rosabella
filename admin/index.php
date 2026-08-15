@@ -656,6 +656,13 @@ $lowStockProducts = $db->query("
         }
 
         /* ── Payment Distribution Card ── */
+        .dash-main-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+
         .dash-breakdown-list {
             display: flex;
             flex-direction: column;
@@ -984,10 +991,10 @@ $lowStockProducts = $db->query("
                     </div>
                 </div>
 
-                <!-- ── 5. Payment Methods & Tables Grid ── -->
+                <!-- ── 5. Operational Tables Grid ── -->
                 <div class="dash-main-grid">
                     <!-- Recent Orders Card -->
-                    <div class="admin-card" style="margin-bottom: 0;">
+                    <div class="admin-card">
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
                             <h3 class="admin-section-heading" style="margin: 0; font-size: 1.05rem;">Recent Orders</h3>
                             <a href="<?= BASE_URL ?>/admin/orders" style="font-size: 0.8rem; font-weight: 700; color: #0f766e; text-decoration: none;">View All &rarr;</a>
@@ -1082,7 +1089,7 @@ $lowStockProducts = $db->query("
                     </div>
 
                     <!-- Low Stock Alert Card -->
-                    <div class="admin-card" style="margin-bottom: 0;">
+                    <div class="admin-card">
                         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
                             <h3 class="admin-section-heading" style="margin: 0; font-size: 1.05rem; color: #b91c1c; display: flex; align-items: center; gap: 6px;">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -1100,8 +1107,20 @@ $lowStockProducts = $db->query("
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php if (empty($lowStockProducts)): ?>
-                                        <tr><td colspan="3" style="text-align: center; color: #10b981; padding: 2rem; font-weight: 600;">✅ All products are well stocked!</td></tr>
+                                    <?php if ($totalProducts === 0): ?>
+                                        <tr>
+                                            <td colspan="3" style="text-align: center; color: #94a3b8; padding: 2.25rem 1rem; font-size: 0.84rem;">
+                                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.8" style="display: block; margin: 0 auto 8px;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                                                No products found in catalog. <a href="<?= BASE_URL ?>/admin/products?action=add" style="color: #0f766e; font-weight: 700; text-decoration: underline; margin-left: 4px;">Add New Product</a>
+                                            </td>
+                                        </tr>
+                                    <?php elseif (empty($lowStockProducts)): ?>
+                                        <tr>
+                                            <td colspan="3" style="text-align: center; color: #0f766e; padding: 2rem 1rem; font-size: 0.84rem; font-weight: 600;">
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" style="vertical-align: -2px; margin-right: 6px;"><polyline points="20 6 9 17 4 12"/></svg>
+                                                Inventory levels are healthy across all active products.
+                                            </td>
+                                        </tr>
                                     <?php else: ?>
                                         <?php foreach ($lowStockProducts as $product): ?>
                                         <?php
