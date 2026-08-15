@@ -2387,7 +2387,136 @@ body:has(.admin-layout) {
     }
 }
 
+/* ── Universal Table Action Buttons (Global for All Screens) ── */
+.admin-actions-row {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    justify-content: flex-end !important;
+}
 
+.btn-action-icon {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+    border: 1px solid #e2e8f0 !important;
+    background: #ffffff !important;
+    color: #475569 !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+    line-height: 1 !important;
+    box-sizing: border-box !important;
+}
+.btn-action-icon svg {
+    width: 15px !important;
+    height: 15px !important;
+    display: block !important;
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+    fill: none !important;
+    pointer-events: none !important;
+    transition: stroke 0.18s ease, transform 0.18s ease !important;
+}
 
+/* ── Order / Cart Action ─── Teal Highlight Border ── */
+.btn-action-icon.order,
+.btn-action-icon.cart,
+.btn-action-icon.teal {
+    color: #0f766e !important;
+}
+.btn-action-icon.order:hover,
+.btn-action-icon.cart:hover,
+.btn-action-icon.teal:hover {
+    background: #ffffff !important;
+    border-color: #0f766e !important;
+    color: #0f766e !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14), 0 2px 5px rgba(15, 118, 110, 0.08) !important;
+}
+.btn-action-icon.order:hover svg,
+.btn-action-icon.cart:hover svg,
+.btn-action-icon.teal:hover svg {
+    stroke: #0f766e !important;
+    transform: scale(1.08) !important;
+}
 
+/* ── Edit / Primary Action ─── Indigo Highlight Border ── */
+.btn-action-icon.edit,
+.btn-action-icon.primary {
+    color: #4338ca !important;
+}
+.btn-action-icon.edit:hover,
+.btn-action-icon.primary:hover {
+    background: #ffffff !important;
+    border-color: #4338ca !important;
+    color: #4338ca !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.14), 0 2px 5px rgba(67, 56, 202, 0.08) !important;
+}
+.btn-action-icon.edit:hover svg,
+.btn-action-icon.primary:hover svg {
+    stroke: #4338ca !important;
+    transform: scale(1.08) !important;
+}
 
+/* ── View / Info Action ─── Blue Highlight Border ── */
+.btn-action-icon.view,
+.btn-action-icon.info {
+    color: #2563eb !important;
+}
+.btn-action-icon.view:hover,
+.btn-action-icon.info:hover {
+    background: #ffffff !important;
+    border-color: #2563eb !important;
+    color: #2563eb !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14), 0 2px 5px rgba(37, 99, 235, 0.08) !important;
+}
+.btn-action-icon.view:hover svg,
+.btn-action-icon.info:hover svg {
+    stroke: #2563eb !important;
+    transform: scale(1.08) !important;
+}
+
+/* ── Invoice Action ─── Emerald Highlight Border ── */
+.btn-action-icon.invoice {
+    color: #059669 !important;
+}
+.btn-action-icon.invoice:hover {
+    background: #ffffff !important;
+    border-color: #059669 !important;
+    color: #059669 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.14), 0 2px 5px rgba(5, 150, 105, 0.08) !important;
+}
+.btn-action-icon.invoice:hover svg {
+    stroke: #059669 !important;
+    transform: scale(1.08) !important;
+}
+
+/* ── Delete / Danger Action ─── Rose Highlight Border ── */
+.btn-action-icon.delete,
+.btn-action-icon.danger {
+    color: #e11d48 !important;
+}
+.btn-action-icon.delete:hover,
+.btn-action-icon.danger:hover {
+    background: #ffffff !important;
+    border-color: #e11d48 !important;
+    color: #e11d48 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.14), 0 2px 5px rgba(225, 29, 72, 0.08) !important;
+}
+.btn-action-icon.delete:hover svg,
+.btn-action-icon.danger:hover svg {
+    stroke: #e11d48 !important;
+    transform: scale(1.08) !important;
+}

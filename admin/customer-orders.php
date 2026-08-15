@@ -614,19 +614,10 @@ $pageTitle = 'Order History - ' . $customerFullName;
                 width: 100% !important;
                 margin-left: 0 !important;
             }
-            .as-filter-btns .btn {
-                width: 100% !important;
-                height: 36px !important;
-                justify-content: center !important;
-            }
-
             .admin-table-wrap {
-                display: none !important;
-            }
-            .as-mobile-orders-wrap {
-                display: flex !important;
-                flex-direction: column;
-                gap: 10px;
+                display: block !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
             }
         }
     </style>
@@ -934,10 +925,12 @@ $pageTitle = 'Order History - ' . $customerFullName;
 
                                 <!-- Actions -->
                                 <td style="text-align: right;">
-                                    <div class="admin-actions-row" style="justify-content: flex-end; gap: 6px;">
-                                        <a href="<?= BASE_URL ?>/admin/order/<?= $order['id'] ?>" class="btn btn-sm btn-outline" style="height: 28px; font-size: 0.76rem; padding: 0 8px; border-radius: 6px;">View</a>
-                                        <a href="<?= BASE_URL ?>/invoice?order=<?= urlencode($order['order_number']) ?>" target="_blank" class="btn btn-sm btn-outline" style="height: 28px; width: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center; color: #0f766e; border-color: #0f766e; border-radius: 6px;" title="Print / Download Invoice">
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    <div class="admin-actions-row">
+                                        <a href="<?= BASE_URL ?>/admin/order/<?= $order['id'] ?>" class="btn-action-icon view" title="View Order Details">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                        </a>
+                                        <a href="<?= BASE_URL ?>/invoice?order=<?= urlencode($order['order_number']) ?>" target="_blank" class="btn-action-icon invoice" title="Print / Download Invoice">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                         </a>
                                     </div>
                                 </td>
@@ -946,85 +939,6 @@ $pageTitle = 'Order History - ' . $customerFullName;
                         <?php endif; ?>
                     </tbody>
                 </table>
-            </div>
-
-            <!-- Mobile Orders Cards (<= 768px) -->
-            <div class="as-mobile-orders-wrap">
-                <?php if (empty($orders)): ?>
-                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 2.5rem 1rem; text-align: center; color: #94a3b8;">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.8" style="display: block; margin: 0 auto 10px;"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-                        <div style="font-weight: 600; color: #64748b; font-size: 0.90rem;">No orders found.</div>
-                        <a href="<?= BASE_URL ?>/admin/order-create?phone=<?= urlencode($customer['phone'] ?? '') ?>&name=<?= urlencode($customerFullName) ?>&city=<?= urlencode($customer['city'] ?? '') ?>" class="btn btn-sm btn-primary" style="margin-top: 10px; display: inline-flex; align-items: center; gap: 5px;">
-                            + Create Order
-                        </a>
-                    </div>
-                <?php else: ?>
-                    <?php foreach ($orders as $order): 
-                        $isPaid = ($order['status'] === 'delivered' || $order['payment_status'] === 'paid');
-                        $payLabel = $isPaid ? 'Paid' : ucfirst($order['payment_status'] ?? 'unpaid');
-                        $payBadge = $isPaid ? 'success' : 'warning';
-                        $gatewayName = paymentDisplayName((string)($order['payment_method'] ?? 'COD'));
-                        $stBadge = $statusMap[$order['status']]['badge'] ?? 'secondary';
-                        $stLabel = $statusMap[$order['status']]['label'] ?? ucfirst($order['status']);
-                    ?>
-                    <div class="as-order-m-card">
-                        <div class="as-order-m-header">
-                            <div>
-                                <a href="<?= BASE_URL ?>/admin/order/<?= $order['id'] ?>" class="as-order-m-num">
-                                    #<?= htmlspecialchars($order['order_number'] ?: $order['id']) ?>
-                                </a>
-                                <div class="as-order-m-date">
-                                    <?= date('M j, Y h:i A', strtotime($order['created_at'])) ?>
-                                </div>
-                            </div>
-                            <div style="text-align: right;">
-                                <span class="badge badge-<?= $stBadge ?>" style="font-size: 0.70rem; padding: 2px 7px;">
-                                    <?= htmlspecialchars($stLabel) ?>
-                                </span>
-                                <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-top: 3px;">
-                                    Tk <?= number_format((float)$order['total']) ?>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="as-order-m-body">
-                            <div class="as-order-m-row">
-                                <span class="as-order-m-lbl">Recipient:</span>
-                                <span style="font-weight: 500; color: #0f172a;"><?= htmlspecialchars(trim(($order['shipping_first_name'] ?? '') . ' ' . ($order['shipping_last_name'] ?? ''))) ?: htmlspecialchars($customerFullName) ?></span>
-                            </div>
-                            <?php if (!empty($order['shipping_phone'])): ?>
-                            <div class="as-order-m-row">
-                                <span class="as-order-m-lbl">Phone:</span>
-                                <a href="tel:<?= htmlspecialchars($order['shipping_phone']) ?>" style="color: #0f766e; text-decoration: none; font-weight: 500;"><?= htmlspecialchars($order['shipping_phone']) ?></a>
-                            </div>
-                            <?php endif; ?>
-                            <div class="as-order-m-row">
-                                <span class="as-order-m-lbl">Payment:</span>
-                                <span>
-                                    <span class="badge badge-<?= $payBadge ?>" style="font-size: 0.68rem; padding: 1px 6px;"><?= htmlspecialchars($payLabel) ?></span>
-                                    <span style="font-size: 0.72rem; color: #64748b; margin-left: 3px;"><?= htmlspecialchars($gatewayName) ?></span>
-                                </span>
-                            </div>
-                            <?php if ((float)($order['advance_payment'] ?? 0) > 0 && !$isPaid): ?>
-                            <div class="as-order-m-row">
-                                <span class="as-order-m-lbl">Advance:</span>
-                                <span style="color: #059669; font-weight: 600;">Tk <?= number_format((float)$order['advance_payment']) ?></span>
-                            </div>
-                            <?php endif; ?>
-                        </div>
-
-                        <div class="as-order-m-actions">
-                            <a href="<?= BASE_URL ?>/admin/order/<?= $order['id'] ?>" class="btn btn-sm btn-outline" style="flex: 1; height: 32px; font-size: 0.76rem; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 5px;">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                                <span>View Details</span>
-                            </a>
-                            <a href="<?= BASE_URL ?>/invoice?order=<?= urlencode($order['order_number']) ?>" target="_blank" class="btn btn-sm btn-outline" style="height: 32px; width: 36px; padding: 0; display: inline-flex; align-items: center; justify-content: center; color: #0f766e; border-color: #0f766e; border-radius: 6px;" title="Print / Download Invoice">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                            </a>
-                        </div>
-                    </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
             </div>
 
             <!-- Standard Pagination -->

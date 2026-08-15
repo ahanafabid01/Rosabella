@@ -317,12 +317,9 @@ $pageTitle = 'Hero Banners';
                 height: 36px !important;
             }
             .admin-table-wrap {
-                display: none !important;
-            }
-            .as-mobile-hero-wrap {
-                display: flex !important;
-                flex-direction: column;
-                gap: 10px;
+                display: block !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch !important;
             }
         }
     </style>
@@ -460,9 +457,13 @@ $pageTitle = 'Hero Banners';
                                         </span>
                                     </td>
                                     <td style="text-align: right;">
-                                        <div class="admin-actions-row" style="justify-content: flex-end; gap: 6px;">
-                                            <a href="?action=edit&id=<?= $slide['id'] ?>" class="btn btn-sm btn-outline" style="height: 28px; font-size: 0.76rem; padding: 0 8px; border-radius: 6px;">Edit</a>
-                                            <a href="?delete=<?= $slide['id'] ?>" class="btn btn-sm btn-outline" style="height: 28px; font-size: 0.76rem; padding: 0 8px; border-radius: 6px; border-color: #ef4444; color: #ef4444;" onclick="return confirm('Are you sure you want to delete this banner?');">Delete</a>
+                                        <div class="admin-actions-row">
+                                            <a href="?action=edit&id=<?= $slide['id'] ?>" class="btn-action-icon edit" title="Edit Banner">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                            </a>
+                                            <a href="?delete=<?= $slide['id'] ?>" class="btn-action-icon delete" onclick="return confirm('Are you sure you want to delete this banner?');" title="Delete Banner">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>
@@ -470,44 +471,6 @@ $pageTitle = 'Hero Banners';
                             <?php endif; ?>
                         </tbody>
                     </table>
-                </div>
-
-                <!-- Mobile Hero Cards (<= 768px) -->
-                <div class="as-mobile-hero-wrap">
-                    <?php if (empty($slides)): ?>
-                        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 2.5rem 1rem; text-align: center; color: #94a3b8;">
-                            No banners found.
-                        </div>
-                    <?php else: ?>
-                        <?php foreach ($slides as $slide): 
-                            $posCfg = $positionMap[$slide['position']] ?? ['label' => ucfirst($slide['position']), 'badge' => 'secondary'];
-                            $imgSrc = !empty($slide['image_path']) ? BASE_URL . '/' . htmlspecialchars($slide['image_path']) : BASE_URL . '/assets/images/placeholder.png';
-                        ?>
-                        <div class="as-hero-m-card">
-                            <div style="display: flex; gap: 10px; align-items: center;">
-                                <img src="<?= $imgSrc ?>" alt="Banner" class="hero-img-preview" style="width: 80px; height: 48px;">
-                                <div style="flex: 1; overflow: hidden;">
-                                    <div style="font-weight: 700; color: #0f172a; font-size: 0.85rem; text-overflow: ellipsis; white-space: nowrap; overflow: hidden;">
-                                        <?= htmlspecialchars($slide['title'] ?: 'No Title') ?>
-                                    </div>
-                                    <div style="display: flex; gap: 6px; align-items: center; margin-top: 3px;">
-                                        <span class="badge badge-<?= $posCfg['badge'] ?>" style="font-size: 0.68rem; padding: 1px 6px;">
-                                            <?= htmlspecialchars($posCfg['label']) ?>
-                                        </span>
-                                        <span class="badge badge-<?= $slide['status'] === 'active' ? 'success' : 'warning' ?>" style="font-size: 0.68rem; padding: 1px 6px;">
-                                            <?= ucfirst($slide['status']) ?>
-                                        </span>
-                                        <span style="font-size: 0.70rem; color: #64748b;">Order: <?= (int)$slide['sort_order'] ?></span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div style="display: flex; justify-content: flex-end; gap: 6px; border-top: 1px dashed #e2e8f0; padding-top: 6px;">
-                                <a href="?action=edit&id=<?= $slide['id'] ?>" class="btn btn-sm btn-outline" style="height: 30px; font-size: 0.76rem; padding: 0 12px; border-radius: 6px;">Edit</a>
-                                <a href="?delete=<?= $slide['id'] ?>" class="btn btn-sm btn-outline" style="height: 30px; font-size: 0.76rem; padding: 0 12px; border-radius: 6px; border-color: #ef4444; color: #ef4444;" onclick="return confirm('Are you sure you want to delete this banner?');">Delete</a>
-                            </div>
-                        </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
                 </div>
 
                 <!-- Pagination System -->
@@ -535,63 +498,6 @@ $pageTitle = 'Hero Banners';
                         </div>
 
                         <div class="admin-two-col-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
-                            <div class="form-group">
-                                <label class="form-label" style="font-weight: 600; color: #0f172a;">Banner Position <span style="color: #ef4444;">*</span></label>
-                                <select name="position" class="form-select" required style="height: 38px;">
-                                    <option value="main" <?= ($editingSlide['position'] ?? '') === 'main' ? 'selected' : '' ?>>Main Slider (1200×600 px)</option>
-                                    <option value="side_top" <?= ($editingSlide['position'] ?? '') === 'side_top' ? 'selected' : '' ?>>Side Banner Top (600×400 px)</option>
-                                    <option value="side_bottom" <?= ($editingSlide['position'] ?? '') === 'side_bottom' ? 'selected' : '' ?>>Side Banner Bottom (600×400 px)</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" style="font-weight: 600; color: #0f172a;">Link URL (Optional)</label>
-                                <input type="text" name="link_url" class="form-input" value="<?= htmlspecialchars($editingSlide['link_url'] ?? '') ?>" placeholder="e.g. category/electronics or /product/slug" style="height: 38px;">
-                            </div>
-                        </div>
-
-                        <div class="admin-two-col-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
-                            <div class="form-group">
-                                <label class="form-label" style="font-weight: 600; color: #0f172a;">Title Text (Optional Overlay)</label>
-                                <input type="text" name="title" class="form-input" value="<?= htmlspecialchars($editingSlide['title'] ?? '') ?>" placeholder="e.g. Mega Summer Clearance" style="height: 38px;">
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label" style="font-weight: 600; color: #0f172a;">Subtitle Text (Optional Overlay)</label>
-                                <input type="text" name="subtitle" class="form-input" value="<?= htmlspecialchars($editingSlide['subtitle'] ?? '') ?>" placeholder="e.g. Up to 60% Off Selected Collections" style="height: 38px;">
-                            </div>
-                        </div>
-
-                        <div class="admin-two-col-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-                            <div class="form-group">
-                                <label class="form-label" style="font-weight: 600; color: #0f172a;">Display Sort Order</label>
-                                <input type="number" name="sort_order" class="form-input" value="<?= isset($editingSlide['sort_order']) ? htmlspecialchars($editingSlide['sort_order']) : '' ?>" placeholder="Leave blank for automatic sequence" style="height: 38px;">
-                                <div style="font-size: 0.74rem; color: #64748b; margin-top: 3px;">Lower numbers appear first. Leave blank to auto-append to the end.</div>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" style="font-weight: 600; color: #0f172a;">Status <span style="color: #ef4444;">*</span></label>
-                                <select name="status" class="form-select" required style="height: 38px;">
-                                    <option value="active" <?= ($editingSlide['status'] ?? '') === 'active' ? 'selected' : '' ?>>Active (Published)</option>
-                                    <option value="inactive" <?= ($editingSlide['status'] ?? '') === 'inactive' ? 'selected' : '' ?>>Inactive (Draft/Hidden)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div style="display: flex; align-items: center; gap: 8px; padding-top: 1rem; border-top: 1px solid #f1f5f9;">
-                            <button type="submit" class="btn btn-primary" style="height: 38px; padding: 0 1.5rem; font-size: 0.85rem; border-radius: 7px;">
-                                <?= $editingSlide ? 'Save Banner Changes' : 'Upload & Publish Banner' ?>
-                            </button>
-                            <a href="<?= BASE_URL ?>/admin/hero" class="btn btn-secondary" style="height: 38px; padding: 0 1rem; font-size: 0.85rem; border-radius: 7px; display: inline-flex; align-items: center;">
-                                Cancel
-                            </a>
-                        </div>
-                    </form>
-                </div>
-            <?php endif; ?>
-        </main>
-    </div>
-    <script src="js/admin.js"></script>
-</body>
-</html>
                             <div class="form-group">
                                 <label class="form-label" style="font-weight: 600; color: #0f172a;">Banner Position <span style="color: #ef4444;">*</span></label>
                                 <select name="position" class="form-select" required style="height: 38px;">

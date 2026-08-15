@@ -263,14 +263,18 @@ $pageTitle = 'Reviews Management';
                         </td>
                         <td><?= intval($review['image_count'] ?? 0) ?></td>
                         <td><?= htmlspecialchars(date('M j, Y', strtotime($review['created_at'] ?? 'now'))) ?></td>
-                        <td>
-                            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: nowrap;">
-                                <a href="<?= BASE_URL ?>/admin/view-review?id=<?= intval($review['id']) ?>" class="btn btn-sm btn-outline" style="white-space: nowrap;">View</a>
-                                <form method="POST" onsubmit="return confirm('Delete this review permanently?');" style="margin: 0;">
+                        <td style="text-align: right;">
+                            <div class="admin-actions-row">
+                                <a href="<?= BASE_URL ?>/admin/view-review?id=<?= intval($review['id']) ?>" class="btn-action-icon view" title="View Review Details">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </a>
+                                <form method="POST" onsubmit="return confirm('Delete this review permanently?');" style="margin: 0; display: inline-block;">
                                     <?= csrfField() ?>
                                     <input type="hidden" name="action" value="delete_review">
                                     <input type="hidden" name="review_id" value="<?= intval($review['id']) ?>">
-                                    <button type="submit" class="btn btn-sm btn-secondary" style="white-space: nowrap;">Delete</button>
+                                    <button type="submit" class="btn-action-icon delete" title="Delete Review">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                    </button>
                                 </form>
                             </div>
                         </td>

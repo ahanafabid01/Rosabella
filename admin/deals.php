@@ -586,8 +586,12 @@ $pageTitle = 'Deals Management';
                                 <td><span class="badge badge-<?= $deal['status'] === 'active' ? 'success' : 'warning' ?>"><?= htmlspecialchars(ucfirst($deal['status'])) ?></span></td>
                                 <td>
                                     <div class="admin-actions-row">
-                                        <a class="btn btn-sm btn-outline" href="?action=edit&id=<?= intval($deal['id']) ?>">Edit</a>
-                                        <a class="btn btn-sm btn-secondary" href="?action=delete&id=<?= intval($deal['id']) ?>" onclick="return confirm('Delete this deal?');">Delete</a>
+                                        <a class="btn-action-icon edit" href="?action=edit&id=<?= intval($deal['id']) ?>" title="Edit Deal">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                        </a>
+                                        <a class="btn-action-icon delete" href="?action=delete&id=<?= intval($deal['id']) ?>" onclick="return confirm('Delete this deal?');" title="Delete Deal">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                        </a>
                                     </div>
                                 </td>
                             </tr>

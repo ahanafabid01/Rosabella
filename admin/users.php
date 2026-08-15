@@ -398,13 +398,12 @@ $pageTitle = 'Staff Management';
                                     <?= csrfField() ?>
                                     <input type="hidden" name="user_id" value="<?= intval($user['id']) ?>">
                                     <input type="hidden" name="delete_user" value="1">
-                                    <button type="submit"
-                                        style="background: transparent; border: 1px solid #fecaca; color: #dc2626; padding: 0.25rem 0.65rem; border-radius: 6px; font-size: 0.78rem; cursor: pointer; font-weight: 500; transition: all 0.15s ease;">
-                                        Delete
+                                    <button type="submit" class="btn-action-icon delete" title="Remove Staff Member">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                                     </button>
                                 </form>
                             <?php else: ?>
-                                <span style="font-size: 0.78rem; color: #94a3b8; font-style: italic;">Protected</span>
+                                <span style="font-size: 0.76rem; color: #94a3b8; font-style: italic;">Protected</span>
                             <?php endif; ?>
                         </td>
                     </tr>

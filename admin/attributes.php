@@ -325,11 +325,15 @@ $pageTitle = 'Attributes Management';
                                         </div>
                                     </td>
                                     <td style="text-align: right;">
-                                        <div class="admin-actions-row" style="justify-content: flex-end;">
-                                            <a class="btn btn-sm btn-outline" href="?action=edit&id=<?= $attr['id'] ?>">Edit</a>
+                                        <div class="admin-actions-row">
+                                            <a class="btn-action-icon edit" href="?action=edit&id=<?= $attr['id'] ?>" title="Edit Attribute">
+                                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                            </a>
                                             <form method="POST" action="?action=delete&id=<?= $attr['id'] ?>" style="display:inline;" onsubmit="return confirm('Delete this attribute?')">
                                                 <?= csrfField() ?>
-                                                <button type="submit" class="btn btn-sm btn-secondary">Delete</button>
+                                                <button type="submit" class="btn-action-icon delete" title="Delete Attribute">
+                                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                                </button>
                                             </form>
                                         </div>
                                     </td>
@@ -480,76 +484,6 @@ $pageTitle = 'Attributes Management';
                             <?php foreach ($allCategories as $cat): ?>
                                 <?php $isAssigned = in_array(intval($cat['id']), $assignedCategoryIds, true); ?>
                                 <label style="display: flex; align-items: center; gap: 8px; font-size: 0.82rem; font-weight: 600; color: #334155; cursor: pointer; padding: 8px 10px; border-radius: 6px; background: #f8fafc; border: 1px solid #e2e8f0; transition: background 0.15s ease;">
-                                    <input type="checkbox" name="categories[]" value="<?= $cat['id'] ?>" <?= $isAssigned ? 'checked' : '' ?> style="width: 16px; height: 16px; flex-shrink: 0; cursor: pointer;">
-                                    <span style="line-height: 1.3;"><?= htmlspecialchars($cat['name']) ?></span>
-                                </label>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-
-                    <div style="display: flex; gap: 0.75rem; align-items: center; margin-top: 1.5rem; flex-wrap: wrap;">
-                        <button class="btn btn-primary" type="submit" style="padding: 0.65rem 1.75rem; font-size: 0.875rem;">Save Attribute</button>
-                        <a class="btn btn-secondary" href="attributes.php" style="padding: 0.65rem 1.5rem; font-size: 0.875rem;">Cancel</a>
-                    </div>
-                </form>
-            </div>
-        <?php endif; ?>
-    </main>
-</div>
-<script src="js/admin.js"></script>
-<script src="../assets/js/color-picker-autocomplete.js"></script>
-<script>
-function toggleCategoryGrid(applyToAll) {
-    const grid = document.getElementById('category-checkboxes-grid');
-    if (grid) {
-        if (applyToAll) {
-            grid.style.opacity = '0.5';
-            grid.style.pointerEvents = 'none';
-        } else {
-            grid.style.opacity = '1';
-            grid.style.pointerEvents = 'auto';
-        }
-    }
-}
-
-let colorPickerInited = false;
-function handleTypeChange() {
-    const typeSelect = document.getElementById('attr_type_select');
-    const colorWidget = document.getElementById('color-swatch-picker-widget');
-    if (typeSelect && colorWidget) {
-        if (typeSelect.value === 'color') {
-            colorWidget.style.display = 'block';
-            if (!colorPickerInited && window.initColorSearchPicker) {
-                window.initColorSearchPicker('color-swatch-picker-widget', 'attr_values_input');
-                colorPickerInited = true;
-            }
-        } else {
-            colorWidget.style.display = 'none';
-        }
-    }
-}
-
-function loadPreset(name, type, values) {
-    document.getElementById('attr_name_input').value = name;
-    document.getElementById('attr_type_select').value = type;
-    document.getElementById('attr_values_input').value = values;
-    handleTypeChange();
-    if (type === 'color' && window.initColorSearchPicker) {
-        const input = document.getElementById('attr_values_input');
-        if (input) input.dispatchEvent(new Event('input'));
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    const typeSelect = document.getElementById('attr_type_select');
-    if (typeSelect) {
-        typeSelect.addEventListener('change', handleTypeChange);
-        handleTypeChange();
-    }
-});
-</script>
-</body>
-</html>
                                     <input type="checkbox" name="categories[]" value="<?= $cat['id'] ?>" <?= $isAssigned ? 'checked' : '' ?> style="width: 16px; height: 16px; flex-shrink: 0; cursor: pointer;">
                                     <span style="line-height: 1.3;"><?= htmlspecialchars($cat['name']) ?></span>
                                 </label>
