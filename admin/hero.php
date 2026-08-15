@@ -592,3 +592,60 @@ $pageTitle = 'Hero Banners';
     <script src="js/admin.js"></script>
 </body>
 </html>
+                            <div class="form-group">
+                                <label class="form-label" style="font-weight: 600; color: #0f172a;">Banner Position <span style="color: #ef4444;">*</span></label>
+                                <select name="position" class="form-select" required style="height: 38px;">
+                                    <option value="main" <?= ($editingSlide['position'] ?? '') === 'main' ? 'selected' : '' ?>>Main Slider (1200×600 px)</option>
+                                    <option value="side_top" <?= ($editingSlide['position'] ?? '') === 'side_top' ? 'selected' : '' ?>>Side Banner Top (600×400 px)</option>
+                                    <option value="side_bottom" <?= ($editingSlide['position'] ?? '') === 'side_bottom' ? 'selected' : '' ?>>Side Banner Bottom (600×400 px)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" style="font-weight: 600; color: #0f172a;">Link URL (Optional)</label>
+                                <input type="text" name="link_url" class="form-input" value="<?= htmlspecialchars($editingSlide['link_url'] ?? '') ?>" placeholder="e.g. category/electronics or /product/slug" style="height: 38px;">
+                            </div>
+                        </div>
+
+                        <div class="admin-two-col-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
+                            <div class="form-group">
+                                <label class="form-label" style="font-weight: 600; color: #0f172a;">Title Text (Optional Overlay)</label>
+                                <input type="text" name="title" class="form-input" value="<?= htmlspecialchars($editingSlide['title'] ?? '') ?>" placeholder="e.g. Mega Summer Clearance" style="height: 38px;">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" style="font-weight: 600; color: #0f172a;">Subtitle Text (Optional Overlay)</label>
+                                <input type="text" name="subtitle" class="form-input" value="<?= htmlspecialchars($editingSlide['subtitle'] ?? '') ?>" placeholder="e.g. Up to 60% Off Selected Collections" style="height: 38px;">
+                            </div>
+                        </div>
+
+                        <div class="admin-two-col-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                            <div class="form-group">
+                                <label class="form-label" style="font-weight: 600; color: #0f172a;">Display Sort Order</label>
+                                <input type="number" name="sort_order" class="form-input" value="<?= isset($editingSlide['sort_order']) ? htmlspecialchars($editingSlide['sort_order']) : '' ?>" placeholder="Leave blank for automatic sequence" style="height: 38px;">
+                                <div style="font-size: 0.74rem; color: #64748b; margin-top: 3px;">Lower numbers appear first. Leave blank to auto-append to the end.</div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" style="font-weight: 600; color: #0f172a;">Status <span style="color: #ef4444;">*</span></label>
+                                <select name="status" class="form-select" required style="height: 38px;">
+                                    <option value="active" <?= ($editingSlide['status'] ?? '') === 'active' ? 'selected' : '' ?>>Active (Published)</option>
+                                    <option value="inactive" <?= ($editingSlide['status'] ?? '') === 'inactive' ? 'selected' : '' ?>>Inactive (Draft/Hidden)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 8px; padding-top: 1rem; border-top: 1px solid #f1f5f9;">
+                            <button type="submit" class="btn btn-primary" style="height: 38px; padding: 0 1.5rem; font-size: 0.85rem; border-radius: 7px;">
+                                <?= $editingSlide ? 'Save Banner Changes' : 'Upload & Publish Banner' ?>
+                            </button>
+                            <a href="<?= BASE_URL ?>/admin/hero" class="btn btn-secondary" style="height: 38px; padding: 0 1rem; font-size: 0.85rem; border-radius: 7px; display: inline-flex; align-items: center;">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            <?php endif; ?>
+        </main>
+    </div>
+    <script src="js/admin.js"></script>
+</body>
+</html>

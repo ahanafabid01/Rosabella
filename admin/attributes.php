@@ -550,3 +550,73 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+                                    <input type="checkbox" name="categories[]" value="<?= $cat['id'] ?>" <?= $isAssigned ? 'checked' : '' ?> style="width: 16px; height: 16px; flex-shrink: 0; cursor: pointer;">
+                                    <span style="line-height: 1.3;"><?= htmlspecialchars($cat['name']) ?></span>
+                                </label>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 0.75rem; align-items: center; margin-top: 1.5rem; flex-wrap: wrap;">
+                        <button class="btn btn-primary" type="submit" style="padding: 0.65rem 1.75rem; font-size: 0.875rem;">Save Attribute</button>
+                        <a class="btn btn-secondary" href="attributes.php" style="padding: 0.65rem 1.5rem; font-size: 0.875rem;">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        <?php endif; ?>
+    </main>
+</div>
+<script src="js/admin.js"></script>
+<script src="../assets/js/color-picker-autocomplete.js"></script>
+<script>
+function toggleCategoryGrid(applyToAll) {
+    const grid = document.getElementById('category-checkboxes-grid');
+    if (grid) {
+        if (applyToAll) {
+            grid.style.opacity = '0.5';
+            grid.style.pointerEvents = 'none';
+        } else {
+            grid.style.opacity = '1';
+            grid.style.pointerEvents = 'auto';
+        }
+    }
+}
+
+let colorPickerInited = false;
+function handleTypeChange() {
+    const typeSelect = document.getElementById('attr_type_select');
+    const colorWidget = document.getElementById('color-swatch-picker-widget');
+    if (typeSelect && colorWidget) {
+        if (typeSelect.value === 'color') {
+            colorWidget.style.display = 'block';
+            if (!colorPickerInited && window.initColorSearchPicker) {
+                window.initColorSearchPicker('color-swatch-picker-widget', 'attr_values_input');
+                colorPickerInited = true;
+            }
+        } else {
+            colorWidget.style.display = 'none';
+        }
+    }
+}
+
+function loadPreset(name, type, values) {
+    document.getElementById('attr_name_input').value = name;
+    document.getElementById('attr_type_select').value = type;
+    document.getElementById('attr_values_input').value = values;
+    handleTypeChange();
+    if (type === 'color' && window.initColorSearchPicker) {
+        const input = document.getElementById('attr_values_input');
+        if (input) input.dispatchEvent(new Event('input'));
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const typeSelect = document.getElementById('attr_type_select');
+    if (typeSelect) {
+        typeSelect.addEventListener('change', handleTypeChange);
+        handleTypeChange();
+    }
+});
+</script>
+</body>
+</html>
