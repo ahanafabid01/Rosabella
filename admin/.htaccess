@@ -35,4 +35,5 @@ RewriteRule ^coupons/?$                 coupons.php         [L,QSA]
 RewriteRule ^hero/?$                    hero.php            [L,QSA]
 RewriteRule ^settings/?$                settings.php        [L,QSA]
 RewriteRule ^notifications/?$           notifications.php    [L,QSA]
+RewriteRule ^customers/?$               customers.php       [L,QSA]
 

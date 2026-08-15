@@ -895,8 +895,8 @@ $lowStockProducts = $db->query("
                         </div>
                     </a>
 
-                    <!-- Registered Users -->
-                    <a href="<?= BASE_URL ?>/admin/users" class="dash-kpi-card">
+                    <!-- Registered Customers -->
+                    <a href="<?= BASE_URL ?>/admin/customers" class="dash-kpi-card">
                         <div class="dash-kpi-top">
                             <span class="dash-kpi-label">Customers</span>
                             <div class="dash-kpi-bubble indigo">
