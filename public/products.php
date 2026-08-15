@@ -85,6 +85,23 @@ $totalPages = ceil($totalProducts / $perPage);
 // Get categories for sidebar
 $stmt = $db->query("SELECT * FROM categories WHERE status = 'active' ORDER BY name");
 $categories = $stmt->fetchAll();
+
+// Helper to generate clean pagination URLs preserving active query filters
+if (!function_exists('getCatalogPageUrl')) {
+    function getCatalogPageUrl($pageNum, $baseUrl, $category) {
+        $params = $_GET;
+        if ($category) {
+            unset($params['category']);
+        }
+        if ($pageNum > 1) {
+            $params['page'] = $pageNum;
+        } else {
+            unset($params['page']);
+        }
+        $qs = http_build_query($params);
+        return $baseUrl . ($qs ? '?' . $qs : '');
+    }
+}
 ?>
 
     <!-- Page Header -->
@@ -461,26 +478,76 @@ $categories = $stmt->fetchAll();
                         
                         <!-- Pagination -->
                         <?php if ($totalPages > 1): ?>
-                            <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 2rem;">
-                                <?php if ($page > 1): ?>
-                                    <a href="<?= $baseUrl ?>?<?= http_build_query(array_merge($_GET, ['page' => $page - 1])) ?>" class="btn btn-secondary">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <polyline points="15 18 9 12 15 6"/>
-                                        </svg>
-                                    </a>
-                                <?php endif; ?>
-                                
-                                <?php for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++): ?>
-                                    <a href="<?= $baseUrl ?>?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>" class="btn <?= $i === $page ? 'btn-primary' : 'btn-secondary' ?>"><?= $i ?></a>
-                                <?php endfor; ?>
-                                
-                                <?php if ($page < $totalPages): ?>
-                                    <a href="<?= $baseUrl ?>?<?= http_build_query(array_merge($_GET, ['page' => $page + 1])) ?>" class="btn btn-secondary">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <polyline points="9 18 15 12 9 6"/>
-                                        </svg>
-                                    </a>
-                                <?php endif; ?>
+                            <?php
+                            $fromItem = ($totalProducts > 0) ? $offset + 1 : 0;
+                            $toItem   = min($offset + $perPage, $totalProducts);
+                            ?>
+                            <div class="catalog-pagination-wrapper">
+                                <div class="catalog-pagination-info">
+                                    Showing <strong><?= $fromItem ?>–<?= $toItem ?></strong> of <strong><?= $totalProducts ?></strong> products
+                                </div>
+
+                                <nav class="catalog-pagination" aria-label="Product catalog pagination">
+                                    <!-- Prev Button -->
+                                    <?php if ($page > 1): ?>
+                                        <a href="<?= getCatalogPageUrl($page - 1, $baseUrl, $category) ?>" class="page-btn page-btn-prev" aria-label="Previous page">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                <polyline points="15 18 9 12 15 6"/>
+                                            </svg>
+                                            <span class="page-btn-text">Prev</span>
+                                        </a>
+                                    <?php else: ?>
+                                        <span class="page-btn page-btn-prev disabled" aria-disabled="true">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                <polyline points="15 18 9 12 15 6"/>
+                                            </svg>
+                                            <span class="page-btn-text">Prev</span>
+                                        </span>
+                                    <?php endif; ?>
+
+                                    <!-- Smart Page Numbers with Ellipsis -->
+                                    <?php
+                                    $range = 2; // Range around current page
+                                    $start = max(1, $page - $range);
+                                    $end   = min($totalPages, $page + $range);
+
+                                    if ($start > 1) {
+                                        echo '<a href="' . getCatalogPageUrl(1, $baseUrl, $category) . '" class="page-btn ' . (1 === $page ? 'active' : '') . '">1</a>';
+                                        if ($start > 2) {
+                                            echo '<span class="page-ellipsis">&hellip;</span>';
+                                        }
+                                    }
+
+                                    for ($i = $start; $i <= $end; $i++) {
+                                        $isActive = ($i === $page);
+                                        echo '<a href="' . getCatalogPageUrl($i, $baseUrl, $category) . '" class="page-btn ' . ($isActive ? 'active' : '') . '" ' . ($isActive ? 'aria-current="page"' : '') . '>' . $i . '</a>';
+                                    }
+
+                                    if ($end < $totalPages) {
+                                        if ($end < $totalPages - 1) {
+                                            echo '<span class="page-ellipsis">&hellip;</span>';
+                                        }
+                                        echo '<a href="' . getCatalogPageUrl($totalPages, $baseUrl, $category) . '" class="page-btn ' . ($totalPages === $page ? 'active' : '') . '">' . $totalPages . '</a>';
+                                    }
+                                    ?>
+
+                                    <!-- Next Button -->
+                                    <?php if ($page < $totalPages): ?>
+                                        <a href="<?= getCatalogPageUrl($page + 1, $baseUrl, $category) ?>" class="page-btn page-btn-next" aria-label="Next page">
+                                            <span class="page-btn-text">Next</span>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                <polyline points="9 18 15 12 9 6"/>
+                                            </svg>
+                                        </a>
+                                    <?php else: ?>
+                                        <span class="page-btn page-btn-next disabled" aria-disabled="true">
+                                            <span class="page-btn-text">Next</span>
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                <polyline points="9 18 15 12 9 6"/>
+                                            </svg>
+                                        </span>
+                                    <?php endif; ?>
+                                </nav>
                             </div>
                         <?php endif; ?>
                     <?php endif; ?>

@@ -571,6 +571,50 @@ function getThemeCSS($theme = null) {
                 padding: 0.55rem 0.7rem;
             }
 
+            /* Clothing Brand Pagination (Minimalist Luxury Look) */
+            .theme-clothing-brand .catalog-pagination-wrapper {
+                border-top: 1px solid var(--color-border-light);
+                margin-top: 3.5rem;
+                padding-top: 2.5rem;
+            }
+
+            .theme-clothing-brand .catalog-pagination-info {
+                font-size: 0.75rem;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: var(--color-text-light);
+            }
+
+            .theme-clothing-brand .page-btn {
+                border-radius: 0;
+                border: 1px solid var(--color-border-light);
+                background: #fffefd;
+                color: #1c1917;
+                font-size: 0.78rem;
+                font-weight: 700;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+            }
+
+            .theme-clothing-brand .page-btn:hover {
+                border-color: #1c1917;
+                background: #f7f5f2;
+                color: #1c1917;
+            }
+
+            .theme-clothing-brand .page-btn.active {
+                background: #1c1917;
+                border-color: #1c1917;
+                color: #fffefd;
+                box-shadow: none;
+            }
+
+            .theme-clothing-brand .page-btn.disabled {
+                border-color: var(--color-border-light);
+                background: transparent;
+                opacity: 0.3;
+            }
+
             @media (min-width: 1024px) {
                 .theme-clothing-brand .products-layout.filters-hidden {
                     grid-template-columns: 1fr;
