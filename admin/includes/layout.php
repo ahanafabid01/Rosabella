@@ -117,10 +117,9 @@ if (!function_exists('renderAdminSidebar')) {
                         'key'      => 'marketing_group',
                         'label'    => 'Marketing',
                         'icon'     => 'coupons',
-                        'active_in'=> ['coupons', 'hero', 'reviews'],
+                        'active_in'=> ['coupons', 'reviews'],
                         'subitems' => [
                             ['href' => $base . '/admin/coupons', 'label' => 'Coupons & Vouchers', 'key' => 'coupons'],
-                            ['href' => $base . '/admin/hero', 'label' => 'Hero Banners', 'key' => 'hero'],
                             ['href' => $base . '/admin/reviews', 'label' => 'Customer Reviews', 'key' => 'reviews'],
                         ]
                     ],
@@ -136,7 +135,7 @@ if (!function_exists('renderAdminSidebar')) {
                         'icon'     => 'users',
                         'active_in'=> ['users', 'notifications'],
                         'subitems' => [
-                            ['href' => $base . '/admin/users', 'label' => 'Staff / Users', 'key' => 'users'],
+                            ['href' => $base . '/admin/users', 'label' => 'Staffs', 'key' => 'users'],
                             ['href' => $base . '/admin/notifications', 'label' => 'Notifications', 'key' => 'notifications', 'badge' => $sidebarUnread],
                         ]
                     ],
@@ -145,9 +144,10 @@ if (!function_exists('renderAdminSidebar')) {
                         'key'      => 'settings_group',
                         'label'    => 'Website & Settings',
                         'icon'     => 'settings',
-                        'active_in'=> ['website', 'settings'],
+                        'active_in'=> ['website', 'hero', 'settings'],
                         'subitems' => [
                             ['href' => $base . '/admin/website-settings', 'label' => 'Website & Theme', 'key' => 'website'],
+                            ['href' => $base . '/admin/hero', 'label' => 'Hero Banners', 'key' => 'hero'],
                             ['href' => $base . '/admin/settings', 'label' => 'Admin Settings', 'key' => 'settings'],
                         ]
                     ],
