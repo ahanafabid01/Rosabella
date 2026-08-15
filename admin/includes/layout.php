@@ -112,8 +112,23 @@ if (!function_exists('renderAdminSidebar')) {
 if (!function_exists('renderAdminTopbar')) {
     function renderAdminTopbar(string $pageTitle): void
     {
-        $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Admin');
-        $initials = strtoupper(substr($userName, 0, 2));
+        $userName   = htmlspecialchars($_SESSION['user_name'] ?? 'Admin');
+        $userAvatar = $_SESSION['user_avatar'] ?? null;
+
+        if ($userAvatar === null && isset($_SESSION['user_id'])) {
+            try {
+                $db = getDB();
+                $avStmt = $db->prepare("SELECT avatar FROM users WHERE id = ?");
+                $avStmt->execute([(int)$_SESSION['user_id']]);
+                $userAvatar = $avStmt->fetchColumn() ?: '';
+                $_SESSION['user_avatar'] = $userAvatar;
+            } catch (Throwable $e) {
+                $userAvatar = '';
+            }
+        }
+
+        $avatarSrc = resolveAdminImageSrc($userAvatar);
+        $initials  = strtoupper(substr(trim($_SESSION['user_name'] ?? 'AD'), 0, 2));
         ?>
         <div class="admin-topbar">
             <div class="admin-topbar-left">
@@ -186,7 +201,11 @@ if (!function_exists('renderAdminTopbar')) {
                 </div>
                 <!-- ===== End Notification Bell ===== -->
                 <a href="<?= BASE_URL ?>/admin/settings?tab=profile" class="admin-topbar-profile-pill" style="text-decoration: none; cursor: pointer;" title="Admin Profile & Settings">
-                    <div class="admin-topbar-avatar"><?= $initials ?></div>
+                    <?php if (!empty($userAvatar)): ?>
+                        <img src="<?= htmlspecialchars($avatarSrc) ?>" alt="<?= $userName ?>" class="admin-topbar-avatar" style="object-fit: cover; border-radius: 6px;">
+                    <?php else: ?>
+                        <div class="admin-topbar-avatar"><?= $initials ?></div>
+                    <?php endif; ?>
                     <span class="admin-topbar-name"><?= $userName ?></span>
                 </a>
                 <a href="<?= BASE_URL ?>/logout" class="admin-topbar-icon admin-topbar-logout" aria-label="Log Out">

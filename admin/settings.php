@@ -6,6 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../includes/image_helper.php';
 require_once __DIR__ . '/includes/layout.php';
 
 if (!isLoggedIn() || !isAdmin()) {
@@ -85,44 +86,81 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_admin_profile'
     $currentPw = $_POST['current_password'] ?? '';
     $newPw     = $_POST['new_password'] ?? '';
     $confirmPw = $_POST['confirm_password'] ?? '';
+    $removeAv  = ($_POST['remove_avatar'] ?? '0') === '1';
 
     if (empty($firstName) || empty($email)) {
         $error = 'First name and email are required.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = 'Please provide a valid email address.';
     } else {
-        // Verify email unique among other users
-        $checkStmt = $db->prepare("SELECT id, password FROM users WHERE id = ?");
+        // Fetch current user row
+        $checkStmt = $db->prepare("SELECT id, password, avatar FROM users WHERE id = ?");
         $checkStmt->execute([$adminId]);
         $currUser = $checkStmt->fetch();
 
+        // Verify email unique among other users
         $dupStmt = $db->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
         $dupStmt->execute([$email, $adminId]);
         if ($dupStmt->fetch()) {
             $error = 'This email address is already in use by another account.';
         } else {
-            // Check if password change requested
-            if (!empty($newPw)) {
-                if (empty($currentPw) || !password_verify($currentPw, $currUser['password'])) {
-                    $error = 'Current password is incorrect.';
-                } elseif (strlen($newPw) < 6) {
-                    $error = 'New password must be at least 6 characters long.';
-                } elseif ($newPw !== $confirmPw) {
-                    $error = 'New password and confirmation do not match.';
-                } else {
-                    $hashed = password_hash($newPw, PASSWORD_DEFAULT);
-                    $upd = $db->prepare("UPDATE users SET first_name = ?, last_name = ?, email = ?, password = ? WHERE id = ?");
-                    $upd->execute([$firstName, $lastName, $email, $hashed, $adminId]);
-                    $_SESSION['user_name'] = $firstName . ' ' . $lastName;
-                    $_SESSION['user_email'] = $email;
-                    $message = 'Profile and password updated successfully.';
+            $avatarPath = $currUser['avatar'] ?? null;
+
+            // Handle Avatar Removal
+            if ($removeAv && !empty($avatarPath)) {
+                $oldFile = __DIR__ . '/../' . ltrim($avatarPath, '/');
+                if (file_exists($oldFile) && is_file($oldFile)) {
+                    @unlink($oldFile);
                 }
-            } else {
-                $upd = $db->prepare("UPDATE users SET first_name = ?, last_name = ?, email = ? WHERE id = ?");
-                $upd->execute([$firstName, $lastName, $email, $adminId]);
-                $_SESSION['user_name'] = $firstName . ' ' . $lastName;
-                $_SESSION['user_email'] = $email;
-                $message = 'Profile details updated successfully.';
+                $avatarPath = null;
+            }
+
+            // Handle Avatar Upload
+            if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+                $uploadDir = __DIR__ . '/../assets/uploads/avatars/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
+                $newPath = optimizeAndSaveImage($_FILES['avatar'], $uploadDir, 400);
+                if ($newPath) {
+                    if (!empty($avatarPath) && $avatarPath !== $newPath) {
+                        $oldFile = __DIR__ . '/../' . ltrim($avatarPath, '/');
+                        if (file_exists($oldFile) && is_file($oldFile)) {
+                            @unlink($oldFile);
+                        }
+                    }
+                    $avatarPath = $newPath;
+                } else {
+                    $error = 'Failed to process avatar image.';
+                }
+            }
+
+            if (!$error) {
+                // Check if password change requested
+                if (!empty($newPw)) {
+                    if (empty($currentPw) || !password_verify($currentPw, $currUser['password'])) {
+                        $error = 'Current password is incorrect.';
+                    } elseif (strlen($newPw) < 6) {
+                        $error = 'New password must be at least 6 characters long.';
+                    } elseif ($newPw !== $confirmPw) {
+                        $error = 'New password and confirmation do not match.';
+                    } else {
+                        $hashed = password_hash($newPw, PASSWORD_DEFAULT);
+                        $upd = $db->prepare("UPDATE users SET first_name = ?, last_name = ?, email = ?, password = ?, avatar = ? WHERE id = ?");
+                        $upd->execute([$firstName, $lastName, $email, $hashed, $avatarPath, $adminId]);
+                        $_SESSION['user_name'] = trim($firstName . ' ' . $lastName);
+                        $_SESSION['user_email'] = $email;
+                        $_SESSION['user_avatar'] = $avatarPath;
+                        $message = 'Profile details, picture, and password updated successfully.';
+                    }
+                } else {
+                    $upd = $db->prepare("UPDATE users SET first_name = ?, last_name = ?, email = ?, avatar = ? WHERE id = ?");
+                    $upd->execute([$firstName, $lastName, $email, $avatarPath, $adminId]);
+                    $_SESSION['user_name'] = trim($firstName . ' ' . $lastName);
+                    $_SESSION['user_email'] = $email;
+                    $_SESSION['user_avatar'] = $avatarPath;
+                    $message = 'Profile details updated successfully.';
+                }
             }
         }
     }
@@ -160,12 +198,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_clear_cache'])
 }
 
 // Fetch current admin user info
-$adminStmt = $db->prepare("SELECT first_name, last_name, email, role, created_at FROM users WHERE id = ?");
+$adminStmt = $db->prepare("SELECT first_name, last_name, email, avatar, role, created_at FROM users WHERE id = ?");
 $adminStmt->execute([(int)$_SESSION['user_id']]);
 $adminProfile = $adminStmt->fetch() ?: [
     'first_name' => 'Admin',
     'last_name' => '',
     'email' => 'admin@rosabella.com',
+    'avatar' => null,
     'role' => 'admin',
     'created_at' => date('Y-m-d H:i:s')
 ];
@@ -779,35 +818,105 @@ $pageTitle = 'Admin Settings';
 
                 <!-- ── TAB 4: Admin Profile & Credentials ── -->
                 <div id="tab-profile" class="as-tab-panel <?= $activeTab === 'profile' ? 'active' : '' ?>">
-                    <form method="POST">
+                    <form method="POST" enctype="multipart/form-data" id="adminProfileForm">
                         <?= csrfField() ?>
+                        <input type="hidden" name="remove_avatar" id="removeAvatarInput" value="0">
                         
                         <div class="as-section-card">
                             <div class="as-card-header">
                                 <div>
                                     <h3 class="as-card-title">
                                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                                        Current Administrator Account
+                                        Administrator Identity & Profile
                                     </h3>
-                                    <div class="as-card-sub">Manage your active admin display name, contact email, and login credentials.</div>
+                                    <div class="as-card-sub">Manage your profile photo, display identity, and administrative authentication.</div>
+                                </div>
+                            </div>
+
+                            <!-- Executive Profile Identity Header Card -->
+                            <?php 
+                            $currAvatar = $adminProfile['avatar'] ?? '';
+                            $hasAvatar = !empty($currAvatar);
+                            $avatarSrc = resolveAdminImageSrc($currAvatar);
+                            $profileInitials = strtoupper(substr(trim(($adminProfile['first_name'] ?? 'A') . ' ' . ($adminProfile['last_name'] ?? '')), 0, 2));
+                            if (empty($profileInitials)) $profileInitials = 'AD';
+                            ?>
+                            <div style="background: linear-gradient(135deg, #f8fafc 0%, #f0fdfa 100%); border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.25rem 1.4rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1.25rem;">
+                                <!-- Left: Avatar + Identity Info -->
+                                <div style="display: flex; align-items: center; gap: 1.15rem;">
+                                    <!-- Interactive Avatar Frame with Camera Edit Badge -->
+                                    <div style="position: relative; width: 76px; height: 76px; flex-shrink: 0; cursor: pointer;" onclick="document.getElementById('avatarFileInput').click()" title="Click to upload new picture">
+                                        <div id="avatarPreviewContainer" style="width: 100%; height: 100%; border-radius: 50%; border: 3px solid #ffffff; background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%); display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);">
+                                            <?php if ($hasAvatar): ?>
+                                                <img id="avatarPreviewImg" src="<?= htmlspecialchars($avatarSrc) ?>" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
+                                                <span id="avatarPreviewInitials" style="font-size: 1.5rem; font-weight: 700; color: #0f766e; display: none;"><?= $profileInitials ?></span>
+                                            <?php else: ?>
+                                                <img id="avatarPreviewImg" src="" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                                                <span id="avatarPreviewInitials" style="font-size: 1.5rem; font-weight: 700; color: #0f766e;"><?= $profileInitials ?></span>
+                                            <?php endif; ?>
+                                        </div>
+                                        <!-- Floating Camera Icon Badge -->
+                                        <div style="position: absolute; right: -2px; bottom: -2px; width: 26px; height: 26px; border-radius: 50%; background: #0f766e; color: #ffffff; border: 2.5px solid #ffffff; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.18);">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                                        </div>
+                                    </div>
+
+                                    <!-- Name, Role & Email Details -->
+                                    <div>
+                                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                            <h3 style="margin: 0; font-size: 1.12rem; font-weight: 700; color: #0f172a; font-family: var(--admin-heading-font); letter-spacing: -0.01em;">
+                                                <?= htmlspecialchars(trim(($adminProfile['first_name'] ?? 'Admin') . ' ' . ($adminProfile['last_name'] ?? ''))) ?>
+                                            </h3>
+                                            <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; font-size: 0.68rem; font-weight: 600; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; text-transform: uppercase; letter-spacing: 0.04em;">
+                                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                                <span><?= htmlspecialchars(ucfirst($adminProfile['role'] ?? 'Admin')) ?></span>
+                                            </span>
+                                        </div>
+                                        <div style="font-size: 0.8rem; color: #64748b; margin-top: 3px; font-weight: 400;"><?= htmlspecialchars($adminProfile['email'] ?? '') ?></div>
+                                        <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">Administrator since <?= date('M Y', strtotime($adminProfile['created_at'] ?? 'now')) ?></div>
+                                    </div>
+                                </div>
+
+                                <!-- Right: Action Upload & Remove Controls -->
+                                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <label for="avatarFileInput" class="btn btn-primary" style="height: 35px; font-size: 0.81rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 0 1rem; border-radius: 8px; font-weight: 500;">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                            <span>Upload Photo</span>
+                                        </label>
+                                        <input type="file" name="avatar" id="avatarFileInput" accept="image/jpeg,image/png,image/webp" style="display: none;" onchange="previewAvatarImage(this)">
+
+                                        <button type="button" id="removeAvatarBtn" class="btn btn-outline" style="height: 35px; font-size: 0.81rem; color: #ef4444; border-color: #fecaca; background: #fff; border-radius: 8px; <?= $hasAvatar ? '' : 'display: none;' ?>" onclick="markAvatarForRemoval()" title="Remove current photo">
+                                            Remove
+                                        </button>
+                                    </div>
+                                    <div style="font-size: 0.72rem; color: #64748b; text-align: right;">
+                                        JPG, PNG or WebP &bull; 400&times;400 auto-optimized
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="as-row">
                                 <div class="as-row-info">
-                                    <h4>Admin Name</h4>
-                                    <p>Your full display name across admin logs and audit trails.</p>
+                                    <h4>Display Name</h4>
+                                    <p>Your full administrator name displayed across admin topbar, activity logs, and receipts.</p>
                                 </div>
-                                <div class="as-input-wrap" style="gap: 8px;">
-                                    <input type="text" name="first_name" class="as-input" placeholder="First Name" value="<?= htmlspecialchars($adminProfile['first_name'] ?? '') ?>" required>
-                                    <input type="text" name="last_name" class="as-input" placeholder="Last Name" value="<?= htmlspecialchars($adminProfile['last_name'] ?? '') ?>">
+                                <div class="as-input-wrap" style="gap: 10px;">
+                                    <div style="width: 100%;">
+                                        <label style="display: block; font-size: 0.72rem; font-weight: 500; color: #64748b; margin-bottom: 3px;">First Name</label>
+                                        <input type="text" name="first_name" class="as-input" placeholder="First Name" value="<?= htmlspecialchars($adminProfile['first_name'] ?? '') ?>" required>
+                                    </div>
+                                    <div style="width: 100%;">
+                                        <label style="display: block; font-size: 0.72rem; font-weight: 500; color: #64748b; margin-bottom: 3px;">Last Name</label>
+                                        <input type="text" name="last_name" class="as-input" placeholder="Last Name" value="<?= htmlspecialchars($adminProfile['last_name'] ?? '') ?>">
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="as-row">
                                 <div class="as-row-info">
-                                    <h4>Account Email</h4>
-                                    <p>Your login email address for administrative authentication.</p>
+                                    <h4>Login Email Address</h4>
+                                    <p>Your primary email address used for administrative login credentials and two-factor alerts.</p>
                                 </div>
                                 <div class="as-input-wrap">
                                     <input type="email" name="email" class="as-input" value="<?= htmlspecialchars($adminProfile['email'] ?? '') ?>" required>
@@ -1016,6 +1125,49 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btn) switchAdminTab(initialTab, btn);
     }
 });
+
+function previewAvatarImage(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.getElementById('avatarPreviewImg');
+            const initials = document.getElementById('avatarPreviewInitials');
+            const removeInput = document.getElementById('removeAvatarInput');
+            const removeBtn = document.getElementById('removeAvatarBtn');
+            if (removeInput) removeInput.value = '0';
+            if (removeBtn) removeBtn.style.display = 'inline-block';
+            if (img) {
+                img.src = e.target.result;
+                img.style.display = 'block';
+            }
+            if (initials) {
+                initials.style.display = 'none';
+            }
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function markAvatarForRemoval() {
+    const removeInput = document.getElementById('removeAvatarInput');
+    const img = document.getElementById('avatarPreviewImg');
+    const initials = document.getElementById('avatarPreviewInitials');
+    const fileInput = document.getElementById('avatarFileInput');
+    const removeBtn = document.getElementById('removeAvatarBtn');
+
+    if (removeInput) removeInput.value = '1';
+    if (fileInput) fileInput.value = '';
+    if (img) {
+        img.src = '';
+        img.style.display = 'none';
+    }
+    if (initials) {
+        initials.style.display = 'block';
+    }
+    if (removeBtn) {
+        removeBtn.style.display = 'none';
+    }
+}
 </script>
 </body>
 </html>
