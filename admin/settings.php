@@ -170,11 +170,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_admin_profile'
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_optimize_db'])) {
     $activeTab = 'maintenance';
     try {
-        $tables = ['products', 'orders', 'order_items', 'users', 'categories', 'cart_items', 'reviews', 'coupons', 'settings', 'hero_slides', 'global_attributes'];
-        foreach ($tables as $tbl) {
+        // Dynamically fetch all existing tables in the database
+        $stmt = $db->query("SHOW TABLES");
+        $allTables = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $optimizedCount = 0;
+        foreach ($allTables as $tbl) {
             $db->query("OPTIMIZE TABLE `$tbl`");
+            $optimizedCount++;
         }
-        $message = 'Database tables optimized successfully.';
+        $message = "Database optimization completed successfully ($optimizedCount tables defragmented and indexed).";
     } catch (Throwable $e) {
         $error = 'Database optimization failed: ' . $e->getMessage();
     }
@@ -183,18 +187,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_optimize_db'])
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action_clear_cache'])) {
     $activeTab = 'maintenance';
     $clearedItems = 0;
-    // Clear temporary directory in cache if exists
+    
+    // 1. Clear asset cache directory
     $cacheDir = __DIR__ . '/../assets/cache/';
     if (is_dir($cacheDir)) {
         $files = glob($cacheDir . '*');
         foreach ($files as $f) {
             if (is_file($f)) {
-                unlink($f);
+                @unlink($f);
                 $clearedItems++;
             }
         }
+    } else {
+        @mkdir($cacheDir, 0755, true);
     }
-    $message = "System cache purged successfully. ($clearedItems cached objects removed)";
+
+    // 2. Reset PHP OPcache if active
+    if (function_exists('opcache_reset')) {
+        @opcache_reset();
+        $clearedItems++;
+    }
+
+    $message = "System cache and execution buffers purged successfully ($clearedItems objects/caches refreshed).";
 }
 
 // Fetch current admin user info

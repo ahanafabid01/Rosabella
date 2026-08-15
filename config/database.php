@@ -405,3 +405,193 @@ function requireCSRF(): void
     }
 }
 
+/**
+ * ─── STOREFRONT MAINTENANCE MODE GUARD ─────────────────────────────────────
+ * When Maintenance Mode is enabled in Admin Settings, non-admin visitors
+ * receive a sleek 503 Maintenance page, while admins retain full access.
+ */
+function checkMaintenanceMode(): void
+{
+    if (php_sapi_name() === 'cli') {
+        return;
+    }
+
+    $uri = $_SERVER['REQUEST_URI'] ?? '';
+    
+    // Whitelist administrative, authentication, and static asset routes
+    if (
+        strpos($uri, '/admin') !== false ||
+        strpos($uri, '/login') !== false ||
+        strpos($uri, '/logout') !== false ||
+        strpos($uri, '/assets') !== false ||
+        strpos($uri, '/uploads') !== false
+    ) {
+        return;
+    }
+
+    // Allow logged-in administrators to view storefront normally
+    if (session_status() === PHP_SESSION_NONE) {
+        @session_start();
+    }
+    if (!empty($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin') {
+        return;
+    }
+
+    // Check maintenance mode state from database settings
+    try {
+        $isMaintenance = getSetting('maintenance_mode');
+        if ($isMaintenance === '1' || $isMaintenance === 'true') {
+            $msg = getSetting('maintenance_message') ?: 'We are currently upgrading our store experience to serve you better. We will be back online shortly!';
+            $siteName = getSetting('site_name') ?: 'Rosabella';
+            
+            http_response_code(503);
+            header('Retry-After: 3600');
+            ?>
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Under Maintenance &mdash; <?= htmlspecialchars($siteName) ?></title>
+                <link rel="preconnect" href="https://fonts.googleapis.com">
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+                <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+                <style>
+                    * { box-sizing: border-box; margin: 0; padding: 0; }
+                    body {
+                        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+                        background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
+                        color: #f8fafc;
+                        min-height: 100vh;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 1.5rem;
+                    }
+                    .maint-container {
+                        background: rgba(30, 41, 59, 0.85);
+                        backdrop-filter: blur(12px);
+                        border: 1px solid rgba(255, 255, 255, 0.1);
+                        border-radius: 20px;
+                        max-width: 540px;
+                        width: 100%;
+                        padding: 3rem 2.25rem;
+                        text-align: center;
+                        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+                        animation: fadeInUp 0.4s ease-out;
+                    }
+                    @keyframes fadeInUp {
+                        from { opacity: 0; transform: translateY(20px); }
+                        to { opacity: 1; transform: translateY(0); }
+                    }
+                    .maint-icon-badge {
+                        width: 72px;
+                        height: 72px;
+                        background: rgba(15, 118, 110, 0.18);
+                        border: 1px solid rgba(45, 212, 191, 0.35);
+                        color: #2dd4bf;
+                        border-radius: 50%;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin-bottom: 1.75rem;
+                        box-shadow: 0 0 30px rgba(45, 212, 191, 0.2);
+                    }
+                    h1 {
+                        font-family: 'Plus Jakarta Sans', sans-serif;
+                        font-size: 1.65rem;
+                        font-weight: 700;
+                        color: #ffffff;
+                        margin-bottom: 0.85rem;
+                        letter-spacing: -0.02em;
+                    }
+                    p {
+                        font-size: 0.95rem;
+                        color: #94a3b8;
+                        line-height: 1.65;
+                        margin-bottom: 2rem;
+                    }
+                    .maint-status-pill {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+                        padding: 6px 14px;
+                        border-radius: 999px;
+                        background: rgba(239, 68, 68, 0.15);
+                        border: 1px solid rgba(239, 68, 68, 0.3);
+                        color: #fca5a5;
+                        font-size: 0.78rem;
+                        font-weight: 600;
+                        text-transform: uppercase;
+                        letter-spacing: 0.05em;
+                        margin-bottom: 1.5rem;
+                    }
+                    .maint-status-dot {
+                        width: 8px;
+                        height: 8px;
+                        border-radius: 50%;
+                        background: #ef4444;
+                        box-shadow: 0 0 8px #ef4444;
+                        animation: pulse 1.5s infinite;
+                    }
+                    @keyframes pulse {
+                        0%, 100% { opacity: 1; transform: scale(1); }
+                        50% { opacity: 0.4; transform: scale(0.85); }
+                    }
+                    .maint-actions {
+                        display: flex;
+                        justify-content: center;
+                        gap: 12px;
+                    }
+                    .admin-link {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 8px;
+                        color: #2dd4bf;
+                        text-decoration: none;
+                        font-size: 0.84rem;
+                        font-weight: 600;
+                        padding: 0.6rem 1.2rem;
+                        border: 1px solid rgba(45, 212, 191, 0.35);
+                        border-radius: 10px;
+                        background: rgba(15, 118, 110, 0.12);
+                        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+                    }
+                    .admin-link:hover {
+                        background: rgba(15, 118, 110, 0.25);
+                        border-color: #2dd4bf;
+                        transform: translateY(-1px);
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="maint-container">
+                    <div class="maint-status-pill">
+                        <span class="maint-status-dot"></span>
+                        <span>Scheduled System Maintenance</span>
+                    </div>
+                    <div class="maint-icon-badge">
+                        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </div>
+                    <h1>We'll Be Back Soon</h1>
+                    <p><?= nl2br(htmlspecialchars($msg)) ?></p>
+                    <div class="maint-actions">
+                        <a href="<?= BASE_URL ?>/login" class="admin-link">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            <span>Staff & Admin Sign In</span>
+                        </a>
+                    </div>
+                </div>
+            </body>
+            </html>
+            <?php
+            exit;
+        }
+    } catch (Throwable $e) {
+        // Fail open if database is momentarily unreachable during boot
+    }
+}
+
+// Automatically enforce maintenance mode on storefront requests
+checkMaintenanceMode();
+

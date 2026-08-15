@@ -162,7 +162,7 @@ if (!function_exists('renderAdminSidebar')) {
                         'icon'     => 'settings',
                         'active_in'=> ['website', 'hero', 'settings'],
                         'subitems' => [
-                            ['href' => $base . '/admin/website-settings', 'label' => 'Website & Theme', 'key' => 'website'],
+                            ['href' => $base . '/admin/website-settings', 'label' => 'Storefront Settings', 'key' => 'website'],
                             ['href' => $base . '/admin/hero', 'label' => 'Hero Banners', 'key' => 'hero'],
                             ['href' => $base . '/admin/settings', 'label' => 'Admin Settings', 'key' => 'settings'],
                         ]
