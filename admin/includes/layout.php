@@ -1,7 +1,38 @@
 <?php
 /**
- * Rosabella - Shared Admin Layout Helpers
+ * Rosabella - Shared Admin Layout Helpers & Security Policies
  */
+
+// ── Enforce Admin Security Policies dynamically configured via Settings ───────
+if (function_exists('isLoggedIn') && isLoggedIn() && function_exists('isAdmin') && isAdmin()) {
+    $now = time();
+    $timeoutMinutes = max(15, min(1440, (int)(getSetting('admin_session_timeout') ?: 120)));
+    $maxIdleSeconds = $timeoutMinutes * 60;
+
+    if (isset($_SESSION['admin_last_activity']) && ($now - $_SESSION['admin_last_activity']) > $maxIdleSeconds) {
+        // Session timed out due to inactivity
+        $_SESSION = [];
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_destroy();
+        }
+        header('Location: ' . BASE_URL . '/login?msg=timeout');
+        exit;
+    }
+    $_SESSION['admin_last_activity'] = $now;
+
+    // Strict IP Verification
+    if ((string)getSetting('admin_ip_session_binding') === '1') {
+        $clientIp = $_SERVER['REMOTE_ADDR'] ?? '';
+        if (!empty($_SESSION['admin_ip']) && !empty($clientIp) && $_SESSION['admin_ip'] !== $clientIp) {
+            $_SESSION = [];
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_destroy();
+            }
+            header('Location: ' . BASE_URL . '/login?msg=ip_mismatch');
+            exit;
+        }
+    }
+}
 
 if (!function_exists('adminIcon')) {
     function adminIcon(string $key): string

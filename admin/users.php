@@ -57,6 +57,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_staff'])) {
         $error = 'First name, valid email, and temporary password are required.';
     } elseif (strlen($password) < 6) {
         $error = 'Password must be at least 6 characters long.';
+    } elseif ((string)getSetting('admin_require_strong_password') === '1' && (!preg_match('/[A-Z]/', $password) || !preg_match('/[a-z]/', $password) || !preg_match('/[0-9]/', $password))) {
+        $error = 'Password must include uppercase, lowercase, and numeric characters as enforced by system security policy.';
     } else {
         $chk = $db->prepare("SELECT id FROM users WHERE email = ?");
         $chk->execute([$email]);

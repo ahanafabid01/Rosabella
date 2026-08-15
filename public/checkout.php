@@ -125,9 +125,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
             $db->beginTransaction();
 
+            $orderPrefix = trim((string)(getSetting('order_id_prefix') ?: 'ORD-'));
             $orderNumber = '';
             for ($i = 0; $i < 5; $i++) {
-                $candidate = 'KAR-' . date('Y') . '-' . str_pad((string)mt_rand(1, 99999), 5, '0', STR_PAD_LEFT);
+                $candidate = $orderPrefix . date('Y') . '-' . str_pad((string)mt_rand(1, 99999), 5, '0', STR_PAD_LEFT);
                 $checkStmt = $db->prepare("SELECT id FROM orders WHERE order_number = ? LIMIT 1");
                 $checkStmt->execute([$candidate]);
                 if (!$checkStmt->fetch()) {
@@ -140,16 +141,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $advancePayment = 0.00;
+            $initialStatus  = 'pending';
             if ($payment_method === 'cod') {
                 $advancePayment = 150.00;
+                if ((string)getSetting('auto_confirm_cod_orders') === '1') {
+                    $initialStatus = 'confirmed';
+                }
             } elseif (in_array($payment_method, ['bkash', 'nagad', 'rocket', 'card', 'bank'], true)) {
                 $advancePayment = (float)$total;
             }
 
-            $insertOrderStmt = $db->prepare("INSERT INTO orders (user_id, order_number, status, subtotal, discount, coupon_id, shipping_cost, tax, advance_payment, total, payment_method, payment_status, shipping_first_name, shipping_last_name, shipping_email, shipping_phone, shipping_address, shipping_city, shipping_upazila, shipping_postal_code, shipping_country, order_notes, payment_phone, payment_trx_id, delivery_method) VALUES (?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $insertOrderStmt = $db->prepare("INSERT INTO orders (user_id, order_number, status, subtotal, discount, coupon_id, shipping_cost, tax, advance_payment, total, payment_method, payment_status, shipping_first_name, shipping_last_name, shipping_email, shipping_phone, shipping_address, shipping_city, shipping_upazila, shipping_postal_code, shipping_country, order_notes, payment_phone, payment_trx_id, delivery_method) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $insertOrderStmt->execute([
                 $_SESSION['user_id'],
                 $orderNumber,
+                $initialStatus,
                 $subtotal,
                 $discount,
                 $couponId,

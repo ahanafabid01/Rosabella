@@ -142,6 +142,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_admin_profile'
                         $error = 'Current password is incorrect.';
                     } elseif (strlen($newPw) < 6) {
                         $error = 'New password must be at least 6 characters long.';
+                    } elseif ((string)getSetting('admin_require_strong_password') === '1' && (!preg_match('/[A-Z]/', $newPw) || !preg_match('/[a-z]/', $newPw) || !preg_match('/[0-9]/', $newPw))) {
+                        $error = 'New password must include uppercase, lowercase, and numeric characters as enforced by system security policy.';
                     } elseif ($newPw !== $confirmPw) {
                         $error = 'New password and confirmation do not match.';
                     } else {

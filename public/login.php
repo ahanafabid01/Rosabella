@@ -9,16 +9,16 @@ $error = '';
 $success = '';
 $redirect = sanitize($_GET['redirect'] ?? $_POST['redirect'] ?? '');
 // Whitelist allowed redirect paths to prevent open redirect attacks
-$allowedRedirects = ['checkout', 'cart', 'account'];
-$redirectPath = in_array($redirect, $allowedRedirects) ? $redirect : 'account';
+$redirectPath = in_array($redirect, $allowedRedirects, true) ? $redirect : 'account';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // ── 1. CSRF Verification ──────────────────────────────────────────────
     requireCSRF();
 
-    // ── 2. Rate Limiting — max 10 attempts per 10 minutes per IP ─────────
-    if (!checkRateLimit('login', 10, 600)) {
-        $cooldown = getRateLimitCooldown('login', 10, 600);
+    // ── 2. Rate Limiting — dynamic based on admin settings ─────────────────
+    $maxLoginAttempts = max(3, min(20, (int)(getSetting('admin_max_login_attempts') ?: 5)));
+    if (!checkRateLimit('login', $maxLoginAttempts, 600)) {
+        $cooldown = getRateLimitCooldown('login', $maxLoginAttempts, 600);
         $error = "Too many login attempts. Please wait " . ceil($cooldown / 60) . " minute(s) before trying again.";
     } else {
         $email    = sanitize($_POST['email'] ?? '');
@@ -34,20 +34,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if ($user && password_verify($password, $user['password'])) {
                 // ── 3. Session Fixation Fix ───────────────────────────────
-                // IMPORTANT: save old session ID BEFORE regenerating —
-                // the guest cart is stored under the old ID in the DB.
                 $oldSessionId = session_id();
                 session_regenerate_id(true);
 
                 $_SESSION['user_id']   = $user['id'];
                 $_SESSION['user_role'] = $user['role'];
                 $_SESSION['user_name'] = $user['first_name'];
+                $_SESSION['admin_ip']  = $_SERVER['REMOTE_ADDR'] ?? '';
+                $_SESSION['admin_last_activity'] = time();
 
-                // Merge guest cart using the OLD session ID (before regeneration)
+                // Merge guest cart using the OLD session ID
                 $stmt = $db->prepare("UPDATE cart SET user_id = ? WHERE session_id = ?");
                 $stmt->execute([$user['id'], $oldSessionId]);
 
-                // Redirect to intended page (checkout, cart, etc.) or admin/account
                 if ($user['role'] === 'admin') {
                     redirect('admin/');
                 } else {
@@ -59,7 +58,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-
 
 require_once __DIR__ . '/../includes/header.php';
 ?>
