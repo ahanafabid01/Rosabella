@@ -17,6 +17,76 @@ if (!isLoggedIn() || !isAdmin()) {
 $pageTitle = 'Dashboard Analytics';
 $db = getDB();
 
+// Status Mapping
+$statusMap = [
+    'pending'      => ['label' => 'Pending',           'badge' => 'warning'],
+    'confirmed'    => ['label' => 'Confirmed',         'badge' => 'info'],
+    'processing'   => ['label' => 'Processing',        'badge' => 'info'],
+    'shipped'      => ['label' => 'Shipped',           'badge' => 'primary'],
+    'delivered'    => ['label' => 'Delivered',         'badge' => 'success'],
+    'on_hold'      => ['label' => 'Hold',              'badge' => 'warning'],
+    'unreachable'  => ['label' => 'Unreachable',       'badge' => 'danger'],
+    'not_received' => ['label' => "Didn't Receive",    'badge' => 'danger'],
+    'returned'     => ['label' => 'Returned',          'badge' => 'purple'],
+    'cancelled'    => ['label' => 'Cancelled',         'badge' => 'secondary'],
+    'refunded'     => ['label' => 'Refunded',          'badge' => 'pink'],
+    'fake'         => ['label' => 'Fake Order',        'badge' => 'dark-red'],
+];
+
+$message = '';
+// ── Handle Inline Order Status Update ─────────────────────────────────────────
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
+    $orderId = intval($_POST['order_id'] ?? 0);
+    $newStatus = sanitize($_POST['status'] ?? 'pending');
+
+    if ($orderId > 0 && isset($statusMap[$newStatus])) {
+        $oldStmt = $db->prepare("SELECT status, total FROM orders WHERE id = ?");
+        $oldStmt->execute([$orderId]);
+        $oldRow = $oldStmt->fetch();
+        $oldStatus = $oldRow['status'] ?? '';
+        $orderTotal = floatval($oldRow['total'] ?? 0);
+
+        if ($newStatus === 'delivered') {
+            $stmt = $db->prepare("UPDATE orders SET status = ?, payment_status = 'paid', advance_payment = ? WHERE id = ?");
+            $saved = $stmt->execute([$newStatus, $orderTotal, $orderId]);
+        } else {
+            $stmt = $db->prepare("UPDATE orders SET status = ? WHERE id = ?");
+            $saved = $stmt->execute([$newStatus, $orderId]);
+        }
+
+        if ($saved) {
+            $message = 'Order #' . $orderId . ' status updated to ' . htmlspecialchars($statusMap[$newStatus]['label']) . '.';
+            
+            // Audit Log
+            $changedBy = htmlspecialchars($_SESSION['user_name'] ?? 'Admin');
+            $histStmt  = $db->prepare("INSERT INTO order_status_history (order_id, status, note, changed_by) VALUES (?, ?, ?, ?)");
+            $histStmt->execute([$orderId, $newStatus, 'Status updated from admin dashboard', $changedBy]);
+
+            // Stock Synchronization
+            if ($oldStatus && $oldStatus !== $newStatus) {
+                $isOldInactive = in_array($oldStatus, ['cancelled', 'refunded', 'fake'], true);
+                $isNewInactive = in_array($newStatus, ['cancelled', 'refunded', 'fake'], true);
+                
+                if (!$isOldInactive && $isNewInactive) {
+                    $itemsStmt = $db->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = ?");
+                    $itemsStmt->execute([$orderId]);
+                    $restockStmt = $db->prepare("UPDATE products SET stock_quantity = stock_quantity + ? WHERE id = ?");
+                    foreach ($itemsStmt->fetchAll() as $item) {
+                        $restockStmt->execute([$item['quantity'], $item['product_id']]);
+                    }
+                } elseif ($isOldInactive && !$isNewInactive) {
+                    $itemsStmt = $db->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = ?");
+                    $itemsStmt->execute([$orderId]);
+                    $destockStmt = $db->prepare("UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ?");
+                    foreach ($itemsStmt->fetchAll() as $item) {
+                        $destockStmt->execute([$item['quantity'], $item['product_id']]);
+                    }
+                }
+            }
+        }
+    }
+}
+
 // ── 1. Core KPIs ─────────────────────────────────────────────────────────────
 $totalProducts = (int)$db->query("SELECT COUNT(*) FROM products")->fetchColumn();
 $totalOrders   = (int)$db->query("SELECT COUNT(*) FROM orders")->fetchColumn();
@@ -506,6 +576,23 @@ $lowStockProducts = $db->query("
         .dash-pay-icon-bubble.rocket { background: #f3e8ff; color: #9333ea; }
         .dash-pay-icon-bubble.card   { background: #dbeafe; color: #2563eb; }
         .dash-pay-icon-bubble svg    { width: 14px; height: 14px; }
+
+        .dash-pay-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .dash-pay-badge.cod   { background: #ccfbf1; color: #0f766e; }
+        .dash-pay-badge.bkash { background: #ffe4e6; color: #e11d48; }
+        .dash-pay-badge.nagad { background: #ffedd5; color: #ea580c; }
+        .dash-pay-badge.card  { background: #dbeafe; color: #2563eb; }
+        .dash-pay-badge svg   { width: 12px; height: 12px; }
+
         .dash-breakdown-bar {
             height: 7px;
             background: #f1f5f9;
@@ -597,6 +684,13 @@ $lowStockProducts = $db->query("
                         </div>
                     </div>
                 </div>
+
+                <?php if (!empty($message)): ?>
+                <div class="alert alert-success" style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 8px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span><?= htmlspecialchars($message) ?></span>
+                </div>
+                <?php endif; ?>
 
                 <!-- ── 2. 6 Executive Metric KPI Cards ── -->
                 <div class="dash-kpi-grid-6">
@@ -773,17 +867,14 @@ $lowStockProducts = $db->query("
                                     <?php else: ?>
                                         <?php foreach ($recentOrders as $order): ?>
                                         <?php
-                                            $statusClass = 'secondary';
-                                            if ($order['status'] === 'delivered') $statusClass = 'success';
-                                            elseif ($order['status'] === 'processing') $statusClass = 'info';
-                                            elseif ($order['status'] === 'pending') $statusClass = 'warning';
-                                            elseif ($order['status'] === 'cancelled' || $order['status'] === 'returned') $statusClass = 'error';
-
-                                            $payClass = ($order['payment_status'] === 'paid') ? 'badge-success' : 'badge-warning';
                                             $customerName = trim((string)($order['customer_full_name'] ?? ''));
                                             $phone = trim((string)($order['shipping_phone'] ?? ''));
-                                            $payMethod = strtoupper(str_replace('_manual', '', (string)($order['payment_method'] ?? 'COD')));
-                                            if ($payMethod === 'CASH ON DELIVERY') $payMethod = 'COD';
+                                            $rawMethod = strtolower((string)($order['payment_method'] ?? 'cod'));
+                                            $badgeType = 'cod';
+                                            $badgeLabel = 'COD';
+                                            if (str_contains($rawMethod, 'bkash')) { $badgeType = 'bkash'; $badgeLabel = 'bKash'; }
+                                            elseif (str_contains($rawMethod, 'nagad')) { $badgeType = 'nagad'; $badgeLabel = 'Nagad'; }
+                                            elseif (str_contains($rawMethod, 'card') || str_contains($rawMethod, 'ssl')) { $badgeType = 'card'; $badgeLabel = 'Card'; }
                                         ?>
                                         <tr>
                                             <td>
@@ -805,15 +896,30 @@ $lowStockProducts = $db->query("
                                                 </span>
                                             </td>
                                             <td>
-                                                <div style="display: inline-flex; align-items: center; gap: 4px; flex-wrap: nowrap;">
-                                                    <span style="font-size: 0.68rem; font-weight: 700; color: #475569; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;"><?= htmlspecialchars($payMethod) ?></span>
-                                                    <span class="badge <?= $payClass ?>" style="font-size: 0.68rem; padding: 2px 6px; font-weight: 700;"><?= ucfirst($order['payment_status'] ?? 'pending') ?></span>
-                                                </div>
+                                                <span class="dash-pay-badge <?= $badgeType ?>">
+                                                    <?php if ($badgeType === 'bkash'): ?>
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                                                    <?php elseif ($badgeType === 'nagad'): ?>
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                                                    <?php elseif ($badgeType === 'card'): ?>
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                                                    <?php else: ?>
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/></svg>
+                                                    <?php endif; ?>
+                                                    <span><?= htmlspecialchars($badgeLabel) ?></span>
+                                                </span>
                                             </td>
                                             <td>
-                                                <span class="badge badge-<?= $statusClass ?>" style="font-size: 0.72rem; padding: 3px 8px; font-weight: 700;">
-                                                    <?= ucfirst($order['status']) ?>
-                                                </span>
+                                                <form method="POST" class="admin-form-row-center" style="margin: 0;">
+                                                    <?= csrfField() ?>
+                                                    <input type="hidden" name="order_id" value="<?= (int)$order['id'] ?>">
+                                                    <input type="hidden" name="update_status" value="1">
+                                                    <select name="status" class="form-select admin-status-select" style="font-weight: 700; font-size: 0.74rem; padding: 0.28rem 0.5rem; border-radius: 7px;" onchange="this.form.submit()">
+                                                        <?php foreach ($statusMap as $sKey => $sVal): ?>
+                                                            <option value="<?= $sKey ?>" <?= $order['status'] === $sKey ? 'selected' : '' ?>><?= htmlspecialchars($sVal['label']) ?></option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                </form>
                                             </td>
                                             <td style="text-align: right; font-weight: 700; color: #0f172a; font-size: 0.86rem; white-space: nowrap;">
                                                 <?= formatPrice($order['total']) ?>
