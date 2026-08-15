@@ -678,19 +678,40 @@ function getThemeCSS($theme = null) {
             }
 
             .theme-clothing-brand .clothing-brand-new-arrivals .products-grid,
-            .theme-clothing-brand .clothing-brand-featured .products-grid {
-                gap: clamp(1.25rem, 2.5vw, 2.5rem);
+            .theme-clothing-brand .clothing-brand-featured .products-grid,
+            .theme-clothing-brand .products-grid {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: clamp(1.25rem, 2vw, 2rem);
             }
 
-            .theme-clothing-brand .clothing-brand-new-arrivals .product-image,
-            .theme-clothing-brand .clothing-brand-featured .product-image {
-                aspect-ratio: 1 / 1;
-                background: #fffefd;
+            .theme-clothing-brand .product-card {
+                background: transparent;
+                border: 0;
+                border-radius: 0;
+                box-shadow: none;
+                min-width: 0;
+                width: 100%;
+            }
+
+            .theme-clothing-brand .product-image {
+                aspect-ratio: 3 / 4;
+                background: #f7f5f2;
+                border-radius: 0;
+                overflow: hidden;
+                position: relative;
             }
 
             .theme-clothing-brand .product-card .product-image img {
-                object-fit: contain;
-                padding: 0.25rem;
+                object-fit: cover;
+                width: 100%;
+                height: 100%;
+                padding: 0;
+                transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .theme-clothing-brand .product-card:hover .product-image img {
+                transform: scale(1.04);
             }
 
             .theme-clothing-brand .clothing-brand-deals {
@@ -925,10 +946,10 @@ function getThemeCSS($theme = null) {
                 transform: scale(1.05);
             }
             
-            /* Product Grid - 4 Column on Desktop */
+            /* Product Grid - Desktop Layout */
             .products-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                grid-template-columns: repeat(4, 1fr);
                 gap: 1.5rem;
             }
             
@@ -941,37 +962,50 @@ function getThemeCSS($theme = null) {
                 letter-spacing: -0.02em;
             }
             
-            /* Responsive Adjustments */
+            /* Responsive Adjustments: Tablet & Mobile (2 Products in a Row) */
+            @media (max-width: 991px) {
+                .products-grid,
+                .theme-clothing-brand .products-grid {
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 1.25rem;
+                }
+            }
+
             @media (max-width: 768px) {
                 .clothing-brand-hero .hero-bento-grid {
                     height: auto;
                 }
 
                 .clothing-brand-hero .hero-main-banner {
-                    height: clamp(380px, 65vw, 520px);
+                    height: clamp(340px, 60vw, 480px);
                 }
 
                 .promo-banner-content {
                     grid-template-columns: 1fr;
-                    min-height: 400px;
+                    min-height: 360px;
                 }
                 
                 .promo-banner-text h2 {
-                    font-size: 1.75rem;
+                    font-size: 1.5rem;
                 }
                 
                 .category-showcase-grid {
-                    grid-template-columns: repeat(2, 1fr);
-                    gap: 1rem;
+                    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                    gap: 0.75rem !important;
                 }
                 
                 .category-showcase-card {
-                    height: 200px;
+                    height: 160px;
                 }
                 
-                .products-grid {
-                    grid-template-columns: repeat(2, 1fr);
-                    gap: 1rem;
+                /* Strict 2-column Product Grid on Mobile */
+                .products-grid,
+                .theme-clothing-brand .products-grid,
+                .theme-clothing-brand .clothing-brand-new-arrivals .products-grid,
+                .theme-clothing-brand .clothing-brand-featured .products-grid,
+                .theme-clothing-brand .catalog-page .products-grid {
+                    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                    gap: 0.75rem !important;
                 }
 
                 .clothing-brand-topbar-content { justify-content: center; min-height: 32px; }
@@ -983,26 +1017,88 @@ function getThemeCSS($theme = null) {
                 .theme-clothing-brand .product-detail-page .add-to-cart-form .btn { min-height: 50px; padding-left: 0.65rem; padding-right: 0.65rem; }
                 .theme-clothing-brand .auth-page { min-height: auto; }
                 .theme-clothing-brand .auth-card { border-left: 0; border-right: 0; }
+
+                /* Clothing Brand Mobile Product Card Polish */
+                .theme-clothing-brand .product-card {
+                    min-width: 0;
+                    width: 100%;
+                }
+                .theme-clothing-brand .product-image {
+                    aspect-ratio: 3 / 4 !important;
+                    background: #f7f5f2;
+                }
+                .theme-clothing-brand .product-content {
+                    padding: 0.5rem 0 0 !important;
+                }
+                .theme-clothing-brand .product-name {
+                    font-size: 0.8rem !important;
+                    letter-spacing: 0.02em !important;
+                    text-transform: uppercase;
+                    line-height: 1.3 !important;
+                    margin-bottom: 0.2rem !important;
+                    min-height: auto !important;
+                }
+                .theme-clothing-brand .product-price {
+                    font-size: 0.85rem !important;
+                    margin-top: 0.15rem !important;
+                }
+                .theme-clothing-brand .price-original {
+                    font-size: 0.72rem !important;
+                }
+                .theme-clothing-brand .product-wishlist {
+                    opacity: 1 !important;
+                    transform: none !important;
+                    width: 28px !important;
+                    height: 28px !important;
+                    top: 6px !important;
+                    right: 6px !important;
+                    background: rgba(255, 255, 255, 0.88) !important;
+                    backdrop-filter: blur(4px) !important;
+                }
+                .theme-clothing-brand .product-wishlist svg {
+                    width: 14px !important;
+                    height: 14px !important;
+                }
+                .theme-clothing-brand .product-badges {
+                    top: 6px !important;
+                    left: 6px !important;
+                    gap: 3px !important;
+                }
+                .theme-clothing-brand .badge {
+                    font-size: 0.58rem !important;
+                    padding: 2px 5px !important;
+                    letter-spacing: 0.08em !important;
+                }
             }
             
             @media (max-width: 480px) {
                 .category-showcase-grid {
-                    grid-template-columns: 1fr;
+                    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                    gap: 0.5rem !important;
                 }
                 
+                .category-showcase-card {
+                    height: 130px;
+                }
+
                 .promo-banner-text {
-                    padding: 1.5rem;
+                    padding: 1.25rem;
                 }
                 
                 .promo-banner-text h2 {
-                    font-size: 1.5rem;
+                    font-size: 1.35rem;
                 }
                 
-                .products-grid {
-                    grid-template-columns: 1fr;
+                /* Strict 2 Columns on small phones */
+                .products-grid,
+                .theme-clothing-brand .products-grid,
+                .theme-clothing-brand .clothing-brand-new-arrivals .products-grid,
+                .theme-clothing-brand .clothing-brand-featured .products-grid,
+                .theme-clothing-brand .catalog-page .products-grid {
+                    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                    gap: 0.6rem !important;
                 }
 
-                .theme-clothing-brand .catalog-page .products-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
                 .theme-clothing-brand .product-detail-page .add-to-cart-form > div:last-child { grid-template-columns: 1fr; }
                 .theme-clothing-brand .auth-card { padding: 1.5rem 0 !important; box-shadow: none; }
             }

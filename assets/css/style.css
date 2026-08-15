@@ -1922,6 +1922,71 @@ textarea {
     font-weight: 400;
 }
 
+/* Mobile 2-Column Product Grid & Card Polish */
+@media (max-width: 639px) {
+    .products-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.75rem !important;
+    }
+
+    .product-card {
+        border-radius: var(--radius-md);
+        min-width: 0;
+        width: 100%;
+    }
+
+    .product-content {
+        padding: 0.65rem 0.75rem 0.85rem;
+    }
+
+    .product-name {
+        font-size: 0.82rem;
+        line-height: 1.35;
+        margin-bottom: 0.25rem;
+        min-height: auto;
+        -webkit-line-clamp: 2;
+    }
+
+    .product-price {
+        gap: 0.35rem;
+        margin-top: 0.25rem;
+    }
+
+    .price-current {
+        font-size: 0.92rem;
+        font-weight: 600;
+    }
+
+    .price-original {
+        font-size: 0.75rem;
+    }
+
+    .product-wishlist {
+        opacity: 1 !important;
+        transform: none !important;
+        width: 28px !important;
+        height: 28px !important;
+        top: 6px !important;
+        right: 6px !important;
+    }
+
+    .product-wishlist svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .product-badges {
+        top: 6px;
+        left: 6px;
+        gap: 3px;
+    }
+
+    .badge {
+        font-size: 0.62rem;
+        padding: 2px 6px;
+    }
+}
+
 /* =============================================
    Deals Section
    ============================================= */
