@@ -41,7 +41,7 @@ if (empty($customerFullName)) {
     $customerFullName = 'Customer #' . $customer['id'];
 }
 
-function getCustInitials(string $fn, string $ln): string {
+function getCustOrderInitials(string $fn, string $ln): string {
     $i = mb_substr(trim($fn), 0, 1, 'UTF-8');
     if (!empty($ln)) {
         $i .= mb_substr(trim($ln), 0, 1, 'UTF-8');
@@ -49,24 +49,78 @@ function getCustInitials(string $fn, string $ln): string {
     return strtoupper($i ?: 'C');
 }
 
-$initials = getCustInitials($customer['first_name'] ?? '', $customer['last_name'] ?? '');
+$initials = getCustOrderInitials($customer['first_name'] ?? '', $customer['last_name'] ?? '');
 
 $statusMap = [
-    'pending'      => ['label' => 'Pending',           'badge' => 'warning'],
-    'confirmed'    => ['label' => 'Confirmed',         'badge' => 'info'],
-    'processing'   => ['label' => 'Processing',        'badge' => 'primary'],
-    'shipped'      => ['label' => 'Shipped',           'badge' => 'indigo'],
-    'delivered'    => ['label' => 'Delivered',         'badge' => 'success'],
-    'on_hold'      => ['label' => 'Hold',              'badge' => 'warning'],
-    'unreachable'  => ['label' => 'Unreachable',       'badge' => 'danger'],
-    'not_received' => ['label' => "Didn't Receive",    'badge' => 'danger'],
-    'returned'     => ['label' => 'Returned',          'badge' => 'purple'],
-    'cancelled'    => ['label' => 'Cancelled',         'badge' => 'secondary'],
-    'refunded'     => ['label' => 'Refunded',          'badge' => 'pink'],
-    'fake'         => ['label' => 'Fake Order',        'badge' => 'dark-red'],
+    'pending'      => ['label' => 'Pending',           'badge' => 'warning',   'color' => '#f59e0b'],
+    'confirmed'    => ['label' => 'Confirmed',         'badge' => 'info',      'color' => '#0284c7'],
+    'processing'   => ['label' => 'Processing',        'badge' => 'primary',   'color' => '#2563eb'],
+    'shipped'      => ['label' => 'Shipped',           'badge' => 'indigo',    'color' => '#4f46e5'],
+    'delivered'    => ['label' => 'Delivered',         'badge' => 'success',   'color' => '#10b981'],
+    'on_hold'      => ['label' => 'Hold',              'badge' => 'warning',   'color' => '#d97706'],
+    'unreachable'  => ['label' => 'Unreachable',       'badge' => 'danger',    'color' => '#ef4444'],
+    'not_received' => ['label' => "Didn't Receive",    'badge' => 'danger',    'color' => '#dc2626'],
+    'returned'     => ['label' => 'Returned',          'badge' => 'purple',    'color' => '#8b5cf6'],
+    'cancelled'    => ['label' => 'Cancelled',         'badge' => 'secondary', 'color' => '#64748b'],
+    'refunded'     => ['label' => 'Refunded',          'badge' => 'pink',      'color' => '#ec4899'],
+    'fake'         => ['label' => 'Fake Order',        'badge' => 'dark-red',  'color' => '#991b1b'],
 ];
 
-// ── Fetch Customer Lifetime Summary Metrics ───────────────────────────────────
+// ── Handle Order Status Quick Update ──────────────────────────────────────────
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_order_status'])) {
+    requireCSRF();
+    $orderId = intval($_POST['order_id'] ?? 0);
+    $newStatus = sanitize($_POST['status'] ?? 'pending');
+
+    if ($orderId > 0 && isset($statusMap[$newStatus])) {
+        $oldStatusStmt = $db->prepare("SELECT status, total FROM orders WHERE id = ?");
+        $oldStatusStmt->execute([$orderId]);
+        $oldRow = $oldStatusStmt->fetch();
+        $oldStatus = $oldRow['status'] ?? '';
+        $orderTotal = floatval($oldRow['total'] ?? 0);
+
+        if ($newStatus === 'delivered') {
+            $upd = $db->prepare("UPDATE orders SET status = ?, payment_status = 'paid', advance_payment = ? WHERE id = ?");
+            $upd->execute([$newStatus, $orderTotal, $orderId]);
+        } else {
+            $upd = $db->prepare("UPDATE orders SET status = ? WHERE id = ?");
+            $upd->execute([$newStatus, $orderId]);
+        }
+
+        // Status audit log
+        $changedBy = htmlspecialchars($_SESSION['user_name'] ?? 'Admin');
+        try {
+            $histStmt = $db->prepare("INSERT INTO order_status_history (order_id, status, note, changed_by) VALUES (?, ?, ?, ?)");
+            $histStmt->execute([$orderId, $newStatus, 'Status updated from Customer Order History', $changedBy]);
+        } catch (Throwable $e) {}
+
+        // Stock Sync Logic
+        if ($oldStatus && $oldStatus !== $newStatus) {
+            $isOldInactive = in_array($oldStatus, ['cancelled', 'refunded', 'fake'], true);
+            $isNewInactive = in_array($newStatus, ['cancelled', 'refunded', 'fake'], true);
+            
+            if (!$isOldInactive && $isNewInactive) {
+                $itemsStmt = $db->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = ?");
+                $itemsStmt->execute([$orderId]);
+                $restockStmt = $db->prepare("UPDATE products SET stock_quantity = stock_quantity + ? WHERE id = ?");
+                foreach ($itemsStmt->fetchAll() as $item) {
+                    $restockStmt->execute([$item['quantity'], $item['product_id']]);
+                }
+            } elseif ($isOldInactive && !$isNewInactive) {
+                $itemsStmt = $db->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = ?");
+                $itemsStmt->execute([$orderId]);
+                $destockStmt = $db->prepare("UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ?");
+                foreach ($itemsStmt->fetchAll() as $item) {
+                    $destockStmt->execute([$item['quantity'], $item['product_id']]);
+                }
+            }
+        }
+
+        $message = 'Order status updated successfully to ' . htmlspecialchars($statusMap[$newStatus]['label']) . '.';
+    }
+}
+
+// ── Customer Lifetime Summary Metrics ─────────────────────────────────────────
 $custPhone = trim($customer['phone'] ?? '');
 
 $metricParams = [$customerId];
@@ -104,6 +158,16 @@ $totalOrdersCount = (int)$metrics['total_orders'];
 $totalSpentAmount = (float)$metrics['total_spent'];
 $grossSpentAmount = (float)$metrics['gross_spent'];
 $avgOrderValue = $totalOrdersCount > 0 ? ($grossSpentAmount / $totalOrdersCount) : 0;
+
+// Status counts specifically for this customer
+$custStatusCountStmt = $db->prepare("
+    SELECT status, COUNT(*) as cnt 
+    FROM orders 
+    WHERE user_id = ? $phoneClause 
+    GROUP BY status
+");
+$custStatusCountStmt->execute($metricParams);
+$custStatusCounts = $custStatusCountStmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
 // ── Filter Orders ─────────────────────────────────────────────────────────────
 $statusFilter = sanitize($_GET['status'] ?? '');
@@ -153,26 +217,7 @@ $ordersStmt = $db->prepare("
 $ordersStmt->execute($queryParams);
 $orders = $ordersStmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Pre-fetch items for each order
-$orderIds = array_column($orders, 'id');
-$orderItemsMap = [];
-if (!empty($orderIds)) {
-    $inPlaceholders = implode(',', array_fill(0, count($orderIds), '?'));
-    $itemsStmt = $db->prepare("
-        SELECT oi.*, p.main_image, p.name as product_title
-        FROM order_items oi
-        LEFT JOIN products p ON p.id = oi.product_id
-        WHERE oi.order_id IN ($inPlaceholders)
-        ORDER BY oi.id ASC
-    ");
-    $itemsStmt->execute($orderIds);
-    $rawItems = $itemsStmt->fetchAll(PDO::FETCH_ASSOC);
-    foreach ($rawItems as $ri) {
-        $orderItemsMap[$ri['order_id']][] = $ri;
-    }
-}
-
-$pageTitle = 'Order History – ' . $customerFullName;
+$pageTitle = 'Order History - ' . $customerFullName;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -183,27 +228,44 @@ $pageTitle = 'Order History – ' . $customerFullName;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle) ?> – Rosabella Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="css/admin.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .cust-profile-card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-        }
-        .cust-profile-header {
+        /* ── Header Toolbar ── */
+        .as-page-header-wrap {
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 1rem;
+            gap: 12px;
+            margin-bottom: 1.25rem;
         }
-        .cust-avatar-large {
-            width: 58px;
-            height: 58px;
+        .as-page-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ── Customer Profile Card ── */
+        .as-cust-banner {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1.25rem;
+        }
+        .as-cust-avatar {
+            width: 52px;
+            height: 52px;
             border-radius: 50%;
             background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
             color: #ffffff;
@@ -211,64 +273,319 @@ $pageTitle = 'Order History – ' . $customerFullName;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 1.35rem;
+            font-size: 1.2rem;
             flex-shrink: 0;
-            box-shadow: 0 4px 10px rgba(15, 118, 110, 0.2);
+            box-shadow: 0 3px 8px rgba(15, 118, 110, 0.2);
+            letter-spacing: 0.5px;
         }
-        .cust-stat-grid {
+        .as-cust-title-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .as-cust-meta-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-top: 4px;
+            flex-wrap: wrap;
+            font-size: 0.82rem;
+            color: #475569;
+        }
+        .as-cust-meta-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* ── KPI Metric Cards ── */
+        .as-cust-kpi-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-top: 1.25rem;
-            padding-top: 1.25rem;
-            border-top: 1px solid #f1f5f9;
+            gap: 0.85rem;
+            margin-bottom: 1.25rem;
         }
-        .cust-stat-box {
-            background: #f8fafc;
+        .as-cust-kpi-card {
+            background: #ffffff;
             border: 1px solid #e2e8f0;
             border-radius: 10px;
-            padding: 0.9rem 1.1rem;
+            padding: 1rem 1.15rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            transition: all 0.15s ease;
         }
-        .cust-stat-val {
-            font-size: 1.3rem;
+        .as-cust-kpi-card:hover {
+            border-color: #cbd5e1;
+            transform: translateY(-1px);
+        }
+        .as-cust-kpi-val {
+            font-size: 1.25rem;
             font-weight: 700;
             color: #0f172a;
             line-height: 1.2;
         }
-        .cust-stat-label {
-            font-size: 0.76rem;
-            color: #64748b;
+        .as-cust-kpi-label {
+            font-size: 0.74rem;
             font-weight: 500;
+            color: #64748b;
             margin-top: 2px;
         }
-        .order-item-chip {
+        .as-cust-kpi-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 4px 8px;
-            background: #f8fafc;
-            border: 1px solid #f1f5f9;
-            border-radius: 6px;
-            font-size: 0.78rem;
-            color: #334155;
-            margin-bottom: 4px;
-        }
-        .order-item-img {
-            width: 26px;
-            height: 26px;
-            border-radius: 4px;
-            object-fit: cover;
-            background: #e2e8f0;
+            justify-content: center;
             flex-shrink: 0;
         }
-        @media (max-width: 900px) {
-            .cust-stat-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        .as-cust-kpi-icon.blue   { background: #eff6ff; color: #2563eb; }
+        .as-cust-kpi-icon.teal   { background: #f0fdfa; color: #0f766e; }
+        .as-cust-kpi-icon.amber  { background: #fffbeb; color: #d97706; }
+        .as-cust-kpi-icon.emerald{ background: #ecfdf5; color: #059669; }
+
+        /* ── Status Pills Filter Row ── */
+        .as-status-pills-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            margin-bottom: 1.25rem;
         }
-        @media (max-width: 600px) {
-            .cust-stat-grid {
-                grid-template-columns: 1fr;
+        .as-status-pill-card {
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.65rem 0.85rem;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            transition: all 0.15s ease;
+        }
+        .as-status-pill-card:hover {
+            border-color: #cbd5e1;
+            background: #fafafa;
+        }
+        .as-status-pill-card.active-pill {
+            border-color: #0f766e !important;
+            background: #f0fdfa !important;
+            box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.15);
+        }
+
+        /* ── Search Bar ── */
+        .as-search-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        /* ── Mobile Order Cards ── */
+        .as-mobile-orders-wrap {
+            display: none;
+        }
+        .as-order-m-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 0.85rem 1rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .as-order-m-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .as-order-m-num {
+            font-family: monospace;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #0f766e;
+            text-decoration: none;
+        }
+        .as-order-m-date {
+            font-size: 0.72rem;
+            color: #64748b;
+            margin-top: 1px;
+        }
+        .as-order-m-body {
+            padding: 8px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            font-size: 0.78rem;
+        }
+        .as-order-m-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #334155;
+        }
+        .as-order-m-lbl {
+            color: #64748b;
+            font-weight: 500;
+        }
+        .as-order-m-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding-top: 8px;
+            border-top: 1px dashed #e2e8f0;
+            margin-top: 4px;
+        }
+
+        /* ── Mobile Optimization (<= 768px) ── */
+        @media (max-width: 768px) {
+            .as-page-header-wrap {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 0.75rem !important;
+            }
+            .as-page-header-actions {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 8px !important;
+                width: 100% !important;
+            }
+            .as-page-header-actions .btn {
+                width: 100% !important;
+                height: 38px !important;
+                justify-content: center !important;
+                padding: 0 8px !important;
+                font-size: 0.80rem !important;
+                white-space: nowrap !important;
+                text-overflow: ellipsis !important;
+                overflow: hidden !important;
+            }
+
+            .as-cust-banner {
+                padding: 1rem !important;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 0.75rem !important;
+            }
+            .as-cust-banner-main {
+                display: flex !important;
+                align-items: center !important;
+                gap: 12px !important;
+            }
+            .as-cust-meta-row {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 6px !important;
+                margin-top: 8px !important;
+                padding-top: 8px !important;
+                border-top: 1px dashed #e2e8f0 !important;
+            }
+            .as-cust-meta-item {
+                font-size: 0.80rem !important;
+            }
+            .as-cust-joined-meta {
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                text-align: left !important;
+                font-size: 0.74rem !important;
+                padding-top: 8px !important;
+                border-top: 1px solid #f1f5f9 !important;
+                width: 100% !important;
+            }
+
+            .as-cust-kpi-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px !important;
+            }
+            .as-cust-kpi-card {
+                padding: 0.75rem 0.85rem !important;
+            }
+            .as-cust-kpi-val {
+                font-size: 1.1rem !important;
+            }
+            .as-cust-kpi-label {
+                font-size: 0.70rem !important;
+            }
+            .as-cust-kpi-icon {
+                width: 32px !important;
+                height: 32px !important;
+            }
+            .as-cust-kpi-icon svg {
+                width: 16px !important;
+                height: 16px !important;
+            }
+
+            .as-status-pills-row {
+                display: flex !important;
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch;
+                padding-bottom: 6px !important;
+                gap: 6px !important;
+                margin-bottom: 1rem !important;
+                scrollbar-width: none;
+            }
+            .as-status-pills-row::-webkit-scrollbar {
+                display: none;
+            }
+            .as-status-pill-card {
+                flex: 0 0 auto !important;
+                min-width: 96px !important;
+                padding: 0.45rem 0.65rem !important;
+            }
+            .as-status-pill-card .as-pill-cnt {
+                font-size: 1rem !important;
+            }
+            .as-status-pill-card .as-pill-lbl {
+                font-size: 0.68rem !important;
+            }
+
+            .as-search-card {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 8px !important;
+                padding: 10px 12px !important;
+            }
+            .as-search-form {
+                flex-direction: column !important;
+                width: 100% !important;
+                gap: 6px !important;
+            }
+            .as-search-form .form-input,
+            .as-search-form .form-select {
+                width: 100% !important;
+                max-width: 100% !important;
+                height: 36px !important;
+            }
+            .as-search-btns {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 6px !important;
+                width: 100% !important;
+            }
+            .as-search-btns .btn {
+                width: 100% !important;
+                height: 36px !important;
+                justify-content: center !important;
+            }
+
+            .admin-table-wrap {
+                display: none !important;
+            }
+            .as-mobile-orders-wrap {
+                display: flex !important;
+                flex-direction: column;
+                gap: 10px;
             }
         }
     </style>
@@ -282,250 +599,292 @@ $pageTitle = 'Order History – ' . $customerFullName;
         <main class="admin-content">
             <?php renderAdminTopbar($pageTitle); ?>
 
-            <!-- Breadcrumb Navigation -->
-            <div style="margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
-                <div style="font-size: 0.82rem; color: #64748b; display: flex; align-items: center; gap: 6px;">
-                    <a href="<?= BASE_URL ?>/admin/customers" style="color: #0f766e; text-decoration: none; font-weight: 500;">Customers</a>
-                    <span>/</span>
-                    <span style="color: #0f172a; font-weight: 600;"><?= htmlspecialchars($customerFullName) ?></span>
-                    <span>/</span>
-                    <span>Order History</span>
+            <!-- Page Header Toolbar -->
+            <div class="as-page-header-wrap">
+                <div>
+                    <h1 class="admin-title" style="display: flex; align-items: center; gap: 8px; margin: 0; font-size: 1.25rem;">
+                        <span>Customer Order History</span>
+                    </h1>
+                    <div style="font-size: 0.82rem; color: #64748b; margin-top: 3px;">
+                        Detailed purchasing record for <strong style="color: #0f172a;"><?= htmlspecialchars($customerFullName) ?></strong>.
+                    </div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <a href="<?= BASE_URL ?>/admin/customers" class="btn btn-secondary" style="height: 34px; font-size: 0.80rem; display: inline-flex; align-items: center; gap: 5px;">
+                <div class="as-page-header-actions">
+                    <a href="<?= BASE_URL ?>/admin/customers" class="btn btn-secondary">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-                        <span>Back to Customers</span>
+                        <span>Back</span>
                     </a>
-                    <a href="<?= BASE_URL ?>/admin/order-create?phone=<?= urlencode($customer['phone'] ?? '') ?>&name=<?= urlencode($customerFullName) ?>&city=<?= urlencode($customer['city'] ?? '') ?>" class="btn btn-primary" style="height: 34px; font-size: 0.80rem; display: inline-flex; align-items: center; gap: 5px;">
+                    <a href="<?= BASE_URL ?>/admin/order-create?phone=<?= urlencode($customer['phone'] ?? '') ?>&name=<?= urlencode($customerFullName) ?>&city=<?= urlencode($customer['city'] ?? '') ?>" class="btn btn-primary">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        <span>+ Create Order for Customer</span>
+                        <span>+ Create Order</span>
                     </a>
                 </div>
             </div>
 
-            <!-- Customer Profile & Intelligence Header -->
-            <div class="cust-profile-card">
-                <div class="cust-profile-header">
-                    <div style="display: flex; align-items: center; gap: 14px;">
-                        <div class="cust-avatar-large"><?= $initials ?></div>
+            <!-- Alerts -->
+            <?php if ($message): ?>
+            <div class="alert alert-success" style="margin-bottom: 1.25rem;">
+                <?= htmlspecialchars($message) ?>
+            </div>
+            <?php endif; ?>
+            <?php if ($error): ?>
+            <div class="alert alert-danger" style="margin-bottom: 1.25rem;">
+                <?= htmlspecialchars($error) ?>
+            </div>
+            <?php endif; ?>
+
+            <!-- Customer Intelligence Profile Banner -->
+            <div class="as-cust-banner">
+                <div style="flex: 1; width: 100%;">
+                    <div class="as-cust-banner-main">
+                        <div class="as-cust-avatar"><?= $initials ?></div>
                         <div>
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #0f172a;"><?= htmlspecialchars($customerFullName) ?></h2>
+                            <div class="as-cust-title-row">
+                                <h2 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #0f172a;"><?= htmlspecialchars($customerFullName) ?></h2>
                                 <span class="badge <?= $customer['status'] === 'active' ? 'badge-success' : ($customer['status'] === 'banned' ? 'badge-danger' : 'badge-warning') ?>" style="text-transform: capitalize; font-size: 0.72rem; padding: 2px 7px;">
                                     <?= htmlspecialchars($customer['status'] ?? 'active') ?>
                                 </span>
                                 <span style="font-size: 0.74rem; color: #94a3b8; font-weight: 500;">ID #<?= $customer['id'] ?></span>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 14px; margin-top: 4px; flex-wrap: wrap; font-size: 0.82rem; color: #475569;">
-                                <div style="display: inline-flex; align-items: center; gap: 5px;">
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                                    <a href="mailto:<?= htmlspecialchars($customer['email']) ?>" style="color: inherit; text-decoration: none;"><?= htmlspecialchars($customer['email']) ?></a>
-                                </div>
-                                <?php if (!empty($customer['phone'])): ?>
-                                <div style="display: inline-flex; align-items: center; gap: 5px;">
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                                    <a href="tel:<?= htmlspecialchars($customer['phone']) ?>" style="color: inherit; text-decoration: none; font-weight: 500;"><?= htmlspecialchars($customer['phone']) ?></a>
-                                </div>
-                                <?php endif; ?>
-                                <div style="display: inline-flex; align-items: center; gap: 5px;">
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                                    <span><?= htmlspecialchars(implode(', ', array_filter([$customer['address'] ?? '', $customer['upazila'] ?? '', $customer['city'] ?? '']))) ?: 'Bangladesh' ?></span>
-                                </div>
-                            </div>
                         </div>
                     </div>
-                    <div style="font-size: 0.76rem; color: #64748b; text-align: right;">
-                        <div>Customer Since: <strong><?= date('M j, Y', strtotime($customer['created_at'])) ?></strong></div>
-                        <?php if ($metrics['latest_order_date']): ?>
-                        <div style="margin-top: 2px;">Last Order: <strong><?= date('M j, Y h:i A', strtotime($metrics['latest_order_date'])) ?></strong></div>
+
+                    <div class="as-cust-meta-row">
+                        <div class="as-cust-meta-item">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            <a href="mailto:<?= htmlspecialchars($customer['email']) ?>" style="color: inherit; text-decoration: none;"><?= htmlspecialchars($customer['email']) ?></a>
+                        </div>
+                        <?php if (!empty($customer['phone'])): ?>
+                        <div class="as-cust-meta-item">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                            <a href="tel:<?= htmlspecialchars($customer['phone']) ?>" style="color: inherit; text-decoration: none; font-weight: 500;"><?= htmlspecialchars($customer['phone']) ?></a>
+                        </div>
                         <?php endif; ?>
+                        <div class="as-cust-meta-item">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            <span><?= htmlspecialchars(implode(', ', array_filter([$customer['address'] ?? '', $customer['upazila'] ?? '', $customer['city'] ?? '']))) ?: 'Bangladesh' ?></span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 4 Performance Metric Boxes -->
-                <div class="cust-stat-grid">
-                    <div class="cust-stat-box">
-                        <div class="cust-stat-val"><?= number_format($totalOrdersCount) ?></div>
-                        <div class="cust-stat-label">Total Orders Placed</div>
+                <div class="as-cust-joined-meta">
+                    <div>Joined: <strong><?= date('M j, Y', strtotime($customer['created_at'])) ?></strong></div>
+                    <?php if ($metrics['latest_order_date']): ?>
+                    <div>Last Order: <strong><?= date('M j, Y h:i A', strtotime($metrics['latest_order_date'])) ?></strong></div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- 4 Executive KPI Metric Cards (Responsive 2x2 Grid on Mobile) -->
+            <div class="as-cust-kpi-grid">
+                <!-- Total Orders -->
+                <div class="as-cust-kpi-card">
+                    <div>
+                        <div class="as-cust-kpi-val"><?= number_format($totalOrdersCount) ?></div>
+                        <div class="as-cust-kpi-label">Total Orders</div>
                     </div>
-                    <div class="cust-stat-box">
-                        <div class="cust-stat-val" style="color: #0f766e;">Tk <?= number_format($totalSpentAmount) ?></div>
-                        <div class="cust-stat-label">Paid Lifetime Spend</div>
+                    <div class="as-cust-kpi-icon blue">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
                     </div>
-                    <div class="cust-stat-box">
-                        <div class="cust-stat-val">Tk <?= number_format($avgOrderValue) ?></div>
-                        <div class="cust-stat-label">Average Order Value</div>
+                </div>
+
+                <!-- Total Paid Spend -->
+                <div class="as-cust-kpi-card">
+                    <div>
+                        <div class="as-cust-kpi-val" style="color: #0f766e;">Tk <?= number_format($totalSpentAmount) ?></div>
+                        <div class="as-cust-kpi-label">Paid Lifetime Spend</div>
                     </div>
-                    <div class="cust-stat-box">
-                        <div class="cust-stat-val" style="color: #059669;"><?= number_format((int)$metrics['delivered_orders']) ?></div>
-                        <div class="cust-stat-label">Delivered Orders (<?= $totalOrdersCount > 0 ? round(($metrics['delivered_orders'] / $totalOrdersCount) * 100) : 0 ?>% Success)</div>
+                    <div class="as-cust-kpi-icon teal">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                    </div>
+                </div>
+
+                <!-- Average Order Value -->
+                <div class="as-cust-kpi-card">
+                    <div>
+                        <div class="as-cust-kpi-val">Tk <?= number_format($avgOrderValue) ?></div>
+                        <div class="as-cust-kpi-label">Avg Order Value</div>
+                    </div>
+                    <div class="as-cust-kpi-icon amber">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    </div>
+                </div>
+
+                <!-- Delivered Success Rate -->
+                <div class="as-cust-kpi-card">
+                    <div>
+                        <div class="as-cust-kpi-val" style="color: #059669;"><?= number_format((int)$metrics['delivered_orders']) ?></div>
+                        <div class="as-cust-kpi-label">Delivered (<?= $totalOrdersCount > 0 ? round(($metrics['delivered_orders'] / $totalOrdersCount) * 100) : 0 ?>%)</div>
+                    </div>
+                    <div class="as-cust-kpi-icon emerald">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>
                 </div>
             </div>
 
-            <!-- ── Orders Filter & Search Toolbar ── -->
-            <div class="admin-card" style="margin-bottom: 1.25rem; padding: 1rem 1.25rem;">
-                <form method="GET" action="<?= BASE_URL ?>/admin/customer-orders" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
-                    <input type="hidden" name="id" value="<?= $customerId ?>">
-
-                    <div style="display: flex; align-items: center; gap: 0.75rem; flex: 1; min-width: 260px; flex-wrap: wrap;">
-                        <div style="position: relative; flex: 1; min-width: 200px;">
-                            <input type="text" name="search" class="form-input" placeholder="Search order number or recipient..." value="<?= htmlspecialchars($search) ?>" style="padding-left: 2.2rem; height: 36px; font-size: 0.82rem; width: 100%; border-radius: 7px;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); pointer-events: none;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <!-- Status Filter Pills Row (Horizontal Scroll on Mobile) -->
+            <div class="as-status-pills-row">
+                <?php
+                $statPills = [
+                    'all'         => ['title' => 'All Orders',        'color' => '#0f172a', 'cnt' => $totalOrdersCount],
+                    'pending'     => ['title' => 'Pending',           'color' => '#f59e0b', 'cnt' => $custStatusCounts['pending'] ?? 0],
+                    'confirmed'   => ['title' => 'Confirmed',         'color' => '#0284c7', 'cnt' => $custStatusCounts['confirmed'] ?? 0],
+                    'processing'  => ['title' => 'Processing',        'color' => '#2563eb', 'cnt' => $custStatusCounts['processing'] ?? 0],
+                    'shipped'     => ['title' => 'Shipped',           'color' => '#4f46e5', 'cnt' => $custStatusCounts['shipped'] ?? 0],
+                    'delivered'   => ['title' => 'Delivered',         'color' => '#10b981', 'cnt' => $custStatusCounts['delivered'] ?? 0],
+                    'on_hold'     => ['title' => 'On Hold',           'color' => '#d97706', 'cnt' => $custStatusCounts['on_hold'] ?? 0],
+                    'returned'    => ['title' => 'Returned',          'color' => '#8b5cf6', 'cnt' => $custStatusCounts['returned'] ?? 0],
+                    'cancelled'   => ['title' => 'Cancelled',         'color' => '#64748b', 'cnt' => $custStatusCounts['cancelled'] ?? 0],
+                ];
+                foreach ($statPills as $pKey => $pCfg):
+                    $isActive = ($pKey === 'all' && empty($statusFilter)) || ($statusFilter === $pKey);
+                    $url = BASE_URL . '/admin/customer-orders?id=' . $customerId . ($pKey !== 'all' ? '&status=' . urlencode($pKey) : '') . ($search ? '&search=' . urlencode($search) : '');
+                ?>
+                    <a href="<?= $url ?>" class="as-status-pill-card <?= $isActive ? 'active-pill' : '' ?>">
+                        <div>
+                            <div class="as-pill-cnt" style="font-size: 1.1rem; font-weight: 700; color: <?= $pCfg['color'] ?>; line-height: 1.2;"><?= $pCfg['cnt'] ?></div>
+                            <div class="as-pill-lbl" style="font-size: 0.72rem; font-weight: 500; color: #64748b; margin-top: 2px;"><?= htmlspecialchars($pCfg['title']) ?></div>
                         </div>
+                    </a>
+                <?php endforeach; ?>
+            </div>
 
-                        <select name="status" class="form-select" style="height: 36px; font-size: 0.82rem; width: auto; min-width: 140px; border-radius: 7px;" onchange="this.form.submit()">
-                            <option value="">All Statuses</option>
-                            <?php foreach ($statusMap as $k => $v): ?>
-                                <option value="<?= $k ?>" <?= $statusFilter === $k ? 'selected' : '' ?>><?= $v['label'] ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-
-                    <div style="display: flex; align-items: center; gap: 6px;">
-                        <button type="submit" class="btn btn-primary" style="height: 36px; font-size: 0.82rem; padding: 0 1rem; border-radius: 7px;">Filter</button>
+            <!-- Orders Search Toolbar -->
+            <div class="as-search-card">
+                <h2 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin: 0;">Orders (<?= number_format($totalFilteredOrders) ?>)</h2>
+                <form method="GET" action="<?= BASE_URL ?>/admin/customer-orders" class="admin-actions-row as-search-form" style="margin: 0; gap: 8px;">
+                    <input type="hidden" name="id" value="<?= $customerId ?>">
+                    <input type="text" name="search" class="form-input admin-input-max-280" placeholder="Search order #, recipient..." value="<?= htmlspecialchars($search) ?>">
+                    <select name="status" class="form-select" onchange="this.form.submit()">
+                        <option value="">All Statuses</option>
+                        <?php foreach ($statusMap as $sKey => $sVal): ?>
+                            <option value="<?= $sKey ?>" <?= $statusFilter === $sKey ? 'selected' : '' ?>><?= htmlspecialchars($sVal['label']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <div class="as-search-btns">
+                        <button type="submit" class="btn btn-secondary">Search</button>
                         <?php if ($search || $statusFilter): ?>
-                            <a href="<?= BASE_URL ?>/admin/customer-orders?id=<?= $customerId ?>" class="btn btn-secondary" style="height: 36px; font-size: 0.82rem; padding: 0 0.75rem; border-radius: 7px; display: inline-flex; align-items: center;">Clear</a>
+                            <a href="<?= BASE_URL ?>/admin/customer-orders?id=<?= $customerId ?>" class="btn btn-secondary">Clear</a>
                         <?php endif; ?>
                     </div>
                 </form>
             </div>
 
-            <!-- ── Orders Table ── -->
+            <!-- Desktop Orders Table -->
             <div class="admin-table-wrap">
                 <table class="admin-table">
                     <thead>
                         <tr>
-                            <th style="width: 120px;">Order #</th>
-                            <th style="width: 140px;">Date &amp; Time</th>
-                            <th style="min-width: 240px;">Ordered Items</th>
-                            <th>Shipping Destination</th>
+                            <th style="width: 140px;">Order #</th>
+                            <th>Date</th>
+                            <th>Shipping &amp; Recipient</th>
+                            <th style="text-align: right;">Total</th>
                             <th style="text-align: center;">Payment</th>
                             <th style="text-align: center;">Status</th>
-                            <th style="text-align: right; width: 110px;">Total</th>
-                            <th style="text-align: right; width: 100px;">Actions</th>
+                            <th>Gateway</th>
+                            <th style="text-align: right;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($orders)): ?>
                             <tr>
-                                <td colspan="8" style="text-align: center; color: #94a3b8; padding: 3.5rem 1rem;">
-                                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.8" style="display: block; margin: 0 auto 10px;"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                                <td colspan="8" style="text-align: center; padding: 3.5rem 1rem; color: #94a3b8;">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.8" style="display: block; margin: 0 auto 10px;"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
                                     <div style="font-weight: 600; color: #64748b; font-size: 0.95rem;">No orders found for this customer.</div>
-                                    <p style="margin: 4px 0 12px; font-size: 0.80rem; color: #94a3b8;">This customer has not placed any orders matching the selected criteria.</p>
+                                    <p style="margin: 4px 0 14px; font-size: 0.80rem; color: #94a3b8;">Try clearing the filter or place a new order for this customer.</p>
                                     <a href="<?= BASE_URL ?>/admin/order-create?phone=<?= urlencode($customer['phone'] ?? '') ?>&name=<?= urlencode($customerFullName) ?>&city=<?= urlencode($customer['city'] ?? '') ?>" class="btn btn-sm btn-primary" style="display: inline-flex; align-items: center; gap: 5px;">
-                                        + Create Customer's First Order
+                                        + Create Order
                                     </a>
                                 </td>
                             </tr>
                         <?php else: ?>
-                            <?php foreach ($orders as $ord): 
-                                $items = $orderItemsMap[$ord['id']] ?? [];
-                                $stBadge = $statusMap[$ord['status']]['badge'] ?? 'secondary';
-                                $stLabel = $statusMap[$ord['status']]['label'] ?? ucfirst($ord['status']);
-                                $payStatus = $ord['payment_status'] ?? 'unpaid';
-                                $payMethod = ucfirst(str_replace('_', ' ', $ord['payment_method'] ?? 'COD'));
+                            <?php foreach ($orders as $order): 
+                                $isPaid = ($order['status'] === 'delivered' || $order['payment_status'] === 'paid');
+                                $payLabel = $isPaid ? 'Paid' : ucfirst($order['payment_status'] ?? 'unpaid');
+                                $payBadge = $isPaid ? 'success' : 'warning';
+                                $gatewayName = paymentDisplayName((string)($order['payment_method'] ?? 'COD'));
+                                $stBadge = $statusMap[$order['status']]['badge'] ?? 'secondary';
+                                $stLabel = $statusMap[$order['status']]['label'] ?? ucfirst($order['status']);
                             ?>
                             <tr>
                                 <!-- Order # -->
                                 <td>
-                                    <a href="<?= BASE_URL ?>/admin/order/<?= $ord['id'] ?>" style="font-weight: 700; color: #0f766e; text-decoration: none; font-size: 0.85rem; font-family: monospace;">
-                                        #<?= htmlspecialchars($ord['order_number'] ?: $ord['id']) ?>
+                                    <a href="<?= BASE_URL ?>/admin/order/<?= $order['id'] ?>" style="font-weight: 700; color: #0f766e; text-decoration: none; font-size: 0.85rem; font-family: monospace; display: inline-flex; align-items: center; gap: 4px;">
+                                        <span>#<?= htmlspecialchars($order['order_number'] ?: $order['id']) ?></span>
                                     </a>
                                 </td>
 
                                 <!-- Date & Time -->
                                 <td>
                                     <div style="font-size: 0.80rem; font-weight: 500; color: #0f172a;">
-                                        <?= date('M j, Y', strtotime($ord['created_at'])) ?>
+                                        <?= date('M j, Y', strtotime($order['created_at'])) ?>
                                     </div>
                                     <div style="font-size: 0.72rem; color: #64748b;">
-                                        <?= date('h:i A', strtotime($ord['created_at'])) ?>
+                                        <?= date('h:i A', strtotime($order['created_at'])) ?>
                                     </div>
                                 </td>
 
-                                <!-- Ordered Items Preview -->
+                                <!-- Shipping & Contact -->
                                 <td>
-                                    <?php if (empty($items)): ?>
-                                        <span style="font-size: 0.76rem; color: #94a3b8;">No item details</span>
-                                    <?php else: ?>
-                                        <div style="display: flex; flex-direction: column; gap: 3px;">
-                                            <?php foreach (array_slice($items, 0, 3) as $it): 
-                                                $imgUrl = !empty($it['main_image']) ? BASE_URL . '/' . htmlspecialchars($it['main_image']) : BASE_URL . '/assets/images/placeholder.png';
-                                                $vInfo = implode(' / ', array_filter([$it['size'] ?? '', $it['color'] ?? '', $it['variant'] ?? '']));
-                                            ?>
-                                            <div class="order-item-chip">
-                                                <img src="<?= $imgUrl ?>" class="order-item-img" alt="product">
-                                                <div style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                                    <span style="font-weight: 500;"><?= htmlspecialchars($it['product_name'] ?? $it['product_title'] ?? 'Product') ?></span>
-                                                    <?php if (!empty($vInfo)): ?>
-                                                        <span style="color: #64748b; font-size: 0.72rem;">(<?= htmlspecialchars($vInfo) ?>)</span>
-                                                    <?php endif; ?>
-                                                </div>
-                                                <div style="font-weight: 600; color: #0f172a; white-space: nowrap;">
-                                                    &times; <?= (int)$it['quantity'] ?>
-                                                </div>
-                                            </div>
-                                            <?php endforeach; ?>
-                                            <?php if (count($items) > 3): ?>
-                                                <div style="font-size: 0.72rem; color: #0f766e; font-weight: 600; padding-left: 4px;">
-                                                    +<?= count($items) - 3 ?> more item(s)
-                                                </div>
-                                            <?php endif; ?>
-                                        </div>
-                                    <?php endif; ?>
-                                </td>
-
-                                <!-- Shipping Destination -->
-                                <td>
-                                    <div style="font-size: 0.80rem; font-weight: 500; color: #334155;">
-                                        <?= htmlspecialchars(trim(($ord['shipping_first_name'] ?? '') . ' ' . ($ord['shipping_last_name'] ?? ''))) ?: htmlspecialchars($customerFullName) ?>
+                                    <div style="font-weight: 500; color: #0f172a; font-size: 0.82rem;">
+                                        <?= htmlspecialchars(trim(($order['shipping_first_name'] ?? '') . ' ' . ($order['shipping_last_name'] ?? ''))) ?: htmlspecialchars($customerFullName) ?>
                                     </div>
                                     <div style="font-size: 0.74rem; color: #64748b; margin-top: 1px;">
-                                        <?= htmlspecialchars(implode(', ', array_filter([$ord['shipping_address'] ?? '', $ord['shipping_city'] ?? '']))) ?: 'Local Delivery' ?>
+                                        <?= htmlspecialchars(implode(', ', array_filter([$order['shipping_address'] ?? '', $order['shipping_city'] ?? '']))) ?: 'Local Delivery' ?>
                                     </div>
-                                    <?php if (!empty($ord['shipping_phone'])): ?>
+                                    <?php if (!empty($order['shipping_phone'])): ?>
                                         <div style="font-size: 0.72rem; color: #64748b; margin-top: 1px;">
-                                            📞 <?= htmlspecialchars($ord['shipping_phone']) ?>
+                                            📞 <?= htmlspecialchars($order['shipping_phone']) ?>
                                         </div>
                                     <?php endif; ?>
                                 </td>
 
-                                <!-- Payment Status & Method -->
-                                <td style="text-align: center;">
-                                    <span class="badge <?= $payStatus === 'paid' ? 'badge-success' : ($payStatus === 'partial' ? 'badge-warning' : 'badge-danger') ?>" style="font-size: 0.72rem; text-transform: capitalize; padding: 2px 7px;">
-                                        <?= htmlspecialchars($payStatus) ?>
-                                    </span>
-                                    <div style="font-size: 0.70rem; color: #64748b; margin-top: 3px; font-weight: 500;">
-                                        <?= htmlspecialchars($payMethod) ?>
-                                    </div>
-                                </td>
-
-                                <!-- Order Status -->
-                                <td style="text-align: center;">
-                                    <span class="badge badge-<?= $stBadge ?>" style="font-size: 0.74rem; padding: 3px 8px; font-weight: 600;">
-                                        <?= htmlspecialchars($stLabel) ?>
-                                    </span>
-                                </td>
-
-                                <!-- Total Amount -->
+                                <!-- Total -->
                                 <td style="text-align: right;">
-                                    <div style="font-weight: 700; color: #0f172a; font-size: 0.90rem;">
-                                        Tk <?= number_format((float)$ord['total']) ?>
+                                    <div style="font-weight: 700; color: #0f172a; font-size: 0.88rem;">
+                                        Tk <?= number_format((float)$order['total']) ?>
                                     </div>
-                                    <?php if ((float)$ord['advance_payment'] > 0 && $payStatus !== 'paid'): ?>
-                                        <div style="font-size: 0.70rem; color: #059669;">
-                                            Adv: Tk <?= number_format((float)$ord['advance_payment']) ?>
+                                    <?php if ((float)($order['advance_payment'] ?? 0) > 0 && !$isPaid): ?>
+                                        <div style="font-size: 0.70rem; color: #059669; font-weight: 500;">
+                                            Adv: Tk <?= number_format((float)$order['advance_payment']) ?>
                                         </div>
                                     <?php endif; ?>
+                                </td>
+
+                                <!-- Payment Status -->
+                                <td style="text-align: center;">
+                                    <span class="badge badge-<?= $payBadge ?>" style="font-weight: 500; font-size: 0.74rem; padding: 2px 8px;">
+                                        <?= htmlspecialchars($payLabel) ?>
+                                    </span>
+                                </td>
+
+                                <!-- Order Status Dropdown (Live Status Updater) -->
+                                <td style="text-align: center;">
+                                    <form method="POST" class="admin-form-row-center" style="margin: 0; display: inline-block;">
+                                        <?= csrfField() ?>
+                                        <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
+                                        <input type="hidden" name="update_order_status" value="1">
+                                        <select name="status" class="form-select admin-status-select" style="font-weight: 600; font-size: 0.80rem; padding: 0.25rem 0.5rem; border-radius: 6px;" onchange="this.form.submit()">
+                                            <?php foreach ($statusMap as $sKey => $sVal): ?>
+                                                <option value="<?= $sKey ?>" <?= $order['status'] === $sKey ? 'selected' : '' ?>><?= htmlspecialchars($sVal['label']) ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </form>
+                                </td>
+
+                                <!-- Gateway -->
+                                <td>
+                                    <span style="font-size: 0.78rem; font-weight: 500; color: #334155;">
+                                        <?= htmlspecialchars($gatewayName) ?>
+                                    </span>
                                 </td>
 
                                 <!-- Actions -->
                                 <td style="text-align: right;">
-                                    <div class="admin-actions-row" style="justify-content: flex-end; gap: 5px;">
-                                        <a href="<?= BASE_URL ?>/admin/order/<?= $ord['id'] ?>" class="btn btn-sm btn-primary" style="padding: 0 8px; height: 28px; font-size: 0.76rem; display: inline-flex; align-items: center; gap: 4px; border-radius: 6px;" title="View Complete Order Details">
-                                            <span>View</span>
-                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                                    <div class="admin-actions-row" style="justify-content: flex-end; gap: 6px;">
+                                        <a href="<?= BASE_URL ?>/admin/order/<?= $order['id'] ?>" class="btn btn-sm btn-outline" style="height: 28px; font-size: 0.76rem; padding: 0 8px; border-radius: 6px;">View</a>
+                                        <a href="<?= BASE_URL ?>/invoice?order=<?= urlencode($order['order_number']) ?>" target="_blank" class="btn btn-sm btn-outline" style="height: 28px; width: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center; color: #0f766e; border-color: #0f766e; border-radius: 6px;" title="Print / Download Invoice">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                         </a>
                                     </div>
                                 </td>
@@ -536,10 +895,97 @@ $pageTitle = 'Order History – ' . $customerFullName;
                 </table>
             </div>
 
+            <!-- Mobile Orders Cards (<= 768px) -->
+            <div class="as-mobile-orders-wrap">
+                <?php if (empty($orders)): ?>
+                    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 2.5rem 1rem; text-align: center; color: #94a3b8;">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.8" style="display: block; margin: 0 auto 10px;"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                        <div style="font-weight: 600; color: #64748b; font-size: 0.90rem;">No orders found.</div>
+                        <a href="<?= BASE_URL ?>/admin/order-create?phone=<?= urlencode($customer['phone'] ?? '') ?>&name=<?= urlencode($customerFullName) ?>&city=<?= urlencode($customer['city'] ?? '') ?>" class="btn btn-sm btn-primary" style="margin-top: 10px; display: inline-flex; align-items: center; gap: 5px;">
+                            + Create Order
+                        </a>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($orders as $order): 
+                        $isPaid = ($order['status'] === 'delivered' || $order['payment_status'] === 'paid');
+                        $payLabel = $isPaid ? 'Paid' : ucfirst($order['payment_status'] ?? 'unpaid');
+                        $payBadge = $isPaid ? 'success' : 'warning';
+                        $gatewayName = paymentDisplayName((string)($order['payment_method'] ?? 'COD'));
+                        $stBadge = $statusMap[$order['status']]['badge'] ?? 'secondary';
+                        $stLabel = $statusMap[$order['status']]['label'] ?? ucfirst($order['status']);
+                    ?>
+                    <div class="as-order-m-card">
+                        <div class="as-order-m-header">
+                            <div>
+                                <a href="<?= BASE_URL ?>/admin/order/<?= $order['id'] ?>" class="as-order-m-num">
+                                    #<?= htmlspecialchars($order['order_number'] ?: $order['id']) ?>
+                                </a>
+                                <div class="as-order-m-date">
+                                    <?= date('M j, Y h:i A', strtotime($order['created_at'])) ?>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <span class="badge badge-<?= $stBadge ?>" style="font-size: 0.70rem; padding: 2px 7px;">
+                                    <?= htmlspecialchars($stLabel) ?>
+                                </span>
+                                <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-top: 3px;">
+                                    Tk <?= number_format((float)$order['total']) ?>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="as-order-m-body">
+                            <div class="as-order-m-row">
+                                <span class="as-order-m-lbl">Recipient:</span>
+                                <span style="font-weight: 500; color: #0f172a;"><?= htmlspecialchars(trim(($order['shipping_first_name'] ?? '') . ' ' . ($order['shipping_last_name'] ?? ''))) ?: htmlspecialchars($customerFullName) ?></span>
+                            </div>
+                            <?php if (!empty($order['shipping_phone'])): ?>
+                            <div class="as-order-m-row">
+                                <span class="as-order-m-lbl">Phone:</span>
+                                <a href="tel:<?= htmlspecialchars($order['shipping_phone']) ?>" style="color: #0f766e; text-decoration: none; font-weight: 500;"><?= htmlspecialchars($order['shipping_phone']) ?></a>
+                            </div>
+                            <?php endif; ?>
+                            <div class="as-order-m-row">
+                                <span class="as-order-m-lbl">Payment:</span>
+                                <span>
+                                    <span class="badge badge-<?= $payBadge ?>" style="font-size: 0.68rem; padding: 1px 6px;"><?= htmlspecialchars($payLabel) ?></span>
+                                    <span style="font-size: 0.72rem; color: #64748b; margin-left: 3px;"><?= htmlspecialchars($gatewayName) ?></span>
+                                </span>
+                            </div>
+                            <?php if ((float)($order['advance_payment'] ?? 0) > 0 && !$isPaid): ?>
+                            <div class="as-order-m-row">
+                                <span class="as-order-m-lbl">Advance:</span>
+                                <span style="color: #059669; font-weight: 600;">Tk <?= number_format((float)$order['advance_payment']) ?></span>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="as-order-m-actions">
+                            <form method="POST" style="flex: 1; margin: 0;">
+                                <?= csrfField() ?>
+                                <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
+                                <input type="hidden" name="update_order_status" value="1">
+                                <select name="status" class="form-select admin-status-select" style="width: 100%; height: 32px; font-weight: 600; font-size: 0.76rem; padding: 0 6px; border-radius: 6px;" onchange="this.form.submit()">
+                                    <?php foreach ($statusMap as $sKey => $sVal): ?>
+                                        <option value="<?= $sKey ?>" <?= $order['status'] === $sKey ? 'selected' : '' ?>><?= htmlspecialchars($sVal['label']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </form>
+                            <a href="<?= BASE_URL ?>/admin/order/<?= $order['id'] ?>" class="btn btn-sm btn-outline" style="height: 32px; padding: 0 10px; font-size: 0.76rem; border-radius: 6px; display: inline-flex; align-items: center;">View</a>
+                            <a href="<?= BASE_URL ?>/invoice?order=<?= urlencode($order['order_number']) ?>" target="_blank" class="btn btn-sm btn-outline" style="height: 32px; width: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; color: #0f766e; border-color: #0f766e; border-radius: 6px;" title="Invoice">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            </a>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+
             <!-- Standard Pagination -->
             <?php renderAdminPagination($page, $totalFilteredOrders, $perPage, BASE_URL . '/admin/customer-orders', array_filter(['id' => $customerId, 'search' => $search, 'status' => $statusFilter])); ?>
 
         </main>
     </div>
+    <script src="js/admin.js"></script>
 </body>
 </html>
