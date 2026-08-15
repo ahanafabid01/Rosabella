@@ -158,7 +158,7 @@ $productId = intval($_GET['id'] ?? 0);  // Always cast to int — prevents type-
 
 // Delete product — requires a POST form with CSRF (GET-based delete is CSRF-vulnerable)
 if ($action === 'delete' && $productId > 0 && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    requireCSRF();
+    // CSRF already verified by the blanket check above (lines 18-21)
     // Cascade: delete associated images from disk first
     $imgStmt = $db->prepare("SELECT main_image, gallery_images FROM products WHERE id = ?");
     $imgStmt->execute([$productId]);
@@ -177,8 +177,8 @@ if ($action === 'delete' && $productId > 0 && $_SERVER['REQUEST_METHOD'] === 'PO
 }
 
 
-// Save product (create/update)
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+// Save product (create/update) - only run on add/edit actions
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($action, ['add', 'edit'], true) && isset($_POST['name'])) {
     $name = sanitize($_POST['name']);
     $slug = trim(preg_replace('/[^a-z0-9]+/', '-', strtolower($name)), '-');
     $category_id = intval($_POST['category_id']);

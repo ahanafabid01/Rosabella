@@ -99,3 +99,13 @@ Stack trace:
 [14-Aug-2026 15:01:46 Europe/Berlin] PHP Warning:  Undefined array key "advance_payment" in C:\xampp\htdocs\Rosabella\admin\order-detail.php on line 356
 [14-Aug-2026 15:01:48 Europe/Berlin] PHP Warning:  Undefined array key "advance_payment" in C:\xampp\htdocs\Rosabella\admin\order-detail.php on line 356
 [14-Aug-2026 15:01:54 Europe/Berlin] PHP Warning:  Undefined array key "advance_payment" in C:\xampp\htdocs\Rosabella\admin\order-detail.php on line 356
+[15-Aug-2026 07:28:35 Europe/Berlin] PHP Warning:  Undefined array key "name" in C:\xampp\htdocs\Rosabella\admin\products.php on line 182
+[15-Aug-2026 07:28:35 Europe/Berlin] PHP Deprecated:  trim(): Passing null to parameter #1 ($string) of type string is deprecated in C:\xampp\htdocs\Rosabella\config\database.php on line 118
+[15-Aug-2026 07:28:35 Europe/Berlin] PHP Warning:  Undefined array key "category_id" in C:\xampp\htdocs\Rosabella\admin\products.php on line 184
+[15-Aug-2026 07:28:35 Europe/Berlin] PHP Warning:  Undefined array key "price" in C:\xampp\htdocs\Rosabella\admin\products.php on line 185
+[15-Aug-2026 07:28:35 Europe/Berlin] PHP Warning:  Undefined array key "stock_quantity" in C:\xampp\htdocs\Rosabella\admin\products.php on line 187
+[15-Aug-2026 07:28:47 Europe/Berlin] PHP Warning:  Undefined array key "name" in C:\xampp\htdocs\Rosabella\admin\products.php on line 182
+[15-Aug-2026 07:28:47 Europe/Berlin] PHP Deprecated:  trim(): Passing null to parameter #1 ($string) of type string is deprecated in C:\xampp\htdocs\Rosabella\config\database.php on line 118
+[15-Aug-2026 07:28:47 Europe/Berlin] PHP Warning:  Undefined array key "category_id" in C:\xampp\htdocs\Rosabella\admin\products.php on line 184
+[15-Aug-2026 07:28:47 Europe/Berlin] PHP Warning:  Undefined array key "price" in C:\xampp\htdocs\Rosabella\admin\products.php on line 185
+[15-Aug-2026 07:28:47 Europe/Berlin] PHP Warning:  Undefined array key "stock_quantity" in C:\xampp\htdocs\Rosabella\admin\products.php on line 187

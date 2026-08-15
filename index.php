@@ -55,6 +55,15 @@ $stmt = $db->query("SELECT p.*, c.name as category_name
                     LIMIT 15");
 $newArrivalProducts = $stmt->fetchAll();
 
+// Get all products (always shown as a fallback / main catalogue section)
+$stmt = $db->query("SELECT p.*, c.name as category_name 
+                    FROM products p 
+                    LEFT JOIN categories c ON p.category_id = c.id 
+                    WHERE p.status = 'active' 
+                    ORDER BY p.created_at DESC 
+                    LIMIT 20");
+$allHomeProducts = $stmt->fetchAll();
+
 // Helper function to get product grid columns CSS
 function getProductGridCols($theme) {
     $config = getThemeConfig($theme);
@@ -630,6 +639,7 @@ try {
     <?php endif; ?>
 
     <!-- Featured Products Section -->
+    <?php if (!empty($featuredProducts)): ?>
     <section class="section <?= $isClothingBrandTheme ? 'clothing-brand-featured' : '' ?>">
         <div class="container">
             <div class="section-header" style="margin-bottom: 2.5rem; text-align: center; display: flex; flex-direction: column; align-items: center;">
@@ -743,7 +753,117 @@ try {
             </div>
         </div>
     </section>
+    <?php endif; ?>
 
+    <!-- All Products Section — shown only when Featured or New Arrivals has no products -->
+    <?php if (!empty($allHomeProducts) && (empty($featuredProducts) || empty($newArrivalProducts))): ?>
+    <section class="section <?= $isClothingBrandTheme ? 'clothing-brand-featured' : '' ?>" style="<?= (!empty($featuredProducts) || !empty($newArrivalProducts)) ? 'background: var(--color-bg-secondary);' : '' ?>">
+        <div class="container">
+            <div class="section-header" style="margin-bottom: 2.5rem; text-align: center; display: flex; flex-direction: column; align-items: center;">
+                <div style="width: 100%;">
+                    <?php if ($isClothingBrandTheme): ?><p class="clothing-brand-eyebrow">Shop Everything</p><?php endif; ?>
+                    <h2 class="section-title">All Products</h2>
+                    <p class="section-subtitle" style="max-width: 500px; margin: 0.5rem auto 0;">
+                        <?= count($allHomeProducts) ?> products available &mdash; browse our full collection
+                    </p>
+                </div>
+            </div>
+
+            <div class="products-grid">
+                <?php foreach ($allHomeProducts as $idx => $product): ?>
+                    <?php
+                    $discount = 0;
+                    if ($product['sale_price'] && $product['price'] > 0) {
+                        $discount = round((($product['price'] - $product['sale_price']) / $product['price']) * 100);
+                    }
+                    $image = $product['main_image'] ?: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80';
+                    ?>
+                    <div class="product-card">
+                        <div class="product-image">
+                            <a href="<?= BASE_URL ?>/product/<?= $product['slug'] ?>" class="product-image-link" aria-label="View <?= htmlspecialchars($product['name']) ?>"></a>
+                            <img src="<?= htmlspecialchars($image) ?>" alt="<?= htmlspecialchars($product['name']) ?>" width="400" height="400" loading="lazy">
+
+                            <!-- Badges -->
+                            <div class="product-badges">
+                                <?php if ($product['is_new']): ?>
+                                    <span class="badge badge-new">New</span>
+                                <?php endif; ?>
+                                <?php if ($product['is_featured']): ?>
+                                    <span class="badge badge-bestseller">Featured</span>
+                                <?php endif; ?>
+                                <?php if ($discount > 0): ?>
+                                    <span class="badge badge-sale">-<?= $discount ?>%</span>
+                                <?php endif; ?>
+                            </div>
+
+                            <!-- Wishlist Button -->
+                            <button class="product-wishlist" data-product-id="<?= $product['id'] ?>" aria-label="Add to wishlist">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                                </svg>
+                            </button>
+
+                            <!-- Quick Actions -->
+                            <div class="product-actions">
+                                <button class="btn btn-primary product-add-cart" data-product-id="<?= $product['id'] ?>" style="flex: 1;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                                    </svg>
+                                    Add to Cart
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="product-content">
+                            <h3 class="product-name">
+                                <a href="<?= BASE_URL ?>/product/<?= $product['slug'] ?>"><?= htmlspecialchars($product['name']) ?></a>
+                            </h3>
+                            <div class="product-price">
+                                <span class="price-current">
+                                    <?= formatPrice($product['sale_price'] ?: $product['price']) ?>
+                                </span>
+                                <?php if ($product['sale_price']): ?>
+                                    <span class="price-original"><?= formatPrice($product['price']) ?></span>
+                                <?php endif; ?>
+                            </div>
+                            <?php
+                            $colorsArr = [];
+                            if (!empty($product['colors'])) {
+                                $decoded = json_decode($product['colors'], true);
+                                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded) && !isset($decoded[0]) && !isset($decoded['color'])) {
+                                    $colorsArr = $decoded;
+                                }
+                            }
+                            ?>
+                            <?php if (!empty($colorsArr)): ?>
+                            <div style="display: flex; gap: 0.35rem; margin-top: 0.75rem; flex-wrap: wrap;">
+                                <?php foreach ($colorsArr as $cName => $cData): ?>
+                                    <?php
+                                    $cImg = '';
+                                    if (!empty($cData['main_image'])) {
+                                        $cImg = strpos($cData['main_image'], 'http') === 0 ? $cData['main_image'] : BASE_URL . '/' . ltrim($cData['main_image'], '/');
+                                    }
+                                    ?>
+                                    <div style="width: 14px; height: 14px; border-radius: 50%; background-color: <?= htmlspecialchars($cData['hex'] ?? '#000') ?>; cursor: pointer; border: 1px solid rgba(0,0,0,0.15); box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); transition: transform 0.2s;" title="<?= htmlspecialchars($cName) ?>" <?= $cImg ? 'onmouseover="this.closest(\'.product-card\').querySelector(\'.product-image img\').src=\''.htmlspecialchars($cImg).'\';"' : '' ?> onmouseenter="this.style.transform='scale(1.2)'" onmouseleave="this.style.transform='scale(1)'"></div>
+                                <?php endforeach; ?>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <div style="text-align: center; margin-top: 2.5rem;">
+                <a href="<?= BASE_URL ?>/shop" class="btn btn-outline btn-lg">
+                    View All Products
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
 
