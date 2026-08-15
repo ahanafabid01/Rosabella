@@ -273,7 +273,6 @@ $lowStockProducts = $db->query("
                                     <tr>
                                         <td>
                                             <div style="font-weight: 700; color: #0f172a; font-size: 0.85rem;"><?= htmlspecialchars($order['order_number']) ?></div>
-                                            <div style="font-size: 0.75rem; color: #64748b;"><?= htmlspecialchars($order['customer_name'] ?? 'Guest Customer') ?></div>
                                         </td>
                                         <td>
                                             <span class="badge badge-<?= $statusClass ?>" style="font-size: 0.75rem; padding: 3px 8px; font-weight: 700;">

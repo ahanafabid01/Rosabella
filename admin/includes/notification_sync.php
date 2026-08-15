@@ -36,11 +36,16 @@ if (!function_exists('syncAdminNotifications')) {
         // 1. Pending orders
         $pendingCount = (int)$db->query("SELECT COUNT(*) FROM orders WHERE status = 'pending'")->fetchColumn();
         if ($pendingCount > 0) {
-            $latest = $db->query("SELECT id, customer_name, total FROM orders WHERE status='pending' ORDER BY created_at DESC LIMIT 1")->fetch();
+            $latest = $db->query("
+                SELECT id, order_number, total, 
+                       TRIM(CONCAT(COALESCE(shipping_first_name,''), ' ', COALESCE(shipping_last_name,''))) AS customer_name 
+                FROM orders WHERE status='pending' ORDER BY created_at DESC LIMIT 1
+            ")->fetch();
+            $custName = !empty($latest['customer_name']) ? ' — ' . htmlspecialchars($latest['customer_name']) : '';
             $events[] = [
                 'type' => 'order', 'icon' => 'order', 'priority' => 'high',
                 'title' => $pendingCount === 1 ? '1 Pending Order' : "{$pendingCount} Pending Orders",
-                'body'  => $latest ? "Latest: #{$latest['id']} — " . htmlspecialchars($latest['customer_name']) . " · Tk " . number_format($latest['total'], 2) : '',
+                'body'  => $latest ? "Latest: #{$latest['order_number']}{$custName} · Tk " . number_format($latest['total'], 2) : '',
                 'url'   => BASE_URL . '/admin/orders?status=pending',
                 'ref_id'=> 'pending_orders_' . $pendingCount,
             ];
@@ -49,11 +54,16 @@ if (!function_exists('syncAdminNotifications')) {
         // 2. New orders last 24h (non-pending)
         $newCount = (int)$db->query("SELECT COUNT(*) FROM orders WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR) AND status != 'pending'")->fetchColumn();
         if ($newCount > 0) {
-            $latest = $db->query("SELECT id, customer_name FROM orders WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR) AND status != 'pending' ORDER BY created_at DESC LIMIT 1")->fetch();
+            $latest = $db->query("
+                SELECT id, order_number, total,
+                       TRIM(CONCAT(COALESCE(shipping_first_name,''), ' ', COALESCE(shipping_last_name,''))) AS customer_name 
+                FROM orders WHERE created_at >= DATE_SUB(NOW(), INTERVAL 24 HOUR) AND status != 'pending' ORDER BY created_at DESC LIMIT 1
+            ")->fetch();
+            $custName = !empty($latest['customer_name']) ? ' — ' . htmlspecialchars($latest['customer_name']) : '';
             $events[] = [
                 'type' => 'order', 'icon' => 'order', 'priority' => 'medium',
                 'title' => $newCount === 1 ? '1 New Order (24h)' : "{$newCount} New Orders (24h)",
-                'body'  => $latest ? "Latest: #{$latest['id']} — " . htmlspecialchars($latest['customer_name']) : '',
+                'body'  => $latest ? "Latest: #{$latest['order_number']}{$custName}" : '',
                 'url'   => BASE_URL . '/admin/orders',
                 'ref_id'=> 'new_orders_24h_' . $newCount,
             ];
