@@ -897,35 +897,6 @@ button, input, optgroup, select, textarea, .btn, .form-input, .form-select, .for
     color: var(--color-primary);
 }
 
-.admin-topbar-profile-pill {
-    display: flex;
-    align-items: center;
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-    padding: 4px 12px 4px 4px;
-    gap: 0.5rem;
-    background: #fff;
-}
-
-.admin-topbar-avatar {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    background: var(--color-primary);
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 0.8rem;
-}
-
-.admin-topbar-name {
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: var(--color-text);
-}
-
 .admin-topbar-logout {
     gap: 0.5rem;
     padding: 0 1rem;
@@ -986,33 +957,55 @@ button, input, optgroup, select, textarea, .btn, .form-input, .form-select, .for
 }
 
 .admin-topbar-profile-pill {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.25rem 0.75rem 0.25rem 0.25rem;
-    border: 1px solid var(--color-border);
-    border-radius: 20px;
-    background: #fff;
+    gap: 0.55rem;
+    padding: 3px 12px 3px 3px;
+    border: 1px solid #e2e8f0;
+    border-radius: 9999px;
+    background: #ffffff;
     cursor: pointer;
+    text-decoration: none;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
 }
 
+.admin-topbar-profile-pill:hover {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    transform: translateY(-0.5px);
+}
+
+.admin-topbar-avatar,
 .admin-topbar-profile-pill .admin-topbar-avatar {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px; /* Squarish like screenshot */
-    background: #1a365d;
-    color: #fff;
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
+    color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.75rem;
-    font-weight: 700;
+    font-size: 0.72rem;
+    font-weight: 600;
+    flex-shrink: 0;
+    border: 1.5px solid #ffffff;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
 }
 
 .admin-topbar-profile-pill .admin-topbar-name {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--color-text);
+    font-size: 0.835rem;
+    font-weight: 500;
+    color: #1e293b;
+    letter-spacing: -0.01em;
+}
+
+.notif-badge[hidden],
+.notif-badge:empty {
+    display: none !important;
 }
 
 /* Icon Buttons to look like chips */

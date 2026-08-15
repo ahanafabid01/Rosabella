@@ -202,7 +202,7 @@ if (!function_exists('renderAdminTopbar')) {
                 <!-- ===== End Notification Bell ===== -->
                 <a href="<?= BASE_URL ?>/admin/settings?tab=profile" class="admin-topbar-profile-pill" style="text-decoration: none; cursor: pointer;" title="Admin Profile & Settings">
                     <?php if (!empty($userAvatar)): ?>
-                        <img src="<?= htmlspecialchars($avatarSrc) ?>" alt="<?= $userName ?>" class="admin-topbar-avatar" style="object-fit: cover; border-radius: 6px;">
+                        <img src="<?= htmlspecialchars($avatarSrc) ?>" alt="<?= $userName ?>" class="admin-topbar-avatar">
                     <?php else: ?>
                         <div class="admin-topbar-avatar"><?= $initials ?></div>
                     <?php endif; ?>
