@@ -247,23 +247,12 @@ function getThemeCSS($theme = null) {
         $css .= '
             /* Clothing Brand Theme - Fashion-Focused Layout */
             
-            /* Hero Section with Dark Overlay */
+            /* Hero Section */
             .hero-main-banner {
                 position: relative;
                 overflow: hidden;
             }
-            
-            .hero-main-banner::before {
-                content: "";
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 100%);
-                z-index: 2;
-                pointer-events: none;
-            }
+
 
             .clothing-brand-hero .hero-bento-grid {
                 height: clamp(680px, 75vh, 800px);
@@ -636,10 +625,11 @@ function getThemeCSS($theme = null) {
             }
 
             .theme-clothing-brand .clothing-brand-hero .hero-slide::after {
-                background: linear-gradient(90deg, rgba(16, 14, 12, 0.6), rgba(16, 14, 12, 0.08) 70%);
+                background: linear-gradient(90deg, rgba(0, 0, 0, 0.22) 0%, rgba(0, 0, 0, 0) 55%);
                 content: "";
                 inset: 0;
                 position: absolute;
+                pointer-events: none;
             }
 
             .clothing-brand-hero-copy {
@@ -649,6 +639,7 @@ function getThemeCSS($theme = null) {
                 max-width: min(580px, 80vw);
                 position: absolute;
                 z-index: 4;
+                text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
             }
 
             .clothing-brand-hero-copy p {
@@ -658,6 +649,7 @@ function getThemeCSS($theme = null) {
                 letter-spacing: 0.16em;
                 margin: 0 0 1rem;
                 text-transform: uppercase;
+                text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
             }
 
             .clothing-brand-hero-copy h1 {
@@ -667,6 +659,7 @@ function getThemeCSS($theme = null) {
                 letter-spacing: -0.07em !important;
                 line-height: 0.98;
                 margin: 0 0 1.75rem;
+                text-shadow: 0 3px 16px rgba(0, 0, 0, 0.45);
             }
 
             .clothing-brand-hero-copy a {
