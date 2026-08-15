@@ -227,6 +227,8 @@ $pageTitle = 'Attributes Management';
             </div>
             <?php if ($action === 'list'): ?>
                 <a href="?action=add" class="btn btn-primary" style="white-space: nowrap;">+ Create Master Attribute</a>
+            <?php else: ?>
+                <a href="attributes.php" class="btn btn-secondary" style="white-space: nowrap;">← Back to Attributes</a>
             <?php endif; ?>
         </div>
 
@@ -403,13 +405,17 @@ $pageTitle = 'Attributes Management';
 
         <?php else: ?>
             <!-- Form: Add / Edit Master Attribute -->
-            <div class="admin-card" style="max-width: 760px; margin: 0 auto;">
+            <div class="admin-card">
                 <!-- Form Header + Presets -->
                 <div class="attr-form-header">
-                    <h3 class="admin-section-heading" style="margin: 0;">
-                        <?= $action === 'edit' ? 'Edit Master Attribute' : 'Create Master Attribute' ?>
-                    </h3>
+                    <div>
+                        <h3 class="admin-section-heading" style="margin: 0; font-size: 1.05rem;">
+                            <?= $action === 'edit' ? 'Edit Master Attribute' : 'Create Master Attribute' ?>
+                        </h3>
+                        <p style="margin: 3px 0 0; font-size: 0.80rem; color: #64748b;">Configure attribute names, types, predefined options, and assign them globally or to specific product categories.</p>
+                    </div>
                     <div class="attr-preset-bar">
+                        <span style="font-size: 0.76rem; font-weight: 600; color: #64748b; margin-right: 2px;">Quick Presets:</span>
                         <button type="button" class="btn btn-sm btn-secondary" onclick="loadPreset('Standard Clothing Sizes', 'size', 'XS, S, M, L, XL, XXL, 3XL')">+ Sizes Preset</button>
                         <button type="button" class="btn btn-sm btn-secondary" onclick="loadPreset('Shoe Sizes', 'size', '38, 39, 40, 41, 42, 43, 44, 45')">+ Shoes Preset</button>
                         <button type="button" class="btn btn-sm btn-secondary" onclick="loadPreset('Standard Colors', 'color', 'Black, White, Navy Blue, Crimson Red, Olive Green, Beige, Gray')">+ Colors Preset</button>
@@ -439,7 +445,7 @@ $pageTitle = 'Attributes Management';
 
                     <div class="form-group">
                         <label class="form-label">Allowed Options / Values * <span style="font-weight: 400; color: #64748b;">(Comma Separated)</span></label>
-                        <textarea id="attr_values_input" name="attribute_values" class="form-textarea" style="height: 90px;" required
+                        <textarea id="attr_values_input" name="attribute_values" class="form-textarea" style="min-height: 100px;" required
                             placeholder="e.g., S, M, L, XL, XXL  or  Red, Crimson Red, Navy Blue, Rose Gold, Black, White"><?= htmlspecialchars($editingAttr['attribute_values'] ?? '') ?></textarea>
                         <div class="admin-upload-help" style="margin-top: 4px;">Enter comma-separated values. For Color type, use the swatch picker below!</div>
 
@@ -455,33 +461,35 @@ $pageTitle = 'Attributes Management';
                     <!-- Category Assignment Section -->
                     <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem;">
                         <div style="display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.5rem;">
-                            <label class="form-label" style="font-weight: 700; color: #0f172a; margin: 0;">🏷️ Apply to Categories</label>
-                            <label style="font-size: 0.8rem; font-weight: 600; color: #0f766e; cursor: pointer; display: flex; align-items: center; gap: 5px; white-space: nowrap;">
+                            <div>
+                                <label class="form-label" style="font-weight: 700; color: #0f172a; margin: 0;">🏷️ Apply to Categories</label>
+                                <p style="font-size: 0.78rem; color: #64748b; margin: 2px 0 0;">
+                                    Uncheck "Apply to ALL Categories" to select specific categories below.
+                                </p>
+                            </div>
+                            <label style="font-size: 0.8rem; font-weight: 600; color: #0f766e; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; background: #e6fcf5; border: 1px solid #a7f3d0; padding: 6px 12px; border-radius: 6px;">
                                 <input type="checkbox" id="toggle-all-cats" name="apply_to_all" value="1"
                                     <?= (!empty($editingAttr['apply_to_all']) || $action === 'add') ? 'checked' : '' ?>
                                     onchange="toggleCategoryGrid(this.checked)"
-                                    style="width: 16px; height: 16px;">
+                                    style="width: 16px; height: 16px; cursor: pointer;">
                                 Apply to ALL Categories
                             </label>
                         </div>
-                        <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 1rem;">
-                            Uncheck "Apply to ALL Categories" to select specific categories below.
-                        </p>
 
-                        <div id="category-checkboxes-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; max-height: 240px; overflow-y: auto; padding: 8px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; <?= (!empty($editingAttr['apply_to_all']) || $action === 'add') ? 'opacity: 0.5; pointer-events: none;' : '' ?>">
+                        <div id="category-checkboxes-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; max-height: 260px; overflow-y: auto; padding: 10px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 0.75rem; <?= (!empty($editingAttr['apply_to_all']) || $action === 'add') ? 'opacity: 0.5; pointer-events: none;' : '' ?>">
                             <?php foreach ($allCategories as $cat): ?>
                                 <?php $isAssigned = in_array(intval($cat['id']), $assignedCategoryIds, true); ?>
-                                <label style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 600; color: #334155; cursor: pointer; padding: 6px 8px; border-radius: 6px; background: #f8fafc; border: 1px solid #f1f5f9;">
-                                    <input type="checkbox" name="categories[]" value="<?= $cat['id'] ?>" <?= $isAssigned ? 'checked' : '' ?> style="width: 16px; height: 16px; flex-shrink: 0;">
+                                <label style="display: flex; align-items: center; gap: 8px; font-size: 0.82rem; font-weight: 600; color: #334155; cursor: pointer; padding: 8px 10px; border-radius: 6px; background: #f8fafc; border: 1px solid #e2e8f0; transition: background 0.15s ease;">
+                                    <input type="checkbox" name="categories[]" value="<?= $cat['id'] ?>" <?= $isAssigned ? 'checked' : '' ?> style="width: 16px; height: 16px; flex-shrink: 0; cursor: pointer;">
                                     <span style="line-height: 1.3;"><?= htmlspecialchars($cat['name']) ?></span>
                                 </label>
                             <?php endforeach; ?>
                         </div>
                     </div>
 
-                    <div class="admin-actions-row" style="margin-top: 1.5rem; flex-wrap: wrap;">
-                        <button class="btn btn-primary" type="submit" style="flex: 1 1 auto;">Save Attribute</button>
-                        <a class="btn btn-secondary" href="attributes.php" style="flex: 1 1 auto; text-align: center;">Cancel</a>
+                    <div style="display: flex; gap: 0.75rem; align-items: center; margin-top: 1.5rem; flex-wrap: wrap;">
+                        <button class="btn btn-primary" type="submit" style="padding: 0.65rem 1.75rem; font-size: 0.875rem;">Save Attribute</button>
+                        <a class="btn btn-secondary" href="attributes.php" style="padding: 0.65rem 1.5rem; font-size: 0.875rem;">Cancel</a>
                     </div>
                 </form>
             </div>
