@@ -154,7 +154,14 @@ foreach ($mergedPayments as $item) {
 }
 
 // ── 4. Tables Data ───────────────────────────────────────────────────────────
-$recentOrders = $db->query("SELECT * FROM orders ORDER BY created_at DESC LIMIT 6")->fetchAll();
+$recentOrders = $db->query("
+    SELECT o.*, 
+           TRIM(CONCAT(COALESCE(o.shipping_first_name,''), ' ', COALESCE(o.shipping_last_name,''))) AS customer_full_name,
+           (SELECT COUNT(*) FROM order_items oi WHERE oi.order_id = o.id) AS item_count
+    FROM orders o 
+    ORDER BY o.created_at DESC 
+    LIMIT 6
+")->fetchAll(PDO::FETCH_ASSOC);
 
 $lowStockProducts = $db->query("
     SELECT p.*, c.name as category_name 
@@ -751,7 +758,10 @@ $lowStockProducts = $db->query("
                             <table class="admin-table admin-table-sm">
                                 <thead>
                                     <tr>
-                                        <th>Order Reference</th>
+                                        <th>Order #</th>
+                                        <th>Customer</th>
+                                        <th>Date</th>
+                                        <th>Payment</th>
                                         <th>Status</th>
                                         <th style="text-align: right;">Total</th>
                                         <th style="text-align: right;">Action</th>
@@ -759,7 +769,7 @@ $lowStockProducts = $db->query("
                                 </thead>
                                 <tbody>
                                     <?php if (empty($recentOrders)): ?>
-                                        <tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 2rem;">No recent orders found.</td></tr>
+                                        <tr><td colspan="7" style="text-align: center; color: #94a3b8; padding: 2rem;">No recent orders found.</td></tr>
                                     <?php else: ?>
                                         <?php foreach ($recentOrders as $order): ?>
                                         <?php
@@ -768,17 +778,44 @@ $lowStockProducts = $db->query("
                                             elseif ($order['status'] === 'processing') $statusClass = 'info';
                                             elseif ($order['status'] === 'pending') $statusClass = 'warning';
                                             elseif ($order['status'] === 'cancelled' || $order['status'] === 'returned') $statusClass = 'error';
+
+                                            $payClass = ($order['payment_status'] === 'paid') ? 'badge-success' : 'badge-warning';
+                                            $customerName = trim((string)($order['customer_full_name'] ?? ''));
+                                            $phone = trim((string)($order['shipping_phone'] ?? ''));
+                                            $payMethod = strtoupper(str_replace('_manual', '', (string)($order['payment_method'] ?? 'COD')));
+                                            if ($payMethod === 'CASH ON DELIVERY') $payMethod = 'COD';
                                         ?>
                                         <tr>
                                             <td>
                                                 <div style="font-weight: 700; color: #0f172a; font-size: 0.85rem;"><?= htmlspecialchars($order['order_number']) ?></div>
                                             </td>
                                             <td>
-                                                <span class="badge badge-<?= $statusClass ?>" style="font-size: 0.75rem; padding: 3px 8px; font-weight: 700;">
+                                                <?php if ($customerName): ?>
+                                                    <div style="font-weight: 600; color: #1e293b; font-size: 0.82rem; line-height: 1.2;"><?= htmlspecialchars($customerName) ?></div>
+                                                    <?php if ($phone): ?><div style="font-size: 0.72rem; color: #64748b;"><?= htmlspecialchars($phone) ?></div><?php endif; ?>
+                                                <?php elseif ($phone): ?>
+                                                    <div style="font-weight: 600; color: #1e293b; font-size: 0.82rem;"><?= htmlspecialchars($phone) ?></div>
+                                                <?php else: ?>
+                                                    <span style="color: #94a3b8; font-size: 0.78rem;">Direct Customer</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <span style="font-size: 0.75rem; color: #64748b; font-weight: 500; white-space: nowrap;">
+                                                    <?= date('d M, h:i A', strtotime($order['created_at'])) ?>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div style="display: inline-flex; align-items: center; gap: 4px; flex-wrap: nowrap;">
+                                                    <span style="font-size: 0.68rem; font-weight: 700; color: #475569; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;"><?= htmlspecialchars($payMethod) ?></span>
+                                                    <span class="badge <?= $payClass ?>" style="font-size: 0.68rem; padding: 2px 6px; font-weight: 700;"><?= ucfirst($order['payment_status'] ?? 'pending') ?></span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-<?= $statusClass ?>" style="font-size: 0.72rem; padding: 3px 8px; font-weight: 700;">
                                                     <?= ucfirst($order['status']) ?>
                                                 </span>
                                             </td>
-                                            <td style="text-align: right; font-weight: 700; color: #1e293b; font-size: 0.88rem;">
+                                            <td style="text-align: right; font-weight: 700; color: #0f172a; font-size: 0.86rem; white-space: nowrap;">
                                                 <?= formatPrice($order['total']) ?>
                                             </td>
                                             <td style="text-align: right;">
