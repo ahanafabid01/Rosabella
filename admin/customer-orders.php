@@ -349,21 +349,21 @@ $pageTitle = 'Order History - ' . $customerFullName;
         }
         .as-filter-form {
             display: flex;
-            flex-direction: column;
+            align-items: center;
             width: 100%;
-            gap: 8px;
+            margin: 0;
         }
         .as-filter-row {
             display: flex;
             align-items: center;
             gap: 8px;
             width: 100%;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
         }
         .as-filter-search-wrap {
             position: relative;
-            flex: 1 1 240px;
-            min-width: 180px;
+            flex: 1 1 auto;
+            min-width: 200px;
         }
         .as-filter-search-wrap input {
             width: 100%;
@@ -389,6 +389,12 @@ $pageTitle = 'Order History - ' . $customerFullName;
             pointer-events: none;
             color: #94a3b8;
         }
+        .as-filter-controls-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
         .as-filter-select {
             height: 36px;
             font-size: 0.82rem;
@@ -398,20 +404,23 @@ $pageTitle = 'Order History - ' . $customerFullName;
             border: 1px solid #cbd5e1;
             background-color: #ffffff;
             color: #334155;
-            flex: 0 1 150px;
-            min-width: 130px;
-        }
-        .as-filter-controls-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
+            width: 150px;
+            flex-shrink: 0;
         }
         .as-filter-btns {
             display: flex;
             align-items: center;
             gap: 6px;
-            margin-left: auto;
+            flex-shrink: 0;
+        }
+        .as-filter-btns .btn {
+            height: 36px;
+            font-size: 0.82rem;
+            padding: 0 14px;
+            border-radius: 7px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         /* ── Mobile Order Cards ── */
@@ -648,7 +657,7 @@ $pageTitle = 'Order History - ' . $customerFullName;
                     </a>
                     <a href="<?= BASE_URL ?>/admin/order-create?phone=<?= urlencode($customer['phone'] ?? '') ?>&name=<?= urlencode($customerFullName) ?>&city=<?= urlencode($customer['city'] ?? '') ?>" class="btn btn-primary">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        <span>+ Create Order</span>
+                        <span>Create Order</span>
                     </a>
                 </div>
             </div>
