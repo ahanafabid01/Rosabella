@@ -83,6 +83,15 @@
             }
         }
     });
+
+    window.toggleAdminNavGroup = function(btn) {
+        if (!btn) return;
+        const group = btn.closest('.admin-nav-group');
+        if (!group) return;
+        const isOpen = group.classList.contains('open');
+        group.classList.toggle('open', !isOpen);
+        btn.setAttribute('aria-expanded', (!isOpen).toString());
+    };
 })();
 
 

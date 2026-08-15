@@ -48,60 +48,193 @@ if (!function_exists('renderAdminSidebar')) {
     function renderAdminSidebar(string $activePage): void
     {
         $base = BASE_URL;
-        $items = [
-            'dashboard'     => ['href' => $base . '/admin/dashboard',       'label' => 'Dashboard'],
-            'products'      => ['href' => $base . '/admin/products',         'label' => 'Products'],
-            'categories'    => ['href' => $base . '/admin/categories',       'label' => 'Categories'],
-            'attributes'    => ['href' => $base . '/admin/attributes.php',   'label' => 'Attributes'],
-            'deals'         => ['href' => $base . '/admin/deals',            'label' => 'Deals'],
-            'orders'        => ['href' => $base . '/admin/orders',           'label' => 'Orders'],
-            'order-create'  => ['href' => $base . '/admin/order-create',     'label' => 'Create Order'],
-            'customers'     => ['href' => $base . '/admin/customers',        'label' => 'Customers'],
-            'reviews'       => ['href' => $base . '/admin/reviews',          'label' => 'Reviews'],
-            'notifications' => ['href' => $base . '/admin/notifications',    'label' => 'Notifications'],
-            'users'         => ['href' => $base . '/admin/users',            'label' => 'Staff / Users'],
-            'coupons'       => ['href' => $base . '/admin/coupons',          'label' => 'Coupons'],
-            'hero'          => ['href' => $base . '/admin/hero',             'label' => 'Hero Banners'],
-            'website'       => ['href' => $base . '/admin/website-settings', 'label' => 'Website'],
-            'settings'      => ['href' => $base . '/admin/settings',         'label' => 'Admin Settings'],
+
+        // Fetch unread count for sidebar badge
+        try {
+            $db = getDB();
+            $sidebarUnread = (int)$db->query("SELECT COUNT(*) FROM admin_notifications WHERE is_read = 0")->fetchColumn();
+        } catch (Throwable $e) { 
+            $sidebarUnread = 0; 
+        }
+
+        $navSections = [
+            [
+                'section' => 'OVERVIEW',
+                'items' => [
+                    [
+                        'type'   => 'link',
+                        'key'    => 'dashboard',
+                        'href'   => $base . '/admin/dashboard',
+                        'label'  => 'Dashboard',
+                        'icon'   => 'dashboard',
+                    ]
+                ]
+            ],
+            [
+                'section' => 'COMMERCE',
+                'items' => [
+                    [
+                        'type'     => 'dropdown',
+                        'key'      => 'customers_group',
+                        'label'    => 'Customer',
+                        'icon'     => 'customers',
+                        'active_in'=> ['customers'],
+                        'subitems' => [
+                            ['href' => $base . '/admin/customers', 'label' => 'Customer List', 'key' => 'customers'],
+                        ]
+                    ],
+                    [
+                        'type'     => 'dropdown',
+                        'key'      => 'products_group',
+                        'label'    => 'Product',
+                        'icon'     => 'products',
+                        'active_in'=> ['products', 'categories', 'attributes', 'deals'],
+                        'subitems' => [
+                            ['href' => $base . '/admin/products', 'label' => 'Product List', 'key' => 'products'],
+                            ['href' => $base . '/admin/categories', 'label' => 'Categories', 'key' => 'categories'],
+                            ['href' => $base . '/admin/attributes.php', 'label' => 'Attributes', 'key' => 'attributes'],
+                            ['href' => $base . '/admin/deals', 'label' => 'Deals & Offers', 'key' => 'deals'],
+                        ]
+                    ],
+                    [
+                        'type'     => 'dropdown',
+                        'key'      => 'orders_group',
+                        'label'    => 'Order',
+                        'icon'     => 'orders',
+                        'active_in'=> ['orders', 'order-create'],
+                        'subitems' => [
+                            ['href' => $base . '/admin/orders', 'label' => 'Order List', 'key' => 'orders'],
+                            ['href' => $base . '/admin/order-create', 'label' => 'Order Create', 'key' => 'order-create'],
+                        ]
+                    ],
+                ]
+            ],
+            [
+                'section' => 'MARKETING',
+                'items' => [
+                    [
+                        'type'     => 'dropdown',
+                        'key'      => 'marketing_group',
+                        'label'    => 'Marketing',
+                        'icon'     => 'coupons',
+                        'active_in'=> ['coupons', 'hero', 'reviews'],
+                        'subitems' => [
+                            ['href' => $base . '/admin/coupons', 'label' => 'Coupons & Vouchers', 'key' => 'coupons'],
+                            ['href' => $base . '/admin/hero', 'label' => 'Hero Banners', 'key' => 'hero'],
+                            ['href' => $base . '/admin/reviews', 'label' => 'Customer Reviews', 'key' => 'reviews'],
+                        ]
+                    ],
+                ]
+            ],
+            [
+                'section' => 'MANAGEMENT',
+                'items' => [
+                    [
+                        'type'     => 'dropdown',
+                        'key'      => 'system_group',
+                        'label'    => 'Staff & System',
+                        'icon'     => 'users',
+                        'active_in'=> ['users', 'notifications'],
+                        'subitems' => [
+                            ['href' => $base . '/admin/users', 'label' => 'Staff / Users', 'key' => 'users'],
+                            ['href' => $base . '/admin/notifications', 'label' => 'Notifications', 'key' => 'notifications', 'badge' => $sidebarUnread],
+                        ]
+                    ],
+                    [
+                        'type'     => 'dropdown',
+                        'key'      => 'settings_group',
+                        'label'    => 'Website & Settings',
+                        'icon'     => 'settings',
+                        'active_in'=> ['website', 'settings'],
+                        'subitems' => [
+                            ['href' => $base . '/admin/website-settings', 'label' => 'Website & Theme', 'key' => 'website'],
+                            ['href' => $base . '/admin/settings', 'label' => 'Admin Settings', 'key' => 'settings'],
+                        ]
+                    ],
+                ]
+            ]
         ];
         ?>
         <div class="admin-sidebar-backdrop" data-admin-sidebar-close></div>
         <aside class="admin-sidebar">
-            <div class="admin-logo-centered">
+            <div class="admin-sidebar-brand">
                 <?php
                 $siteLogo = getSetting('site_logo');
                 $siteName = getSetting('site_name') ?: 'Rosabella';
                 ?>
-                <?php if ($siteLogo): ?>
-                    <img src="<?= BASE_URL . '/' . htmlspecialchars($siteLogo) ?>" alt="Logo" style="max-height: 40px; border-radius: 4px;">
-                <?php else: ?>
-                    <span class="logo-icon"><?= strtoupper(substr($siteName, 0, 1)) ?></span>
-                <?php endif; ?>
-                <div class="logo-text">Admin Panel</div>
+                <div class="admin-brand-logo-wrap">
+                    <?php if ($siteLogo): ?>
+                        <img src="<?= BASE_URL . '/' . htmlspecialchars($siteLogo) ?>" alt="Logo" class="admin-brand-logo-img">
+                    <?php else: ?>
+                        <div class="admin-brand-logo-icon"><?= strtoupper(substr($siteName, 0, 1)) ?></div>
+                    <?php endif; ?>
+                </div>
+                <div class="admin-brand-info">
+                    <span class="admin-brand-name"><?= htmlspecialchars($siteName) ?></span>
+                    <span class="admin-brand-badge">Admin Panel</span>
+                </div>
             </div>
-            <div class="admin-nav-divider" style="margin-bottom: 1.5rem;"></div>
+            
+            <div class="admin-nav-divider" style="margin-bottom: 0.5rem;"></div>
+
             <nav class="admin-nav">
-                <?php
-                // Fetch unread count for sidebar badge
-                try {
-                    $db = getDB();
-                    $sidebarUnread = (int)$db->query("SELECT COUNT(*) FROM admin_notifications WHERE is_read = 0")->fetchColumn();
-                } catch (Throwable $e) { $sidebarUnread = 0; }
-                ?>
-                <?php foreach ($items as $key => $item): ?>
-                    <a href="<?= htmlspecialchars($item['href']) ?>" class="<?= $activePage === $key ? 'active' : '' ?>">
-                        <?= adminIcon($key) ?>
-                        <span><?= htmlspecialchars($item['label']) ?></span>
-                        <?php if ($key === 'notifications' && $sidebarUnread > 0): ?>
-                            <span class="sidebar-notif-badge"><?= $sidebarUnread > 99 ? '99+' : $sidebarUnread ?></span>
+                <?php foreach ($navSections as $sec): ?>
+                    <?php if (!empty($sec['section'])): ?>
+                        <div class="admin-nav-section-title"><?= htmlspecialchars($sec['section']) ?></div>
+                    <?php endif; ?>
+
+                    <?php foreach ($sec['items'] as $item): ?>
+                        <?php if ($item['type'] === 'link'): ?>
+                            <a href="<?= htmlspecialchars($item['href']) ?>" class="admin-nav-link <?= $activePage === $item['key'] ? 'active' : '' ?>">
+                                <?= adminIcon($item['icon']) ?>
+                                <span class="admin-nav-label"><?= htmlspecialchars($item['label']) ?></span>
+                            </a>
+                        <?php elseif ($item['type'] === 'dropdown'): ?>
+                            <?php 
+                            $isGroupActive = in_array($activePage, $item['active_in'], true);
+                            $isOpen = $isGroupActive;
+                            ?>
+                            <div class="admin-nav-group <?= $isOpen ? 'open' : '' ?>">
+                                <button type="button" class="admin-nav-group-btn <?= $isGroupActive ? 'active-group' : '' ?>" onclick="toggleAdminNavGroup(this)" aria-expanded="<?= $isOpen ? 'true' : 'false' ?>">
+                                    <span class="admin-nav-group-left">
+                                        <?= adminIcon($item['icon']) ?>
+                                        <span class="admin-nav-label"><?= htmlspecialchars($item['label']) ?></span>
+                                    </span>
+                                    <svg class="admin-nav-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="6 9 12 15 18 9"/>
+                                    </svg>
+                                </button>
+                                <div class="admin-nav-submenu">
+                                    <div class="admin-nav-submenu-inner">
+                                        <?php foreach ($item['subitems'] as $sub): ?>
+                                            <?php $isSubActive = ($activePage === $sub['key']); ?>
+                                            <a href="<?= htmlspecialchars($sub['href']) ?>" class="admin-nav-sublink <?= $isSubActive ? 'active' : '' ?>">
+                                                <span class="admin-nav-sub-dot"></span>
+                                                <span class="admin-nav-sub-text"><?= htmlspecialchars($sub['label']) ?></span>
+                                                <?php if (!empty($sub['badge']) && $sub['badge'] > 0): ?>
+                                                    <span class="sidebar-notif-badge"><?= $sub['badge'] > 99 ? '99+' : $sub['badge'] ?></span>
+                                                <?php endif; ?>
+                                            </a>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            </div>
                         <?php endif; ?>
-                    </a>
+                    <?php endforeach; ?>
                 <?php endforeach; ?>
-                <div class="admin-nav-divider"></div>
-                <a href="<?= BASE_URL ?>/logout" class="admin-nav-muted">
+
+                <div class="admin-nav-divider" style="margin-top: 1rem;"></div>
+
+                <!-- Live Storefront Quick Link -->
+                <a href="<?= BASE_URL ?>/" target="_blank" class="admin-nav-link admin-nav-storefront-link" title="Open Storefront in New Tab">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    <span class="admin-nav-label">Live Storefront</span>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: auto; opacity: 0.6;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </a>
+
+                <a href="<?= BASE_URL ?>/logout" class="admin-nav-link admin-nav-muted" style="color: #f87171 !important;">
                     <?= adminIcon('logout') ?>
-                    <span>Logout</span>
+                    <span class="admin-nav-label">Logout</span>
                 </a>
             </nav>
         </aside>
