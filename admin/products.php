@@ -5,7 +5,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-require_once '../config/database.php';
+require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/includes/layout.php';
 
 if (!isLoggedIn() || !isAdmin()) {
@@ -152,6 +152,223 @@ function deleteManagedProductUpload(string $path): void
     }
 }
 
+function getStandardColorDatabase(): array
+{
+    static $colorMap = null;
+    if ($colorMap !== null) {
+        return $colorMap;
+    }
+
+    $colorMap = [
+        // Basics & Monochrome
+        'black' => '#000000',
+        'jet black' => '#0A0A0A',
+        'midnight black' => '#121212',
+        'matte black' => '#222222',
+        'white' => '#FFFFFF',
+        'off white' => '#FAF9F6',
+        'pure white' => '#FFFFFF',
+        'ivory' => '#FFFFF0',
+        'cream' => '#FFFDD0',
+        'charcoal' => '#36454F',
+        'gray' => '#808080',
+        'grey' => '#808080',
+        'dark gray' => '#555555',
+        'dark grey' => '#555555',
+        'light gray' => '#D3D3D3',
+        'light grey' => '#D3D3D3',
+        'slate gray' => '#708090',
+        'slate grey' => '#708090',
+        'silver' => '#C0C0C0',
+        'metallic silver' => '#AAA9AD',
+        'space gray' => '#4B4B4D',
+        'space grey' => '#4B4B4D',
+
+        // Blues & Teals
+        'navy blue' => '#000080',
+        'navy' => '#000080',
+        'royal blue' => '#4169E1',
+        'sky blue' => '#87CEEB',
+        'baby blue' => '#89CFF0',
+        'midnight blue' => '#191970',
+        'denim blue' => '#1560BD',
+        'denim' => '#1560BD',
+        'blue' => '#0000FF',
+        'cyan' => '#00FFFF',
+        'teal' => '#008080',
+        'turquoise' => '#40E0D0',
+        'electric blue' => '#7DF9FF',
+        'powder blue' => '#B0E0E6',
+        'ocean blue' => '#006994',
+        'steel blue' => '#4682B4',
+        'sapphire blue' => '#0F52BA',
+        'sapphire' => '#0F52BA',
+        'cobalt blue' => '#0047AB',
+        'cobalt' => '#0047AB',
+        'aquamarine' => '#7FFFD4',
+        'aqua' => '#00FFFF',
+        'sierra blue' => '#9BB5CE',
+        'pacific blue' => '#284A5C',
+
+        // Reds & Pinks
+        'red' => '#FF0000',
+        'crimson red' => '#DC143C',
+        'crimson' => '#DC143C',
+        'scarlet' => '#FF2400',
+        'burgundy' => '#800020',
+        'wine red' => '#722F37',
+        'wine' => '#722F37',
+        'maroon' => '#800000',
+        'cherry red' => '#D2042D',
+        'cherry' => '#D2042D',
+        'ruby red' => '#9B111E',
+        'ruby' => '#9B111E',
+        'pink' => '#FFC0CB',
+        'rose pink' => '#FF66CC',
+        'baby pink' => '#F4C2C2',
+        'hot pink' => '#FF69B4',
+        'blush pink' => '#DE5D83',
+        'blush' => '#DE5D83',
+        'magenta' => '#FF00FF',
+        'coral pink' => '#F88379',
+        'dusty rose' => '#DCAE96',
+        'rose gold' => '#B76E79',
+        'fuchsia' => '#FF00FF',
+        'salmon' => '#FA8072',
+
+        // Greens
+        'green' => '#008000',
+        'olive green' => '#808000',
+        'olive' => '#808000',
+        'emerald green' => '#50C878',
+        'emerald' => '#50C878',
+        'sage green' => '#9DC183',
+        'sage' => '#9DC183',
+        'mint green' => '#98FF98',
+        'mint' => '#98FF98',
+        'forest green' => '#228B22',
+        'dark green' => '#006400',
+        'lime green' => '#32CD32',
+        'lime' => '#00FF00',
+        'army green' => '#4B5320',
+        'pistachio green' => '#93C572',
+        'pistachio' => '#93C572',
+        'jade green' => '#00A86B',
+        'jade' => '#00A86B',
+        'seafoam green' => '#9FE2BF',
+        'seafoam' => '#9FE2BF',
+        'khaki green' => '#8A9A5B',
+        'alpine green' => '#505E4D',
+
+        // Yellows, Oranges & Earth Tones
+        'yellow' => '#FFFF00',
+        'mustard yellow' => '#FFDB58',
+        'mustard' => '#FFDB58',
+        'lemon yellow' => '#FFF700',
+        'lemon' => '#FFF700',
+        'gold' => '#FFD700',
+        'golden' => '#FFD700',
+        'metallic gold' => '#D4AF37',
+        'amber' => '#FFBF00',
+        'orange' => '#FFA500',
+        'burnt orange' => '#CC5500',
+        'coral' => '#FF7F50',
+        'peach' => '#FFDAB9',
+        'tangerine' => '#F28500',
+        'rust' => '#B7410E',
+        'terracotta' => '#E2725B',
+        'apricot' => '#FBCEB1',
+        'champagne' => '#F7E7CE',
+
+        // Purples
+        'purple' => '#800080',
+        'violet' => '#EE82EE',
+        'lavender' => '#E6E6FA',
+        'plum' => '#8E4585',
+        'lilac' => '#C8A2C8',
+        'mauve' => '#E0B0FF',
+        'eggplant' => '#614051',
+        'grape' => '#6F2DA8',
+        'orchid' => '#DA70D6',
+        'indigo' => '#4B0082',
+
+        // Neutrals & Browns
+        'beige' => '#F5F5DC',
+        'khaki' => '#C3B091',
+        'brown' => '#964B00',
+        'chocolate brown' => '#7B3F00',
+        'chocolate' => '#7B3F00',
+        'dark brown' => '#654321',
+        'camel' => '#C19A6B',
+        'tan' => '#D2B48C',
+        'taupe' => '#483C32',
+        'nude' => '#E3BC9A',
+        'sand' => '#C2B280',
+        'espresso' => '#4E3629',
+        'copper' => '#B87333',
+        'bronze' => '#CD7F32',
+        'mocha' => '#967969',
+        'coffee' => '#6F4E37',
+    ];
+
+    return $colorMap;
+}
+
+function resolveColorHex(string $name, ?string $hex = null): string
+{
+    $hex = trim((string)$hex);
+    if ($hex !== '') {
+        if ($hex[0] !== '#') {
+            $hex = '#' . $hex;
+        }
+        if (preg_match('/^#[0-9a-fA-F]{3,8}$/', $hex)) {
+            return strtoupper($hex);
+        }
+    }
+
+    $trimmedName = trim($name);
+    if (preg_match('/^#([0-9a-fA-F]{3,8})$/', $trimmedName)) {
+        return strtoupper($trimmedName);
+    }
+
+    $nameClean = strtolower($trimmedName);
+    $db = getStandardColorDatabase();
+    if (isset($db[$nameClean])) {
+        return $db[$nameClean];
+    }
+
+    return '#000000';
+}
+
+function generateUniqueProductSlug(PDO $db, string $name, int $currentProductId = 0): string
+{
+    $baseSlug = trim(preg_replace('/[^a-z0-9]+/', '-', strtolower($name)), '-');
+    if ($baseSlug === '') {
+        $baseSlug = 'product';
+    }
+
+    $slug = $baseSlug;
+    $counter = 1;
+
+    while (true) {
+        if ($currentProductId > 0) {
+            $stmt = $db->prepare("SELECT COUNT(*) FROM products WHERE slug = ? AND id != ?");
+            $stmt->execute([$slug, $currentProductId]);
+        } else {
+            $stmt = $db->prepare("SELECT COUNT(*) FROM products WHERE slug = ?");
+            $stmt->execute([$slug]);
+        }
+
+        $exists = (int)$stmt->fetchColumn();
+        if ($exists === 0) {
+            return $slug;
+        }
+
+        $counter++;
+        $slug = $baseSlug . '-' . $counter;
+    }
+}
+
 // Handle actions
 $action = $_GET['action'] ?? 'list';
 $productId = intval($_GET['id'] ?? 0);  // Always cast to int — prevents type-juggling attacks
@@ -179,14 +396,30 @@ if ($action === 'delete' && $productId > 0 && $_SERVER['REQUEST_METHOD'] === 'PO
 
 // Save product (create/update) - only run on add/edit actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($action, ['add', 'edit'], true) && isset($_POST['name'])) {
-    $name = sanitize($_POST['name']);
-    $slug = trim(preg_replace('/[^a-z0-9]+/', '-', strtolower($name)), '-');
-    $category_id = intval($_POST['category_id']);
-    $price = floatval($_POST['price']);
-    $sale_price = !empty($_POST['sale_price']) ? floatval($_POST['sale_price']) : null;
-    $stock_quantity = intval($_POST['stock_quantity']);
+    $name = sanitize($_POST['name'] ?? '');
+    $slug = generateUniqueProductSlug($db, $name, ($action === 'edit' ? $productId : 0));
+    $category_id = intval($_POST['category_id'] ?? 0);
+    $priceRaw = trim($_POST['price'] ?? '');
+    $price = $priceRaw !== '' ? floatval($priceRaw) : null;
+    $salePriceRaw = trim($_POST['sale_price'] ?? '');
+    $sale_price = $salePriceRaw !== '' ? floatval($salePriceRaw) : null;
+    $stockRaw = trim($_POST['stock_quantity'] ?? '');
+    $stock_quantity = $stockRaw !== '' ? intval($stockRaw) : null;
     // Allow basic HTML for the rich text editor
     $description = strip_tags($_POST['description'] ?? '', '<b><i><u><strong><em><p><br><ul><li><ol><h1><h2><h3><h4><h5><h6><a><span><div>');
+    
+    // Explicit Validation with Specific Field Identification
+    if ($name === '') {
+        $error = 'Product Name is required. Please fill in the product name.';
+    } elseif ($category_id <= 0) {
+        $error = 'Category is required. Please select a category for this product.';
+    } elseif ($price === null || $price < 0) {
+        $error = 'Price is required. Please enter a valid product price.';
+    } elseif ($stock_quantity === null || $stock_quantity < 0) {
+        $error = 'Stock Quantity is required. Please enter a valid stock quantity.';
+    } elseif ($sale_price !== null && $price !== null && $sale_price >= $price) {
+        $error = 'Sale Price must be lower than the regular Price.';
+    }
     
     // New fields
     $sku = sanitize($_POST['sku'] ?? '');
@@ -201,18 +434,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($action, ['add', 'edit'], 
     if ($colorsInput !== '') {
         $colorPairs = explode(',', $colorsInput);
         foreach ($colorPairs as $pair) {
+            $pair = trim($pair);
+            if ($pair === '') continue;
+
+            $cName = $pair;
+            $cHex = null;
+
             if (strpos($pair, ':') !== false) {
-                [$cName, $cHex] = explode(':', $pair);
+                [$cName, $cHex] = explode(':', $pair, 2);
                 $cName = trim($cName);
                 $cHex = trim($cHex);
-                if ($cName !== '' && $cHex !== '') {
-                    $colorsData[$cName] = ['hex' => $cHex, 'main_image' => '', 'gallery_images' => []];
-                }
+            }
+
+            if ($cName !== '') {
+                $finalHex = resolveColorHex($cName, $cHex);
+                $colorsData[$cName] = [
+                    'hex' => $finalHex,
+                    'main_image' => '',
+                    'gallery_images' => []
+                ];
             }
         }
     }
     
-    // Existing colors from DB to retain existing images
+    // Existing colors from DB to retain existing hex and images
     $existingColors = [];
     if ($action === 'edit' && $productId > 0) {
         $existingStmt2 = $db->prepare("SELECT colors FROM products WHERE id = ?");
@@ -224,6 +469,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($action, ['add', 'edit'], 
                 // it's an associative array
                 $removeGalleryImagesArr = array_values(array_unique(array_filter(array_map('trim', (array)($_POST['remove_gallery_images'] ?? [])))));
                 foreach ($colorsData as $cName => &$data) {
+                    // Retain existing custom hex if user didn't specify a different hex
+                    if (isset($existingColors[$cName]['hex']) && $existingColors[$cName]['hex'] !== '') {
+                        // If current hex is default #000000 but existing had a valid hex, keep existing
+                        if ($data['hex'] === '#000000' && $existingColors[$cName]['hex'] !== '#000000') {
+                            $data['hex'] = $existingColors[$cName]['hex'];
+                        }
+                    }
                     if (isset($existingColors[$cName]['main_image'])) {
                         if (!in_array($existingColors[$cName]['main_image'], $removeGalleryImagesArr, true)) {
                             $data['main_image'] = $existingColors[$cName]['main_image'];
@@ -441,12 +693,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($action, ['add', 'edit'], 
     }
 }
 
-// Get product for editing
+// Get product for editing or restore POSTed values on validation error
 $product = null;
 if ($action === 'edit' && $productId) {
     $stmt = $db->prepare("SELECT * FROM products WHERE id = ?");
     $stmt->execute([$productId]);
     $product = $stmt->fetch();
+}
+
+if ($error && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $product = [
+        'id' => $productId,
+        'name' => $_POST['name'] ?? '',
+        'brand' => $_POST['brand'] ?? '',
+        'sku' => $_POST['sku'] ?? '',
+        'style' => $_POST['style'] ?? '',
+        'description' => $_POST['description'] ?? '',
+        'key_features' => $_POST['key_features'] ?? '',
+        'sizes' => $_POST['sizes'] ?? '',
+        'colors' => $colors ?? ($_POST['colors_input'] ?? ''),
+        'variants' => $_POST['variants'] ?? '',
+        'price' => $_POST['price'] ?? '',
+        'sale_price' => $_POST['sale_price'] ?? '',
+        'stock_quantity' => $_POST['stock_quantity'] ?? '',
+        'category_id' => $_POST['category_id'] ?? '',
+        'status' => $_POST['status'] ?? 'active',
+        'is_featured' => isset($_POST['is_featured']) ? 1 : 0,
+        'is_new' => isset($_POST['is_new']) ? 1 : 0,
+        'is_bestseller' => isset($_POST['is_bestseller']) ? 1 : 0,
+        'main_image' => $mainImage ?? ($product['main_image'] ?? ''),
+        'gallery_images' => $galleryImagesJson ?? ($product['gallery_images'] ?? ''),
+    ];
 }
 $productGalleryImages = parseGalleryImages($product['gallery_images'] ?? null);
 
@@ -1012,8 +1289,8 @@ $pageTitle = 'Products Management';
                         <div class="admin-card">
                             <h3 class="admin-section-heading">Status & Organization</h3>
                             <div class="form-group">
-                                <label class="form-label">Category</label>
-                                <select name="category_id" id="product_category_id" class="form-select" onchange="fetchCategoryAttributes(this.value)">
+                                <label class="form-label">Category *</label>
+                                <select name="category_id" id="product_category_id" class="form-select" required onchange="fetchCategoryAttributes(this.value)">
                                     <option value="">Select category</option>
                                     <?php foreach ($categories as $cat): ?>
                                     <option value="<?= $cat['id'] ?>" <?= ($product['category_id'] ?? '') == $cat['id'] ? 'selected' : '' ?>><?= htmlspecialchars($cat['name']) ?></option>
@@ -1185,10 +1462,115 @@ $pageTitle = 'Products Management';
 
                 var form = document.querySelector('.admin-product-form-layout');
                 if (form) {
-                    form.addEventListener('submit', function() {
+                    function clearValidationStyles(el) {
+                        if (!el) return;
+                        el.style.borderColor = '';
+                        el.style.boxShadow = '';
+                        var parent = el.closest('.form-group') || el.parentNode;
+                        if (parent) {
+                            var feedback = parent.querySelector('.form-inline-validation-error');
+                            if (feedback) feedback.remove();
+                        }
+                    }
+
+                    form.querySelectorAll('input, select, textarea').forEach(function(el) {
+                        el.addEventListener('input', function() { clearValidationStyles(this); });
+                        el.addEventListener('change', function() { clearValidationStyles(this); });
+                    });
+
+                    function highlightFieldWithError(el, fieldLabel, message) {
+                        if (!el) return;
+                        el.style.transition = 'border-color 0.25s ease, box-shadow 0.25s ease';
+                        el.style.borderColor = '#ef4444';
+                        el.style.boxShadow = '0 0 0 4px rgba(239, 68, 68, 0.25)';
+                        
+                        var parent = el.closest('.form-group') || el.parentNode;
+                        if (parent && !parent.querySelector('.form-inline-validation-error')) {
+                            var errDiv = document.createElement('div');
+                            errDiv.className = 'form-inline-validation-error';
+                            errDiv.style.cssText = 'color: #dc2626; font-size: 0.8rem; font-weight: 600; margin-top: 6px; display: flex; align-items: center; gap: 4px;';
+                            errDiv.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg> ' + message;
+                            parent.appendChild(errDiv);
+                        }
+
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        setTimeout(function() { el.focus(); }, 250);
+
+                        showValidationToast(fieldLabel, message);
+                    }
+
+                    function showValidationToast(fieldLabel, message) {
+                        var oldToast = document.getElementById('admin-form-val-toast');
+                        if (oldToast) oldToast.remove();
+
+                        var toast = document.createElement('div');
+                        toast.id = 'admin-form-val-toast';
+                        toast.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 99999; background: #991b1b; color: #ffffff; padding: 14px 18px; border-radius: 10px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); font-size: 0.88rem; font-weight: 600; display: flex; align-items: center; gap: 12px; max-width: 440px; border-left: 5px solid #f87171;';
+                        toast.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fecaca" stroke-width="2.5" style="flex-shrink:0;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>' +
+                            '<div><strong style="display:block; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.06em; color:#fca5a5;">Required Field Missing: ' + fieldLabel + '</strong>' + message + '</div>';
+
+                        document.body.appendChild(toast);
+                        setTimeout(function() {
+                            if (toast.parentNode) {
+                                toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                                toast.style.opacity = '0';
+                                toast.style.transform = 'translateY(-10px)';
+                                setTimeout(function() { if (toast.parentNode) toast.remove(); }, 300);
+                            }
+                        }, 4000);
+                    }
+
+                    form.addEventListener('submit', function(e) {
                         var descriptionInput = document.getElementById('quill-description');
-                        var html = quill.root.innerHTML;
-                        descriptionInput.value = (html === '<p><br></p>') ? '' : html;
+                        if (quill && descriptionInput) {
+                            var html = quill.root.innerHTML;
+                            descriptionInput.value = (html === '<p><br></p>') ? '' : html;
+                        }
+
+                        var nameField = form.querySelector('[name="name"]');
+                        var catField = form.querySelector('[name="category_id"]');
+                        var priceField = form.querySelector('[name="price"]');
+                        var stockField = form.querySelector('[name="stock_quantity"]');
+                        var salePriceField = form.querySelector('[name="sale_price"]');
+
+                        if (nameField && !nameField.value.trim()) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            highlightFieldWithError(nameField, 'Product Name', 'Please fill in the Product Name before saving.');
+                            return false;
+                        }
+
+                        if (catField && (!catField.value || catField.value === '' || catField.value === '0')) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            highlightFieldWithError(catField, 'Category', 'Please choose a Category from the dropdown.');
+                            return false;
+                        }
+
+                        if (priceField && (priceField.value.trim() === '' || isNaN(parseFloat(priceField.value)) || parseFloat(priceField.value) < 0)) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            highlightFieldWithError(priceField, 'Price', 'Please enter a valid Price (e.g. 29.99).');
+                            return false;
+                        }
+
+                        if (stockField && (stockField.value.trim() === '' || isNaN(parseInt(stockField.value, 10)) || parseInt(stockField.value, 10) < 0)) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            highlightFieldWithError(stockField, 'Stock Quantity', 'Please enter the available Stock Quantity.');
+                            return false;
+                        }
+
+                        if (salePriceField && salePriceField.value.trim() !== '' && priceField && priceField.value.trim() !== '') {
+                            var regP = parseFloat(priceField.value);
+                            var saleP = parseFloat(salePriceField.value);
+                            if (saleP >= regP) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                highlightFieldWithError(salePriceField, 'Sale Price', 'Discounted Sale Price must be lower than the regular Price.');
+                                return false;
+                            }
+                        }
                     });
                 }
             }

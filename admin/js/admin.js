@@ -66,21 +66,22 @@
             }
         });
 
-        // Auto-hide alerts after 1.5 seconds
-        const alerts = document.querySelectorAll('.alert');
-        if (alerts.length > 0) {
+        // Auto-hide success alerts after 3 seconds, keep error alerts visible for clear guidance
+        const successAlerts = document.querySelectorAll('.alert.alert-success');
+        if (successAlerts.length > 0) {
             setTimeout(() => {
-                alerts.forEach(alert => {
-                    alert.style.transition = 'opacity 0.4s ease';
+                successAlerts.forEach(alert => {
+                    alert.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
                     alert.style.opacity = '0';
+                    alert.style.transform = 'translateY(-6px)';
                     setTimeout(() => alert.remove(), 400);
                 });
-            }, 1500);
+            }, 3000);
+        }
 
-            // Prevent form resubmission warning on page refresh
-            if (window.history.replaceState) {
-                window.history.replaceState(null, null, window.location.href);
-            }
+        // Prevent form resubmission warning on page refresh
+        if (window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.href);
         }
     });
 
