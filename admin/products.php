@@ -1331,95 +1331,25 @@ $pageTitle = 'Products Management';
 
                         <div class="admin-card">
                             <h3 class="admin-section-heading">Media</h3>
-                            <div class="form-group" id="global-main-image-container" <?= (!empty($parsedColors)) ? 'style="display:none;"' : '' ?>>
-                                <label class="form-label">Main Product Image</label>
+                            
+                            <!-- 1. Main Product Image (Always Visible) -->
+                            <div class="form-group" id="global-main-image-container">
+                                <label class="form-label" style="font-weight: 600;">Main Product Image</label>
                                 <?php if (!empty($product['main_image'])): ?>
-                                    <div class="admin-image-preview-wrap">
-                                        <img src="<?= htmlspecialchars(resolveAdminImageSrc($product['main_image'])) ?>" alt="Current product image" class="admin-image-preview">
+                                    <div class="admin-image-preview-wrap" style="margin-bottom: 10px;">
+                                        <img src="<?= htmlspecialchars(resolveAdminImageSrc($product['main_image'])) ?>" alt="Current product image" class="admin-image-preview" style="max-width: 120px; border-radius: 6px;">
                                     </div>
                                 <?php endif; ?>
                                 <input type="file" name="main_image_file" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif">
-                                <p class="admin-upload-help">Upload JPG, PNG, WEBP, or GIF (max 5 MB).</p>
+                                <p class="admin-upload-help">Upload primary cover image (JPG, PNG, WEBP, or GIF - max 5 MB).</p>
                                 <input type="hidden" name="current_image" value="<?= htmlspecialchars($product['main_image'] ?? '') ?>">
                             </div>
-                            <div class="form-group" id="color-media-container" style="<?= empty($parsedColors) ? 'display:none;' : '' ?>">
-                                <label class="form-label" style="border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 12px; font-weight: 600;">Color-Specific Media (Main & Gallery Images)</label>
-                                <p class="admin-upload-help" style="margin-bottom: 15px;">Select a color from the dropdown below to upload its specific <strong>Main Product Image</strong> and <strong>Gallery Images</strong>.</p>
-                                
-                                <select id="color-upload-selector" class="form-select" style="margin-bottom: 1.5rem;">
-                                    <option value="">-- Select a color --</option>
-                                    <?php if (!empty($parsedColors)): ?>
-                                        <?php foreach ($parsedColors as $colorName => $colorData): ?>
-                                            <option value="<?= htmlspecialchars($colorName) ?>"><?= htmlspecialchars($colorName) ?></option>
-                                        <?php endforeach; ?>
-                                    <?php endif; ?>
-                                </select>
-                                
-                                <div id="dynamic-color-uploads">
-                                <?php if (!empty($parsedColors)): ?>
-                                    <?php foreach ($parsedColors as $colorName => $colorData): ?>
-                                        <div class="color-upload-group" data-color="<?= htmlspecialchars($colorName) ?>" style="display: none; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;">
-                                            <label class="form-label" style="display:flex; align-items:center; gap:8px; margin-bottom: 1.2rem; font-size: 1.1rem;">Manage Images for 
-                                                <span style="display:inline-block; width:16px; height:16px; border-radius:50%; background-color:<?= htmlspecialchars($colorData['hex'] ?? '#000') ?>; border:1px solid rgba(0,0,0,0.1);"></span>
-                                                <strong><?= htmlspecialchars($colorName) ?></strong>
-                                            </label>
-                                            
-                                            <!-- Main Color Image -->
-                                            <div style="margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #e2e8f0;">
-                                                <label class="form-label" style="font-weight: 600; color: #334155;">Main Product Image</label>
-                                                <?php if (!empty($colorData['main_image'])): ?>
-                                                    <div class="admin-image-preview-wrap" style="margin-bottom: 10px;">
-                                                        <img src="<?= htmlspecialchars(resolveAdminImageSrc($colorData['main_image'])) ?>" alt="Main color image" class="admin-image-preview" style="max-width: 120px; border-radius: 4px;">
-                                                        <div style="margin-top: 5px;">
-                                                            <label style="font-size: 0.85rem; color: var(--color-danger); cursor: pointer;">
-                                                                <input type="checkbox" name="remove_gallery_images[]" value="<?= htmlspecialchars($colorData['main_image']) ?>"> Remove Main Image
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                <?php endif; ?>
-                                                <input type="file" name="color_main_image[<?= htmlspecialchars($colorName) ?>]" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif">
-                                                <p class="admin-upload-help" style="margin-top: 4px;">Upload the primary image shown for this color.</p>
-                                            </div>
 
-                                            <!-- Gallery Color Images -->
-                                            <div>
-                                                <label class="form-label" style="font-weight: 600; color: #334155;">Gallery Images</label>
-                                                <?php if (!empty($colorData['gallery_images'])): ?>
-                                                    <div class="admin-gallery-grid" style="margin-bottom: 15px;">
-                                                        <?php foreach ($colorData['gallery_images'] as $galleryImage): ?>
-                                                            <label class="admin-gallery-item">
-                                                                <img src="<?= htmlspecialchars(resolveAdminImageSrc($galleryImage)) ?>" alt="Gallery image" class="admin-gallery-thumb">
-                                                                <span class="admin-gallery-remove">
-                                                                    <input type="checkbox" name="remove_gallery_images[]" value="<?= htmlspecialchars($galleryImage) ?>">
-                                                                    Remove
-                                                                </span>
-                                                            </label>
-                                                        <?php endforeach; ?>
-                                                    </div>
-                                                <?php endif; ?>
-                                                
-                                                <input type="file" name="color_gallery[<?= htmlspecialchars($colorName) ?>][]" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
-                                                <p class="admin-upload-help" style="margin-top: 4px;">Select multiple secondary thumbnail images for this color.</p>
-                                            </div>
-                                        </div>
-                                    <?php endforeach; ?>
-                                    </div>
-                                </div>
-                            <?php else: ?>
-                                <div class="form-group" id="color-media-container" style="display:none;">
-                                    <label class="form-label" style="border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 12px; font-weight: 600;">Color-Specific Media (Main & Gallery Images)</label>
-                                    <p class="admin-upload-help" style="margin-bottom: 15px;">Select a color from the dropdown below to upload its specific <strong>Main Product Image</strong> and <strong>Gallery Images</strong>.</p>
-                                    <select id="color-upload-selector" class="form-select" style="margin-bottom: 1.5rem;">
-                                        <option value="">-- Select a color --</option>
-                                    </select>
-                                    <div id="dynamic-color-uploads"></div>
-                                </div>
-                            <?php endif; ?>
-
-                            <div class="form-group" id="global-gallery-image-container" <?= (!empty($parsedColors)) ? 'style="display:none;"' : '' ?>>
-                                <label class="form-label">General Gallery Images</label>
+                            <!-- 2. General Gallery Images (Always Visible) -->
+                            <div class="form-group" id="global-gallery-image-container" style="margin-top: 1.5rem; border-top: 1px solid #f1f5f9; padding-top: 1.25rem;">
+                                <label class="form-label" style="font-weight: 600;">Product Gallery Images</label>
                                 <?php if (!empty($productGalleryImages)): ?>
-                                    <div class="admin-gallery-grid">
+                                    <div class="admin-gallery-grid" style="margin-bottom: 12px;">
                                         <?php foreach ($productGalleryImages as $galleryImage): ?>
                                             <label class="admin-gallery-item">
                                                 <img src="<?= htmlspecialchars(resolveAdminImageSrc($galleryImage)) ?>" alt="Gallery image" class="admin-gallery-thumb">
@@ -1432,7 +1362,72 @@ $pageTitle = 'Products Management';
                                     </div>
                                 <?php endif; ?>
                                 <input type="file" name="gallery_image_files[]" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
-                                <p class="admin-upload-help">Select multiple images at once.</p>
+                                <p class="admin-upload-help">Select multiple additional gallery/showcase images.</p>
+                            </div>
+
+                            <!-- 3. Color-Specific Media (Shown when color variants are present) -->
+                            <div class="form-group" id="color-media-container" style="<?= empty($parsedColors) ? 'display:none;' : '' ?> margin-top: 1.5rem; border-top: 1px solid #f1f5f9; padding-top: 1.25rem;">
+                                <label class="form-label" style="font-weight: 700; color: #047857; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                                    🎨 Color-Specific Media (Optional)
+                                </label>
+                                <p class="admin-upload-help" style="margin-bottom: 12px;">Optionally upload distinct main and gallery photos for specific color variants.</p>
+                                
+                                <select id="color-upload-selector" class="form-select" style="margin-bottom: 1rem;">
+                                    <option value="">-- Select a color --</option>
+                                    <?php if (!empty($parsedColors)): ?>
+                                        <?php foreach ($parsedColors as $colorName => $colorData): ?>
+                                            <option value="<?= htmlspecialchars($colorName) ?>"><?= htmlspecialchars($colorName) ?></option>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </select>
+                                
+                                <div id="dynamic-color-uploads">
+                                <?php if (!empty($parsedColors)): ?>
+                                    <?php foreach ($parsedColors as $colorName => $colorData): ?>
+                                        <div class="color-upload-group" data-color="<?= htmlspecialchars($colorName) ?>" style="display: none; margin-bottom: 16px; padding: 14px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                            <label class="form-label" style="display:flex; align-items:center; gap:8px; margin-bottom: 1rem; font-size: 0.95rem; font-weight: 700;">
+                                                <span style="display:inline-block; width:15px; height:15px; border-radius:50%; background-color:<?= htmlspecialchars($colorData['hex'] ?? '#000') ?>; border:1px solid rgba(0,0,0,0.15);"></span>
+                                                <strong><?= htmlspecialchars($colorName) ?></strong> Images
+                                            </label>
+                                            
+                                            <!-- Main Color Image -->
+                                            <div style="margin-bottom: 1.25rem; padding-bottom: 1.25rem; border-bottom: 1px solid #e2e8f0;">
+                                                <label class="form-label" style="font-weight: 600; color: #334155; font-size: 0.85rem;">Color Main Image</label>
+                                                <?php if (!empty($colorData['main_image'])): ?>
+                                                    <div class="admin-image-preview-wrap" style="margin-bottom: 8px;">
+                                                        <img src="<?= htmlspecialchars(resolveAdminImageSrc($colorData['main_image'])) ?>" alt="Main color image" class="admin-image-preview" style="max-width: 100px; border-radius: 4px;">
+                                                        <div style="margin-top: 4px;">
+                                                            <label style="font-size: 0.8rem; color: var(--color-danger); cursor: pointer;">
+                                                                <input type="checkbox" name="remove_gallery_images[]" value="<?= htmlspecialchars($colorData['main_image']) ?>"> Remove
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                <?php endif; ?>
+                                                <input type="file" name="color_main_image[<?= htmlspecialchars($colorName) ?>]" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif">
+                                            </div>
+
+                                            <!-- Gallery Color Images -->
+                                            <div>
+                                                <label class="form-label" style="font-weight: 600; color: #334155; font-size: 0.85rem;">Color Gallery Images</label>
+                                                <?php if (!empty($colorData['gallery_images'])): ?>
+                                                    <div class="admin-gallery-grid" style="margin-bottom: 10px;">
+                                                        <?php foreach ($colorData['gallery_images'] as $galleryImage): ?>
+                                                            <label class="admin-gallery-item">
+                                                                <img src="<?= htmlspecialchars(resolveAdminImageSrc($galleryImage)) ?>" alt="Gallery image" class="admin-gallery-thumb">
+                                                                <span class="admin-gallery-remove">
+                                                                    <input type="checkbox" name="remove_gallery_images[]" value="<?= htmlspecialchars($galleryImage) ?>">
+                                                                    Remove
+                                                                </span>
+                                                            </label>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                                <input type="file" name="color_gallery[<?= htmlspecialchars($colorName) ?>][]" class="form-input" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
+                                            </div>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                                </div>
                             </div>
                         </div>
 
@@ -1599,8 +1594,6 @@ $pageTitle = 'Products Management';
                     var val = this.value.trim();
                     var container = document.getElementById('color-media-container');
                     var dynamicUploads = document.getElementById('dynamic-color-uploads');
-                    var globalMainImg = document.getElementById('global-main-image-container');
-                    var globalGalleryImg = document.getElementById('global-gallery-image-container');
                     
                     // Parse clean color names array
                     var activeColorNames = val.split(',')
@@ -1618,15 +1611,11 @@ $pageTitle = 'Products Management';
 
                     if (uniqueActiveColors.length === 0) {
                         if (container) container.style.display = 'none';
-                        if (globalMainImg) globalMainImg.style.display = 'block';
-                        if (globalGalleryImg) globalGalleryImg.style.display = 'block';
                         if (colorSelector) colorSelector.innerHTML = '<option value="">-- Select a color --</option>';
                         return;
                     }
                     
                     if (container) container.style.display = 'block';
-                    if (globalMainImg) globalMainImg.style.display = 'none';
-                    if (globalGalleryImg) globalGalleryImg.style.display = 'none';
                     
                     // 1. Rebuild Dropdown Options cleanly
                     if (colorSelector) {
@@ -1641,8 +1630,8 @@ $pageTitle = 'Products Management';
                         
                         if (uniqueActiveColors.includes(currentSelected)) {
                             colorSelector.value = currentSelected;
-                        } else if (uniqueActiveColors.length === 1) {
-                            // Single color product: auto-select the color automatically!
+                        } else if (uniqueActiveColors.length > 0) {
+                            // Auto-select first active color so upload fields appear right away!
                             colorSelector.value = uniqueActiveColors[0];
                         } else {
                             colorSelector.value = '';

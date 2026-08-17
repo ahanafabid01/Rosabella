@@ -806,7 +806,7 @@ try {
                     <?php if ($isClothingBrandTheme): ?><p class="clothing-brand-eyebrow">Shop Everything</p><?php endif; ?>
                     <h2 class="section-title">All Products</h2>
                     <p class="section-subtitle" style="max-width: 500px; margin: 0.5rem auto 0;">
-                        <?= count($allHomeProducts) ?> products available &mdash; browse our full collection
+                        Explore our complete collection of timeless essentials and new arrivals
                     </p>
                 </div>
             </div>
